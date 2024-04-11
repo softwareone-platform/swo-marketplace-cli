@@ -1,0 +1,92 @@
+[tool.poetry]
+name = "swo-marketplace-cli"
+version = "0.1.0"
+description = "Command line utility for SoftwareOne Marketplace Platform"
+authors = ["SoftwareOne AG"]
+license = "Apache-2.0 license"
+packages = [
+    { include = "swo" }
+]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4"
+typer = "0.12.*"
+
+[tool.poetry.group.dev.dependencies]
+ipdb = "0.13.*"
+ipython = "8.*"
+mypy = "1.8.*"
+poetry-plugin-sort = "0.2.*"
+pre-commit = "3.6.*"
+pytest = "7.4.*"
+pytest-cov = "4.1.*"
+pytest-deadfixtures = "2.2.*"
+pytest-mock = "3.12.*"
+pytest-randomly = "3.15.*"
+pytest-xdist = "3.5.*"
+ruff = "0.3.*"
+types-requests = "2.31.*"
+typing-extensions = "4.9.*"
+
+[tool.poetry.scripts]
+swocli = 'swo.mpt.cli:cli'
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = "tests"
+pythonpath = "."
+addopts = "--cov=swo/mpt/cli --cov-report=term-missing --cov-report=html --cov-report=xml"
+DJANGO_SETTINGS_MODULE = "tests.django.settings"
+log_cli = false
+filterwarnings = [
+    "ignore:Support for class-based `config` is deprecated:DeprecationWarning",
+    "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+]
+
+[tool.coverage.run]
+branch = true
+
+[tool.ruff]
+extend-exclude = [".vscode", ".devcontainer"]
+output-format = "full"
+
+[tool.ruff.lint]
+
+select = [
+    "E",  # w errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade,
+    "PT",  # flake8-pytest-style
+    "T10",  # flake8-pytest-style
+]
+ignore = [
+    "PT004", # fixture '{name}' does not return anything, add leading underscore
+    "PT011", # pytest.raises({exception}) is too broad, set the match parameter or use a more specific exception
+    "B008",  # do not perform function calls in argument defaults
+    "B904",  # Within an `except` clause, raise exceptions with `raise ... from err` or `raise ... from None` to distinguish them from errors in exception handling
+]
+
+[tool.ruff.lint.isort]
+known-third-party = ["swo"]
+
+[tool.ruff.lint.pycodestyle]
+max-line-length = 100
+
+[tool.mypy]
+warn_no_return = false
+
+[[tool.mypy.overrides]]
+module = "pyfiglet.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "gunicorn.*"
+ignore_missing_imports = true
