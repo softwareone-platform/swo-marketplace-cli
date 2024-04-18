@@ -11,6 +11,9 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4"
+pydantic = "2.7.*"
+pyfiglet = "^1.0.2"
+requests = "2.31.*"
 typer = "0.12.*"
 
 [tool.poetry.group.dev.dependencies]
@@ -25,12 +28,13 @@ pytest-deadfixtures = "2.2.*"
 pytest-mock = "3.12.*"
 pytest-randomly = "3.15.*"
 pytest-xdist = "3.5.*"
+responses = "0.24.*"
 ruff = "0.3.*"
 types-requests = "2.31.*"
 typing-extensions = "4.9.*"
 
 [tool.poetry.scripts]
-swocli = 'swo.mpt.cli:cli'
+swocli = 'swo.mpt.cli.swocli:app'
 
 [build-system]
 requires = ["poetry-core"]
@@ -40,7 +44,6 @@ build-backend = "poetry.core.masonry.api"
 testpaths = "tests"
 pythonpath = "."
 addopts = "--cov=swo/mpt/cli --cov-report=term-missing --cov-report=html --cov-report=xml"
-DJANGO_SETTINGS_MODULE = "tests.django.settings"
 log_cli = false
 filterwarnings = [
     "ignore:Support for class-based `config` is deprecated:DeprecationWarning",
@@ -49,6 +52,11 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
+
+[tool.coverage.report]
+exclude_also = [
+    "if __name__ == \"__main__\":",
+]
 
 [tool.ruff]
 extend-exclude = [".vscode", ".devcontainer"]
@@ -82,6 +90,8 @@ max-line-length = 100
 
 [tool.mypy]
 warn_no_return = false
+exclude = ['tests']
+plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
 module = "pyfiglet.*"
