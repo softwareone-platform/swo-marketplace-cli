@@ -1,0 +1,15 @@
+[{
+    "id": "ACC-12341",
+    "name": "Account 1",
+    "type": "Vendor",
+    "secret": "secret 1",
+    "environment": "https://example.com",
+    "is_active": true
+}, {
+    "id": "ACC-12342",
+    "name": "Account 2",
+    "type": "Vendor",
+    "secret": "secret 2",
+    "environment": "https://example.com",
+    "is_active": false
+}]
