@@ -31,7 +31,7 @@ jobs:
 
     - name: 'Fix coverage paths for SonarCloud'
       run: |
-        sed -i 's/\/swo\/swo/\/github\/workspace\/swo/g' coverage.xml
+        sed -i 's/\/swo\/swo/\/github\/workspace\/swo/mpt/cli/g' coverage.xml
 
     - name: 'Run SonarCloud Scan'
       uses: SonarSource/sonarcloud-github-action@master
