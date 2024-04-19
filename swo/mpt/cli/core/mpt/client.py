@@ -2,6 +2,7 @@ from urllib.parse import urljoin
 
 from requests import PreparedRequest, Request, Response, Session
 from requests.adapters import HTTPAdapter, Retry
+from swo.mpt.cli.core.accounts.models import Account
 
 
 class MPTClient(Session):
@@ -34,4 +35,8 @@ class MPTClient(Session):
 
     def join_url(self, url: str) -> str:
         url = url[1:] if url[0] == "/" else url
-        return urljoin(self.base_url, url)
+        return urljoin(self.base_url, url, allow_fragments=True)
+
+
+def client_from_account(account: Account) -> MPTClient:
+    return MPTClient(account.environment, account.secret)

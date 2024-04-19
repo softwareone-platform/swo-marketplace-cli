@@ -7,6 +7,7 @@ from swo.mpt.cli.core.accounts.flows import (
     disable_accounts_except,
     does_account_exist,
     find_account,
+    find_active_account,
     from_file,
     from_token,
     get_accounts_file_path,
@@ -15,7 +16,7 @@ from swo.mpt.cli.core.accounts.flows import (
     write_accounts,
 )
 from swo.mpt.cli.core.accounts.models import Account
-from swo.mpt.cli.core.errors import AccountNotFoundError
+from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
 from swo.mpt.cli.core.mpt.models import Token
 
@@ -132,3 +133,21 @@ def test_find_account_exception(expected_account, another_expected_account):
         find_account(accounts, "another-account-id")
 
     assert "nother-account-id" in str(e.value)
+
+
+def test_find_active_account(expected_account, another_expected_account):
+    accounts = [expected_account, another_expected_account]
+
+    account = find_active_account(accounts)
+
+    assert account == expected_account
+
+
+def test_find_active_account_exception(expected_account, another_expected_account):
+    expected_account.is_active = False
+    accounts = [expected_account, another_expected_account]
+
+    with pytest.raises(NoActiveAccountFoundError) as e:
+        find_active_account(accounts)
+
+    assert "No active account found. Activate any account first" in str(e.value)
