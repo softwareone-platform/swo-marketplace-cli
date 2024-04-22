@@ -182,14 +182,15 @@ def _list_accounts(
     table: Table, accounts: list[Account], wrap_secret: bool = True
 ) -> Table:
     def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
-        if account_type == "Vendor":
-            return f"[cyan]{account_type}"
-        elif account_type == "Operations":
-            return f"[white]{account_type}"
-        elif account_type == "Client":
-            return f"[magenta]{account_type}"
-        else:
-            return account_type
+        match account_type:
+            case "Vendor":
+                return f"[cyan]{account_type}"
+            case "Operations":
+                return f"[white]{account_type}"
+            case "Client":
+                return f"[magenta]{account_type}"
+            case _:
+                return account_type
 
     def _wrap_active(is_active: bool) -> str:  # pragma: no cover
         if is_active:

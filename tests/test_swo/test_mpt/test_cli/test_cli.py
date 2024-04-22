@@ -1,3 +1,4 @@
+import pytest
 from swo.mpt.cli.swocli import app
 from typer.testing import CliRunner
 
@@ -9,9 +10,13 @@ def test_cli():
     assert result.exit_code == 0
 
 
-def test_alias_group():
+@pytest.mark.parametrize(
+    "command",
+    ["account", "accounts", "product", "products"],
+)
+def test_alias_group(command):
     # accounts and account is the same
-    result = runner.invoke(app, ["account", "--help"])
+    result = runner.invoke(app, [command, "--help"])
     assert result.exit_code == 0
 
 

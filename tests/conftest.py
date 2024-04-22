@@ -27,6 +27,23 @@ def mpt_client(base_url):
 
 
 @pytest.fixture()
+def wrap_to_mpt_list_response():
+    def _wrap_to_list(list_response):
+        return {
+            "data": list_response,
+            "$meta": {
+                "pagination": {
+                    "limit": 10,
+                    "offset": 0,
+                    "total": 2,
+                },
+            },
+        }
+
+    return _wrap_to_list
+
+
+@pytest.fixture()
 def mpt_token():
     return {
         "id": "TKN-1234",
@@ -37,6 +54,37 @@ def mpt_token():
             "type": "Vendor",
         },
     }
+
+
+@pytest.fixture()
+def mpt_products():
+    return [
+        {
+            "id": "PRD-1234-1234",
+            "name": "Adobe for Commercial",
+            "status": "Published",
+            "vendor": {
+                "id": "ACC-4321",
+                "name": "Adobe",
+                "type": "Vendor",
+            },
+        },
+        {
+            "id": "PRD-4321-4321",
+            "name": "Azure CSP Commercial",
+            "status": "Draft",
+            "vendor": {
+                "id": "ACC-1234",
+                "name": "Microsoft",
+                "type": "Vendor",
+            },
+        },
+    ]
+
+
+@pytest.fixture()
+def mpt_products_response(wrap_to_mpt_list_response, mpt_products):
+    return wrap_to_mpt_list_response(mpt_products)
 
 
 @pytest.fixture()

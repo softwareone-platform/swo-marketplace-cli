@@ -5,14 +5,16 @@ import typer
 from swo.mpt.cli.core.accounts import app as accounts_app
 from swo.mpt.cli.core.alias_group import AliasTyperGroup
 from swo.mpt.cli.core.console import console, show_banner
+from swo.mpt.cli.core.products import app as products_app
 
 app = typer.Typer(cls=AliasTyperGroup, callback=show_banner)
 app.add_typer(accounts_app, name="accounts")
+app.add_typer(products_app, name="products")
 
 
 try:
     VERSION = version("swo-marketplace-cli")
-except PackageNotFoundError:
+except PackageNotFoundError:  # pragma: no cover
     VERSION = "unknown"
 
 
@@ -24,7 +26,6 @@ def get_version():
 
 
 def version_callback(value: bool):
-    show_banner()
     if value:
         console.print(f"version: {get_version()}")
         raise typer.Exit()
@@ -37,7 +38,7 @@ def main(
         typer.Option("--version", callback=version_callback, is_eager=True),
     ] = None,
 ):
-    pass
+    show_banner()
 
 
 if __name__ == "__main__":

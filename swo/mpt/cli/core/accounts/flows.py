@@ -4,7 +4,7 @@ from operator import attrgetter
 from pathlib import Path
 
 from swo.mpt.cli.core.accounts.models import Account
-from swo.mpt.cli.core.errors import AccountNotFoundError
+from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
 from swo.mpt.cli.core.mpt.models import Token
 
 
@@ -100,5 +100,16 @@ def find_account(accounts: list[Account], account_id: str) -> Account:
     account = next((a for a in accounts if a.id == account_id), None)
     if not account:
         raise AccountNotFoundError(account_id)
+
+    return account
+
+
+def find_active_account(accounts: list[Account]) -> Account:
+    """
+    Return active account
+    """
+    account = next((a for a in accounts if a.is_active), None)
+    if not account:
+        raise NoActiveAccountFoundError()
 
     return account
