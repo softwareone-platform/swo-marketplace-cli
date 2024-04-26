@@ -25,10 +25,6 @@ app = typer.Typer()
 
 @app.command(name="add")
 def add_account(
-    token_id: Annotated[
-        str,
-        typer.Argument(help="SoftwareOne Marketplace API Token ID", metavar="TOKEN-ID"),
-    ],
     secret: Annotated[
         str, typer.Argument(help="SoftwareOne Marketplace API Token secret")
     ],
@@ -43,15 +39,13 @@ def add_account(
         accounts_file = get_accounts_file_path()
         accounts = get_or_create_accounts(accounts_file)
 
-        status.update(
-            f"Fetching account information for {token_id} from environment {environment}"
-        )
+        status.update(f"Fetching account information from environment {environment}")
         mpt_client = MPTClient(environment, secret)
         try:
-            token = get_token(mpt_client, token_id)
+            token = get_token(mpt_client, secret)
         except MPTAPIError as e:
             console.print(
-                f"Cannot find account for token {token_id} on "
+                f"Cannot find account for token {secret} on "
                 f"environment {environment}. Exception: {str(e)}"
             )
             raise typer.Exit(code=3)

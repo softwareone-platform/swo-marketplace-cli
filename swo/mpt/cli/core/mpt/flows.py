@@ -1,21 +1,30 @@
+import json
 from typing import Optional
 from urllib.parse import quote_plus
 
-from swo.mpt.cli.core.errors import wrap_http_error
+from swo.mpt.cli.core.errors import MPTAPIError, wrap_http_error
 
 from .client import MPTClient
 from .models import ListResponse, Meta, Product, Token
 
 
 @wrap_http_error
-def get_token(mpt_client: MPTClient, token_id: str) -> Token:
+def get_token(mpt_client: MPTClient, secret: str) -> Token:
     """
     Retrieves API Token from the MPT Platform
     """
-    response = mpt_client.get(f"/accounts/api-tokens/{token_id}")
+    response = mpt_client.get(f"/accounts/api-tokens?limit=2&token={secret}")
     response.raise_for_status()
 
-    return Token.model_validate(response.json())
+    response_body = response.json()
+
+    if len(response_body["data"]) == 0 or len(response_body["data"]) > 1:
+        raise MPTAPIError(
+            f"MPT API for Tokens returns 0 or more than 1 tokens for secret {secret}",
+            "\n" + json.dumps(response_body),
+        )
+
+    return Token.model_validate(response_body["data"][0])
 
 
 @wrap_http_error
