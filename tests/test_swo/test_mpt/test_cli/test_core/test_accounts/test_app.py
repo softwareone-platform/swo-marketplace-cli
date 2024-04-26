@@ -49,7 +49,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
         return_value=new_token,
     )
 
-    result = runner.invoke(app, ["add", "TKN-123456", "new-secret"])
+    result = runner.invoke(app, ["add", "new-secret"])
 
     assert result.exit_code == 0, result.stdout
     with open(account_file_path) as f:
@@ -77,7 +77,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
         return_value=new_token,
     )
 
-    result = runner.invoke(app, ["add", "TKN-123456", "new-secret"])
+    result = runner.invoke(app, ["add", "new-secret"])
 
     assert result.exit_code == 0, result.stdout
     with open(new_accounts_path) as f:
@@ -127,7 +127,6 @@ def test_add_account_accounts_override_environment(
         app,
         [
             "add",
-            "TKN-123456",
             "new-secret",
             "--environment",
             "https://new-environment.example.com",
@@ -176,7 +175,7 @@ def test_add_account_token_failed(new_accounts_path, mocker):
         side_effect=MPTAPIError("critical error", "you can't perform the operation"),
     )
 
-    result = runner.invoke(app, ["add", "TKN-123456", "new-secret"])
+    result = runner.invoke(app, ["add", "new-secret"])
 
     assert result.exit_code == 3, result.stdout
 
@@ -191,7 +190,7 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
         return_value=existing_token("new-super-secret"),
     )
 
-    result = runner.invoke(app, ["add", "TKN-123456", "new-super-secret"], input="N\n")
+    result = runner.invoke(app, ["add", "new-super-secret"], input="N\n")
 
     assert result.exit_code == 1, result.stdout
     with open(new_accounts_path) as f:
@@ -227,7 +226,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
         return_value=existing_token("new-super-secret"),
     )
 
-    result = runner.invoke(app, ["add", "TKN-123456", "new-super-secret"], input="y\n")
+    result = runner.invoke(app, ["add", "new-super-secret"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
     with open(new_accounts_path) as f:
