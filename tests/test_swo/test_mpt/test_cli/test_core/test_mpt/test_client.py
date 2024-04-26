@@ -40,5 +40,7 @@ def test_mpt_client_url_join_slash(requests_mocker):
 def test_mpt_client_from_client(expected_account):
     mpt_client = client_from_account(expected_account)
 
+    _, token = expected_account.token.split(":")
+
     assert mpt_client.base_url == f"{expected_account.environment}/"
-    assert mpt_client.api_token == expected_account.secret
+    assert mpt_client.api_token == token

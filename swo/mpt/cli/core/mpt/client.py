@@ -39,4 +39,5 @@ class MPTClient(Session):
 
 
 def client_from_account(account: Account) -> MPTClient:
-    return MPTClient(account.environment, account.secret)
+    _, secret = account.token.split(":")
+    return MPTClient(account.environment, secret)
