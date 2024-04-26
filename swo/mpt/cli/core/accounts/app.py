@@ -168,9 +168,10 @@ def list_accounts(
 def _account_table(title: str) -> Table:
     table = Table(title=title, box=box.ROUNDED)
 
-    table.add_column("ID")
-    table.add_column("Name", no_wrap=True)
+    table.add_column("ID", no_wrap=True)
+    table.add_column("Name")
     table.add_column("Type")
+    table.add_column("Token", no_wrap=True)
     table.add_column("Secret")
     table.add_column("Environment", no_wrap=True)
     table.add_column("Active", justify="center")
@@ -209,6 +210,7 @@ def _list_accounts(
             account.id,
             account.name,
             _wrap_account_type(account.type),
+            account.token_id,
             _wrap_secret(account.secret, wrap_secret),
             account.environment,
             _wrap_active(account.is_active),
