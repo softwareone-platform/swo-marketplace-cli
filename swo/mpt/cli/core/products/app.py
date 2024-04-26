@@ -54,7 +54,9 @@ def list_products(
 
         with console.status(f"Fetching #{page} page  of products"):
             mpt_client = client_from_account(account)
-            meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
+            meta, products = get_products(
+                mpt_client, page_size, offset, query=rql_query
+            )
 
         table = _products_table("Products")
         table = _list_products(table, products)

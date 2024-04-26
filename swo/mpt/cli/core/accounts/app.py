@@ -55,7 +55,7 @@ def add_account(
                 f"environment {environment}. Exception: {str(e)}"
             )
             raise typer.Exit(code=3)
-        account = from_token(token, secret, environment)
+        account = from_token(token, environment)
 
     if does_account_exist(accounts, account):
         _ = typer.confirm(
@@ -172,7 +172,6 @@ def _account_table(title: str) -> Table:
     table.add_column("Name")
     table.add_column("Type")
     table.add_column("Token", no_wrap=True)
-    table.add_column("Secret")
     table.add_column("Environment", no_wrap=True)
     table.add_column("Active", justify="center")
 
@@ -199,19 +198,19 @@ def _list_accounts(
         else:
             return ""
 
-    def _wrap_secret(secret: str, to_wrap_secret: bool) -> str:
+    def _wrap_token(account: Account, to_wrap_secret: bool) -> str:
+        token_id, token = account.token.split(":")
         if to_wrap_secret:
-            return f"{secret[0:][:4]}*****{secret[:4]}"
-        else:
-            return secret
+            token = f"{token[0:][:4]}*****{token[:4]}"
+
+        return f"{token_id}:{token}"
 
     for account in accounts:
         table.add_row(
             account.id,
             account.name,
             _wrap_account_type(account.type),
-            account.token_id,
-            _wrap_secret(account.secret, wrap_secret),
+            _wrap_token(account, wrap_secret),
             account.environment,
             _wrap_active(account.is_active),
         )

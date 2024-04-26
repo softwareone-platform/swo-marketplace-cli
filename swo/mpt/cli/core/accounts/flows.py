@@ -8,7 +8,7 @@ from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundEr
 from swo.mpt.cli.core.mpt.models import Token
 
 
-def from_token(token: Token, secret: str, environment: str) -> Account:
+def from_token(token: Token, environment: str) -> Account:
     """
     Extracts Account from the MPT Token
     """
@@ -16,8 +16,7 @@ def from_token(token: Token, secret: str, environment: str) -> Account:
         id=token.account.id,
         name=token.account.name,
         type=token.account.type,
-        token_id=token.id,
-        secret=secret,
+        token=f"{token.id}:{token.token}",
         environment=environment,
         is_active=True,
     )

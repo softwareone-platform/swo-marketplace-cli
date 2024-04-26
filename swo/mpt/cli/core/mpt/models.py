@@ -22,6 +22,7 @@ class Account(BaseModel):
 class Token(BaseModel):
     id: str
     account: Account
+    token: str
 
 
 class Product(BaseModel):

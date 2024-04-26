@@ -29,8 +29,9 @@ def test_from_token(expected_account):
             name="Account 1",
             type="Vendor",
         ),
+        token="secret 1",
     )
-    account = from_token(token, "secret 1", "https://example.com")
+    account = from_token(token, "https://example.com")
 
     assert account == expected_account
 
@@ -76,8 +77,7 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
             id="ACC-4321",
             name="Not exists account",
             type="Vendor",
-            token_id="TKN-0000-0000-0001",
-            secret="secret",
+            token="TKN-0000-0000-0001:secret",
             environment="https://example.com",
             is_active=False,
         ),
