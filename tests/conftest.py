@@ -46,7 +46,7 @@ def wrap_to_mpt_list_response():
 @pytest.fixture()
 def mpt_token():
     return {
-        "id": "TKN-1234",
+        "id": "TKN-0000-0000-0001",
         "name": "Adobe Token",
         "account": {
             "id": "ACC-4321",
@@ -104,6 +104,7 @@ def expected_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
+        token_id="TKN-0000-0000-0001",
         secret="secret 1",
         environment="https://example.com",
         is_active=True,
@@ -116,6 +117,7 @@ def another_expected_account():
         id="ACC-12342",
         name="Account 2",
         type="Vendor",
+        token_id="TKN-0000-0000-0002",
         secret="secret 2",
         environment="https://example.com",
         is_active=False,

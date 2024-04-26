@@ -23,7 +23,7 @@ from swo.mpt.cli.core.mpt.models import Token
 
 def test_from_token(expected_account):
     token = Token(
-        id="TKN-1234",
+        id="TKN-0000-0000-0001",
         account=MPTAccount(
             id="ACC-12341",
             name="Account 1",
@@ -76,6 +76,7 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
             id="ACC-4321",
             name="Not exists account",
             type="Vendor",
+            token_id="TKN-0000-0000-0001",
             secret="secret",
             environment="https://example.com",
             is_active=False,
