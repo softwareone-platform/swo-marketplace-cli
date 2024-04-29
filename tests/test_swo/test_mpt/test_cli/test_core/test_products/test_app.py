@@ -1,4 +1,3 @@
-import json
 from urllib.parse import urljoin
 
 from swo.mpt.cli.core.products import app
@@ -7,46 +6,12 @@ from typer.testing import CliRunner
 runner = CliRunner()
 
 
-def test_list_products_account_file_not_exists(tmp_path, mocker):
-    account_file_path = tmp_path / ".swocli" / "accounts.json"
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_accounts_file_path",
-        return_value=account_file_path,
-    )
-
-    result = runner.invoke(app, [])
-
-    assert result.exit_code == 3, result.stdout
-    assert "No active account found." in result.stdout
-
-
-def test_list_products_accounts_not_active(new_accounts_path, mocker):
-    with open(new_accounts_path) as f:
-        accounts = json.load(f)
-
-    for account in accounts:
-        account["is_active"] = False
-
-    with open(new_accounts_path, "w") as f:
-        json.dump(accounts, f)
-
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
-
-    result = runner.invoke(app, [])
-
-    assert result.exit_code == 3, result.stdout
-    assert "No active account found." in result.stdout
-
-
 def test_list_products(
-    new_accounts_path, mocker, requests_mocker, mpt_client, mpt_products_response
+    expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
     mocker.patch(
-        "swo.mpt.cli.core.products.app.get_accounts_file_path",
-        return_value=new_accounts_path,
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
     )
     requests_mocker.get(
         urljoin(
@@ -55,18 +20,18 @@ def test_list_products(
         json=mpt_products_response,
     )
 
-    result = runner.invoke(app, [])
+    result = runner.invoke(app, ["list"])
 
     assert result.exit_code == 0, result.stdout
     assert mpt_products_response["data"][0]["id"] in result.stdout
 
 
 def test_list_products_with_query_and_paging(
-    new_accounts_path, mocker, requests_mocker, mpt_client, mpt_products_response
+    expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
     mocker.patch(
-        "swo.mpt.cli.core.products.app.get_accounts_file_path",
-        return_value=new_accounts_path,
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
     )
     requests_mocker.get(
         urljoin(
@@ -79,8 +44,60 @@ def test_list_products_with_query_and_paging(
 
     result = runner.invoke(
         app,
-        ["--page", "20", "--query", "eq(product.id,PRD-1234)"],
+        ["list", "--page", "20", "--query", "eq(product.id,PRD-1234)"],
     )
 
     assert result.exit_code == 0, result.stdout
     assert mpt_products_response["data"][0]["id"] in result.stdout
+
+
+def test_file_with_extension(expected_account, mocker):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+
+def test_sync_file_doesnt_exist(expected_account, mocker):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", "--dry-run", "some-file"],
+    )
+
+    assert result.exit_code == 3, result.stdout
+    assert "Provided file path doesn't exist" in result.stdout
+
+
+def test_sync_with_dry_run_failure(expected_account, mocker, empty_file):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", "--dry-run", str(empty_file)],
+    )
+
+    assert result.exit_code == 3, result.stdout
+    assert "General: Required tab doesn't exist" in result.stdout
+
+
+def test_sync_with_dry_run(expected_account, mocker, product_file):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", "--dry-run", str(product_file)],
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "Product definition" in result.stdout

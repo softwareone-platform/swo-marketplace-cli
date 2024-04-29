@@ -4,7 +4,11 @@ import typer
 from rich import box
 from rich.table import Table
 from swo.mpt.cli.core.console import console
-from swo.mpt.cli.core.errors import AccountNotFoundError, MPTAPIError
+from swo.mpt.cli.core.errors import (
+    AccountNotFoundError,
+    MPTAPIError,
+    NoActiveAccountFoundError,
+)
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import get_token
 
@@ -12,6 +16,7 @@ from .flows import (
     disable_accounts_except,
     does_account_exist,
     find_account,
+    find_active_account,
     from_token,
     get_accounts_file_path,
     get_or_create_accounts,
@@ -157,6 +162,23 @@ def list_accounts(
     table = _account_table("Available accounts")
     table = _list_accounts(table, accounts, wrap_secret=False)
     console.print(table)
+
+
+def get_active_account():
+    """
+    Check for file and create current active account
+    """
+    with console.status("Reading accounts from the configuration file"):
+        accounts_file_path = get_accounts_file_path()
+        accounts = get_or_create_accounts(accounts_file_path)
+
+    try:
+        account = find_active_account(accounts)
+        console.print(f"Current active account: {account.id} ({account.name})")
+        return account
+    except NoActiveAccountFoundError as e:
+        console.print(str(e))
+        raise typer.Exit(code=3)
 
 
 def _account_table(title: str) -> Table:
