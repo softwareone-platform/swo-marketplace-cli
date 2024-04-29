@@ -1,7 +1,9 @@
 import json
 
 import pytest
+import typer
 from swo.mpt.cli.core.accounts import app
+from swo.mpt.cli.core.accounts.app import get_active_account
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.mpt.models import Account, Token
 from typer.testing import CliRunner
@@ -402,3 +404,33 @@ def test_list_active_account(new_accounts_path, mocker):
     assert result.exit_code == 0, result.stdout
     assert "ACC-12341" in result.stdout
     assert "ACC-12342" not in result.stdout
+
+
+def test_get_active_account(new_accounts_path, mocker, expected_account):
+    mocker.patch(
+        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
+        return_value=new_accounts_path,
+    )
+
+    assert get_active_account() == expected_account
+
+
+def test_get_active_account_no_active_account(
+    new_accounts_path, mocker, expected_account
+):
+    mocker.patch(
+        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
+        return_value=new_accounts_path,
+    )
+
+    with open(new_accounts_path) as f:
+        accounts = json.load(f)
+
+    for account in accounts:
+        account["is_active"] = False
+
+    with open(new_accounts_path, "w") as f:
+        json.dump(accounts, f)
+
+    with pytest.raises(typer.Exit):
+        get_active_account()

@@ -3,17 +3,19 @@ from typing import Annotated, Optional
 import typer
 from rich import box
 from rich.table import Table
-from swo.mpt.cli.core.accounts.flows import (
-    find_active_account,
-    get_accounts_file_path,
-    get_or_create_accounts,
-)
+from swo.mpt.cli.core.accounts.app import get_active_account
 from swo.mpt.cli.core.console import console
-from swo.mpt.cli.core.errors import NoActiveAccountFoundError
+from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import client_from_account
 from swo.mpt.cli.core.mpt.flows import get_products
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
 from swo.mpt.cli.core.mpt.models import Product as MPTProduct
+from swo.mpt.cli.core.products.flows import (
+    check_file_exists,
+    check_product_definition,
+    get_definition_file,
+)
+from swo.mpt.cli.core.stats import StatsCollector
 
 app = typer.Typer()
 
@@ -36,16 +38,7 @@ def list_products(
     """
     List available products from SoftwareOne Marketplace
     """
-    with console.status("Reading accounts from the configuration file"):
-        accounts_file_path = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file_path)
-
-    try:
-        account = find_active_account(accounts)
-        console.print(f"Current active account: {account.id} ({account.name})")
-    except NoActiveAccountFoundError as e:
-        console.print(str(e))
-        raise typer.Exit(code=3)
+    active_account = get_active_account()
 
     has_pages = True
     page = 0
@@ -53,7 +46,7 @@ def list_products(
         offset = _offset_by_page(page, page_size)
 
         with console.status(f"Fetching #{page} page  of products"):
-            mpt_client = client_from_account(account)
+            mpt_client = client_from_account(active_account)
             meta, products = get_products(
                 mpt_client, page_size, offset, query=rql_query
             )
@@ -67,6 +60,43 @@ def list_products(
             page += 1
         else:
             has_pages = False
+
+
+@app.command(name="sync")
+def sync_product(
+    product_path: Annotated[
+        str,
+        typer.Argument(help="Path to Product Definition file", metavar="PRODUCT-PATH"),
+    ],
+    is_dry_run: Annotated[
+        bool,
+        typer.Option(
+            "--dry-run",
+            "-r",
+            help="Do not sync Product Definition. Check the file consistency only.",
+        ),
+    ] = False,
+):
+    """
+    Sync product to the environment
+    """
+    product_definition_path = get_definition_file(product_path)
+
+    try:
+        check_file_exists(product_definition_path)
+    except FileNotExistsError as e:
+        console.print(str(e))
+        raise typer.Exit(code=3)
+
+    if is_dry_run:
+        stats = StatsCollector()
+        stats = check_product_definition(product_definition_path, stats)
+
+    if not stats.is_empty():
+        console.print(str(stats))
+        raise typer.Exit(code=3)
+
+    console.print(f"Product definition {product_path} is correct")
 
 
 def _products_table(title: str) -> Table:

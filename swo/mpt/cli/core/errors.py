@@ -1,4 +1,5 @@
 from functools import wraps
+from pathlib import Path
 from typing import Callable, ParamSpec, TypeVar
 
 from requests import RequestException
@@ -46,3 +47,11 @@ class NoActiveAccountFoundError(CLIError):
             "No active account found. Activate any account first using "
             "'swocli accounts active ACCOUNT-ID' command"
         )
+
+
+class FileNotExistsError(CLIError):
+    def __init__(self, file_path: Path):
+        self._path = file_path
+
+    def __str__(self) -> str:
+        return f"Provided file path doesn't exist: {self._path}"

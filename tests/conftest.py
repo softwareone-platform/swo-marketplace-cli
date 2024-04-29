@@ -121,3 +121,18 @@ def another_expected_account():
         environment="https://example.com",
         is_active=False,
     )
+
+
+@pytest.fixture()
+def product_file_root():
+    return Path("tests/product_files")
+
+
+@pytest.fixture()
+def empty_file(product_file_root):
+    return product_file_root / "PRD-0000-0000-empty.xlsx"
+
+
+@pytest.fixture()
+def product_file(product_file_root):
+    return product_file_root / "PRD-1234-1234-1234-file.xlsx"
