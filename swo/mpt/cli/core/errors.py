@@ -27,7 +27,9 @@ def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         try:
             return func(*args, **kwargs)
         except RequestException as e:
-            response = str(e.response.content) if e.response else "Empty response"
+            response = (
+                str(e.response.content) if e.response is not None else "Empty response"
+            )
             raise MPTAPIError(response, str(e))
 
     return _wrapper
