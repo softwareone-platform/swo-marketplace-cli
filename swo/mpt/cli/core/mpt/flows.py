@@ -142,7 +142,7 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
     if not data:
         raise MPTAPIError(
             f"Unit of measure by name '{uom_name}' is not found.",
-            "Not unit of measure found.",
+            "404 not found",
         )
 
     return Uom.model_validate(data[0])

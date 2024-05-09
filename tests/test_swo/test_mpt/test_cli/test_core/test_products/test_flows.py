@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 from openpyxl import load_workbook
-from swo.mpt.cli.core.errors import FileNotExistsError
+from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
     check_file_exists,
@@ -17,7 +17,7 @@ from swo.mpt.cli.core.products.flows import (
     sync_product_definition,
     sync_templates,
 )
-from swo.mpt.cli.core.stats import StatsCollector
+from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
 from swo.mpt.cli.core.utils import get_values_for_table
 
 
@@ -213,6 +213,7 @@ def test_check_product_definition_not_all_required_settings(
 def test_sync_parameters_groups(
     mocker, mpt_client, new_product_file, product, parameter_group
 ):
+    stats = ProductStatsCollector()
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
         return_value=parameter_group,
@@ -222,7 +223,7 @@ def test_sync_parameters_groups(
     ws = wb[constants.TAB_PARAMETERS_GROUPS]
     values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
 
-    _, id_mapping = sync_parameters_groups(mpt_client, ws, product, values)
+    _, id_mapping = sync_parameters_groups(mpt_client, ws, product, values, stats)
 
     assert id_mapping == {
         "PGR-4944-4118-0002": parameter_group,
@@ -259,7 +260,26 @@ def test_sync_parameters_groups(
     )
 
 
+def test_sync_parameters_groups_exception(
+    mocker, mpt_client, new_product_file, product
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_parameter_group",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+
+    wb = load_workbook(filename=str(new_product_file))
+    ws = wb[constants.TAB_PARAMETERS_GROUPS]
+    values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
+
+    sync_parameters_groups(mpt_client, ws, product, values, stats)
+
+    assert ws["J2"].value == "Error with response body Error"
+
+
 def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_group):
+    stats = ProductStatsCollector()
     item_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
     )
@@ -268,7 +288,7 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
     ws = wb[constants.TAB_ITEMS_GROUPS]
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
-    _, id_mapping = sync_items_groups(mpt_client, ws, product, values)
+    _, id_mapping = sync_items_groups(mpt_client, ws, product, values, stats)
 
     assert id_mapping == {
         "IGR-4944-4118-0002": item_group,
@@ -309,9 +329,26 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
     )
 
 
+def test_sync_items_groups_exception(mocker, mpt_client, new_product_file, product):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_item_group",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+
+    wb = load_workbook(filename=str(new_product_file))
+    ws = wb[constants.TAB_ITEMS_GROUPS]
+    values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
+
+    sync_items_groups(mpt_client, ws, product, values, stats)
+
+    assert ws["L2"].value == "Error with response body Error"
+
+
 def test_sync_parameters(
     mocker, mpt_client, new_product_file, product, parameter, parameter_group
 ):
+    stats = ProductStatsCollector()
     parameter_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter", return_value=parameter
     )
@@ -329,6 +366,7 @@ def test_sync_parameters(
         {
             "PGR-4944-4118-0002": parameter_group,
         },
+        stats,
     )
 
     assert id_mapping == {
@@ -410,6 +448,34 @@ def test_sync_parameters(
     )
 
 
+def test_sync_parameters_exception(
+    mocker, mpt_client, new_product_file, product, parameter_group
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_parameter",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+
+    wb = load_workbook(filename=str(new_product_file))
+    ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
+    values = get_values_for_table(ws, constants.PARAMETERS_FIELDS)
+
+    sync_parameters(
+        "Agreement",
+        mpt_client,
+        ws,
+        product,
+        values,
+        {
+            "PGR-4944-4118-0002": parameter_group,
+        },
+        stats,
+    )
+
+    assert ws["O2"].value == "Error with response body Error"
+
+
 def test_sync_item(
     mocker,
     mpt_client,
@@ -421,6 +487,7 @@ def test_sync_item(
     item_group,
     uom,
 ):
+    stats = ProductStatsCollector()
     item_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_item", return_value=item
     )
@@ -444,6 +511,7 @@ def test_sync_item(
             "PAR-0000-0000-00001": parameter,
             "PAR-0000-0000-00002": another_parameter,
         },
+        stats,
     )
 
     assert id_mapping == {
@@ -536,6 +604,47 @@ def test_sync_item(
     )
 
 
+def test_sync_item_exception(
+    mocker,
+    mpt_client,
+    new_product_file,
+    product,
+    parameter,
+    another_parameter,
+    item_group,
+    uom,
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_item",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+    mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
+
+    wb = load_workbook(filename=str(new_product_file))
+    ws = wb[constants.TAB_ITEMS]
+    values = get_values_for_dynamic_table(
+        ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    )
+
+    sync_items(
+        mpt_client,
+        ws,
+        product,
+        values,
+        {
+            "IGR-4944-4118-0002": item_group,
+        },
+        {
+            "PAR-0000-0000-00001": parameter,
+            "PAR-0000-0000-00002": another_parameter,
+        },
+        stats,
+    )
+
+    assert ws["S2"].value == "Error with response body Error"
+
+
 def test_sync_template(
     mocker,
     mpt_client,
@@ -544,6 +653,7 @@ def test_sync_template(
     template,
     parameter,
 ):
+    stats = ProductStatsCollector()
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
@@ -560,6 +670,7 @@ def test_sync_template(
         {
             "PAR-4944-4118-0001": parameter,
         },
+        stats,
     )
 
     assert id_mapping == {
@@ -593,6 +704,37 @@ def test_sync_template(
             "content": "Test content **Azure**",
         },
     )
+
+
+def test_sync_template_exception(
+    mocker,
+    mpt_client,
+    new_product_file,
+    product,
+    parameter,
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_template",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+
+    wb = load_workbook(filename=str(new_product_file))
+    ws = wb[constants.TAB_TEMPLATES]
+    values = get_values_for_table(ws, constants.TEMPLATES_FIELDS)
+
+    sync_templates(
+        mpt_client,
+        ws,
+        product,
+        values,
+        {
+            "PAR-4944-4118-0001": parameter,
+        },
+        stats,
+    )
+
+    assert ws["I2"].value == "Error with response body Error"
 
 
 def test_sync_product(
@@ -639,7 +781,7 @@ def test_sync_product(
         "swo.mpt.cli.core.products.flows.create_product", return_value=product
     )
 
-    stats = StatsCollector()
+    stats = ProductStatsCollector()
     sync_product_definition(mpt_client, new_product_file, stats)
 
     assert parameter_group_mock.call_count == 2
@@ -722,7 +864,7 @@ def test_sync_product_extra_columns(
         "swo.mpt.cli.core.products.flows.create_product", return_value=product
     )
 
-    stats = StatsCollector()
+    stats = ProductStatsCollector()
     sync_product_definition(mpt_client, extra_column_product_file, stats)
 
     assert parameter_group_mock.call_count == 2
@@ -759,3 +901,16 @@ def test_sync_product_extra_columns(
 
     wb = load_workbook(filename=str(extra_column_product_file))
     assert wb[constants.TAB_GENERAL]["B15"].value == product.id
+
+
+def test_sync_product_exception(mocker, mpt_client, new_product_file):
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_product",
+        side_effect=MPTAPIError("Error", "Error"),
+    )
+
+    stats = ProductStatsCollector()
+    sync_product_definition(mpt_client, new_product_file, stats)
+
+    wb = load_workbook(filename=str(new_product_file))
+    assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"

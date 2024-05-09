@@ -111,18 +111,45 @@ def sync_product(
 
         with console.status("Syncing product definition"):
             product_stats, product = sync_product_definition(
-                mpt_client, product_definition_path, product_stats
+                mpt_client,
+                product_definition_path,
+                product_stats,
             )
 
-        if not product_stats.is_empty():
-            console.print(
-                f"There are errors during sync of the product "
-                f"{product.id} ({product.name}) definition."
-            )
-            console.print(str(product_stats))
+        table = _product_stats_table(product_stats)
+        table = _list_products_stats(table, product_stats)
+
+        console.print(table)
+
+        if product_stats.is_error:
             raise typer.Exit(code=3)
 
-        console.print("Product synced [bold green]successfully")
+
+def _product_stats_table(stats: ProductStatsCollector) -> Table:
+    if stats.is_error:
+        title = "Product Sync [red bold]FAILED"
+    else:
+        title = "Product Sync [green bold]SUCCEED"
+
+    table = Table(title, box=box.ROUNDED)
+
+    table.add_column("Total")
+    table.add_column("Synced")
+    table.add_column("Errors")
+
+    return table
+
+
+def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
+    for tab_name, tab_stats in stats.tabs.items():
+        table.add_row(
+            tab_name,
+            f"[blue]{tab_stats["total"]}",
+            f"[green]{tab_stats["synced"]}",
+            f"[red bold]{tab_stats["error"]}",
+        )
+
+    return table
 
 
 def _products_table(title: str) -> Table:
