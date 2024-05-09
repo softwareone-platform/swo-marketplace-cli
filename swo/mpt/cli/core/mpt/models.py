@@ -1,6 +1,6 @@
-from typing import TypeAlias, TypeVar
+from typing import Annotated, TypeAlias, TypeVar
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Meta(BaseModel):
@@ -30,3 +30,34 @@ class Product(BaseModel):
     name: str
     status: str
     vendor: Account
+
+
+class ParameterGroup(BaseModel):
+    id: str
+    name: str
+
+
+class ItemGroup(BaseModel):
+    id: str
+    name: str
+
+
+class Parameter(BaseModel):
+    id: str
+    name: str
+    external_id: Annotated[str, Field(alias="externalId")]
+
+
+class Item(BaseModel):
+    id: str
+    name: str
+
+
+class Uom(BaseModel):
+    id: str
+    name: str
+
+
+class Template(BaseModel):
+    id: str
+    name: str

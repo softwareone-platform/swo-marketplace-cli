@@ -1,16 +1,48 @@
+import json
 import os
+import re
+from functools import partial
 from pathlib import Path
+from typing import TypeAlias, TypeVar
 
 from openpyxl import load_workbook  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 from swo.mpt.cli.core.errors import FileNotExistsError
-from swo.mpt.cli.core.products.constants import (
-    REQUIRED_FIELDS_BY_TAB,
-    REQUIRED_FIELDS_WITH_VALUES_BY_TAB,
-    REQUIRED_TABS,
-    TAB_GENERAL,
+from swo.mpt.cli.core.mpt.client import MPTClient
+from swo.mpt.cli.core.mpt.flows import (
+    create_item,
+    create_item_group,
+    create_parameter,
+    create_parameter_group,
+    create_product,
+    create_template,
+    search_uom_by_name,
 )
-from swo.mpt.cli.core.stats import StatsCollector
+from swo.mpt.cli.core.mpt.models import (
+    Item,
+    ItemGroup,
+    Parameter,
+    ParameterGroup,
+    Product,
+    Template,
+)
+from swo.mpt.cli.core.products import constants
+from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
+from swo.mpt.cli.core.utils import (
+    SheetValue,
+    SheetValueGenerator,
+    find_first,
+    find_value_for,
+    find_values_by_pattern,
+    get_values_for_dynamic_table,
+    get_values_for_general,
+    get_values_for_table,
+    set_dict_value,
+    set_value,
+)
+
+T = TypeVar("T")
+SyncResult: TypeAlias = tuple[Worksheet, dict[str, T]]
 
 
 def get_definition_file(path: str) -> Path:
@@ -45,28 +77,28 @@ def check_product_definition(
     # check parameters and items refer to proper groups
     wb = load_workbook(filename=str(definition_path))
 
-    for sheet_name in REQUIRED_TABS:
+    for sheet_name in constants.REQUIRED_TABS:
         if sheet_name not in wb.sheetnames:
             stats.add_msg(sheet_name, "", "Required tab doesn't exist")
 
-    existing_sheets = set(REQUIRED_TABS).intersection(set(wb.sheetnames))
+    existing_sheets = set(constants.REQUIRED_TABS).intersection(set(wb.sheetnames))
 
     for sheet_name in existing_sheets:
-        if sheet_name not in REQUIRED_FIELDS_BY_TAB:
+        if sheet_name not in constants.REQUIRED_FIELDS_BY_TAB:
             continue
 
-        if sheet_name == TAB_GENERAL:
+        if sheet_name == constants.TAB_GENERAL:
             check_required_general_fields(
                 stats,
                 wb.get_sheet_by_name(sheet_name),
-                REQUIRED_FIELDS_BY_TAB[sheet_name],
-                REQUIRED_FIELDS_WITH_VALUES_BY_TAB[sheet_name],
+                constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
+                constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[sheet_name],
             )
         else:
             check_required_columns(
                 stats,
                 wb.get_sheet_by_name(sheet_name),
-                REQUIRED_FIELDS_BY_TAB[sheet_name],
+                constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
             )
 
     return stats
@@ -124,3 +156,477 @@ def check_required_columns(
             )
 
     return stats
+
+
+def to_product_json(values: list[SheetValue]) -> dict:
+    return {
+        "name": find_value_for(constants.GENERAL_PRODUCT_NAME, values)[2],
+        "shortDescription": find_value_for(
+            constants.GENERAL_CATALOG_DESCRIPTION, values
+        )[2],
+        "longDescription": find_value_for(
+            constants.GENERAL_PRODUCT_DESCRIPTION, values
+        )[2],
+        "website": find_value_for(constants.GENERAL_PRODUCT_WEBSITE, values)[2],
+        "externalIds": None,
+        "settings": None,
+    }
+
+
+def to_settings_json(values: SheetValueGenerator, mapping: dict[str, str]) -> dict:
+    settings: dict = {}
+    for value in values:
+        settings_name = find_value_for(constants.SETTINGS_SETTING, value)[2]
+        settings_value = find_value_for(constants.SETTINGS_VALUE, value)[2]
+        json_path = mapping[settings_name]
+
+        if ".label" not in json_path and ".title" not in json_path:
+            settings_value = settings_value == "Enabled"
+
+        settings = set_dict_value(settings, json_path, settings_value)
+
+    return settings
+
+
+def to_parameter_group_json(values: list[SheetValue]) -> dict:
+    return {
+        "name": find_value_for(constants.PARAMETERS_GROUPS_NAME, values)[2],
+        "label": find_value_for(constants.PARAMETERS_GROUPS_LABEL, values)[2],
+        "description": find_value_for(constants.PARAMETERS_GROUPS_DESCRIPTION, values)[
+            2
+        ],
+        "displayOrder": find_value_for(
+            constants.PARAMETERS_GROUPS_DISPLAY_ORDER, values
+        )[2],
+        "isDefault": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2]
+        == "True",
+    }
+
+
+def to_item_group_json(values: list[SheetValue]) -> dict:
+    return {
+        "name": find_value_for(constants.ITEMS_GROUPS_NAME, values)[2],
+        "label": find_value_for(constants.ITEMS_GROUPS_LABEL, values)[2],
+        "description": find_value_for(constants.ITEMS_GROUPS_DESCRIPTION, values)[2],
+        "displayOrder": find_value_for(constants.ITEMS_GROUPS_DISPLAY_ORDER, values)[2],
+        "isDefault": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2]
+        == "True",
+        "isMultipleChoice": find_value_for(
+            constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values
+        )[2]
+        == "True",
+        "isRequired": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
+        == "True",
+    }
+
+
+def to_parameter_json(
+    scope: str,
+    parameter_group_mapping: dict[str, ParameterGroup],
+    values: list[SheetValue],
+) -> dict:
+    phase = find_value_for(constants.PARAMETERS_PHASE, values)[2]
+    parameter_json = {
+        "name": find_value_for(constants.PARAMETERS_NAME, values)[2],
+        "description": find_value_for(constants.PARAMETERS_DESCRIPTION, values)[2],
+        "scope": scope,
+        "phase": phase,
+        "type": find_value_for(constants.PARAMETERS_TYPE, values)[2],
+        "options": json.loads(find_value_for(constants.PARAMETERS_OPTIONS, values)[2]),
+        "constraints": json.loads(
+            find_value_for(constants.PARAMETERS_CONSTRAINTS, values)[2]
+        ),
+        "externalId": find_value_for(constants.PARAMETERS_EXTERNALID, values)[2],
+        "displayOrder": find_value_for(constants.PARAMETERS_DISPLAY_ORDER, values)[2],
+    }
+
+    if phase == "Order" and scope not in ("Item", "Request"):
+        excel_group_id = find_value_for(constants.PARAMETERS_GROUP_ID, values)[2]
+        group = parameter_group_mapping[excel_group_id]
+
+        parameter_json["group"] = {"id": group.id}
+
+    return parameter_json
+
+
+def to_item_json(
+    product: Product,
+    item_group_mapping: dict[str, ItemGroup],
+    item_parameters_id_mapping: dict[str, Parameter],
+    values: list[SheetValue],
+) -> dict:
+    parameters = []
+    for value in find_values_by_pattern(re.compile(r"Parameter\.*"), values):
+        _, external_id = value[1].split(".")
+        parameter = find_first(
+            lambda p, ext_id=external_id: p.external_id == ext_id,
+            item_parameters_id_mapping.values(),
+        )
+        parameters.append({"id": parameter.id, "value": value[2]})
+
+    excel_group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
+    group = item_group_mapping[excel_group_id]
+
+    return {
+        "name": find_value_for(constants.ITEMS_NAME, values)[2],
+        "description": find_value_for(constants.ITEMS_DESCRIPTION, values)[2],
+        "externalIds": {
+            "vendor": find_value_for(constants.ITEMS_VENDOR_ITEM_ID, values)[2],
+        },
+        "group": {
+            "id": group.id,
+        },
+        "product": {
+            "id": product.id,
+        },
+        "quantityNotApplicable": find_value_for(
+            constants.ITEMS_QUANTITY_APPLICABLE, values
+        )[2]
+        == "True",
+        "terms": {
+            "commitment": find_value_for(constants.ITEMS_COMMITMENT_TERM, values)[2],
+            "period": find_value_for(constants.ITEMS_BILLING_FREQUENCY, values)[2],
+        },
+        "unit": {
+            "id": find_value_for(constants.ITEMS_UNIT_ID, values)[2],
+        },
+        "parameters": parameters,
+    }
+
+
+def to_template_json(
+    product: Product,
+    values: list[SheetValue],
+) -> dict:
+    return {
+        "name": find_value_for(constants.TEMPLATES_NAME, values)[2],
+        "type": find_value_for(constants.TEMPLATES_TYPE, values)[2],
+        "content": find_value_for(constants.TEMPLATES_CONTENT, values)[2],
+        "default": find_value_for(constants.TEMPLATES_DEFAULT, values)[2] == "True",
+    }
+
+
+def sync_product_definition(
+    mpt_client: MPTClient, definition_path: Path, stats: ProductStatsCollector
+) -> tuple[ProductStatsCollector, Product]:
+    """
+    Sync product definition to the marketplace platform
+    """
+    wb = load_workbook(filename=str(definition_path))
+
+    general_values = get_values_for_general(
+        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+    )
+    settings_values = get_values_for_table(
+        wb[constants.TAB_SETTINGS], constants.SETTINGS_FIELDS
+    )
+
+    product = create_product(
+        mpt_client,
+        to_product_json(general_values),
+        to_settings_json(settings_values, constants.SETTINGS_API_MAPPING),
+        Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
+    )
+    index, _, _ = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)
+    wb[constants.TAB_GENERAL][index] = product.id
+
+    parameters_groups_ws = wb[constants.TAB_PARAMETERS_GROUPS]
+    parameter_groups = get_values_for_table(
+        parameters_groups_ws, constants.PARAMETERS_GROUPS_FIELDS
+    )
+    _, parameters_groups_id_mapping = sync_parameters_groups(
+        mpt_client, parameters_groups_ws, product, parameter_groups
+    )
+
+    items_groups_ws = wb[constants.TAB_ITEMS_GROUPS]
+    item_groups = get_values_for_table(items_groups_ws, constants.ITEMS_GROUPS_FIELDS)
+    _, items_groups_id_mapping = sync_items_groups(
+        mpt_client, items_groups_ws, product, item_groups
+    )
+
+    agreements_parameters_ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
+    agreements_parameters = get_values_for_table(
+        agreements_parameters_ws, constants.PARAMETERS_FIELDS
+    )
+    _, agreements_parameters_id_mapping = sync_agreement_parameters(
+        mpt_client,
+        agreements_parameters_ws,
+        product,
+        agreements_parameters,
+        parameters_groups_id_mapping,
+    )
+
+    item_parameters_ws = wb[constants.TAB_ITEM_PARAMETERS]
+    item_parameters = get_values_for_table(
+        item_parameters_ws, constants.PARAMETERS_FIELDS
+    )
+    _, item_parameters_id_mapping = sync_item_parameters(
+        mpt_client,
+        item_parameters_ws,
+        product,
+        item_parameters,
+        parameters_groups_id_mapping,
+    )
+
+    request_parameters_ws = wb[constants.TAB_REQUEST_PARAMETERS]
+    request_parameters = get_values_for_table(
+        request_parameters_ws, constants.PARAMETERS_FIELDS
+    )
+    _, request_parameters_id_mapping = sync_request_parameters(
+        mpt_client,
+        request_parameters_ws,
+        product,
+        request_parameters,
+        parameters_groups_id_mapping,
+    )
+
+    subscription_parameters_ws = wb[constants.TAB_SUBSCRIPTION_PARAMETERS]
+    subscription_parameters = get_values_for_table(
+        subscription_parameters_ws, constants.PARAMETERS_FIELDS
+    )
+    _, subscription_parameters_id_mapping = sync_subscription_parameters(
+        mpt_client,
+        subscription_parameters_ws,
+        product,
+        subscription_parameters,
+        parameters_groups_id_mapping,
+    )
+
+    items_ws = wb[constants.TAB_ITEMS]
+    items = get_values_for_dynamic_table(
+        items_ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    )
+    _, items_id_mapping = sync_items(
+        mpt_client,
+        items_ws,
+        product,
+        items,
+        items_groups_id_mapping,
+        item_parameters_id_mapping,
+    )
+
+    all_parameters_id_mapping = {
+        **agreements_parameters_id_mapping,
+        **item_parameters_id_mapping,
+        **request_parameters_id_mapping,
+        **subscription_parameters_id_mapping,
+    }
+
+    templates_ws = wb[constants.TAB_TEMPLATES]
+    templates = get_values_for_table(templates_ws, constants.TEMPLATES_FIELDS)
+    _, templates_id_mapping = sync_templates(
+        mpt_client,
+        templates_ws,
+        product,
+        templates,
+        all_parameters_id_mapping,
+    )
+
+    wb.save(str(definition_path))
+
+    return stats, product
+
+
+def sync_parameters_groups(
+    mpt_client: MPTClient, ws: Worksheet, product: Product, values: SheetValueGenerator
+) -> SyncResult[ParameterGroup]:
+    """
+    Sync product parameters groups
+    Returns mapping if ids {"<excel-id>": ParameterGroup}
+    """
+    id_mapping = {}
+
+    for sheet_value in values:
+        parameter_group = create_parameter_group(
+            mpt_client,
+            product,
+            to_parameter_group_json(sheet_value),
+        )
+
+        index, _, sheet_id_value = find_value_for(
+            constants.PARAMETERS_GROUPS_ID, sheet_value
+        )
+
+        # TODO: refactor, should be done out of this function
+        ws[index] = parameter_group.id
+        id_mapping[sheet_id_value] = parameter_group
+
+    return ws, id_mapping
+
+
+def sync_items_groups(
+    mpt_client: MPTClient, ws: Worksheet, product: Product, values: SheetValueGenerator
+) -> SyncResult[ItemGroup]:
+    """
+    Sync item parameters groups
+    Returns mapping if ids {"<excel-id>": ItemGroup}
+    """
+    id_mapping = {}
+
+    for sheet_value in values:
+        item_group = create_item_group(
+            mpt_client,
+            product,
+            to_item_group_json(sheet_value),
+        )
+
+        index, _, sheet_id_value = find_value_for(
+            constants.ITEMS_GROUPS_ID, sheet_value
+        )
+
+        # TODO: refactor, should be done out of this function
+        ws[index] = item_group.id
+        id_mapping[sheet_id_value] = item_group
+
+    return ws, id_mapping
+
+
+def sync_parameters(
+    scope: str,
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product: Product,
+    values: SheetValueGenerator,
+    parameter_groups_mapping: dict[str, ParameterGroup],
+) -> SyncResult[Parameter]:
+    """
+    Sync parameters by scope
+    Returns mapping if ids {"<excel-id>": Parameter}
+    """
+    id_mapping = {}
+
+    for sheet_value in values:
+        parameter = create_parameter(
+            mpt_client,
+            product,
+            to_parameter_json(scope, parameter_groups_mapping, sheet_value),
+        )
+
+        id_index, _, sheet_id_value = find_value_for(
+            constants.ID_COLUMN_NAME, sheet_value
+        )
+
+        # TODO: refactor, should be done out of this function
+        ws[id_index] = parameter.id
+        id_mapping[sheet_id_value] = parameter
+
+        phase = find_value_for(constants.PARAMETERS_PHASE, sheet_value)[2]
+        if phase == "Order" and scope not in ("Item", "Request"):
+            group_id_index, _, sheet_id_value = find_value_for(
+                constants.PARAMETERS_GROUP_ID, sheet_value
+            )
+            created_group = parameter_groups_mapping[sheet_id_value]
+            ws[group_id_index] = created_group.id
+
+    return ws, id_mapping
+
+
+sync_agreement_parameters = partial(sync_parameters, "Agreement")
+sync_item_parameters = partial(sync_parameters, "Item")
+sync_request_parameters = partial(sync_parameters, "Request")
+sync_subscription_parameters = partial(sync_parameters, "Subscription")
+
+
+def sync_items(
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product: Product,
+    values: SheetValueGenerator,
+    items_groups_mapping: dict[str, ItemGroup],
+    item_parameters_id_mapping: dict[str, Parameter],
+) -> SyncResult[Item]:
+    """
+    Sync parameters by scope
+    Returns mapping if ids {"<excel-id>": Item}
+    """
+    id_mapping = {}
+
+    for sheet_value in values:
+        sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
+        item = create_item(
+            mpt_client,
+            product,
+            to_item_json(
+                product, items_groups_mapping, item_parameters_id_mapping, sheet_value
+            ),
+        )
+
+        id_index, _, sheet_id_value = find_value_for(
+            constants.ID_COLUMN_NAME, sheet_value
+        )
+
+        # TODO: refactor, should be done out of this function
+        ws[id_index] = item.id
+        id_mapping[sheet_id_value] = item
+
+        uom_id_index, _, sheet_id_value = find_value_for(
+            constants.ITEMS_UNIT_ID, sheet_value
+        )
+        ws[uom_id_index] = sheet_id_value
+
+        group_id_index, _, sheet_id_value = find_value_for(
+            constants.ITEMS_GROUP_ID, sheet_value
+        )
+        created_group = items_groups_mapping[sheet_id_value]
+        ws[group_id_index] = created_group.id
+
+    return ws, id_mapping
+
+
+def setup_unit_of_measure(
+    mpt_client: MPTClient, values: list[SheetValue]
+) -> list[SheetValue]:
+    unit_name = find_value_for(constants.ITEMS_UNIT_NAME, values)[2]
+
+    uom = search_uom_by_name(mpt_client, unit_name)
+    return set_value(constants.ITEMS_UNIT_ID, values, uom.id)
+
+
+def sync_templates(
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product: Product,
+    values: SheetValueGenerator,
+    all_parameters_id_mapping: dict[str, Parameter],
+) -> SyncResult[Template]:
+    """
+    Sync templates
+    Returns mapping if ids {"<excel-id>": Template}
+    """
+    id_mapping = {}
+
+    for sheet_value in values:
+        sheet_value = replace_parameter_variables(
+            sheet_value, all_parameters_id_mapping
+        )
+        template = create_template(
+            mpt_client,
+            product,
+            to_template_json(product, sheet_value),
+        )
+
+        content_index, _, sheet_content_value = find_value_for(
+            constants.TEMPLATES_CONTENT, sheet_value
+        )
+        ws[content_index] = sheet_content_value
+
+        id_index, _, sheet_id_value = find_value_for(
+            constants.ID_COLUMN_NAME, sheet_value
+        )
+
+        # TODO: refactor, should be done out of this function
+        ws[id_index] = template.id
+        id_mapping[sheet_id_value] = template
+
+    return ws, id_mapping
+
+
+def replace_parameter_variables(
+    values: list[SheetValue], parameter_mapping: dict[str, Parameter]
+) -> list[SheetValue]:
+    _, _, content = find_value_for(constants.TEMPLATES_CONTENT, values)
+
+    for sheet_param_id, param in parameter_mapping.items():
+        content = content.replace(sheet_param_id, param.id)
+
+    return set_value(constants.TEMPLATES_CONTENT, values, content)

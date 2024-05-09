@@ -1,4 +1,13 @@
+from typing import TypeAlias
+
+RowError: TypeAlias = tuple[str, str]
+
+
 class StatsCollector:
+    """
+    Error messages collector
+    """
+
     def __init__(self) -> None:
         self._sections: dict[str, dict[str, list[str]]] = {}
         self._is_empty: bool = True
@@ -34,3 +43,21 @@ class StatsCollector:
                 msg = f"{msg}\t\t{item_name}: {', '.join(item_messages)}"
 
         return msg
+
+
+class ProductStatsCollector:
+    def __init__(self) -> None:
+        self.general: list[RowError] = []
+
+        self.__tab_aliases = {
+            "general": self.general,
+        }
+
+        self._is_empty = True
+
+    def add_error(self, tab_alias: str, error: RowError) -> None:
+        errors = self.__tab_aliases[tab_alias]
+        errors.append(error)
+
+    def is_empty(self) -> bool:
+        return self._is_empty

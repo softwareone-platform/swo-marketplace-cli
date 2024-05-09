@@ -3,8 +3,18 @@ from pathlib import Path
 
 import pytest
 import responses
-from swo.mpt.cli.core.accounts.models import Account
+from swo.mpt.cli.core.accounts.models import Account as CLIAccount
 from swo.mpt.cli.core.mpt.client import MPTClient
+from swo.mpt.cli.core.mpt.models import (
+    Account,
+    Item,
+    ItemGroup,
+    Parameter,
+    ParameterGroup,
+    Product,
+    Template,
+    Uom,
+)
 
 
 @pytest.fixture()
@@ -84,8 +94,126 @@ def mpt_products():
 
 
 @pytest.fixture()
+def mpt_product():
+    return {
+        "id": "PRD-1234-1234",
+        "name": "Adobe for Commercial",
+        "status": "Published",
+        "vendor": {
+            "id": "ACC-4321",
+            "name": "Adobe",
+            "type": "Vendor",
+        },
+    }
+
+
+@pytest.fixture()
+def mpt_parameter_group():
+    return {
+        "id": "PRG-1234-1234",
+        "name": "Parameter Group 1",
+    }
+
+
+@pytest.fixture()
+def mpt_item_group():
+    return {
+        "id": "ITG-1234-1234",
+        "name": "Item Group 1",
+    }
+
+
+@pytest.fixture()
+def mpt_parameter():
+    return {
+        "id": "PAR-1234-1234-0001",
+        "name": "Parameter",
+        "externalId": "external-id-1",
+    }
+
+
+@pytest.fixture()
+def mpt_item():
+    return {
+        "id": "ITM-1234-1234",
+        "name": "Item 1",
+    }
+
+
+@pytest.fixture()
+def mpt_uom():
+    return {
+        "id": "UM-1234-1234",
+        "name": "User",
+    }
+
+
+@pytest.fixture()
+def mpt_template():
+    return {
+        "id": "TPL-1234-1234",
+        "name": "Template 1",
+    }
+
+
+@pytest.fixture()
+def product():
+    return Product(
+        id="PRD-1234-1234",
+        name="Adobe for Commercial",
+        status="Draft",
+        vendor=Account(id="ACC-4321", name="Adobe", type="Vendor"),
+    )
+
+
+@pytest.fixture()
+def parameter_group():
+    return ParameterGroup(id="PRG-1234-1234", name="Parameter Group")
+
+
+@pytest.fixture()
+def item_group():
+    return ItemGroup(id="ITG-1234-1234", name="Item Group")
+
+
+@pytest.fixture()
+def parameter():
+    return Parameter(id="PAR-1234-1234-0001", name="Parameter", externalId="external_1")
+
+
+@pytest.fixture()
+def another_parameter():
+    return Parameter(id="PAR-1234-1234-0002", name="Parameter", externalId="external_2")
+
+
+@pytest.fixture()
+def item():
+    return Item(id="ITM-1234-1234-0001", name="Item")
+
+
+@pytest.fixture()
+def uom():
+    return Uom(id="UOM-1234-1234", name="User")
+
+
+@pytest.fixture()
+def template():
+    return Template(id="TPL-0000-0000-0001", name="Template")
+
+
+@pytest.fixture()
+def product_icon_path():
+    return Path("swo/mpt/cli/core/icons/fake-icon.png")
+
+
+@pytest.fixture()
 def mpt_products_response(wrap_to_mpt_list_response, mpt_products):
     return wrap_to_mpt_list_response(mpt_products)
+
+
+@pytest.fixture()
+def mpt_uoms_response(wrap_to_mpt_list_response, mpt_uom):
+    return wrap_to_mpt_list_response([mpt_uom])
 
 
 @pytest.fixture()
@@ -101,7 +229,7 @@ def new_accounts_path(tmp_path, accounts_path):
 
 @pytest.fixture()
 def expected_account():
-    return Account(
+    return CLIAccount(
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
@@ -113,7 +241,7 @@ def expected_account():
 
 @pytest.fixture()
 def another_expected_account():
-    return Account(
+    return CLIAccount(
         id="ACC-12342",
         name="Account 2",
         type="Vendor",
@@ -136,3 +264,58 @@ def empty_file(product_file_root):
 @pytest.fixture()
 def product_file(product_file_root):
     return product_file_root / "PRD-1234-1234-1234-file.xlsx"
+
+
+@pytest.fixture()
+def new_product_file(tmp_path, product_file):
+    shutil.copyfile(product_file, tmp_path / "PRD-1234-1234-1234-copied.xlsx")
+    return tmp_path / "PRD-1234-1234-1234-copied.xlsx"
+
+
+@pytest.fixture()
+def extra_column_product_file(tmp_path, product_file_root):
+    shutil.copyfile(
+        product_file_root / "PRD-1234-1234-1234-file-extra-column.xlsx",
+        tmp_path / "PRD-1234-1234-1234-file-extra-column.xlsx",
+    )
+    return tmp_path / "PRD-1234-1234-1234-file-extra-column.xlsx"
+
+
+@pytest.fixture()
+def mock_sync_product(
+    mocker,
+    parameter_group,
+    item_group,
+    parameter,
+    another_parameter,
+    item,
+    uom,
+    template,
+    product,
+):
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_parameter_group",
+        return_value=parameter_group,
+    )
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
+    )
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_parameter",
+        side_effect=[
+            parameter,
+            another_parameter,
+            parameter,
+            another_parameter,
+            parameter,
+            another_parameter,
+            parameter,
+            another_parameter,
+        ],
+    )
+    mocker.patch("swo.mpt.cli.core.products.flows.create_item", return_value=item)
+    mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
+    mocker.patch(
+        "swo.mpt.cli.core.products.flows.create_template", return_value=template
+    )
+    mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)

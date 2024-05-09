@@ -14,8 +14,9 @@ from swo.mpt.cli.core.products.flows import (
     check_file_exists,
     check_product_definition,
     get_definition_file,
+    sync_product_definition,
 )
-from swo.mpt.cli.core.stats import StatsCollector
+from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
 
 app = typer.Typer()
 
@@ -80,15 +81,15 @@ def sync_product(
     """
     Sync product to the environment
     """
-    product_definition_path = get_definition_file(product_path)
+    with console.status("Check product definition"):
+        product_definition_path = get_definition_file(product_path)
 
-    try:
-        check_file_exists(product_definition_path)
-    except FileNotExistsError as e:
-        console.print(str(e))
-        raise typer.Exit(code=3)
+        try:
+            check_file_exists(product_definition_path)
+        except FileNotExistsError as e:
+            console.print(str(e))
+            raise typer.Exit(code=3)
 
-    if is_dry_run:
         stats = StatsCollector()
         stats = check_product_definition(product_definition_path, stats)
 
@@ -96,7 +97,32 @@ def sync_product(
         console.print(str(stats))
         raise typer.Exit(code=3)
 
-    console.print(f"Product definition {product_path} is correct")
+    console.print(f"Product definition [cyan]{product_path}[/cyan] is correct")
+
+    if not is_dry_run:
+        active_account = get_active_account()
+        mpt_client = client_from_account(active_account)
+        product_stats = ProductStatsCollector()
+
+        _ = typer.confirm(
+            f"Do you want to create product for {active_account.id} ({active_account.name})?",
+            abort=True,
+        )
+
+        with console.status("Syncing product definition"):
+            product_stats, product = sync_product_definition(
+                mpt_client, product_definition_path, product_stats
+            )
+
+        if not product_stats.is_empty():
+            console.print(
+                f"There are errors during sync of the product "
+                f"{product.id} ({product.name}) definition."
+            )
+            console.print(str(product_stats))
+            raise typer.Exit(code=3)
+
+        console.print("Product synced [bold green]successfully")
 
 
 def _products_table(title: str) -> Table:

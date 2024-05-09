@@ -2010,4 +2010,4 @@ test = ["pytest"]
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.12,<4"
-content-hash = "8eea7ef51a4aaff75f7e349d13c7c2f53cb2a2dba124aa09bcdf50328cb53e0e"
+content-hash = "c86f8f8360e8bbb56a7315327e1f5e0cd246a248457caa7fc7a91df236d6f7e5"

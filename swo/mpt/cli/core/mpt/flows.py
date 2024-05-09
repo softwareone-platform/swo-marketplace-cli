@@ -1,11 +1,24 @@
 import json
+from pathlib import Path
 from typing import Optional
 from urllib.parse import quote_plus
 
+from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError, wrap_http_error
 
 from .client import MPTClient
-from .models import ListResponse, Meta, Product, Token
+from .models import (
+    Item,
+    ItemGroup,
+    ListResponse,
+    Meta,
+    Parameter,
+    ParameterGroup,
+    Product,
+    Template,
+    Token,
+    Uom,
+)
 
 
 @wrap_http_error
@@ -48,3 +61,98 @@ def get_products(
         Meta.model_validate(json_body["$meta"]["pagination"]),
         [Product.model_validate(p) for p in json_body["data"]],
     )
+
+
+@wrap_http_error
+def create_product(
+    mpt_client: MPTClient, product_json: dict, settings_json: dict, icon: Path
+) -> Product:
+    parameters = MultipartEncoder(
+        fields={
+            "product": json.dumps(product_json),
+            "icon": ("icon.png", open(icon, "rb"), "image/png"),
+        }
+    )
+
+    products_response = mpt_client.post(
+        "/products", data=parameters, headers={"Content-Type": parameters.content_type}
+    )
+    products_response.raise_for_status()
+    product = Product.model_validate(products_response.json())
+
+    response = mpt_client.put(
+        f"/products/{product.id}/settings",
+        json=settings_json,
+    )
+    response.raise_for_status()
+
+    return product
+
+
+@wrap_http_error
+def create_parameter_group(
+    mpt_client: MPTClient, product: Product, parameter_group_json: dict
+) -> ParameterGroup:
+    response = mpt_client.post(
+        f"/products/{product.id}/parameter-groups", json=parameter_group_json
+    )
+    response.raise_for_status()
+
+    return ParameterGroup.model_validate(response.json())
+
+
+@wrap_http_error
+def create_item_group(
+    mpt_client: MPTClient, product: Product, item_group_json: dict
+) -> ItemGroup:
+    response = mpt_client.post(
+        f"/products/{product.id}/item-groups", json=item_group_json
+    )
+    response.raise_for_status()
+
+    return ItemGroup.model_validate(response.json())
+
+
+@wrap_http_error
+def create_parameter(
+    mpt_client: MPTClient, product: Product, parameter_json: dict
+) -> Parameter:
+    response = mpt_client.post(
+        f"/products/{product.id}/parameters", json=parameter_json
+    )
+    response.raise_for_status()
+
+    return Parameter.model_validate(response.json())
+
+
+@wrap_http_error
+def create_item(mpt_client: MPTClient, product: Product, item_json: dict) -> Item:
+    response = mpt_client.post("/items", json=item_json)
+    response.raise_for_status()
+
+    return Item.model_validate(response.json())
+
+
+@wrap_http_error
+def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
+    response = mpt_client.get(f"/units-of-measure?name={uom_name}&limit=1&offset=0")
+    response.raise_for_status()
+
+    data = response.json()["data"]
+    if not data:
+        raise MPTAPIError(
+            f"Unit of measure by name '{uom_name}' is not found.",
+            "Not unit of measure found.",
+        )
+
+    return Uom.model_validate(data[0])
+
+
+@wrap_http_error
+def create_template(
+    mpt_client: MPTClient, product: Product, template_json: dict
+) -> Template:
+    response = mpt_client.post(f"/products/{product.id}/templates", json=template_json)
+    response.raise_for_status()
+
+    return Template.model_validate(response.json())

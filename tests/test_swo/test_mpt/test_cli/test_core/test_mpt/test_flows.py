@@ -1,9 +1,29 @@
 from urllib.parse import urljoin
 
 import pytest
+from responses import matchers
 from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.mpt.flows import get_products, get_token
-from swo.mpt.cli.core.mpt.models import Product, Token
+from swo.mpt.cli.core.mpt.flows import (
+    create_item,
+    create_item_group,
+    create_parameter,
+    create_parameter_group,
+    create_product,
+    create_template,
+    get_products,
+    get_token,
+    search_uom_by_name,
+)
+from swo.mpt.cli.core.mpt.models import (
+    Item,
+    ItemGroup,
+    Parameter,
+    ParameterGroup,
+    Product,
+    Template,
+    Token,
+    Uom,
+)
 
 
 def test_get_token(requests_mocker, mpt_client, mpt_token, wrap_to_mpt_list_response):
@@ -87,5 +107,251 @@ def test_get_products_exception(requests_mocker, mpt_client):
 
     with pytest.raises(MPTAPIError) as e:
         get_products(mpt_client, 10, 0)
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_path):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/products",
+        ),
+        json=mpt_product,
+    )
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{mpt_product['id']}/settings",
+        ),
+        match=[matchers.json_params_matcher({"settings": "1234"})],
+    )
+
+    product = create_product(
+        mpt_client, {"name": "Create product"}, {"settings": "1234"}, product_icon_path
+    )
+
+    assert product == Product.model_validate(mpt_product)
+
+
+def test_create_product_exception(
+    requests_mocker, mpt_client, mpt_product, product_icon_path
+):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/products",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_product(
+            mpt_client,
+            {"name": "Create product"},
+            {"settings": "1234"},
+            product_icon_path,
+        )
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_create_parameter_group(
+    requests_mocker, mpt_client, product, mpt_parameter_group
+):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/parameter-groups",
+        ),
+        json=mpt_parameter_group,
+        match=[matchers.json_params_matcher({"name": "Parameter Group"})],
+    )
+
+    group = create_parameter_group(mpt_client, product, {"name": "Parameter Group"})
+
+    assert group == ParameterGroup.model_validate(mpt_parameter_group)
+
+
+def test_create_parameter_group_exception(requests_mocker, mpt_client, product):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/parameter-groups",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_parameter_group(mpt_client, product, {"name": "Parameter Group"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_create_item_group(requests_mocker, mpt_client, product, mpt_item_group):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/item-groups",
+        ),
+        json=mpt_item_group,
+        match=[matchers.json_params_matcher({"name": "Item Group"})],
+    )
+
+    group = create_item_group(mpt_client, product, {"name": "Item Group"})
+
+    assert group == ItemGroup.model_validate(mpt_item_group)
+
+
+def test_create_item_group_exception(requests_mocker, mpt_client, product):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/item-groups",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_item_group(mpt_client, product, {"name": "Item Group"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_create_parameter(requests_mocker, mpt_client, product, mpt_parameter):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/parameters",
+        ),
+        json=mpt_parameter,
+        match=[matchers.json_params_matcher({"name": "Parameter Name"})],
+    )
+
+    group = create_parameter(mpt_client, product, {"name": "Parameter Name"})
+
+    assert group == Parameter.model_validate(mpt_parameter)
+
+
+def test_create_parameter_exception(requests_mocker, mpt_client, product):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/parameters",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_parameter(mpt_client, product, {"name": "Parameter Name"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_create_item(requests_mocker, mpt_client, product, mpt_item):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items",
+        ),
+        json=mpt_item,
+        match=[matchers.json_params_matcher({"name": "Item Name"})],
+    )
+
+    group = create_item(mpt_client, product, {"name": "Item Name"})
+
+    assert group == Item.model_validate(mpt_item)
+
+
+def test_create_item_exception(requests_mocker, product, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_item(mpt_client, product, {"name": "Item Name"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_response):
+    name = "User"
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            f"/units-of-measure?name={name}&limit=1&offset=0",
+        ),
+        json=mpt_uoms_response,
+    )
+
+    uom = search_uom_by_name(mpt_client, name)
+
+    assert uom == Uom.model_validate(mpt_uom)
+
+
+def test_search_uom_by_name_exception(requests_mocker, mpt_client):
+    name = "User"
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            f"/units-of-measure?name={name}&limit=1&offset=0",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        search_uom_by_name(mpt_client, name)
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_search_uom_by_name_not_found(
+    requests_mocker, wrap_to_mpt_list_response, mpt_client
+):
+    name = "User"
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            f"/units-of-measure?name={name}&limit=1&offset=0",
+        ),
+        json=wrap_to_mpt_list_response([]),
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        search_uom_by_name(mpt_client, name)
+
+    assert "is not found" in str(e.value)
+
+
+def test_create_template(requests_mocker, mpt_client, product, mpt_template):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/templates",
+        ),
+        json=mpt_template,
+        match=[matchers.json_params_matcher({"name": "Template Name"})],
+    )
+
+    template = create_template(mpt_client, product, {"name": "Template Name"})
+
+    assert template == Template.model_validate(mpt_template)
+
+
+def test_create_template_exception(requests_mocker, product, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/templates",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_template(mpt_client, product, {"name": "Template Name"})
 
     assert "Internal Server Error" in str(e.value)

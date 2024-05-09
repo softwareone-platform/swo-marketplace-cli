@@ -88,7 +88,7 @@ def test_sync_with_dry_run_failure(expected_account, mocker, empty_file):
     assert "General: Required tab doesn't exist" in result.stdout
 
 
-def test_sync_with_dry_run(expected_account, mocker, product_file):
+def test_sync_with_dry_run(expected_account, mocker, new_product_file):
     mocker.patch(
         "swo.mpt.cli.core.products.app.get_active_account",
         return_value=expected_account,
@@ -96,8 +96,24 @@ def test_sync_with_dry_run(expected_account, mocker, product_file):
 
     result = runner.invoke(
         app,
-        ["sync", "--dry-run", str(product_file)],
+        ["sync", "--dry-run", str(new_product_file)],
     )
 
     assert result.exit_code == 0, result.stdout
     assert "Product definition" in result.stdout
+
+
+def test_sync_product(mocker, expected_account, mock_sync_product, new_product_file):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", str(new_product_file)],
+        input="y\n",
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "Product synced successfully" in result.stdout
