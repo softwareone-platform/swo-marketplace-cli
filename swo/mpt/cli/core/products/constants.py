@@ -2,6 +2,7 @@ ID_COLUMN_NAME = "ID"
 ACTION_COLUMN_NAME = "Action"
 CREATED_COLUMN_NAME = "Created"
 MODIFIED_COLUMN_NAME = "Modified"
+ERROR_COLUMN_NAME = "Error"
 
 # Tabs definition
 TAB_GENERAL = "General"

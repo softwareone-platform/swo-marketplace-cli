@@ -116,4 +116,4 @@ def test_sync_product(mocker, expected_account, mock_sync_product, new_product_f
     )
 
     assert result.exit_code == 0, result.stdout
-    assert "Product synced successfully" in result.stdout
+    assert "Product Sync" in result.stdout

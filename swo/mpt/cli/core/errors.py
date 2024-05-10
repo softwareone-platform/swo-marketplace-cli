@@ -13,12 +13,12 @@ class CLIError(Exception):
 
 
 class MPTAPIError(CLIError):
-    def __init__(self, error_message: str, response_body: str):
+    def __init__(self, request_msg: str, response_body: str):
         self._response_body = response_body
-        self._msg = error_message
+        self._request_msg = request_msg
 
     def __str__(self) -> str:
-        return f"{self._msg} with response body {self._response_body}"
+        return f"{self._request_msg} with response body {self._response_body}"
 
 
 def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
@@ -27,10 +27,18 @@ def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
         try:
             return func(*args, **kwargs)
         except RequestException as e:
-            response = (
-                str(e.response.content) if e.response is not None else "Empty response"
-            )
-            raise MPTAPIError(response, str(e))
+            if e.response is None:
+                msg = "No response"
+            elif e.response.status_code == 400:
+                response_body = e.response.json()
+
+                msg = ""
+                for field, error in response_body["errors"].items():
+                    msg += f"{field}: {error[0]}\n"
+            else:
+                msg = str(e.response.content)
+
+            raise MPTAPIError(str(e), msg)
 
     return _wrapper
 

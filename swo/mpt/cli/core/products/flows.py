@@ -3,9 +3,11 @@ import os
 import re
 from functools import partial
 from pathlib import Path
-from typing import TypeAlias, TypeVar
+from typing import Optional, TypeAlias, TypeVar
 
 from openpyxl import load_workbook  # type: ignore
+from openpyxl.utils import get_column_letter  # type: ignore
+from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import MPTClient
@@ -306,42 +308,71 @@ def to_template_json(
     }
 
 
+def add_or_create_error(
+    ws: Worksheet, sheet_value: list[SheetValue], exception: Exception
+) -> Worksheet:
+    column = find_first(
+        lambda c: c[1].value == constants.ERROR_COLUMN_NAME,
+        enumerate(ws["1"]),
+    )
+
+    if column:
+        index, _ = column
+        column_letter = get_column_letter(index + 1)
+    else:
+        column_letter = get_column_letter(ws.max_column + 1)
+        ws[f"{column_letter}1"] = constants.ERROR_COLUMN_NAME
+
+    index, _, _ = sheet_value[0]
+    row_number = coordinate_from_string(index)[1]
+    ws[f"{column_letter}{row_number}"] = str(exception)
+
+    return ws
+
+
 def sync_product_definition(
     mpt_client: MPTClient, definition_path: Path, stats: ProductStatsCollector
-) -> tuple[ProductStatsCollector, Product]:
+) -> tuple[ProductStatsCollector, Optional[Product]]:
     """
     Sync product definition to the marketplace platform
     """
     wb = load_workbook(filename=str(definition_path))
 
-    general_values = get_values_for_general(
-        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
-    )
-    settings_values = get_values_for_table(
-        wb[constants.TAB_SETTINGS], constants.SETTINGS_FIELDS
-    )
+    try:
+        general_values = get_values_for_general(
+            wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+        )
+        settings_values = get_values_for_table(
+            wb[constants.TAB_SETTINGS], constants.SETTINGS_FIELDS
+        )
+        product = create_product(
+            mpt_client,
+            to_product_json(general_values),
+            to_settings_json(settings_values, constants.SETTINGS_API_MAPPING),
+            Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
+        )
+        index, _, _ = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)
+        wb[constants.TAB_GENERAL][index] = product.id
+        stats.add_synced(constants.TAB_GENERAL)
 
-    product = create_product(
-        mpt_client,
-        to_product_json(general_values),
-        to_settings_json(settings_values, constants.SETTINGS_API_MAPPING),
-        Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
-    )
-    index, _, _ = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)
-    wb[constants.TAB_GENERAL][index] = product.id
+    except Exception as e:
+        add_or_create_error(wb[constants.TAB_GENERAL], general_values, e)
+        wb.save(str(definition_path))
+        stats.add_error(constants.TAB_GENERAL)
+        return stats, None
 
     parameters_groups_ws = wb[constants.TAB_PARAMETERS_GROUPS]
     parameter_groups = get_values_for_table(
         parameters_groups_ws, constants.PARAMETERS_GROUPS_FIELDS
     )
     _, parameters_groups_id_mapping = sync_parameters_groups(
-        mpt_client, parameters_groups_ws, product, parameter_groups
+        mpt_client, parameters_groups_ws, product, parameter_groups, stats
     )
 
     items_groups_ws = wb[constants.TAB_ITEMS_GROUPS]
     item_groups = get_values_for_table(items_groups_ws, constants.ITEMS_GROUPS_FIELDS)
     _, items_groups_id_mapping = sync_items_groups(
-        mpt_client, items_groups_ws, product, item_groups
+        mpt_client, items_groups_ws, product, item_groups, stats
     )
 
     agreements_parameters_ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
@@ -354,6 +385,7 @@ def sync_product_definition(
         product,
         agreements_parameters,
         parameters_groups_id_mapping,
+        stats,
     )
 
     item_parameters_ws = wb[constants.TAB_ITEM_PARAMETERS]
@@ -366,6 +398,7 @@ def sync_product_definition(
         product,
         item_parameters,
         parameters_groups_id_mapping,
+        stats,
     )
 
     request_parameters_ws = wb[constants.TAB_REQUEST_PARAMETERS]
@@ -378,6 +411,7 @@ def sync_product_definition(
         product,
         request_parameters,
         parameters_groups_id_mapping,
+        stats,
     )
 
     subscription_parameters_ws = wb[constants.TAB_SUBSCRIPTION_PARAMETERS]
@@ -390,6 +424,7 @@ def sync_product_definition(
         product,
         subscription_parameters,
         parameters_groups_id_mapping,
+        stats,
     )
 
     items_ws = wb[constants.TAB_ITEMS]
@@ -403,6 +438,7 @@ def sync_product_definition(
         items,
         items_groups_id_mapping,
         item_parameters_id_mapping,
+        stats,
     )
 
     all_parameters_id_mapping = {
@@ -420,6 +456,7 @@ def sync_product_definition(
         product,
         templates,
         all_parameters_id_mapping,
+        stats,
     )
 
     wb.save(str(definition_path))
@@ -428,7 +465,11 @@ def sync_product_definition(
 
 
 def sync_parameters_groups(
-    mpt_client: MPTClient, ws: Worksheet, product: Product, values: SheetValueGenerator
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product: Product,
+    values: SheetValueGenerator,
+    stats: ProductStatsCollector,
 ) -> SyncResult[ParameterGroup]:
     """
     Sync product parameters groups
@@ -437,25 +478,34 @@ def sync_parameters_groups(
     id_mapping = {}
 
     for sheet_value in values:
-        parameter_group = create_parameter_group(
-            mpt_client,
-            product,
-            to_parameter_group_json(sheet_value),
-        )
+        try:
+            parameter_group = create_parameter_group(
+                mpt_client,
+                product,
+                to_parameter_group_json(sheet_value),
+            )
 
-        index, _, sheet_id_value = find_value_for(
-            constants.PARAMETERS_GROUPS_ID, sheet_value
-        )
+            index, _, sheet_id_value = find_value_for(
+                constants.PARAMETERS_GROUPS_ID, sheet_value
+            )
 
-        # TODO: refactor, should be done out of this function
-        ws[index] = parameter_group.id
-        id_mapping[sheet_id_value] = parameter_group
+            # TODO: refactor, should be done out of this function
+            ws[index] = parameter_group.id
+            id_mapping[sheet_id_value] = parameter_group
+            stats.add_synced(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
 
     return ws, id_mapping
 
 
 def sync_items_groups(
-    mpt_client: MPTClient, ws: Worksheet, product: Product, values: SheetValueGenerator
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product: Product,
+    values: SheetValueGenerator,
+    stats: ProductStatsCollector,
 ) -> SyncResult[ItemGroup]:
     """
     Sync item parameters groups
@@ -464,19 +514,24 @@ def sync_items_groups(
     id_mapping = {}
 
     for sheet_value in values:
-        item_group = create_item_group(
-            mpt_client,
-            product,
-            to_item_group_json(sheet_value),
-        )
+        try:
+            item_group = create_item_group(
+                mpt_client,
+                product,
+                to_item_group_json(sheet_value),
+            )
 
-        index, _, sheet_id_value = find_value_for(
-            constants.ITEMS_GROUPS_ID, sheet_value
-        )
+            index, _, sheet_id_value = find_value_for(
+                constants.ITEMS_GROUPS_ID, sheet_value
+            )
 
-        # TODO: refactor, should be done out of this function
-        ws[index] = item_group.id
-        id_mapping[sheet_id_value] = item_group
+            # TODO: refactor, should be done out of this function
+            ws[index] = item_group.id
+            id_mapping[sheet_id_value] = item_group
+            stats.add_synced(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
 
     return ws, id_mapping
 
@@ -488,6 +543,7 @@ def sync_parameters(
     product: Product,
     values: SheetValueGenerator,
     parameter_groups_mapping: dict[str, ParameterGroup],
+    stats: ProductStatsCollector,
 ) -> SyncResult[Parameter]:
     """
     Sync parameters by scope
@@ -496,27 +552,32 @@ def sync_parameters(
     id_mapping = {}
 
     for sheet_value in values:
-        parameter = create_parameter(
-            mpt_client,
-            product,
-            to_parameter_json(scope, parameter_groups_mapping, sheet_value),
-        )
-
-        id_index, _, sheet_id_value = find_value_for(
-            constants.ID_COLUMN_NAME, sheet_value
-        )
-
-        # TODO: refactor, should be done out of this function
-        ws[id_index] = parameter.id
-        id_mapping[sheet_id_value] = parameter
-
-        phase = find_value_for(constants.PARAMETERS_PHASE, sheet_value)[2]
-        if phase == "Order" and scope not in ("Item", "Request"):
-            group_id_index, _, sheet_id_value = find_value_for(
-                constants.PARAMETERS_GROUP_ID, sheet_value
+        try:
+            parameter = create_parameter(
+                mpt_client,
+                product,
+                to_parameter_json(scope, parameter_groups_mapping, sheet_value),
             )
-            created_group = parameter_groups_mapping[sheet_id_value]
-            ws[group_id_index] = created_group.id
+
+            id_index, _, sheet_id_value = find_value_for(
+                constants.ID_COLUMN_NAME, sheet_value
+            )
+
+            # TODO: refactor, should be done out of this function
+            ws[id_index] = parameter.id
+            id_mapping[sheet_id_value] = parameter
+
+            phase = find_value_for(constants.PARAMETERS_PHASE, sheet_value)[2]
+            if phase == "Order" and scope not in ("Item", "Request"):
+                group_id_index, _, sheet_id_value = find_value_for(
+                    constants.PARAMETERS_GROUP_ID, sheet_value
+                )
+                created_group = parameter_groups_mapping[sheet_id_value]
+                ws[group_id_index] = created_group.id
+            stats.add_synced(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
 
     return ws, id_mapping
 
@@ -534,6 +595,7 @@ def sync_items(
     values: SheetValueGenerator,
     items_groups_mapping: dict[str, ItemGroup],
     item_parameters_id_mapping: dict[str, Parameter],
+    stats: ProductStatsCollector,
 ) -> SyncResult[Item]:
     """
     Sync parameters by scope
@@ -542,33 +604,41 @@ def sync_items(
     id_mapping = {}
 
     for sheet_value in values:
-        sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
-        item = create_item(
-            mpt_client,
-            product,
-            to_item_json(
-                product, items_groups_mapping, item_parameters_id_mapping, sheet_value
-            ),
-        )
+        try:
+            sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
+            item = create_item(
+                mpt_client,
+                product,
+                to_item_json(
+                    product,
+                    items_groups_mapping,
+                    item_parameters_id_mapping,
+                    sheet_value,
+                ),
+            )
 
-        id_index, _, sheet_id_value = find_value_for(
-            constants.ID_COLUMN_NAME, sheet_value
-        )
+            id_index, _, sheet_id_value = find_value_for(
+                constants.ID_COLUMN_NAME, sheet_value
+            )
 
-        # TODO: refactor, should be done out of this function
-        ws[id_index] = item.id
-        id_mapping[sheet_id_value] = item
+            # TODO: refactor, should be done out of this function
+            ws[id_index] = item.id
+            id_mapping[sheet_id_value] = item
 
-        uom_id_index, _, sheet_id_value = find_value_for(
-            constants.ITEMS_UNIT_ID, sheet_value
-        )
-        ws[uom_id_index] = sheet_id_value
+            uom_id_index, _, sheet_id_value = find_value_for(
+                constants.ITEMS_UNIT_ID, sheet_value
+            )
+            ws[uom_id_index] = sheet_id_value
 
-        group_id_index, _, sheet_id_value = find_value_for(
-            constants.ITEMS_GROUP_ID, sheet_value
-        )
-        created_group = items_groups_mapping[sheet_id_value]
-        ws[group_id_index] = created_group.id
+            group_id_index, _, sheet_id_value = find_value_for(
+                constants.ITEMS_GROUP_ID, sheet_value
+            )
+            created_group = items_groups_mapping[sheet_id_value]
+            ws[group_id_index] = created_group.id
+            stats.add_synced(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
 
     return ws, id_mapping
 
@@ -588,6 +658,7 @@ def sync_templates(
     product: Product,
     values: SheetValueGenerator,
     all_parameters_id_mapping: dict[str, Parameter],
+    stats: ProductStatsCollector,
 ) -> SyncResult[Template]:
     """
     Sync templates
@@ -596,27 +667,32 @@ def sync_templates(
     id_mapping = {}
 
     for sheet_value in values:
-        sheet_value = replace_parameter_variables(
-            sheet_value, all_parameters_id_mapping
-        )
-        template = create_template(
-            mpt_client,
-            product,
-            to_template_json(product, sheet_value),
-        )
+        try:
+            sheet_value = replace_parameter_variables(
+                sheet_value, all_parameters_id_mapping
+            )
+            template = create_template(
+                mpt_client,
+                product,
+                to_template_json(product, sheet_value),
+            )
 
-        content_index, _, sheet_content_value = find_value_for(
-            constants.TEMPLATES_CONTENT, sheet_value
-        )
-        ws[content_index] = sheet_content_value
+            content_index, _, sheet_content_value = find_value_for(
+                constants.TEMPLATES_CONTENT, sheet_value
+            )
+            ws[content_index] = sheet_content_value
 
-        id_index, _, sheet_id_value = find_value_for(
-            constants.ID_COLUMN_NAME, sheet_value
-        )
+            id_index, _, sheet_id_value = find_value_for(
+                constants.ID_COLUMN_NAME, sheet_value
+            )
 
-        # TODO: refactor, should be done out of this function
-        ws[id_index] = template.id
-        id_mapping[sheet_id_value] = template
+            # TODO: refactor, should be done out of this function
+            ws[id_index] = template.id
+            id_mapping[sheet_id_value] = template
+            stats.add_synced(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
 
     return ws, id_mapping
 

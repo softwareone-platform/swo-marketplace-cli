@@ -355,3 +355,19 @@ def test_create_template_exception(requests_mocker, product, mpt_client):
         create_template(mpt_client, product, {"name": "Template Name"})
 
     assert "Internal Server Error" in str(e.value)
+
+
+def test_create_template_400_exception(requests_mocker, product, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            f"/products/{product.id}/templates",
+        ),
+        status=400,
+        json={"errors": {"description": ["error for exception"]}}
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_template(mpt_client, product, {"name": "Template Name"})
+
+    assert "error for exception" in str(e.value)

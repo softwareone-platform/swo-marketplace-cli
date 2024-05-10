@@ -1,6 +1,18 @@
-from typing import TypeAlias
+import copy
+from typing import TypedDict
 
-RowError: TypeAlias = tuple[str, str]
+
+class Results(TypedDict):
+    synced: int
+    error: int
+    total: int
+
+
+DEFAULT_RESULTS: Results = {
+    "synced": 0,
+    "error": 0,
+    "total": 0,
+}
 
 
 class StatsCollector:
@@ -47,17 +59,43 @@ class StatsCollector:
 
 class ProductStatsCollector:
     def __init__(self) -> None:
-        self.general: list[RowError] = []
+        self.general: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.items_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.agreements_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.item_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.request_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.subscription_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.items: Results = copy.deepcopy(DEFAULT_RESULTS)
+        self.templates: Results = copy.deepcopy(DEFAULT_RESULTS)
+
+        self.__has_error = False
 
         self.__tab_aliases = {
-            "general": self.general,
+            "General": self.general,
+            "Parameters Groups": self.parameters_groups,
+            "Items Groups": self.items_groups,
+            "Agreements Parameters": self.agreements_parameters,
+            "Item Parameters": self.item_parameters,
+            "Request Parameters": self.request_parameters,
+            "Subscription Parameters": self.subscription_parameters,
+            "Items": self.items,
+            "Templates": self.templates,
         }
 
-        self._is_empty = True
+    def add_error(self, tab_name: str) -> None:
+        self.__tab_aliases[tab_name]["error"] += 1
+        self.__tab_aliases[tab_name]["total"] += 1
+        self.__has_error = True
 
-    def add_error(self, tab_alias: str, error: RowError) -> None:
-        errors = self.__tab_aliases[tab_alias]
-        errors.append(error)
+    def add_synced(self, tab_name: str) -> None:
+        self.__tab_aliases[tab_name]["synced"] += 1
+        self.__tab_aliases[tab_name]["total"] += 1
 
-    def is_empty(self) -> bool:
-        return self._is_empty
+    @property
+    def tabs(self) -> dict[str, Results]:
+        return self.__tab_aliases
+
+    @property
+    def is_error(self) -> bool:
+        return self.__has_error
