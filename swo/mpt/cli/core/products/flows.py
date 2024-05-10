@@ -9,6 +9,7 @@ from openpyxl import load_workbook  # type: ignore
 from openpyxl.utils import get_column_letter  # type: ignore
 from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
+from rich.status import Status
 from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import (
@@ -330,8 +331,20 @@ def add_or_create_error(
     return ws
 
 
+def status_step_text(stats: ProductStatsCollector, tab_name: str) -> str:
+    results = stats.tabs[tab_name]
+
+    return (
+        f"[green]{results['synced']}[/green] / "
+        f"[red bold]{results['error']}[/red bold] / [blue]{results['total']}[/blue]"
+    )
+
+
 def sync_product_definition(
-    mpt_client: MPTClient, definition_path: Path, stats: ProductStatsCollector
+    mpt_client: MPTClient,
+    definition_path: Path,
+    stats: ProductStatsCollector,
+    status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
     """
     Sync product definition to the marketplace platform
@@ -366,13 +379,18 @@ def sync_product_definition(
         parameters_groups_ws, constants.PARAMETERS_GROUPS_FIELDS
     )
     _, parameters_groups_id_mapping = sync_parameters_groups(
-        mpt_client, parameters_groups_ws, product, parameter_groups, stats
+        mpt_client,
+        parameters_groups_ws,
+        product,
+        parameter_groups,
+        stats,
+        status,
     )
 
     items_groups_ws = wb[constants.TAB_ITEMS_GROUPS]
     item_groups = get_values_for_table(items_groups_ws, constants.ITEMS_GROUPS_FIELDS)
     _, items_groups_id_mapping = sync_items_groups(
-        mpt_client, items_groups_ws, product, item_groups, stats
+        mpt_client, items_groups_ws, product, item_groups, stats, status
     )
 
     agreements_parameters_ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
@@ -386,6 +404,7 @@ def sync_product_definition(
         agreements_parameters,
         parameters_groups_id_mapping,
         stats,
+        status,
     )
 
     item_parameters_ws = wb[constants.TAB_ITEM_PARAMETERS]
@@ -399,6 +418,7 @@ def sync_product_definition(
         item_parameters,
         parameters_groups_id_mapping,
         stats,
+        status,
     )
 
     request_parameters_ws = wb[constants.TAB_REQUEST_PARAMETERS]
@@ -412,6 +432,7 @@ def sync_product_definition(
         request_parameters,
         parameters_groups_id_mapping,
         stats,
+        status,
     )
 
     subscription_parameters_ws = wb[constants.TAB_SUBSCRIPTION_PARAMETERS]
@@ -425,6 +446,7 @@ def sync_product_definition(
         subscription_parameters,
         parameters_groups_id_mapping,
         stats,
+        status,
     )
 
     items_ws = wb[constants.TAB_ITEMS]
@@ -439,6 +461,7 @@ def sync_product_definition(
         items_groups_id_mapping,
         item_parameters_id_mapping,
         stats,
+        status,
     )
 
     all_parameters_id_mapping = {
@@ -457,6 +480,7 @@ def sync_product_definition(
         templates,
         all_parameters_id_mapping,
         stats,
+        status,
     )
 
     wb.save(str(definition_path))
@@ -470,6 +494,7 @@ def sync_parameters_groups(
     product: Product,
     values: SheetValueGenerator,
     stats: ProductStatsCollector,
+    status: Status,
 ) -> SyncResult[ParameterGroup]:
     """
     Sync product parameters groups
@@ -496,6 +521,9 @@ def sync_parameters_groups(
         except Exception as e:
             add_or_create_error(ws, sheet_value, e)
             stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
 
@@ -506,6 +534,7 @@ def sync_items_groups(
     product: Product,
     values: SheetValueGenerator,
     stats: ProductStatsCollector,
+    status: Status,
 ) -> SyncResult[ItemGroup]:
     """
     Sync item parameters groups
@@ -532,6 +561,9 @@ def sync_items_groups(
         except Exception as e:
             add_or_create_error(ws, sheet_value, e)
             stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
 
@@ -544,6 +576,7 @@ def sync_parameters(
     values: SheetValueGenerator,
     parameter_groups_mapping: dict[str, ParameterGroup],
     stats: ProductStatsCollector,
+    status: Status,
 ) -> SyncResult[Parameter]:
     """
     Sync parameters by scope
@@ -578,6 +611,9 @@ def sync_parameters(
         except Exception as e:
             add_or_create_error(ws, sheet_value, e)
             stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
 
@@ -596,6 +632,7 @@ def sync_items(
     items_groups_mapping: dict[str, ItemGroup],
     item_parameters_id_mapping: dict[str, Parameter],
     stats: ProductStatsCollector,
+    status: Status,
 ) -> SyncResult[Item]:
     """
     Sync parameters by scope
@@ -639,6 +676,9 @@ def sync_items(
         except Exception as e:
             add_or_create_error(ws, sheet_value, e)
             stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
 
@@ -659,6 +699,7 @@ def sync_templates(
     values: SheetValueGenerator,
     all_parameters_id_mapping: dict[str, Parameter],
     stats: ProductStatsCollector,
+    status: Status,
 ) -> SyncResult[Template]:
     """
     Sync templates
@@ -693,6 +734,9 @@ def sync_templates(
         except Exception as e:
             add_or_create_error(ws, sheet_value, e)
             stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
 

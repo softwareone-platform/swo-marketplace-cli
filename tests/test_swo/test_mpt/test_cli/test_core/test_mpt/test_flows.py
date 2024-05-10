@@ -364,7 +364,7 @@ def test_create_template_400_exception(requests_mocker, product, mpt_client):
             f"/products/{product.id}/templates",
         ),
         status=400,
-        json={"errors": {"description": ["error for exception"]}}
+        json={"errors": {"description": ["error for exception"]}},
     )
 
     with pytest.raises(MPTAPIError) as e:
