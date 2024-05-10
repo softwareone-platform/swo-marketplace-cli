@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 from openpyxl import load_workbook
+from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
@@ -223,7 +224,9 @@ def test_sync_parameters_groups(
     ws = wb[constants.TAB_PARAMETERS_GROUPS]
     values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
 
-    _, id_mapping = sync_parameters_groups(mpt_client, ws, product, values, stats)
+    _, id_mapping = sync_parameters_groups(
+        mpt_client, ws, product, values, stats, console.status("")
+    )
 
     assert id_mapping == {
         "PGR-4944-4118-0002": parameter_group,
@@ -273,7 +276,7 @@ def test_sync_parameters_groups_exception(
     ws = wb[constants.TAB_PARAMETERS_GROUPS]
     values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
 
-    sync_parameters_groups(mpt_client, ws, product, values, stats)
+    sync_parameters_groups(mpt_client, ws, product, values, stats, console.status(""))
 
     assert ws["J2"].value == "Error with response body Error"
 
@@ -288,7 +291,9 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
     ws = wb[constants.TAB_ITEMS_GROUPS]
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
-    _, id_mapping = sync_items_groups(mpt_client, ws, product, values, stats)
+    _, id_mapping = sync_items_groups(
+        mpt_client, ws, product, values, stats, console.status("")
+    )
 
     assert id_mapping == {
         "IGR-4944-4118-0002": item_group,
@@ -340,7 +345,7 @@ def test_sync_items_groups_exception(mocker, mpt_client, new_product_file, produ
     ws = wb[constants.TAB_ITEMS_GROUPS]
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
-    sync_items_groups(mpt_client, ws, product, values, stats)
+    sync_items_groups(mpt_client, ws, product, values, stats, console.status(""))
 
     assert ws["L2"].value == "Error with response body Error"
 
@@ -367,6 +372,7 @@ def test_sync_parameters(
             "PGR-4944-4118-0002": parameter_group,
         },
         stats,
+        console.status(""),
     )
 
     assert id_mapping == {
@@ -471,6 +477,7 @@ def test_sync_parameters_exception(
             "PGR-4944-4118-0002": parameter_group,
         },
         stats,
+        console.status(""),
     )
 
     assert ws["O2"].value == "Error with response body Error"
@@ -512,6 +519,7 @@ def test_sync_item(
             "PAR-0000-0000-00002": another_parameter,
         },
         stats,
+        console.status(""),
     )
 
     assert id_mapping == {
@@ -640,6 +648,7 @@ def test_sync_item_exception(
             "PAR-0000-0000-00002": another_parameter,
         },
         stats,
+        console.status(""),
     )
 
     assert ws["S2"].value == "Error with response body Error"
@@ -671,6 +680,7 @@ def test_sync_template(
             "PAR-4944-4118-0001": parameter,
         },
         stats,
+        console.status(""),
     )
 
     assert id_mapping == {
@@ -732,6 +742,7 @@ def test_sync_template_exception(
             "PAR-4944-4118-0001": parameter,
         },
         stats,
+        console.status(""),
     )
 
     assert ws["I2"].value == "Error with response body Error"
@@ -782,7 +793,7 @@ def test_sync_product(
     )
 
     stats = ProductStatsCollector()
-    sync_product_definition(mpt_client, new_product_file, stats)
+    sync_product_definition(mpt_client, new_product_file, stats, console.status(""))
 
     assert parameter_group_mock.call_count == 2
     assert item_group_mock.call_count == 2
@@ -865,7 +876,9 @@ def test_sync_product_extra_columns(
     )
 
     stats = ProductStatsCollector()
-    sync_product_definition(mpt_client, extra_column_product_file, stats)
+    sync_product_definition(
+        mpt_client, extra_column_product_file, stats, console.status("")
+    )
 
     assert parameter_group_mock.call_count == 2
     assert item_group_mock.call_count == 2
@@ -910,7 +923,7 @@ def test_sync_product_exception(mocker, mpt_client, new_product_file):
     )
 
     stats = ProductStatsCollector()
-    sync_product_definition(mpt_client, new_product_file, stats)
+    sync_product_definition(mpt_client, new_product_file, stats, console.status(""))
 
     wb = load_workbook(filename=str(new_product_file))
     assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"

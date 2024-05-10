@@ -109,11 +109,12 @@ def sync_product(
             abort=True,
         )
 
-        with console.status("Syncing product definition"):
+        with console.status("Syncing product definition...") as status:
             product_stats, product = sync_product_definition(
                 mpt_client,
                 product_definition_path,
                 product_stats,
+                status,
             )
 
         table = _product_stats_table(product_stats)

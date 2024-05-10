@@ -1,4 +1,5 @@
 import json
+from functools import cache
 from pathlib import Path
 from typing import Optional
 from urllib.parse import quote_plus
@@ -133,6 +134,7 @@ def create_item(mpt_client: MPTClient, product: Product, item_json: dict) -> Ite
     return Item.model_validate(response.json())
 
 
+@cache
 @wrap_http_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
     response = mpt_client.get(f"/units-of-measure?name={uom_name}&limit=1&offset=0")
