@@ -15,7 +15,7 @@ DEFAULT_RESULTS: Results = {
 }
 
 
-class StatsCollector:
+class ErrorMessagesCollector:
     """
     Error messages collector
     """

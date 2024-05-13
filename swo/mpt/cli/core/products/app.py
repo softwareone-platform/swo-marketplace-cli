@@ -16,7 +16,7 @@ from swo.mpt.cli.core.products.flows import (
     get_definition_file,
     sync_product_definition,
 )
-from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
+from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 
 app = typer.Typer()
 
@@ -90,7 +90,7 @@ def sync_product(
             console.print(str(e))
             raise typer.Exit(code=3)
 
-        stats = StatsCollector()
+        stats = ErrorMessagesCollector()
         stats = check_product_definition(product_definition_path, stats)
 
     if not stats.is_empty():

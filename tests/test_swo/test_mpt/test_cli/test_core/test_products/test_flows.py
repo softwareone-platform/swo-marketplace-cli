@@ -18,7 +18,7 @@ from swo.mpt.cli.core.products.flows import (
     sync_product_definition,
     sync_templates,
 )
-from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
+from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import get_values_for_table
 
 
@@ -44,7 +44,7 @@ def test_check_file_not_exists(tmp_path):
 
 
 def test_check_product_definition_not_all_tabs(empty_file):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(empty_file, stats)
 
@@ -64,7 +64,7 @@ Settings: Required tab doesn't exist\n"""
 
 
 def test_check_product_definition_not_all_required_general(product_file_root):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-general-not-all.xlsx", stats
@@ -79,7 +79,7 @@ def test_check_product_definition_not_all_required_general(product_file_root):
 
 
 def test_check_product_definition_not_all_required_parameter_groups(product_file_root):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-parameter-groups-not-all-columns.xlsx",
@@ -91,7 +91,7 @@ def test_check_product_definition_not_all_required_parameter_groups(product_file
 
 
 def test_check_product_definition_not_all_required_items_groups(product_file_root):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-items-groups-not-all-columns.xlsx",
@@ -105,7 +105,7 @@ def test_check_product_definition_not_all_required_items_groups(product_file_roo
 def test_check_product_definition_not_all_required_agreements_parameters(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root
@@ -123,7 +123,7 @@ def test_check_product_definition_not_all_required_agreements_parameters(
 def test_check_product_definition_not_all_required_item_parameters(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-item-parameters-not-all-columns.xlsx",
@@ -137,7 +137,7 @@ def test_check_product_definition_not_all_required_item_parameters(
 def test_check_product_definition_not_all_required_request_parameters(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root
@@ -154,7 +154,7 @@ def test_check_product_definition_not_all_required_request_parameters(
 def test_check_product_definition_not_all_required_subscription_parameters(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root
@@ -172,7 +172,7 @@ def test_check_product_definition_not_all_required_subscription_parameters(
 def test_check_product_definition_not_all_required_items(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-items-not-all-columns.xlsx",
@@ -186,7 +186,7 @@ def test_check_product_definition_not_all_required_items(
 def test_check_product_definition_not_all_required_templates(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-templates-not-all-columns.xlsx",
@@ -200,7 +200,7 @@ def test_check_product_definition_not_all_required_templates(
 def test_check_product_definition_not_all_required_settings(
     product_file_root,
 ):
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
         product_file_root / "PRD-1234-1234-1234-settings-not-all-columns.xlsx",

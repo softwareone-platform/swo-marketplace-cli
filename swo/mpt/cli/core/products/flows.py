@@ -30,7 +30,7 @@ from swo.mpt.cli.core.mpt.models import (
     Template,
 )
 from swo.mpt.cli.core.products import constants
-from swo.mpt.cli.core.stats import ProductStatsCollector, StatsCollector
+from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     SheetValue,
     SheetValueGenerator,
@@ -71,8 +71,8 @@ def check_file_exists(product_file_path: Path) -> bool:
 
 
 def check_product_definition(
-    definition_path: Path, stats: StatsCollector
-) -> StatsCollector:
+    definition_path: Path, stats: ErrorMessagesCollector
+) -> ErrorMessagesCollector:
     """
     Parses Product definition file and check consistensy of product definition file
     """
@@ -108,11 +108,11 @@ def check_product_definition(
 
 
 def check_required_general_fields(
-    stats: StatsCollector,
+    stats: ErrorMessagesCollector,
     sheet: Worksheet,
     required_field_names: list[str],
     required_values_field_names: list[str],
-) -> StatsCollector:
+) -> ErrorMessagesCollector:
     """
     Check that required fields and values are presented in General worksheet
     """
@@ -142,10 +142,10 @@ def check_required_general_fields(
 
 
 def check_required_columns(
-    stats: StatsCollector,
+    stats: ErrorMessagesCollector,
     sheet: Worksheet,
     required_field_names: list[str],
-) -> StatsCollector:
+) -> ErrorMessagesCollector:
     """
     Check that required fields and values are presented in tables worksheet
     """
