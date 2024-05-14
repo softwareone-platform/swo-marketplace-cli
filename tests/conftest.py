@@ -267,6 +267,11 @@ def product_file(product_file_root):
 
 
 @pytest.fixture()
+def update_product_file(product_file_root):
+    return product_file_root / "PRD-1234-1234-1234-file-update.xlsx"
+
+
+@pytest.fixture()
 def new_product_file(tmp_path, product_file):
     shutil.copyfile(product_file, tmp_path / "PRD-1234-1234-1234-copied.xlsx")
     return tmp_path / "PRD-1234-1234-1234-copied.xlsx"
@@ -279,6 +284,14 @@ def extra_column_product_file(tmp_path, product_file_root):
         tmp_path / "PRD-1234-1234-1234-file-extra-column.xlsx",
     )
     return tmp_path / "PRD-1234-1234-1234-file-extra-column.xlsx"
+
+
+@pytest.fixture()
+def new_update_product_file(tmp_path, update_product_file):
+    shutil.copyfile(
+        update_product_file, tmp_path / "PRD-1234-1234-1234-file-update-copied.xlsx"
+    )
+    return tmp_path / "PRD-1234-1234-1234-file-update-copied.xlsx"
 
 
 @pytest.fixture()

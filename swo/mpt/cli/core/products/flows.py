@@ -1,3 +1,4 @@
+import enum
 import json
 import os
 import re
@@ -8,6 +9,7 @@ from typing import Optional, TypeAlias, TypeVar
 from openpyxl import load_workbook  # type: ignore
 from openpyxl.utils import get_column_letter  # type: ignore
 from openpyxl.utils.cell import coordinate_from_string  # type: ignore
+from openpyxl.workbook import Workbook  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 from rich.status import Status
 from swo.mpt.cli.core.errors import FileNotExistsError
@@ -19,6 +21,9 @@ from swo.mpt.cli.core.mpt.flows import (
     create_parameter_group,
     create_product,
     create_template,
+    get_products,
+    publish_item,
+    review_item,
     search_uom_by_name,
 )
 from swo.mpt.cli.core.mpt.models import (
@@ -46,6 +51,20 @@ from swo.mpt.cli.core.utils import (
 
 T = TypeVar("T")
 SyncResult: TypeAlias = tuple[Worksheet, dict[str, T]]
+
+
+class ProductAction(enum.Enum):
+    CREATE = "create"
+    UPDATE = "update"
+
+
+class ItemAction(enum.Enum):
+    CREATE = "create"
+    UPDATE = "update"
+    REVIEW = "review"
+    PUBLISH = "publish"
+    SKIP = "-"
+    SKIPPED = ""
 
 
 def get_definition_file(path: str) -> Path:
@@ -93,14 +112,14 @@ def check_product_definition(
         if sheet_name == constants.TAB_GENERAL:
             check_required_general_fields(
                 stats,
-                wb.get_sheet_by_name(sheet_name),
+                wb[sheet_name],
                 constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
                 constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[sheet_name],
             )
         else:
             check_required_columns(
                 stats,
-                wb.get_sheet_by_name(sheet_name),
+                wb[sheet_name],
                 constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
             )
 
@@ -258,6 +277,7 @@ def to_item_json(
     item_parameters_id_mapping: dict[str, Parameter],
     values: list[SheetValue],
 ) -> dict:
+    # TODO: remove all precalculation out of this function
     parameters = []
     for value in find_values_by_pattern(re.compile(r"Parameter\.*"), values):
         _, external_id = value[1].split(".")
@@ -336,13 +356,16 @@ def status_step_text(stats: ProductStatsCollector, tab_name: str) -> str:
 
     return (
         f"[green]{results['synced']}[/green] / "
-        f"[red bold]{results['error']}[/red bold] / [blue]{results['total']}[/blue]"
+        f"[red bold]{results['error']}[/red bold] / "
+        f"[white bold]{results['skipped']}[/white bold] / "
+        f"[blue]{results['total']}[/blue]"
     )
 
 
 def sync_product_definition(
     mpt_client: MPTClient,
     definition_path: Path,
+    action: ProductAction,
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
@@ -351,6 +374,22 @@ def sync_product_definition(
     """
     wb = load_workbook(filename=str(definition_path))
 
+    if action == ProductAction.UPDATE:
+        stats, product = update_product_definition(mpt_client, wb, stats, status)
+    else:
+        stats, product = create_product_definition(mpt_client, wb, stats, status)
+
+    wb.save(str(definition_path))
+
+    return stats, product
+
+
+def create_product_definition(
+    mpt_client: MPTClient,
+    wb: Workbook,
+    stats: ProductStatsCollector,
+    status: Status,
+) -> tuple[ProductStatsCollector, Optional[Product]]:
     try:
         general_values = get_values_for_general(
             wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
@@ -370,7 +409,6 @@ def sync_product_definition(
 
     except Exception as e:
         add_or_create_error(wb[constants.TAB_GENERAL], general_values, e)
-        wb.save(str(definition_path))
         stats.add_error(constants.TAB_GENERAL)
         return stats, None
 
@@ -483,9 +521,65 @@ def sync_product_definition(
         status,
     )
 
-    wb.save(str(definition_path))
-
     return stats, product
+
+
+def update_product_definition(
+    mpt_client: MPTClient,
+    wb: Workbook,
+    stats: ProductStatsCollector,
+    status: Status,
+) -> tuple[ProductStatsCollector, Optional[Product]]:
+    general_values = get_values_for_general(
+        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+    )
+    product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
+
+    items_ws = wb[constants.TAB_ITEMS]
+    items = get_values_for_dynamic_table(
+        items_ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    )
+
+    update_items(
+        mpt_client,
+        items_ws,
+        product_id,
+        items,
+        stats,
+        status,
+    )
+
+    return stats, None
+
+
+def update_items(
+    mpt_client: MPTClient,
+    ws: Worksheet,
+    product_id: str,
+    values: SheetValueGenerator,
+    stats: ProductStatsCollector,
+    status: Status,
+) -> None:
+    for sheet_value in values:
+        action = find_value_for(constants.ITEMS_ACTION, sheet_value)[2]
+        item_id = find_value_for(constants.ITEMS_ID, sheet_value)[2]
+
+        try:
+            match ItemAction(action):
+                case ItemAction.REVIEW:
+                    review_item(mpt_client, item_id)
+                    stats.add_synced(ws.title)
+                case ItemAction.PUBLISH:
+                    publish_item(mpt_client, item_id)
+                    stats.add_synced(ws.title)
+                case _:
+                    stats.add_skipped(ws.title)
+        except Exception as e:
+            add_or_create_error(ws, sheet_value, e)
+            stats.add_error(ws.title)
+        finally:
+            step_text = status_step_text(stats, ws.title)
+            status.update(f"Syncing {ws.title}: {step_text}")
 
 
 def sync_parameters_groups(
@@ -750,3 +844,17 @@ def replace_parameter_variables(
         content = content.replace(sheet_param_id, param.id)
 
     return set_value(constants.TEMPLATES_CONTENT, values, content)
+
+
+def check_product_exists(
+    mpt_client: MPTClient, product_definition_path: Path
+) -> Product | None:
+    wb = load_workbook(filename=str(product_definition_path))
+    general_values = get_values_for_general(
+        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+    )
+
+    product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
+
+    _, products = get_products(mpt_client, 1, 0, query=f"id={product_id}")
+    return products[0] if products else None

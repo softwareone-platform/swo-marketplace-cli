@@ -6,12 +6,14 @@ class Results(TypedDict):
     synced: int
     error: int
     total: int
+    skipped: int
 
 
 DEFAULT_RESULTS: Results = {
     "synced": 0,
     "error": 0,
     "total": 0,
+    "skipped": 0,
 }
 
 
@@ -90,6 +92,10 @@ class ProductStatsCollector:
 
     def add_synced(self, tab_name: str) -> None:
         self.__tab_aliases[tab_name]["synced"] += 1
+        self.__tab_aliases[tab_name]["total"] += 1
+
+    def add_skipped(self, tab_name: str) -> None:
+        self.__tab_aliases[tab_name]["skipped"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
 
     @property

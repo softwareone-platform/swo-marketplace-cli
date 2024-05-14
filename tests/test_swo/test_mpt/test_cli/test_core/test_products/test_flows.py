@@ -7,8 +7,10 @@ from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
+    ProductAction,
     check_file_exists,
     check_product_definition,
+    check_product_exists,
     get_definition_file,
     get_values_for_dynamic_table,
     sync_items,
@@ -793,7 +795,9 @@ def test_sync_product(
     )
 
     stats = ProductStatsCollector()
-    sync_product_definition(mpt_client, new_product_file, stats, console.status(""))
+    sync_product_definition(
+        mpt_client, new_product_file, ProductAction.CREATE, stats, console.status("")
+    )
 
     assert parameter_group_mock.call_count == 2
     assert item_group_mock.call_count == 2
@@ -877,7 +881,11 @@ def test_sync_product_extra_columns(
 
     stats = ProductStatsCollector()
     sync_product_definition(
-        mpt_client, extra_column_product_file, stats, console.status("")
+        mpt_client,
+        extra_column_product_file,
+        ProductAction.CREATE,
+        stats,
+        console.status(""),
     )
 
     assert parameter_group_mock.call_count == 2
@@ -923,7 +931,61 @@ def test_sync_product_exception(mocker, mpt_client, new_product_file):
     )
 
     stats = ProductStatsCollector()
-    sync_product_definition(mpt_client, new_product_file, stats, console.status(""))
+    sync_product_definition(
+        mpt_client, new_product_file, ProductAction.CREATE, stats, console.status("")
+    )
 
     wb = load_workbook(filename=str(new_product_file))
     assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"
+
+
+def test_sync_product_update_product(mocker, mpt_client, new_update_product_file):
+    review_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.review_item",
+        return_value=None,
+    )
+    publish_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.publish_item",
+        return_value=None,
+    )
+
+    stats = ProductStatsCollector()
+    stats, _ = sync_product_definition(
+        mpt_client,
+        new_update_product_file,
+        ProductAction.UPDATE,
+        stats,
+        console.status(""),
+    )
+
+    review_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0001")
+    publish_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0002")
+    assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
+
+
+def test_check_product_exists(mocker, mpt_client, new_product_file, product):
+    get_products_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.get_products",
+        return_value=({}, [product]),
+    )
+
+    checked_product = check_product_exists(mpt_client, new_product_file)
+
+    assert checked_product == product
+    get_products_mock.assert_called_once_with(
+        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
+    )
+
+
+def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
+    get_products_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.get_products",
+        return_value=({}, []),
+    )
+
+    checked_product = check_product_exists(mpt_client, new_product_file)
+
+    assert not checked_product
+    get_products_mock.assert_called_once_with(
+        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
+    )

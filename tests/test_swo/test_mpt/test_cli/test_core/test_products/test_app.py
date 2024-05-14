@@ -103,7 +103,13 @@ def test_sync_with_dry_run(expected_account, mocker, new_product_file):
     assert "Product definition" in result.stdout
 
 
-def test_sync_product(mocker, expected_account, mock_sync_product, new_product_file):
+def test_sync_product_update(
+    mocker, expected_account, mock_sync_product, new_product_file, product
+):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.check_product_exists",
+        return_value=product,
+    )
     mocker.patch(
         "swo.mpt.cli.core.products.app.get_active_account",
         return_value=expected_account,
@@ -116,4 +122,51 @@ def test_sync_product(mocker, expected_account, mock_sync_product, new_product_f
     )
 
     assert result.exit_code == 0, result.stdout
+    assert "Do you want to update product" in result.stdout
+    assert "Product Sync" in result.stdout
+
+
+def test_sync_product_force_create(
+    mocker, expected_account, mock_sync_product, new_product_file, product
+):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.check_product_exists",
+        return_value=product,
+    )
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", "--force-create", str(new_product_file)],
+        input="y\n",
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "Do you want to create new?" in result.stdout
+    assert "Product Sync" in result.stdout
+
+
+def test_sync_product_no_product(
+    mocker, expected_account, mock_sync_product, new_product_file
+):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.check_product_exists",
+        return_value=None,
+    )
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account",
+        return_value=expected_account,
+    )
+
+    result = runner.invoke(
+        app,
+        ["sync", str(new_product_file)],
+        input="y\n",
+    )
+
+    assert result.exit_code == 0, result.stdout
+    assert "Do you want to create new product for account" in result.stdout
     assert "Product Sync" in result.stdout

@@ -134,6 +134,18 @@ def create_item(mpt_client: MPTClient, product: Product, item_json: dict) -> Ite
     return Item.model_validate(response.json())
 
 
+@wrap_http_error
+def review_item(mpt_client: MPTClient, item_id: str) -> None:
+    response = mpt_client.post(f"/items/{item_id}/review")
+    response.raise_for_status()
+
+
+@wrap_http_error
+def publish_item(mpt_client: MPTClient, item_id: str) -> None:
+    response = mpt_client.post(f"/items/{item_id}/publish")
+    response.raise_for_status()
+
+
 @cache
 @wrap_http_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:

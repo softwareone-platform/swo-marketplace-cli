@@ -11,8 +11,10 @@ from swo.mpt.cli.core.mpt.flows import get_products
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
 from swo.mpt.cli.core.mpt.models import Product as MPTProduct
 from swo.mpt.cli.core.products.flows import (
+    ProductAction,
     check_file_exists,
     check_product_definition,
+    check_product_exists,
     get_definition_file,
     sync_product_definition,
 )
@@ -77,6 +79,14 @@ def sync_product(
             help="Do not sync Product Definition. Check the file consistency only.",
         ),
     ] = False,
+    force_create: Annotated[
+        bool,
+        typer.Option(
+            "--force-create",
+            "-f",
+            help="Force create product even if the Product ID exists in the SWO Platform.",
+        ),
+    ] = False,
 ):
     """
     Sync product to the environment
@@ -104,15 +114,36 @@ def sync_product(
         mpt_client = client_from_account(active_account)
         product_stats = ProductStatsCollector()
 
-        _ = typer.confirm(
-            f"Do you want to create product for {active_account.id} ({active_account.name})?",
-            abort=True,
-        )
+        product = check_product_exists(mpt_client, product_definition_path)
+        if product and not force_create:
+            _ = typer.confirm(
+                f"Do you want to update product {product.id} ({product.name}) "
+                f"for account {active_account.id} ({active_account.name})? "
+                f"To create new use --force-create or -f options.",
+                abort=True,
+            )
+            console.print("Only Items updated is supported now.")
+            action = ProductAction.UPDATE
+        elif product and force_create:
+            _ = typer.confirm(
+                f"Product {product.id} ({product.name}) for account "
+                f"{active_account.id} ({active_account.name}) exists. Do you want to create new?",
+                abort=True,
+            )
+            action = ProductAction.CREATE
+        elif not product:
+            _ = typer.confirm(
+                f"Do you want to create new product for account "
+                f"{active_account.id} ({active_account.name})?",
+                abort=True,
+            )
+            action = ProductAction.CREATE
 
         with console.status("Syncing product definition...") as status:
             product_stats, product = sync_product_definition(
                 mpt_client,
                 product_definition_path,
+                action,
                 product_stats,
                 status,
             )
@@ -137,6 +168,7 @@ def _product_stats_table(stats: ProductStatsCollector) -> Table:
     table.add_column("Total")
     table.add_column("Synced")
     table.add_column("Errors")
+    table.add_column("Skipped")
 
     return table
 
@@ -148,6 +180,7 @@ def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
             f"[blue]{tab_stats["total"]}",
             f"[green]{tab_stats["synced"]}",
             f"[red bold]{tab_stats["error"]}",
+            f"[white]{tab_stats["skipped"]}",
         )
 
     return table
