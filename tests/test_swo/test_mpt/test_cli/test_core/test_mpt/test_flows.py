@@ -12,6 +12,8 @@ from swo.mpt.cli.core.mpt.flows import (
     create_template,
     get_products,
     get_token,
+    publish_item,
+    review_item,
     search_uom_by_name,
 )
 from swo.mpt.cli.core.mpt.models import (
@@ -371,3 +373,57 @@ def test_create_template_400_exception(requests_mocker, product, mpt_client):
         create_template(mpt_client, product, {"name": "Template Name"})
 
     assert "error for exception" in str(e.value)
+
+
+def test_review_item(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/review",
+        ),
+        status=200,
+    )
+
+    review_item(mpt_client, "ITM-1234-1234")
+
+
+def test_review_exception_500(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/review",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        review_item(mpt_client, "ITM-1234-1234")
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_publish_item(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/publish",
+        ),
+        status=200,
+    )
+
+    publish_item(mpt_client, "ITM-1234-1234")
+
+
+def test_publish_exception_500(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/publish",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        publish_item(mpt_client, "ITM-1234-1234")
+
+    assert "Internal Server Error" in str(e.value)

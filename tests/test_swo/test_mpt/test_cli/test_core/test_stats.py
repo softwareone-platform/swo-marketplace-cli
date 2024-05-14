@@ -1,8 +1,8 @@
-from swo.mpt.cli.core.stats import StatsCollector
+from swo.mpt.cli.core.stats import ErrorMessagesCollector
 
 
 def test_stats_add_msg():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats.add_msg("Test", "Test Item", "test message")
 
@@ -10,20 +10,20 @@ def test_stats_add_msg():
 
 
 def test_status_is_empty():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     assert stats.is_empty()
 
 
 def test_status_is_not_empty():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
     stats.add_msg("Test", "Test Item", "test message")
 
     assert not stats.is_empty()
 
 
 def test_stats_add_one_more_msg():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats.add_msg("Test", "Test Item", "test message")
     stats.add_msg("Test", "Test Item", "new message")
@@ -32,7 +32,7 @@ def test_stats_add_one_more_msg():
 
 
 def test_stats_str():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats.add_msg("Test", "Test Item", "test message")
     stats.add_msg("Test", "Test Item", "new message")
@@ -41,7 +41,7 @@ def test_stats_str():
 
 
 def test_stats_str_with_empty_item():
-    stats = StatsCollector()
+    stats = ErrorMessagesCollector()
 
     stats.add_msg("Test", "Test Item", "test message")
     stats.add_msg("Test", "", "new message")
