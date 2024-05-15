@@ -15,6 +15,7 @@ from swo.mpt.cli.core.mpt.flows import (
     publish_item,
     review_item,
     search_uom_by_name,
+    update_item,
 )
 from swo.mpt.cli.core.mpt.models import (
     Item,
@@ -425,5 +426,34 @@ def test_publish_exception_500(requests_mocker, mpt_client):
 
     with pytest.raises(MPTAPIError) as e:
         publish_item(mpt_client, "ITM-1234-1234")
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_update_item(requests_mocker, mpt_client):
+    items_json = {"externalIds": {"operations": "erp-id"}}
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234",
+        ),
+        status=200,
+        match=[matchers.json_params_matcher(items_json)]
+    )
+
+    update_item(mpt_client, "ITM-1234-1234", items_json)
+
+
+def test_update_item_exception_500(requests_mocker, mpt_client):
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        update_item(mpt_client, "ITM-1234-1234", {})
 
     assert "Internal Server Error" in str(e.value)

@@ -164,7 +164,7 @@ def list_accounts(
     console.print(table)
 
 
-def get_active_account():
+def get_active_account() -> Account:
     """
     Check for file and create current active account
     """

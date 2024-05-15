@@ -762,6 +762,7 @@ def test_sync_product(
     template,
     parameter,
     another_parameter,
+    active_vendor_account,
 ):
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
@@ -796,7 +797,12 @@ def test_sync_product(
 
     stats = ProductStatsCollector()
     sync_product_definition(
-        mpt_client, new_product_file, ProductAction.CREATE, stats, console.status("")
+        mpt_client,
+        new_product_file,
+        ProductAction.CREATE,
+        active_vendor_account,
+        stats,
+        console.status(""),
     )
 
     assert parameter_group_mock.call_count == 2
@@ -847,6 +853,7 @@ def test_sync_product_extra_columns(
     template,
     parameter,
     another_parameter,
+    active_vendor_account,
 ):
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
@@ -884,6 +891,7 @@ def test_sync_product_extra_columns(
         mpt_client,
         extra_column_product_file,
         ProductAction.CREATE,
+        active_vendor_account,
         stats,
         console.status(""),
     )
@@ -924,7 +932,9 @@ def test_sync_product_extra_columns(
     assert wb[constants.TAB_GENERAL]["B15"].value == product.id
 
 
-def test_sync_product_exception(mocker, mpt_client, new_product_file):
+def test_sync_product_exception(
+    mocker, mpt_client, new_product_file, active_vendor_account
+):
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_product",
         side_effect=MPTAPIError("Error", "Error"),
@@ -932,14 +942,21 @@ def test_sync_product_exception(mocker, mpt_client, new_product_file):
 
     stats = ProductStatsCollector()
     sync_product_definition(
-        mpt_client, new_product_file, ProductAction.CREATE, stats, console.status("")
+        mpt_client,
+        new_product_file,
+        ProductAction.CREATE,
+        active_vendor_account,
+        stats,
+        console.status(""),
     )
 
     wb = load_workbook(filename=str(new_product_file))
     assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"
 
 
-def test_sync_product_update_product(mocker, mpt_client, new_update_product_file):
+def test_sync_product_update_product(
+    mocker, mpt_client, new_update_product_file, active_vendor_account
+):
     review_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.review_item",
         return_value=None,
@@ -948,18 +965,106 @@ def test_sync_product_update_product(mocker, mpt_client, new_update_product_file
         "swo.mpt.cli.core.products.flows.publish_item",
         return_value=None,
     )
+    update_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.mpt_update_item",
+        return_value=None,
+    )
 
     stats = ProductStatsCollector()
     stats, _ = sync_product_definition(
         mpt_client,
         new_update_product_file,
         ProductAction.UPDATE,
+        active_vendor_account,
         stats,
         console.status(""),
     )
 
     review_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0001")
     publish_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0002")
+    update_mock.assert_called_once_with(
+        mpt_client,
+        "ITM-1213-3316-0003",
+        {
+            "description": "Description 2",
+            "externalIds": {
+                "vendor": "65AB123BASD"
+            },
+            "group": {
+                "id": "IGR-1213-3316-0002"
+            },
+            "name": "Customer",
+            "parameters": [],
+            "product": {
+                "id": "PRD-1213-3316"
+            },
+            "quantityNotApplicable": False,
+            "terms": {
+                "commitment": "1y",
+                "period": "1m"
+            },
+            "unit": {
+                "id": "UNT-1916"
+            }
+        },
+    )
+    assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
+
+
+def test_sync_product_update_product_operations(
+    mocker, mpt_client, new_update_product_file, active_operations_account
+):
+    review_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.review_item",
+        return_value=None,
+    )
+    publish_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.publish_item",
+        return_value=None,
+    )
+    update_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.mpt_update_item",
+        return_value=None,
+    )
+
+    stats = ProductStatsCollector()
+    stats, _ = sync_product_definition(
+        mpt_client,
+        new_update_product_file,
+        ProductAction.UPDATE,
+        active_operations_account,
+        stats,
+        console.status(""),
+    )
+
+    review_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0001")
+    publish_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0002")
+    update_mock.assert_called_once_with(
+        mpt_client,
+        "ITM-1213-3316-0003",
+        {
+            "description": "Description 2",
+            "externalIds": {
+                "operations": "NAV12345",
+            },
+            "group": {
+                "id": "IGR-1213-3316-0002"
+            },
+            "name": "Customer",
+            "parameters": [],
+            "product": {
+                "id": "PRD-1213-3316"
+            },
+            "quantityNotApplicable": False,
+            "terms": {
+                "commitment": "1y",
+                "period": "1m"
+            },
+            "unit": {
+                "id": "UNT-1916"
+            }
+        },
+    )
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
 
 
