@@ -33,8 +33,11 @@ def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
                 response_body = e.response.json()
 
                 msg = ""
-                for field, error in response_body["errors"].items():
-                    msg += f"{field}: {error[0]}\n"
+                if "errors" in response_body:
+                    for field, error in response_body["errors"].items():
+                        msg += f"{field}: {error[0]}\n"
+                else:
+                    msg = str(e.response.content)
             else:
                 msg = str(e.response.content)
 

@@ -12,6 +12,7 @@ from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.workbook import Workbook  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 from rich.status import Status
+from swo.mpt.cli.core.accounts.models import Account
 from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import (
@@ -25,6 +26,9 @@ from swo.mpt.cli.core.mpt.flows import (
     publish_item,
     review_item,
     search_uom_by_name,
+)
+from swo.mpt.cli.core.mpt.flows import (
+    update_item as mpt_update_item,
 )
 from swo.mpt.cli.core.mpt.models import (
     Item,
@@ -271,8 +275,8 @@ def to_parameter_json(
     return parameter_json
 
 
-def to_item_json(
-    product: Product,
+def to_item_create_json(
+    product_id: str,
     item_group_mapping: dict[str, ItemGroup],
     item_parameters_id_mapping: dict[str, Parameter],
     values: list[SheetValue],
@@ -290,17 +294,31 @@ def to_item_json(
     excel_group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
     group = item_group_mapping[excel_group_id]
 
-    return {
+    return _to_item_json(product_id, group.id, values, parameters)
+
+
+def to_item_update_json(
+    product_id: str, values: list[SheetValue], is_operations: bool
+) -> dict:
+    group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
+    return _to_item_json(product_id, group_id, values, [], is_operations)
+
+
+def _to_item_json(
+    product_id: str,
+    group_id: str,
+    values: list[SheetValue],
+    parameters: list[dict],
+    is_operations: bool = False,
+) -> dict:
+    item_json = {
         "name": find_value_for(constants.ITEMS_NAME, values)[2],
         "description": find_value_for(constants.ITEMS_DESCRIPTION, values)[2],
-        "externalIds": {
-            "vendor": find_value_for(constants.ITEMS_VENDOR_ITEM_ID, values)[2],
-        },
         "group": {
-            "id": group.id,
+            "id": group_id,
         },
         "product": {
-            "id": product.id,
+            "id": product_id,
         },
         "quantityNotApplicable": find_value_for(
             constants.ITEMS_QUANTITY_APPLICABLE, values
@@ -315,6 +333,17 @@ def to_item_json(
         },
         "parameters": parameters,
     }
+
+    if is_operations:
+        item_json["externalIds"] = {
+            "operations": find_value_for(constants.ITEMS_ERP_ITEM_ID, values)[2]
+        }
+    else:
+        item_json["externalIds"] = {
+            "vendor": find_value_for(constants.ITEMS_VENDOR_ITEM_ID, values)[2],
+        }
+
+    return item_json
 
 
 def to_template_json(
@@ -366,6 +395,7 @@ def sync_product_definition(
     mpt_client: MPTClient,
     definition_path: Path,
     action: ProductAction,
+    active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
@@ -375,7 +405,9 @@ def sync_product_definition(
     wb = load_workbook(filename=str(definition_path))
 
     if action == ProductAction.UPDATE:
-        stats, product = update_product_definition(mpt_client, wb, stats, status)
+        stats, product = update_product_definition(
+            mpt_client, wb, active_account, stats, status
+        )
     else:
         stats, product = create_product_definition(mpt_client, wb, stats, status)
 
@@ -527,6 +559,7 @@ def create_product_definition(
 def update_product_definition(
     mpt_client: MPTClient,
     wb: Workbook,
+    active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
@@ -545,6 +578,7 @@ def update_product_definition(
         items_ws,
         product_id,
         items,
+        active_account,
         stats,
         status,
     )
@@ -557,6 +591,7 @@ def update_items(
     ws: Worksheet,
     product_id: str,
     values: SheetValueGenerator,
+    active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
 ) -> None:
@@ -572,6 +607,11 @@ def update_items(
                 case ItemAction.PUBLISH:
                     publish_item(mpt_client, item_id)
                     stats.add_synced(ws.title)
+                case ItemAction.UPDATE:
+                    update_item(
+                        mpt_client, active_account, item_id, product_id, sheet_value
+                    )
+                    stats.add_synced(ws.title)
                 case _:
                     stats.add_skipped(ws.title)
         except Exception as e:
@@ -580,6 +620,19 @@ def update_items(
         finally:
             step_text = status_step_text(stats, ws.title)
             status.update(f"Syncing {ws.title}: {step_text}")
+
+
+def update_item(
+    mpt_client: MPTClient,
+    active_account: Account,
+    item_id: str,
+    product_id: str,
+    sheet_value: list[SheetValue],
+) -> None:
+    item_json = to_item_update_json(
+        product_id, sheet_value, active_account.type == "Operations"
+    )
+    mpt_update_item(mpt_client, item_id, item_json)
 
 
 def sync_parameters_groups(
@@ -740,8 +793,8 @@ def sync_items(
             item = create_item(
                 mpt_client,
                 product,
-                to_item_json(
-                    product,
+                to_item_create_json(
+                    product.id,
                     items_groups_mapping,
                     item_parameters_id_mapping,
                     sheet_value,

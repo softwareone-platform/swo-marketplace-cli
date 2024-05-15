@@ -144,6 +144,7 @@ def sync_product(
                 mpt_client,
                 product_definition_path,
                 action,
+                active_account,
                 product_stats,
                 status,
             )

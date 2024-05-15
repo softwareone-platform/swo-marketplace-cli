@@ -252,6 +252,30 @@ def another_expected_account():
 
 
 @pytest.fixture()
+def active_vendor_account():
+    return CLIAccount(
+        id="ACC-12341",
+        name="Account 1",
+        type="Vendor",
+        token="TKN-0000-0000-0001:secret 1",
+        environment="https://example.com",
+        is_active=True,
+    )
+
+
+@pytest.fixture()
+def active_operations_account():
+    return CLIAccount(
+        id="ACC-12341",
+        name="Account 1",
+        type="Operations",
+        token="TKN-0000-0000-0001:secret 1",
+        environment="https://example.com",
+        is_active=True,
+    )
+
+
+@pytest.fixture()
 def product_file_root():
     return Path("tests/product_files")
 
