@@ -15,6 +15,8 @@ from .models import (
     Meta,
     Parameter,
     ParameterGroup,
+    Pricelist,
+    PricelistItem,
     Product,
     Template,
     Token,
@@ -176,3 +178,64 @@ def create_template(
     response.raise_for_status()
 
     return Template.model_validate(response.json())
+
+
+@wrap_http_error
+def get_pricelist(mpt_client: MPTClient, pricelist_id: str) -> Pricelist:
+    response = mpt_client.get(f"/price-lists/{pricelist_id}")
+    response.raise_for_status()
+
+    return Pricelist.model_validate(response.json())
+
+
+@wrap_http_error
+def create_pricelist(mpt_client: MPTClient, pricelist_json: dict) -> Pricelist:
+    response = mpt_client.post("/price-lists", json=pricelist_json)
+    response.raise_for_status()
+
+    return Pricelist.model_validate(response.json())
+
+
+@wrap_http_error
+def update_pricelist(
+    mpt_client: MPTClient, pricelist_id: str, pricelist_json: dict
+) -> Pricelist:
+    response = mpt_client.put(f"price-lists/{pricelist_id}", json=pricelist_json)
+    response.raise_for_status()
+
+    return Pricelist.model_validate(response.json())
+
+
+@wrap_http_error
+def get_pricelist_item(
+    mpt_client: MPTClient, pricelist_id: str, vendor_id: str
+) -> PricelistItem:
+    response = mpt_client.get(
+        f"price-lists/{pricelist_id}/items?item.externalIds.vendor={vendor_id}&limit=1&offset=0"
+    )
+    response.raise_for_status()
+
+    data = response.json()["data"]
+    if not data:
+        raise MPTAPIError(
+            f"Pricelist Item by Item Vendor ID '{vendor_id}' is not found.",
+            "404 not found",
+        )
+
+    return PricelistItem.model_validate(data[0])
+
+
+@wrap_http_error
+def update_pricelist_item(
+    mpt_client: MPTClient,
+    pricelist_id: str,
+    pricelist_item_id: str,
+    pricelist_item_json: dict,
+) -> PricelistItem:
+    response = mpt_client.put(
+        f"price-lists/{pricelist_id}/items/{pricelist_item_id}",
+        json=pricelist_item_json,
+    )
+    response.raise_for_status()
+
+    return PricelistItem.model_validate(response.json())

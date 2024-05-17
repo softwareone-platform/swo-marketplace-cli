@@ -987,25 +987,14 @@ def test_sync_product_update_product(
         "ITM-1213-3316-0003",
         {
             "description": "Description 2",
-            "externalIds": {
-                "vendor": "65AB123BASD"
-            },
-            "group": {
-                "id": "IGR-1213-3316-0002"
-            },
+            "externalIds": {"vendor": "65AB123BASD"},
+            "group": {"id": "IGR-1213-3316-0002"},
             "name": "Customer",
             "parameters": [],
-            "product": {
-                "id": "PRD-1213-3316"
-            },
+            "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {
-                "commitment": "1y",
-                "period": "1m"
-            },
-            "unit": {
-                "id": "UNT-1916"
-            }
+            "terms": {"commitment": "1y", "period": "1m"},
+            "unit": {"id": "UNT-1916"},
         },
     )
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
@@ -1047,22 +1036,13 @@ def test_sync_product_update_product_operations(
             "externalIds": {
                 "operations": "NAV12345",
             },
-            "group": {
-                "id": "IGR-1213-3316-0002"
-            },
+            "group": {"id": "IGR-1213-3316-0002"},
             "name": "Customer",
             "parameters": [],
-            "product": {
-                "id": "PRD-1213-3316"
-            },
+            "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {
-                "commitment": "1y",
-                "period": "1m"
-            },
-            "unit": {
-                "id": "UNT-1916"
-            }
+            "terms": {"commitment": "1y", "period": "1m"},
+            "unit": {"id": "UNT-1916"},
         },
     )
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1

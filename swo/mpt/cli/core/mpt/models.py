@@ -61,3 +61,12 @@ class Uom(BaseModel):
 class Template(BaseModel):
     id: str
     name: str
+
+
+class Pricelist(BaseModel):
+    id: str
+
+
+class PricelistItem(BaseModel):
+    id: str
+    item: Item

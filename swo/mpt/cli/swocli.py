@@ -5,11 +5,13 @@ import typer
 from swo.mpt.cli.core.accounts import app as accounts_app
 from swo.mpt.cli.core.alias_group import AliasTyperGroup
 from swo.mpt.cli.core.console import console, show_banner
+from swo.mpt.cli.core.pricelists import app as pricelists_app
 from swo.mpt.cli.core.products import app as products_app
 
 app = typer.Typer(cls=AliasTyperGroup, callback=show_banner)
 app.add_typer(accounts_app, name="accounts")
 app.add_typer(products_app, name="products")
+app.add_typer(pricelists_app, name="pricelists")
 
 
 try:
