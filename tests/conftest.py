@@ -11,6 +11,8 @@ from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
     ParameterGroup,
+    Pricelist,
+    PricelistItem,
     Product,
     Template,
     Uom,
@@ -135,7 +137,7 @@ def mpt_parameter():
 @pytest.fixture()
 def mpt_item():
     return {
-        "id": "ITM-1234-1234",
+        "id": "ITM-1234-1234-0001",
         "name": "Item 1",
     }
 
@@ -153,6 +155,21 @@ def mpt_template():
     return {
         "id": "TPL-1234-1234",
         "name": "Template 1",
+    }
+
+
+@pytest.fixture()
+def mpt_pricelist():
+    return {
+        "id": "PRC-1234-1234",
+    }
+
+
+@pytest.fixture()
+def mpt_pricelist_item(mpt_item):
+    return {
+        "id": "PRI-1234-1234",
+        "item": mpt_item,
     }
 
 
@@ -188,7 +205,7 @@ def another_parameter():
 
 @pytest.fixture()
 def item():
-    return Item(id="ITM-1234-1234-0001", name="Item")
+    return Item(id="ITM-1234-1234-0001", name="Item 1")
 
 
 @pytest.fixture()
@@ -199,6 +216,16 @@ def uom():
 @pytest.fixture()
 def template():
     return Template(id="TPL-0000-0000-0001", name="Template")
+
+
+@pytest.fixture()
+def pricelist():
+    return Pricelist(id="PRC-1234-1234")
+
+
+@pytest.fixture()
+def pricelist_item(item):
+    return PricelistItem(id="PRI-1234-1234", item=item)
 
 
 @pytest.fixture()
@@ -356,3 +383,19 @@ def mock_sync_product(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
     mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)
+
+
+@pytest.fixture()
+def pricelist_file_root():
+    return Path("tests/pricelist_files")
+
+
+@pytest.fixture()
+def pricelist_file_path(pricelist_file_root):
+    return pricelist_file_root / "PRC-1234-1234-1234.xlsx"
+
+
+@pytest.fixture()
+def pricelist_new_file(tmp_path, pricelist_file_path):
+    shutil.copyfile(pricelist_file_path, tmp_path / "PRC-1234-1234-1234-copied.xlsx")
+    return tmp_path / "PRC-1234-1234-1234-copied.xlsx"

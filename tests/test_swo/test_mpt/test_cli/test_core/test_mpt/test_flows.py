@@ -8,14 +8,19 @@ from swo.mpt.cli.core.mpt.flows import (
     create_item_group,
     create_parameter,
     create_parameter_group,
+    create_pricelist,
     create_product,
     create_template,
+    get_pricelist,
+    get_pricelist_item,
     get_products,
     get_token,
     publish_item,
     review_item,
     search_uom_by_name,
     update_item,
+    update_pricelist,
+    update_pricelist_item,
 )
 from swo.mpt.cli.core.mpt.models import (
     Item,
@@ -438,7 +443,7 @@ def test_update_item(requests_mocker, mpt_client):
             "/items/ITM-1234-1234",
         ),
         status=200,
-        match=[matchers.json_params_matcher(items_json)]
+        match=[matchers.json_params_matcher(items_json)],
     )
 
     update_item(mpt_client, "ITM-1234-1234", items_json)
@@ -455,5 +460,188 @@ def test_update_item_exception_500(requests_mocker, mpt_client):
 
     with pytest.raises(MPTAPIError) as e:
         update_item(mpt_client, "ITM-1234-1234", {})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_get_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234",
+        ),
+        json=mpt_pricelist,
+    )
+
+    returned_pricelist = get_pricelist(mpt_client, "PRC-1234-1234")
+
+    assert returned_pricelist == pricelist
+
+
+def test_get_pricelist_exception(requests_mocker, mpt_client):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234",
+        ),
+        status=404,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        get_pricelist(mpt_client, "PRC-1234-1234")
+
+    assert "Not Found" in str(e.value)
+
+
+def test_create_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists",
+        ),
+        json=mpt_pricelist,
+        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+    )
+
+    returned_pricelist = create_pricelist(mpt_client, {"id": "PRC-1234-1234"})
+
+    assert returned_pricelist == pricelist
+
+
+def test_create_pricelist_exception(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists",
+        ),
+        status=500,
+        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        create_pricelist(mpt_client, {"id": "PRC-1234-1234"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_update_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234",
+        ),
+        json=mpt_pricelist,
+        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+    )
+
+    returned_pricelist = update_pricelist(
+        mpt_client, "PRC-1234-1234", {"id": "PRC-1234-1234"}
+    )
+
+    assert returned_pricelist == pricelist
+
+
+def test_update_pricelist_exception(requests_mocker, mpt_client):
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234",
+        ),
+        status=500,
+        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        update_pricelist(mpt_client, "PRC-1234-1234", {"id": "PRC-1234-1234"})
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_get_pricelist_item(
+    requests_mocker,
+    mpt_client,
+    mpt_pricelist_item,
+    pricelist_item,
+    wrap_to_mpt_list_response,
+):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+        ),
+        json=wrap_to_mpt_list_response([mpt_pricelist_item]),
+    )
+
+    returned_pricelist_item = get_pricelist_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert returned_pricelist_item == pricelist_item
+
+
+def test_get_pricelist_item_exception(requests_mocker, mpt_client):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        get_pricelist_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_get_pricelist_item_not_found(
+    requests_mocker,
+    mpt_client,
+    wrap_to_mpt_list_response,
+):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+        ),
+        json=wrap_to_mpt_list_response([]),
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        get_pricelist_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert "is not found." in str(e.value)
+
+
+def test_update_pricelist_item(
+    requests_mocker, mpt_client, mpt_pricelist_item, pricelist_item
+):
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234/items/PRI-1234-1234",
+        ),
+        json=mpt_pricelist_item,
+        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+    )
+
+    returned_pricelist_item = update_pricelist_item(
+        mpt_client, "PRC-1234-1234", "PRI-1234-1234", {"id": "PRC-1234-1234"}
+    )
+
+    assert returned_pricelist_item == pricelist_item
+
+
+def test_update_pricelist_item_exception(requests_mocker, mpt_client):
+    requests_mocker.put(
+        urljoin(
+            mpt_client.base_url,
+            "/price-lists/PRC-1234-1234/items/PRI-1234-1234",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        update_pricelist_item(
+            mpt_client, "PRC-1234-1234", "PRI-1234-1234", {"id": "PRC-1234-1234"}
+        )
 
     assert "Internal Server Error" in str(e.value)

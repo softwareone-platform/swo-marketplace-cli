@@ -7,8 +7,6 @@ from pathlib import Path
 from typing import Optional, TypeAlias, TypeVar
 
 from openpyxl import load_workbook  # type: ignore
-from openpyxl.utils import get_column_letter  # type: ignore
-from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.workbook import Workbook  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 from rich.status import Status
@@ -43,6 +41,7 @@ from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     SheetValue,
     SheetValueGenerator,
+    add_or_create_error,
     find_first,
     find_value_for,
     find_values_by_pattern,
@@ -356,28 +355,6 @@ def to_template_json(
         "content": find_value_for(constants.TEMPLATES_CONTENT, values)[2],
         "default": find_value_for(constants.TEMPLATES_DEFAULT, values)[2] == "True",
     }
-
-
-def add_or_create_error(
-    ws: Worksheet, sheet_value: list[SheetValue], exception: Exception
-) -> Worksheet:
-    column = find_first(
-        lambda c: c[1].value == constants.ERROR_COLUMN_NAME,
-        enumerate(ws["1"]),
-    )
-
-    if column:
-        index, _ = column
-        column_letter = get_column_letter(index + 1)
-    else:
-        column_letter = get_column_letter(ws.max_column + 1)
-        ws[f"{column_letter}1"] = constants.ERROR_COLUMN_NAME
-
-    index, _, _ = sheet_value[0]
-    row_number = coordinate_from_string(index)[1]
-    ws[f"{column_letter}{row_number}"] = str(exception)
-
-    return ws
 
 
 def status_step_text(stats: ProductStatsCollector, tab_name: str) -> str:

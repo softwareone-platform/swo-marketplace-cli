@@ -1,6 +1,8 @@
 import re
 from typing import Any, Generator, Pattern, TypeAlias
 
+from openpyxl.utils import get_column_letter  # type: ignore
+from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
 
 SheetValue: TypeAlias = tuple[str, str, Any]
@@ -132,3 +134,25 @@ def set_value(
         )
         for index, column, old_value in values
     ]
+
+
+def add_or_create_error(
+    ws: Worksheet, sheet_value: list[SheetValue], exception: Exception
+) -> Worksheet:
+    column = find_first(
+        lambda c: c[1].value == "Error",
+        enumerate(ws["1"]),
+    )
+
+    if column:
+        index, _ = column
+        column_letter = get_column_letter(index + 1)
+    else:
+        column_letter = get_column_letter(ws.max_column + 1)
+        ws[f"{column_letter}1"] = "Error"
+
+    index, _, _ = sheet_value[0]
+    row_number = coordinate_from_string(index)[1]
+    ws[f"{column_letter}{row_number}"] = str(exception)
+
+    return ws

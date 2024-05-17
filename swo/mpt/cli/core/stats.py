@@ -59,31 +59,10 @@ class ErrorMessagesCollector:
         return msg
 
 
-class ProductStatsCollector:
-    def __init__(self) -> None:
-        self.general: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.items_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.agreements_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.item_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.request_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.subscription_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.items: Results = copy.deepcopy(DEFAULT_RESULTS)
-        self.templates: Results = copy.deepcopy(DEFAULT_RESULTS)
-
+class StatsCollector:
+    def __init__(self, tabs: dict[str, Results]) -> None:
         self.__has_error = False
-
-        self.__tab_aliases = {
-            "General": self.general,
-            "Parameters Groups": self.parameters_groups,
-            "Items Groups": self.items_groups,
-            "Agreements Parameters": self.agreements_parameters,
-            "Item Parameters": self.item_parameters,
-            "Request Parameters": self.request_parameters,
-            "Subscription Parameters": self.subscription_parameters,
-            "Items": self.items,
-            "Templates": self.templates,
-        }
+        self.__tab_aliases = tabs
 
     def add_error(self, tab_name: str) -> None:
         self.__tab_aliases[tab_name]["error"] += 1
@@ -105,3 +84,43 @@ class ProductStatsCollector:
     @property
     def is_error(self) -> bool:
         return self.__has_error
+
+
+class ProductStatsCollector(StatsCollector):
+    def __init__(self) -> None:
+        general: Results = copy.deepcopy(DEFAULT_RESULTS)
+        parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
+        items_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
+        agreements_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        item_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        request_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        subscription_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        items: Results = copy.deepcopy(DEFAULT_RESULTS)
+        templates: Results = copy.deepcopy(DEFAULT_RESULTS)
+
+        tabs = {
+            "General": general,
+            "Parameters Groups": parameters_groups,
+            "Items Groups": items_groups,
+            "Agreements Parameters": agreements_parameters,
+            "Item Parameters": item_parameters,
+            "Request Parameters": request_parameters,
+            "Subscription Parameters": subscription_parameters,
+            "Items": items,
+            "Templates": templates,
+        }
+
+        super().__init__(tabs)
+
+
+class PricelistStatsCollector(StatsCollector):
+    def __init__(self) -> None:
+        general: Results = copy.deepcopy(DEFAULT_RESULTS)
+        price_items: Results = copy.deepcopy(DEFAULT_RESULTS)
+
+        tabs = {
+            "General": general,
+            "Price Items": price_items,
+        }
+
+        super().__init__(tabs)
