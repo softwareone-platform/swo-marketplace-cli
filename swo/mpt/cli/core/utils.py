@@ -4,6 +4,7 @@ from typing import Any, Generator, Pattern, TypeAlias
 from openpyxl.utils import get_column_letter  # type: ignore
 from openpyxl.utils.cell import coordinate_from_string  # type: ignore
 from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
+from swo.mpt.cli.core.stats import StatsCollector
 
 SheetValue: TypeAlias = tuple[str, str, Any]
 SheetValueGenerator: TypeAlias = Generator[list[SheetValue], None, None]
@@ -156,3 +157,14 @@ def add_or_create_error(
     ws[f"{column_letter}{row_number}"] = str(exception)
 
     return ws
+
+
+def status_step_text(stats: StatsCollector, tab_name: str) -> str:
+    results = stats.tabs[tab_name]
+
+    return (
+        f"[green]{results['synced']}[/green] / "
+        f"[red bold]{results['error']}[/red bold] / "
+        f"[white bold]{results['skipped']}[/white bold] / "
+        f"[blue]{results['total']}[/blue]"
+    )

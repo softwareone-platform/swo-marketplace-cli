@@ -256,7 +256,7 @@ def test_create_parameter_exception(requests_mocker, mpt_client, product):
     assert "Internal Server Error" in str(e.value)
 
 
-def test_create_item(requests_mocker, mpt_client, product, mpt_item):
+def test_create_item(requests_mocker, mpt_client, mpt_item):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
@@ -266,12 +266,12 @@ def test_create_item(requests_mocker, mpt_client, product, mpt_item):
         match=[matchers.json_params_matcher({"name": "Item Name"})],
     )
 
-    group = create_item(mpt_client, product, {"name": "Item Name"})
+    group = create_item(mpt_client, {"name": "Item Name"})
 
     assert group == Item.model_validate(mpt_item)
 
 
-def test_create_item_exception(requests_mocker, product, mpt_client):
+def test_create_item_exception(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
@@ -281,7 +281,7 @@ def test_create_item_exception(requests_mocker, product, mpt_client):
     )
 
     with pytest.raises(MPTAPIError) as e:
-        create_item(mpt_client, product, {"name": "Item Name"})
+        create_item(mpt_client, {"name": "Item Name"})
 
     assert "Internal Server Error" in str(e.value)
 

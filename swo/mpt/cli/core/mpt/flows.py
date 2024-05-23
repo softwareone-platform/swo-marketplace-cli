@@ -129,7 +129,7 @@ def create_parameter(
 
 
 @wrap_http_error
-def create_item(mpt_client: MPTClient, product: Product, item_json: dict) -> Item:
+def create_item(mpt_client: MPTClient, item_json: dict) -> Item:
     response = mpt_client.post("/items", json=item_json)
     response.raise_for_status()
 

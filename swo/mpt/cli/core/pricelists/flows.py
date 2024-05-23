@@ -23,6 +23,7 @@ from swo.mpt.cli.core.utils import (
     find_value_for,
     get_values_for_general,
     get_values_for_table,
+    status_step_text,
 )
 
 
@@ -79,33 +80,34 @@ def sync_pricelist(
     stats: PricelistStatsCollector,
     console: Console,
 ) -> tuple[PricelistStatsCollector, Optional[Pricelist]]:
-    general_ws = wb[constants.TAB_GENERAL]
-    general_values = get_values_for_general(general_ws, constants.GENERAL_FIELDS)
+    with console.status("Sync Pricelist..."):
+        general_ws = wb[constants.TAB_GENERAL]
+        general_values = get_values_for_general(general_ws, constants.GENERAL_FIELDS)
 
-    if active_account.type == "Operations":
-        pricelist_json = to_operations_pricelist_json(general_values)
-    else:
-        pricelist_json = to_vendor_pricelist_json(general_values)
-
-    try:
-        if action == PricelistAction.CREATE:
-            pricelist = create_pricelist(
-                mpt_client,
-                pricelist_json,
-            )
+        if active_account.type == "Operations":
+            pricelist_json = to_operations_pricelist_json(general_values)
         else:
-            pricelist_id = find_value_for(
-                constants.GENERAL_PRICELIST_ID, general_values
-            )[2]
-            pricelist = update_pricelist(
-                mpt_client,
-                pricelist_id,
-                pricelist_json,
-            )
-    except Exception as e:
-        add_or_create_error(general_ws, general_values, e)
-        stats.add_error(constants.TAB_GENERAL)
-        return stats, None
+            pricelist_json = to_vendor_pricelist_json(general_values)
+
+        try:
+            if action == PricelistAction.CREATE:
+                pricelist = create_pricelist(
+                    mpt_client,
+                    pricelist_json,
+                )
+            else:
+                pricelist_id = find_value_for(
+                    constants.GENERAL_PRICELIST_ID, general_values
+                )[2]
+                pricelist = update_pricelist(
+                    mpt_client,
+                    pricelist_id,
+                    pricelist_json,
+                )
+        except Exception as e:
+            add_or_create_error(general_ws, general_values, e)
+            stats.add_error(constants.TAB_GENERAL)
+            return stats, None
 
     index, _, _ = find_value_for(constants.GENERAL_PRICELIST_ID, general_values)
     general_ws[index] = pricelist.id
@@ -127,8 +129,13 @@ def to_operations_priceitem_json(values: list[SheetValue]) -> dict:
     status = find_value_for(constants.PRICELIST_ITEMS_STATUS, values)[2]
     priceitem_json = {
         "markup": find_value_for(constants.PRICELIST_ITEMS_MARKUP, values)[2],
-        "unitSP": find_value_for(constants.PRICELIST_ITEMS_UNIT_SP, values)[2],
+        "unitLP": find_value_for(constants.PRICELIST_ITEMS_UNIT_LP, values)[2],
+        "unitPP": find_value_for(constants.PRICELIST_ITEMS_UNIT_PP, values)[2],
     }
+
+    unit_sp = find_value_for(constants.PRICELIST_ITEMS_UNIT_SP, values)
+    if unit_sp:
+        priceitem_json["unitSP"] = unit_sp[2]
 
     if status != "Draft":
         priceitem_json["status"] = status
@@ -152,37 +159,43 @@ def sync_pricelist_items(
     stats: PricelistStatsCollector,
     console: Console,
 ) -> PricelistStatsCollector:
-    values = get_values_for_table(ws, constants.PRICELIST_ITEMS_FIELDS)
+    with console.status("Sync Pricelist Items...") as status:
+        values = get_values_for_table(ws, constants.PRICELIST_ITEMS_FIELDS)
 
-    for sheet_value in values:
-        try:
-            action = PricelistItemAction(
-                find_value_for(constants.PRICELIST_ITEMS_ACTION, sheet_value)[2]
-            )
+        for sheet_value in values:
+            try:
+                action = PricelistItemAction(
+                    find_value_for(constants.PRICELIST_ITEMS_ACTION, sheet_value)[2]
+                )
 
-            if action != PricelistItemAction.UPDATE:
-                stats.add_skipped(constants.TAB_PRICE_ITEMS)
-                continue
+                if action != PricelistItemAction.UPDATE:
+                    stats.add_skipped(constants.TAB_PRICE_ITEMS)
+                    continue
 
-            vendor_id = find_value_for(
-                constants.PRICELIST_ITEMS_ITEM_VENDOR_ID, sheet_value
-            )[2]
-            pricelist_item = get_pricelist_item(mpt_client, pricelist_id, vendor_id)
+                vendor_id = find_value_for(
+                    constants.PRICELIST_ITEMS_ITEM_VENDOR_ID, sheet_value
+                )[2]
+                pricelist_item = get_pricelist_item(mpt_client, pricelist_id, vendor_id)
 
-            if active_account.type == "Operations":
-                pricelist_item_json = to_operations_priceitem_json(sheet_value)
-            else:
-                pricelist_item_json = to_vendor_priceitem_json(sheet_value)
+                if active_account.type == "Operations":
+                    pricelist_item_json = to_operations_priceitem_json(sheet_value)
+                else:
+                    pricelist_item_json = to_vendor_priceitem_json(sheet_value)
 
-            pricelist_item = update_pricelist_item(
-                mpt_client, pricelist_id, pricelist_item.id, pricelist_item_json
-            )
+                pricelist_item = update_pricelist_item(
+                    mpt_client, pricelist_id, pricelist_item.id, pricelist_item_json
+                )
 
-            index_id, _, _ = find_value_for(constants.PRICELIST_ITEMS_ID, sheet_value)
-            ws[index_id] = pricelist_item.id
-            stats.add_synced(constants.TAB_PRICE_ITEMS)
-        except Exception as e:
-            add_or_create_error(ws, sheet_value, e)
-            stats.add_error(constants.TAB_PRICE_ITEMS)
+                index_id, _, _ = find_value_for(
+                    constants.PRICELIST_ITEMS_ID, sheet_value
+                )
+                ws[index_id] = pricelist_item.id
+                stats.add_synced(constants.TAB_PRICE_ITEMS)
+            except Exception as e:
+                add_or_create_error(ws, sheet_value, e)
+                stats.add_error(constants.TAB_PRICE_ITEMS)
+            finally:
+                step_text = status_step_text(stats, ws.title)
+                status.update(f"Syncing {ws.title}: {step_text}")
 
     return stats
