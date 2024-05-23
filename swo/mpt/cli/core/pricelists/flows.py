@@ -134,7 +134,7 @@ def to_operations_priceitem_json(values: list[SheetValue]) -> dict:
     }
 
     unit_sp = find_value_for(constants.PRICELIST_ITEMS_UNIT_SP, values)
-    if unit_sp:
+    if unit_sp and unit_sp[2] is not None:
         priceitem_json["unitSP"] = unit_sp[2]
 
     if status != "Draft":

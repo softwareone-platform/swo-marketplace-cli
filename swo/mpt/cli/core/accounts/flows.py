@@ -16,7 +16,8 @@ def from_token(token: Token, environment: str) -> Account:
         id=token.account.id,
         name=token.account.name,
         type=token.account.type,
-        token=f"{token.id}:{token.token}",
+        token=token.token,
+        token_id=token.id,
         environment=environment,
         is_active=True,
     )

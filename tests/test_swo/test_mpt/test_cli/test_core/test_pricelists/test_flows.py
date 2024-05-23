@@ -324,7 +324,6 @@ def test_sync_pricelist_items_operations(
         pricelist_item.id,
         {
             "markup": 0.30,
-            "unitSP": 15.55,
             "unitLP": 10.28,
             "unitPP": 12.3,
         },

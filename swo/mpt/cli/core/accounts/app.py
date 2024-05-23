@@ -215,11 +215,20 @@ def _list_accounts(
             return ""
 
     def _wrap_token(account: Account, to_wrap_secret: bool) -> str:
-        token_id, token = account.token.split(":")
-        if to_wrap_secret:
-            token = f"{token[0:][:4]}*****{token[:4]}"
+        is_new_token = "idt:TKN-" in account.token
 
-        return f"{token_id}:{token}"
+        if is_new_token:
+            token = account.token
+        else:
+            token = f"{account.token_id}:{account.token}"
+
+        if to_wrap_secret:
+            if is_new_token:
+                token = f"{token[0:][:22]}*****{token[:4]}"
+            else:
+                token = f"{token[0:][:4]}*****{token[:4]}"
+
+        return token
 
     for account in accounts:
         table.add_row(
