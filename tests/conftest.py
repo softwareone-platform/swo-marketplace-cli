@@ -260,7 +260,8 @@ def expected_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="TKN-0000-0000-0001:secret 1",
+        token="secret 1",
+        token_id="TKN-0000-0000-0001",
         environment="https://example.com",
         is_active=True,
     )
@@ -272,7 +273,8 @@ def another_expected_account():
         id="ACC-12342",
         name="Account 2",
         type="Vendor",
-        token="TKN-0000-0000-0002:secret 2",
+        token="idt:TKN-0000-0000-0002:secret 2",
+        token_id="TKN-0000-0000-0002",
         environment="https://example.com",
         is_active=False,
     )
@@ -284,7 +286,8 @@ def active_vendor_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="TKN-0000-0000-0001:secret 1",
+        token="secret 1",
+        token_id="TKN-0000-0000-0001",
         environment="https://example.com",
         is_active=True,
     )
@@ -296,7 +299,21 @@ def active_operations_account():
         id="ACC-12341",
         name="Account 1",
         type="Operations",
-        token="TKN-0000-0000-0001:secret 1",
+        token="secret 1",
+        token_id="TKN-0000-0000-0001",
+        environment="https://example.com",
+        is_active=True,
+    )
+
+
+@pytest.fixture()
+def new_token_account():
+    return CLIAccount(
+        id="ACC-12341",
+        name="Account 1",
+        type="Vendor",
+        token="idt:TKN-0000-0000-0001:secret 1",
+        token_id="TKN-0000-0000-0001",
         environment="https://example.com",
         is_active=True,
     )

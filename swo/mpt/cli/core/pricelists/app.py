@@ -29,18 +29,19 @@ def sync_pricelists(
         ),
     ],
 ):
-    file_paths = []
-    for pricelist_path in pricelists_paths:
-        path = Path(pricelist_path)
+    with console.status("Fetching pricelist files..."):
+        file_paths = []
+        for pricelist_path in pricelists_paths:
+            path = Path(pricelist_path)
 
-        if path.is_file():
-            file_paths.append(pricelist_path)
-        elif path.is_dir():
-            file_paths.extend(glob(str(path / "*")))
-        else:
-            file_paths.extend(glob(pricelist_path))
+            if path.is_file():
+                file_paths.append(pricelist_path)
+            elif path.is_dir():
+                file_paths.extend(glob(str(path / "*")))
+            else:
+                file_paths.extend(glob(pricelist_path))
 
-    file_paths = list(filter(lambda p: p.endswith(".xlsx"), file_paths))
+        file_paths = list(filter(lambda p: p.endswith(".xlsx"), file_paths))
 
     if not len(file_paths):
         console.print(

@@ -1,5 +1,6 @@
 from urllib.parse import urljoin
 
+import pytest
 from swo.mpt.cli.core.mpt.client import MPTClient, client_from_account
 
 
@@ -37,10 +38,10 @@ def test_mpt_client_url_join_slash(requests_mocker):
     mpt_client.get("/commerce/orders/ORD-0000/fail")
 
 
-def test_mpt_client_from_client(expected_account):
+@pytest.mark.parametrize("account_fixture", ["expected_account", "new_token_account"])
+def test_mpt_client_from_client(request, account_fixture):
+    expected_account = request.getfixturevalue(account_fixture)
     mpt_client = client_from_account(expected_account)
 
-    _, token = expected_account.token.split(":")
-
     assert mpt_client.base_url == f"{expected_account.environment}/"
-    assert mpt_client.api_token == token
+    assert mpt_client.api_token == expected_account.token

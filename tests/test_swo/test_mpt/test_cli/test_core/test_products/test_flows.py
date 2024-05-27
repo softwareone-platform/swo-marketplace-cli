@@ -544,7 +544,6 @@ def test_sync_item(
     )
     assert item_mock.mock_calls[0].args == (
         mpt_client,
-        product,
         {
             "name": "Adobe PhotoKiosk",
             "description": "Description 1",
@@ -579,7 +578,6 @@ def test_sync_item(
     )
     assert item_mock.mock_calls[1].args == (
         mpt_client,
-        product,
         {
             "name": "Customer",
             "description": "Description 2",

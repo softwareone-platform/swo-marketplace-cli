@@ -50,6 +50,7 @@ from swo.mpt.cli.core.utils import (
     get_values_for_table,
     set_dict_value,
     set_value,
+    status_step_text,
 )
 
 T = TypeVar("T")
@@ -355,17 +356,6 @@ def to_template_json(
         "content": find_value_for(constants.TEMPLATES_CONTENT, values)[2],
         "default": find_value_for(constants.TEMPLATES_DEFAULT, values)[2] == "True",
     }
-
-
-def status_step_text(stats: ProductStatsCollector, tab_name: str) -> str:
-    results = stats.tabs[tab_name]
-
-    return (
-        f"[green]{results['synced']}[/green] / "
-        f"[red bold]{results['error']}[/red bold] / "
-        f"[white bold]{results['skipped']}[/white bold] / "
-        f"[blue]{results['total']}[/blue]"
-    )
 
 
 def sync_product_definition(
@@ -769,7 +759,6 @@ def sync_items(
             sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
             item = create_item(
                 mpt_client,
-                product,
                 to_item_create_json(
                     product.id,
                     items_groups_mapping,

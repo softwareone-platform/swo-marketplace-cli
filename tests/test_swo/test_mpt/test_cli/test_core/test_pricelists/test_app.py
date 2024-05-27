@@ -31,9 +31,7 @@ def test_sync_pricelists_particular_file(
         return_value=pricelist,
     )
 
-    result = runner.invoke(
-        app, ["sync", str(pricelist_new_file)], input="y\ny\n"
-    )
+    result = runner.invoke(app, ["sync", str(pricelist_new_file)], input="y\ny\n")
     assert result.exit_code == 0, result.stdout
     sync_pricelist.assert_called_once()
 
@@ -81,8 +79,6 @@ def test_sync_pricelists_create_file(
         return_value=None,
     )
 
-    result = runner.invoke(
-        app, ["sync", str(pricelist_new_file)], input="y\ny\n"
-    )
+    result = runner.invoke(app, ["sync", str(pricelist_new_file)], input="y\ny\n")
     assert result.exit_code == 0, result.stdout
     sync_pricelist.assert_called_once()
