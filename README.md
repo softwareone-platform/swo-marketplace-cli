@@ -10,3 +10,11 @@ Command line utility for SoftwareOne Marketplace Platform
 $ docker-compose build app_test
 $ docker-compose run --service-ports app_test
 ```
+
+# Command Line Interface
+To list all available commands use
+
+
+```
+mpt-cli --help
+```

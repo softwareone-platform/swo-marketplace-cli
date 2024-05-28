@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: 'Get the version'
+      id: get_version
+      run: echo  "VERSION=${GITHUB_REF/refs\/tags\//}" >> "$GITHUB_OUTPUT"
+
+    - name: Build and publish to PyPI
+      env:
+        PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+        PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+      run: |
+        poetry version ${{ steps.get_version.outputs.VERSION }}
+        poetry build
+        if [ "$(curl -s -o /dev/null -w '%{http_code}' https://pypi.org/pypi/mpt-cli/${{ steps.tag.outputs.result }}/json)" = "404" ]; then poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD; fi

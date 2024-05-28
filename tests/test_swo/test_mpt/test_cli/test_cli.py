@@ -29,4 +29,3 @@ def test_alias_group_error():
 def test_version():
     result = runner.invoke(app, ["--version"])
     assert result.exit_code == 0
-    assert "0.1.0" in result.stdout
