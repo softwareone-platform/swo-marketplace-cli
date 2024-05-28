@@ -1,6 +1,6 @@
 [tool.poetry]
-name = "swo-marketplace-cli"
-version = "0.1.0"
+name = "mpt-cli"
+version = "2.0.0"
 description = "Command line utility for SoftwareOne Marketplace Platform"
 authors = ["SoftwareOne AG"]
 license = "Apache-2.0 license"
@@ -8,6 +8,23 @@ packages = [
     { include = "swo" }
 ]
 readme = "README.md"
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities"
+]
+keywords = [
+    "fulfillment",
+    "command",
+    "line",
+    "interface",
+    "utility",
+    "cli",
+    "softwareone",
+    "marketplace",
+]
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4"
