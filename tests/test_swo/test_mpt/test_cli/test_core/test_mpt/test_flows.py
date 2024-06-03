@@ -18,6 +18,7 @@ from swo.mpt.cli.core.mpt.flows import (
     publish_item,
     review_item,
     search_uom_by_name,
+    unpublish_item,
     update_item,
     update_pricelist,
     update_pricelist_item,
@@ -431,6 +432,33 @@ def test_publish_exception_500(requests_mocker, mpt_client):
 
     with pytest.raises(MPTAPIError) as e:
         publish_item(mpt_client, "ITM-1234-1234")
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_unpublish_item(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/unpublish",
+        ),
+        status=200,
+    )
+
+    unpublish_item(mpt_client, "ITM-1234-1234")
+
+
+def test_unpublish_exception_500(requests_mocker, mpt_client):
+    requests_mocker.post(
+        urljoin(
+            mpt_client.base_url,
+            "/items/ITM-1234-1234/unpublish",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        unpublish_item(mpt_client, "ITM-1234-1234")
 
     assert "Internal Server Error" in str(e.value)
 

@@ -24,6 +24,7 @@ from swo.mpt.cli.core.mpt.flows import (
     publish_item,
     review_item,
     search_uom_by_name,
+    unpublish_item,
 )
 from swo.mpt.cli.core.mpt.flows import (
     update_item as mpt_update_item,
@@ -67,6 +68,7 @@ class ItemAction(enum.Enum):
     UPDATE = "update"
     REVIEW = "review"
     PUBLISH = "publish"
+    UNPUBLISH = "unpublish"
     SKIP = "-"
     SKIPPED = ""
 
@@ -573,6 +575,9 @@ def update_items(
                     stats.add_synced(ws.title)
                 case ItemAction.PUBLISH:
                     publish_item(mpt_client, item_id)
+                    stats.add_synced(ws.title)
+                case ItemAction.UNPUBLISH:
+                    unpublish_item(mpt_client, item_id)
                     stats.add_synced(ws.title)
                 case ItemAction.UPDATE:
                     update_item(

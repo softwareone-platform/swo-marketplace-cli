@@ -149,6 +149,12 @@ def publish_item(mpt_client: MPTClient, item_id: str) -> None:
 
 
 @wrap_http_error
+def unpublish_item(mpt_client: MPTClient, item_id: str) -> None:
+    response = mpt_client.post(f"/items/{item_id}/unpublish")
+    response.raise_for_status()
+
+
+@wrap_http_error
 def update_item(mpt_client, item_id: str, item_json: dict) -> None:
     response = mpt_client.put(f"/items/{item_id}", json=item_json)
     response.raise_for_status()
