@@ -967,6 +967,10 @@ def test_sync_product_update_product(
         "swo.mpt.cli.core.products.flows.mpt_update_item",
         return_value=None,
     )
+    unpublish_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.unpublish_item",
+        return_value=None,
+    )
 
     stats = ProductStatsCollector()
     stats, _ = sync_product_definition(
@@ -980,6 +984,7 @@ def test_sync_product_update_product(
 
     review_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0001")
     publish_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0002")
+    unpublish_mock.assert_called_once_with(mpt_client, "ITM-1213-3316-0005")
     update_mock.assert_called_once_with(
         mpt_client,
         "ITM-1213-3316-0003",
