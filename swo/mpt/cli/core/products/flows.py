@@ -22,6 +22,7 @@ from swo.mpt.cli.core.mpt.flows import (
     create_parameter_group,
     create_product,
     create_template,
+    get_item,
     get_products,
     publish_item,
     review_item,
@@ -568,23 +569,25 @@ def update_items(
     status: Status,
 ) -> None:
     for sheet_value in values:
-        action = find_value_for(constants.ITEMS_ACTION, sheet_value)[2]
-        item_id = find_value_for(constants.ITEMS_ID, sheet_value)[2]
-
         try:
+            action = ItemAction(find_value_for(constants.ITEMS_ACTION, sheet_value)[2])
+            if action not in (ItemAction.SKIP, ItemAction.SKIPPED):
+                item_vendor_id = find_value_for(constants.ITEMS_VENDOR_ITEM_ID, sheet_value)[2]
+                item = get_item(mpt_client, product_id, item_vendor_id)
+
             match ItemAction(action):
                 case ItemAction.REVIEW:
-                    review_item(mpt_client, item_id)
+                    review_item(mpt_client, item.id)
                     stats.add_synced(ws.title)
                 case ItemAction.PUBLISH:
-                    publish_item(mpt_client, item_id)
+                    publish_item(mpt_client, item.id)
                     stats.add_synced(ws.title)
                 case ItemAction.UNPUBLISH:
-                    unpublish_item(mpt_client, item_id)
+                    unpublish_item(mpt_client, item.id)
                     stats.add_synced(ws.title)
                 case ItemAction.UPDATE:
                     update_item(
-                        mpt_client, active_account, item_id, product_id, sheet_value
+                        mpt_client, active_account, item.id, product_id, sheet_value
                     )
                     stats.add_synced(ws.title)
                 case ItemAction.CREATE:
