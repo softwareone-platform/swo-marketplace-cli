@@ -5,6 +5,7 @@ import pytest
 from openpyxl import load_workbook
 from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
+from swo.mpt.cli.core.mpt.models import Item
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
     ProductAction,
@@ -22,6 +23,18 @@ from swo.mpt.cli.core.products.flows import (
 )
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import get_values_for_table
+
+
+@pytest.fixture()
+def items():
+    # see tests/product_files/PRD-1234-1234-1234-file-update.xlsx file
+    return [
+        Item(id="ITM-1213-3316-0001", name="Adobe PhotoKios"),
+        Item(id="ITM-1213-3316-0002", name="Customer"),
+        Item(id="ITM-1213-3316-0003", name="Customer"),
+        Item(id="ITM-1213-3316-0005", name="Customer"),
+        Item(id="ITM-1213-3316-0006", name="Customer"),
+    ]
 
 
 def test_get_definition_file():
@@ -958,7 +971,7 @@ def test_sync_product_update_product(
     new_update_product_file,
     active_vendor_account,
     uom,
-    item,
+    items,
 ):
     review_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.review_item",
@@ -976,9 +989,13 @@ def test_sync_product_update_product(
         "swo.mpt.cli.core.products.flows.unpublish_item",
         return_value=None,
     )
+    get_item_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.get_item",
+        side_effect=items,
+    )
     create_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.mpt_create_item",
-        return_value=item,
+        side_effect=items,
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
@@ -1024,6 +1041,7 @@ def test_sync_product_update_product(
             "externalIds": {"vendor": "65AB123BASD2"},
         },
     )
+    assert get_item_mock.call_count == 5
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
 
 
@@ -1033,7 +1051,7 @@ def test_sync_product_update_product_operations(
     new_update_product_file,
     active_operations_account,
     uom,
-    item,
+    items,
 ):
     review_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.review_item",
@@ -1051,9 +1069,13 @@ def test_sync_product_update_product_operations(
         "swo.mpt.cli.core.products.flows.unpublish_item",
         return_value=None,
     )
+    get_item_mock = mocker.patch(
+        "swo.mpt.cli.core.products.flows.get_item",
+        side_effect=items,
+    )
     create_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.mpt_create_item",
-        return_value=item,
+        side_effect=items,
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
@@ -1101,6 +1123,7 @@ def test_sync_product_update_product_operations(
             "externalIds": {"operations": "NAV123456"},
         },
     )
+    assert get_item_mock.call_count == 5
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
 
 

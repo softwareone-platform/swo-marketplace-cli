@@ -11,6 +11,7 @@ from swo.mpt.cli.core.mpt.flows import (
     create_pricelist,
     create_product,
     create_template,
+    get_item,
     get_pricelist,
     get_pricelist_item,
     get_products,
@@ -490,6 +491,60 @@ def test_update_item_exception_500(requests_mocker, mpt_client):
         update_item(mpt_client, "ITM-1234-1234", {})
 
     assert "Internal Server Error" in str(e.value)
+
+
+def test_get_item(
+    requests_mocker,
+    mpt_client,
+    mpt_item,
+    item,
+    wrap_to_mpt_list_response,
+):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+        ),
+        json=wrap_to_mpt_list_response([mpt_item]),
+    )
+
+    returned_item = get_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert returned_item == item
+
+
+def test_get_item_exception(requests_mocker, mpt_client):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+        ),
+        status=500,
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        get_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert "Internal Server Error" in str(e.value)
+
+
+def test_get_item_not_found(
+    requests_mocker,
+    mpt_client,
+    wrap_to_mpt_list_response,
+):
+    requests_mocker.get(
+        urljoin(
+            mpt_client.base_url,
+            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+        ),
+        json=wrap_to_mpt_list_response([]),
+    )
+
+    with pytest.raises(MPTAPIError) as e:
+        get_item(mpt_client, "PRC-1234-1234", "EXT1")
+
+    assert "is not found." in str(e.value)
 
 
 def test_get_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
