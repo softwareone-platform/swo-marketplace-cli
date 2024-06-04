@@ -394,7 +394,7 @@ def mock_sync_product(
             another_parameter,
         ],
     )
-    mocker.patch("swo.mpt.cli.core.products.flows.create_item", return_value=item)
+    mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template

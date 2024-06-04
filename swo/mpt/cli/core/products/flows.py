@@ -14,7 +14,9 @@ from swo.mpt.cli.core.accounts.models import Account
 from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import (
-    create_item,
+    create_item as mpt_create_item,
+)
+from swo.mpt.cli.core.mpt.flows import (
     create_item_group,
     create_parameter,
     create_parameter_group,
@@ -277,7 +279,7 @@ def to_parameter_json(
     return parameter_json
 
 
-def to_item_create_json(
+def to_item_sync_json(
     product_id: str,
     item_group_mapping: dict[str, ItemGroup],
     item_parameters_id_mapping: dict[str, Parameter],
@@ -299,10 +301,11 @@ def to_item_create_json(
     return _to_item_json(product_id, group.id, values, parameters)
 
 
-def to_item_update_json(
+def to_item_update_or_create_json(
     product_id: str, values: list[SheetValue], is_operations: bool
 ) -> dict:
     group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
+    # TODO: Add item parameter update
     return _to_item_json(product_id, group_id, values, [], is_operations)
 
 
@@ -584,6 +587,9 @@ def update_items(
                         mpt_client, active_account, item_id, product_id, sheet_value
                     )
                     stats.add_synced(ws.title)
+                case ItemAction.CREATE:
+                    create_item(mpt_client, active_account, product_id, ws, sheet_value)
+                    stats.add_synced(ws.title)
                 case _:
                     stats.add_skipped(ws.title)
         except Exception as e:
@@ -601,7 +607,7 @@ def update_item(
     product_id: str,
     sheet_value: list[SheetValue],
 ) -> None:
-    item_json = to_item_update_json(
+    item_json = to_item_update_or_create_json(
         product_id, sheet_value, active_account.type == "Operations"
     )
     mpt_update_item(mpt_client, item_id, item_json)
@@ -762,9 +768,9 @@ def sync_items(
     for sheet_value in values:
         try:
             sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
-            item = create_item(
+            item = mpt_create_item(
                 mpt_client,
-                to_item_create_json(
+                to_item_sync_json(
                     product.id,
                     items_groups_mapping,
                     item_parameters_id_mapping,
@@ -799,6 +805,34 @@ def sync_items(
             status.update(f"Syncing {ws.title}: {step_text}")
 
     return ws, id_mapping
+
+
+def create_item(
+    mpt_client: MPTClient,
+    active_account: Account,
+    product_id: str,
+    ws: Worksheet,
+    sheet_value: list[SheetValue],
+) -> None:
+    sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
+    item = mpt_create_item(
+        mpt_client,
+        to_item_update_or_create_json(
+            product_id,
+            sheet_value,
+            active_account.type == "Operations",
+        ),
+    )
+
+    id_index, _, sheet_id_value = find_value_for(constants.ID_COLUMN_NAME, sheet_value)
+
+    # TODO: refactor, should be done out of this function
+    ws[id_index] = item.id
+
+    uom_id_index, _, sheet_id_value = find_value_for(
+        constants.ITEMS_UNIT_ID, sheet_value
+    )
+    ws[uom_id_index] = sheet_id_value
 
 
 def setup_unit_of_measure(
