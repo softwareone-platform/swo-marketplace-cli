@@ -33,7 +33,6 @@ def items():
         Item(id="ITM-1213-3316-0002", name="Customer"),
         Item(id="ITM-1213-3316-0003", name="Customer"),
         Item(id="ITM-1213-3316-0005", name="Customer"),
-        Item(id="ITM-1213-3316-0006", name="Customer"),
     ]
 
 
@@ -1041,7 +1040,7 @@ def test_sync_product_update_product(
             "externalIds": {"vendor": "65AB123BASD2"},
         },
     )
-    assert get_item_mock.call_count == 5
+    assert get_item_mock.call_count == 4
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
 
 
@@ -1123,7 +1122,7 @@ def test_sync_product_update_product_operations(
             "externalIds": {"operations": "NAV123456"},
         },
     )
-    assert get_item_mock.call_count == 5
+    assert get_item_mock.call_count == 4
     assert stats.tabs[constants.TAB_ITEMS]["skipped"] == 1
 
 
