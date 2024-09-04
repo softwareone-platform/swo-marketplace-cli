@@ -84,7 +84,7 @@ def test_get_token_exception_more_than_one(
 
 def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_products):
     requests_mocker.get(
-        urljoin(mpt_client.base_url, "/products?limit=10&offset=0"),
+        urljoin(mpt_client.base_url, "/catalog/products?limit=10&offset=0"),
         json=mpt_products_response,
     )
 
@@ -99,7 +99,7 @@ def test_get_products_with_query(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/products?limit=10&offset=0&eq(product.id,PRD-1234-1234)",
+            "/catalog/products?limit=10&offset=0&eq(product.id,PRD-1234-1234)",
         ),
         json=mpt_products_response,
     )
@@ -111,7 +111,7 @@ def test_get_products_with_query(
 
 def test_get_products_exception(requests_mocker, mpt_client):
     requests_mocker.get(
-        urljoin(mpt_client.base_url, "/products?limit=10&offset=0"),
+        urljoin(mpt_client.base_url, "/catalog/products?limit=10&offset=0"),
         status=500,
     )
 
@@ -125,14 +125,14 @@ def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_p
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/products",
+            "/catalog/products",
         ),
         json=mpt_product,
     )
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            f"/products/{mpt_product['id']}/settings",
+            f"/catalog/products/{mpt_product['id']}/settings",
         ),
         match=[matchers.json_params_matcher({"settings": "1234"})],
     )
@@ -150,7 +150,7 @@ def test_create_product_exception(
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/products",
+            "/catalog/products",
         ),
         status=500,
     )
@@ -172,7 +172,7 @@ def test_create_parameter_group(
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/parameter-groups",
+            f"/catalog/products/{product.id}/parameter-groups",
         ),
         json=mpt_parameter_group,
         match=[matchers.json_params_matcher({"name": "Parameter Group"})],
@@ -187,7 +187,7 @@ def test_create_parameter_group_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/parameter-groups",
+            f"/catalog/products/{product.id}/parameter-groups",
         ),
         status=500,
     )
@@ -202,7 +202,7 @@ def test_create_item_group(requests_mocker, mpt_client, product, mpt_item_group)
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/item-groups",
+            f"/catalog/products/{product.id}/item-groups",
         ),
         json=mpt_item_group,
         match=[matchers.json_params_matcher({"name": "Item Group"})],
@@ -217,7 +217,7 @@ def test_create_item_group_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/item-groups",
+            f"/catalog/products/{product.id}/item-groups",
         ),
         status=500,
     )
@@ -232,7 +232,7 @@ def test_create_parameter(requests_mocker, mpt_client, product, mpt_parameter):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/parameters",
+            f"/catalog/products/{product.id}/parameters",
         ),
         json=mpt_parameter,
         match=[matchers.json_params_matcher({"name": "Parameter Name"})],
@@ -247,7 +247,7 @@ def test_create_parameter_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/parameters",
+            f"/catalog/products/{product.id}/parameters",
         ),
         status=500,
     )
@@ -262,7 +262,7 @@ def test_create_item(requests_mocker, mpt_client, mpt_item):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items",
+            "/catalog/items",
         ),
         json=mpt_item,
         match=[matchers.json_params_matcher({"name": "Item Name"})],
@@ -277,7 +277,7 @@ def test_create_item_exception(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items",
+            "/catalog/items",
         ),
         status=500,
     )
@@ -293,7 +293,7 @@ def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_respo
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            f"/units-of-measure?name={name}&limit=1&offset=0",
+            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
         ),
         json=mpt_uoms_response,
     )
@@ -308,7 +308,7 @@ def test_search_uom_by_name_exception(requests_mocker, mpt_client):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            f"/units-of-measure?name={name}&limit=1&offset=0",
+            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
         ),
         status=500,
     )
@@ -326,7 +326,7 @@ def test_search_uom_by_name_not_found(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            f"/units-of-measure?name={name}&limit=1&offset=0",
+            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
         ),
         json=wrap_to_mpt_list_response([]),
     )
@@ -341,7 +341,7 @@ def test_create_template(requests_mocker, mpt_client, product, mpt_template):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/templates",
+            f"/catalog/products/{product.id}/templates",
         ),
         json=mpt_template,
         match=[matchers.json_params_matcher({"name": "Template Name"})],
@@ -356,7 +356,7 @@ def test_create_template_exception(requests_mocker, product, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/templates",
+            f"/catalog/products/{product.id}/templates",
         ),
         status=500,
     )
@@ -371,7 +371,7 @@ def test_create_template_400_exception(requests_mocker, product, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            f"/products/{product.id}/templates",
+            f"/catalog/products/{product.id}/templates",
         ),
         status=400,
         json={"errors": {"description": ["error for exception"]}},
@@ -387,7 +387,7 @@ def test_review_item(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/review",
+            "/catalog/items/ITM-1234-1234/review",
         ),
         status=200,
     )
@@ -399,7 +399,7 @@ def test_review_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/review",
+            "/catalog/items/ITM-1234-1234/review",
         ),
         status=500,
     )
@@ -414,7 +414,7 @@ def test_publish_item(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/publish",
+            "/catalog/items/ITM-1234-1234/publish",
         ),
         status=200,
     )
@@ -426,7 +426,7 @@ def test_publish_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/publish",
+            "/catalog/items/ITM-1234-1234/publish",
         ),
         status=500,
     )
@@ -441,7 +441,7 @@ def test_unpublish_item(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/unpublish",
+            "/catalog/items/ITM-1234-1234/unpublish",
         ),
         status=200,
     )
@@ -453,7 +453,7 @@ def test_unpublish_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234/unpublish",
+            "/catalog/items/ITM-1234-1234/unpublish",
         ),
         status=500,
     )
@@ -469,7 +469,7 @@ def test_update_item(requests_mocker, mpt_client):
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234",
+            "/catalog/items/ITM-1234-1234",
         ),
         status=200,
         match=[matchers.json_params_matcher(items_json)],
@@ -482,7 +482,7 @@ def test_update_item_exception_500(requests_mocker, mpt_client):
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/items/ITM-1234-1234",
+            "/catalog/items/ITM-1234-1234",
         ),
         status=500,
     )
@@ -503,7 +503,7 @@ def test_get_item(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+            "/catalog/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
         ),
         json=wrap_to_mpt_list_response([mpt_item]),
     )
@@ -517,7 +517,7 @@ def test_get_item_exception(requests_mocker, mpt_client):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+            "/catalog/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
         ),
         status=500,
     )
@@ -536,7 +536,7 @@ def test_get_item_not_found(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
+            "/catalog/items?externalIds.vendor=EXT1&product.id=PRC-1234-1234&limit=1&offset=0",
         ),
         json=wrap_to_mpt_list_response([]),
     )
@@ -551,7 +551,7 @@ def test_get_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234",
         ),
         json=mpt_pricelist,
     )
@@ -565,7 +565,7 @@ def test_get_pricelist_exception(requests_mocker, mpt_client):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234",
         ),
         status=404,
     )
@@ -580,7 +580,7 @@ def test_create_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist)
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/price-lists",
+            "/catalog/price-lists",
         ),
         json=mpt_pricelist,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
@@ -595,7 +595,7 @@ def test_create_pricelist_exception(requests_mocker, mpt_client):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
-            "/price-lists",
+            "/catalog/price-lists",
         ),
         status=500,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
@@ -611,7 +611,7 @@ def test_update_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist)
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234",
         ),
         json=mpt_pricelist,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
@@ -628,7 +628,7 @@ def test_update_pricelist_exception(requests_mocker, mpt_client):
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234",
         ),
         status=500,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
@@ -650,7 +650,7 @@ def test_get_pricelist_item(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+            "/catalog/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
         ),
         json=wrap_to_mpt_list_response([mpt_pricelist_item]),
     )
@@ -664,7 +664,7 @@ def test_get_pricelist_item_exception(requests_mocker, mpt_client):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+            "/catalog/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
         ),
         status=500,
     )
@@ -683,7 +683,7 @@ def test_get_pricelist_item_not_found(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
+            "/catalog/price-lists/PRC-1234-1234/items?item.externalIds.vendor=EXT1&limit=1&offset=0",
         ),
         json=wrap_to_mpt_list_response([]),
     )
@@ -700,7 +700,7 @@ def test_update_pricelist_item(
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234/items/PRI-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234/items/PRI-1234-1234",
         ),
         json=mpt_pricelist_item,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
@@ -717,7 +717,7 @@ def test_update_pricelist_item_exception(requests_mocker, mpt_client):
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
-            "/price-lists/PRC-1234-1234/items/PRI-1234-1234",
+            "/catalog/price-lists/PRC-1234-1234/items/PRI-1234-1234",
         ),
         status=500,
     )
