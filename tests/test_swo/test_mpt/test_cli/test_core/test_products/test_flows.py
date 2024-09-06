@@ -261,7 +261,7 @@ def test_sync_parameters_groups(
             "label": "Default Group",
             "description": "Description 1",
             "displayOrder": 10,
-            "isDefault": True,
+            "default": True,
         },
     )
     assert parameter_group_mock.mock_calls[1].args == (
@@ -272,7 +272,7 @@ def test_sync_parameters_groups(
             "label": "Additional Group",
             "description": "Description 2",
             "displayOrder": 20,
-            "isDefault": False,
+            "default": False,
         },
     )
 
@@ -328,9 +328,9 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
             "label": "Default Group",
             "description": "Description 1",
             "displayOrder": 10,
-            "isDefault": True,
-            "isMultipleChoice": True,
-            "isRequired": True,
+            "default": True,
+            "multiple": True,
+            "required": True,
         },
     )
     assert item_group_mock.mock_calls[1].args == (
@@ -341,9 +341,9 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
             "label": "Additional Group",
             "description": "Description 2",
             "displayOrder": 20,
-            "isDefault": False,
-            "isMultipleChoice": False,
-            "isRequired": True,
+            "default": False,
+            "multiple": False,
+            "required": True,
         },
     )
 

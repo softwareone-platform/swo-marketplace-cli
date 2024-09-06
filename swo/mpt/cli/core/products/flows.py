@@ -229,7 +229,7 @@ def to_parameter_group_json(values: list[SheetValue]) -> dict:
         "displayOrder": find_value_for(
             constants.PARAMETERS_GROUPS_DISPLAY_ORDER, values
         )[2],
-        "isDefault": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2]
+        "default": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2]
         == "True",
     }
 
@@ -240,13 +240,13 @@ def to_item_group_json(values: list[SheetValue]) -> dict:
         "label": find_value_for(constants.ITEMS_GROUPS_LABEL, values)[2],
         "description": find_value_for(constants.ITEMS_GROUPS_DESCRIPTION, values)[2],
         "displayOrder": find_value_for(constants.ITEMS_GROUPS_DISPLAY_ORDER, values)[2],
-        "isDefault": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2]
+        "default": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2]
         == "True",
-        "isMultipleChoice": find_value_for(
+        "multiple": find_value_for(
             constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values
         )[2]
         == "True",
-        "isRequired": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
+        "required": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
         == "True",
     }
 
