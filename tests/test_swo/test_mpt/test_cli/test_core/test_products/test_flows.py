@@ -429,7 +429,6 @@ def test_sync_parameters(
                     },
                 ],
                 "defaultValue": "New",
-                "label": "Some label",
                 "hintText": "Some hint text",
             },
             "constraints": {
@@ -452,7 +451,6 @@ def test_sync_parameters(
             "phase": "Fulfillment",
             "type": "SingleLineText",
             "options": {
-                "label": "Retry Count",
                 "hintText": "Retry Count",
                 "placeholderText": "Retry Count",
             },

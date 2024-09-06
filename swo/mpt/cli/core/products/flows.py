@@ -257,13 +257,19 @@ def to_parameter_json(
     values: list[SheetValue],
 ) -> dict:
     phase = find_value_for(constants.PARAMETERS_PHASE, values)[2]
+    options = json.loads(find_value_for(constants.PARAMETERS_OPTIONS, values)[2])
+
+    # backward compatible change for V3 Marketplace API
+    if "label" in options:
+        del options["label"]
+
     parameter_json = {
         "name": find_value_for(constants.PARAMETERS_NAME, values)[2],
         "description": find_value_for(constants.PARAMETERS_DESCRIPTION, values)[2],
         "scope": scope,
         "phase": phase,
         "type": find_value_for(constants.PARAMETERS_TYPE, values)[2],
-        "options": json.loads(find_value_for(constants.PARAMETERS_OPTIONS, values)[2]),
+        "options": options,
         "constraints": json.loads(
             find_value_for(constants.PARAMETERS_CONSTRAINTS, values)[2]
         ),
