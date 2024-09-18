@@ -58,7 +58,7 @@ class NoActiveAccountFoundError(CLIError):
     def __str__(self) -> str:
         return (
             "No active account found. Activate any account first using "
-            "'swocli accounts activate ACCOUNT-ID' command"
+            "'mpt-cli accounts activate ACCOUNT-ID' command"
         )
 
 
