@@ -5,8 +5,8 @@ from typer.core import TyperGroup
 class AliasTyperGroup(TyperGroup):
     """
     Provides ability to make commands with s and without s at the end same
-    swocli account add
-    swocli accounts add
+    mpt-cli account add
+    mpt-cli accounts add
 
     are same commands
     """

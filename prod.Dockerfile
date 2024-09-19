@@ -9,4 +9,4 @@ ADD . /swo
 
 RUN poetry update && poetry install
 
-ENTRYPOINT ["swocli"]
+ENTRYPOINT ["mpt-cli"]
