@@ -842,7 +842,7 @@ def test_sync_product(
             "productOrdering": True,
             "productRequests": {"enabled": False, "label": None, "title": None},
         },
-        Path("/swo/swo/mpt/cli/core/products/../icons/fake-icon.png"),
+        Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
     wb = load_workbook(filename=str(new_product_file))
@@ -933,7 +933,7 @@ def test_sync_product_extra_columns(
             "productOrdering": True,
             "productRequests": {"enabled": False, "label": None, "title": None},
         },
-        Path("/swo/swo/mpt/cli/core/products/../icons/fake-icon.png"),
+        Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
     wb = load_workbook(filename=str(extra_column_product_file))
