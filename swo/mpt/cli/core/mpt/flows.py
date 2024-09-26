@@ -78,7 +78,9 @@ def create_product(
     )
 
     products_response = mpt_client.post(
-        "/catalog/products", data=parameters, headers={"Content-Type": parameters.content_type}
+        "/catalog/products",
+        data=parameters,
+        headers={"Content-Type": parameters.content_type},
     )
     products_response.raise_for_status()
     product = Product.model_validate(products_response.json())
@@ -180,7 +182,9 @@ def get_item(mpt_client: MPTClient, product_id: str, vendor_id: str) -> Item:
 @cache
 @wrap_http_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
-    response = mpt_client.get(f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0")
+    response = mpt_client.get(
+        f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0"
+    )
     response.raise_for_status()
 
     data = response.json()["data"]
@@ -197,7 +201,9 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
 def create_template(
     mpt_client: MPTClient, product: Product, template_json: dict
 ) -> Template:
-    response = mpt_client.post(f"/catalog/products/{product.id}/templates", json=template_json)
+    response = mpt_client.post(
+        f"/catalog/products/{product.id}/templates", json=template_json
+    )
     response.raise_for_status()
 
     return Template.model_validate(response.json())
@@ -223,7 +229,9 @@ def create_pricelist(mpt_client: MPTClient, pricelist_json: dict) -> Pricelist:
 def update_pricelist(
     mpt_client: MPTClient, pricelist_id: str, pricelist_json: dict
 ) -> Pricelist:
-    response = mpt_client.put(f"/catalog/price-lists/{pricelist_id}", json=pricelist_json)
+    response = mpt_client.put(
+        f"/catalog/price-lists/{pricelist_id}", json=pricelist_json
+    )
     response.raise_for_status()
 
     return Pricelist.model_validate(response.json())
