@@ -240,11 +240,8 @@ def to_item_group_json(values: list[SheetValue]) -> dict:
         "label": find_value_for(constants.ITEMS_GROUPS_LABEL, values)[2],
         "description": find_value_for(constants.ITEMS_GROUPS_DESCRIPTION, values)[2],
         "displayOrder": find_value_for(constants.ITEMS_GROUPS_DISPLAY_ORDER, values)[2],
-        "default": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2]
-        == "True",
-        "multiple": find_value_for(
-            constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values
-        )[2]
+        "default": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2] == "True",
+        "multiple": find_value_for(constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values)[2]
         == "True",
         "required": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
         == "True",
@@ -578,7 +575,9 @@ def update_items(
         try:
             action = ItemAction(find_value_for(constants.ITEMS_ACTION, sheet_value)[2])
             if action not in (ItemAction.SKIP, ItemAction.SKIPPED, ItemAction.CREATE):
-                item_vendor_id = find_value_for(constants.ITEMS_VENDOR_ITEM_ID, sheet_value)[2]
+                item_vendor_id = find_value_for(
+                    constants.ITEMS_VENDOR_ITEM_ID, sheet_value
+                )[2]
                 item = get_item(mpt_client, product_id, item_vendor_id)
 
             match ItemAction(action):

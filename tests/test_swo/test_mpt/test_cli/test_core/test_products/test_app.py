@@ -15,7 +15,9 @@ def test_list_products(
     )
     requests_mocker.get(
         urljoin(
-            mpt_client.base_url, "/catalog/products?limit=10&offset=0", allow_fragments=True
+            mpt_client.base_url,
+            "/catalog/products?limit=10&offset=0",
+            allow_fragments=True,
         ),
         json=mpt_products_response,
     )
