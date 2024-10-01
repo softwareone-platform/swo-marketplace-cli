@@ -63,14 +63,6 @@ def test_check_product_definition_not_all_tabs(empty_file):
     stats = check_product_definition(empty_file, stats)
 
     expected_message = """General: Required tab doesn't exist
-Parameters Groups: Required tab doesn't exist
-Items Groups: Required tab doesn't exist
-Agreements Parameters: Required tab doesn't exist
-Item Parameters: Required tab doesn't exist
-Request Parameters: Required tab doesn't exist
-Subscription Parameters: Required tab doesn't exist
-Items: Required tab doesn't exist
-Templates: Required tab doesn't exist
 Settings: Required tab doesn't exist\n"""
 
     assert not stats.is_empty()
