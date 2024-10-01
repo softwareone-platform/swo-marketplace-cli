@@ -112,7 +112,7 @@ def check_product_definition(
         if sheet_name not in wb.sheetnames:
             stats.add_msg(sheet_name, "", "Required tab doesn't exist")
 
-    existing_sheets = set(constants.REQUIRED_TABS).intersection(set(wb.sheetnames))
+    existing_sheets = set(constants.ALL_TABS).intersection(set(wb.sheetnames))
 
     for sheet_name in existing_sheets:
         if sheet_name not in constants.REQUIRED_FIELDS_BY_TAB:
