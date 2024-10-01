@@ -15,7 +15,7 @@ TAB_SUBSCRIPTION_PARAMETERS = "Subscription Parameters"
 TAB_ITEMS = "Items"
 TAB_TEMPLATES = "Templates"
 TAB_SETTINGS = "Settings"
-REQUIRED_TABS = [
+ALL_TABS = [
     TAB_GENERAL,
     TAB_PARAMETERS_GROUPS,
     TAB_ITEMS_GROUPS,
@@ -27,6 +27,11 @@ REQUIRED_TABS = [
     TAB_TEMPLATES,
     TAB_SETTINGS,
 ]
+REQUIRED_TABS = [
+    TAB_GENERAL,
+    TAB_SETTINGS,
+]
+
 
 # General tab definition
 GENERAL_PRODUCT_ID = "Product ID"
