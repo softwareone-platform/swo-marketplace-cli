@@ -333,15 +333,23 @@ def _to_item_json(
             constants.ITEMS_QUANTITY_APPLICABLE, values
         )[2]
         == "True",
-        "terms": {
-            "commitment": find_value_for(constants.ITEMS_COMMITMENT_TERM, values)[2],
-            "period": find_value_for(constants.ITEMS_BILLING_FREQUENCY, values)[2],
-        },
         "unit": {
             "id": find_value_for(constants.ITEMS_UNIT_ID, values)[2],
         },
         "parameters": parameters,
     }
+
+    period = find_value_for(constants.ITEMS_BILLING_FREQUENCY, values)[2]
+
+    if period == "one-time":
+        item_json["terms"] = {
+            "period": period,
+        }
+    else:
+        item_json["terms"] = {
+            "commitment": find_value_for(constants.ITEMS_COMMITMENT_TERM, values)[2],
+            "period": period,
+        }
 
     if is_operations:
         item_json["externalIds"] = {
