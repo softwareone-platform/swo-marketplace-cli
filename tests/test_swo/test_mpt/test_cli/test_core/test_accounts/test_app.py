@@ -64,7 +64,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
             "type": "Vendor",
             "token": "new-secret",
             "token_id": "TKN-123456",
-            "environment": "https://api.platform.softwareone.com/v1",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         }
     ]
@@ -111,7 +111,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
             "type": "Vendor",
             "token": "new-secret",
             "token_id": "TKN-123456",
-            "environment": "https://api.platform.softwareone.com/v1",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         },
     ]
@@ -259,7 +259,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
             "type": "Vendor",
             "token": "new-super-secret",
             "token_id": "TKN-0000-0000-0002",
-            "environment": "https://api.platform.softwareone.com/v1",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         },
     ]
