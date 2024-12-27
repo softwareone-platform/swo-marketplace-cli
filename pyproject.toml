@@ -71,10 +71,16 @@ filterwarnings = [
 
 [tool.coverage.run]
 branch = true
+relative_files = true
+source = ["swo"]
 
 [tool.coverage.report]
 exclude_also = [
     "if __name__ == \"__main__\":",
+]
+include = [
+    "swo/mpt/cli/**",
+    "swo/mpt/cli/plugins/audit_plugin/**",
 ]
 
 [tool.ruff]
@@ -119,3 +125,6 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "gunicorn.*"
 ignore_missing_imports = true
+
+[tool.poetry.plugins."swo.mpt.cli.plugins"]
+"audit" = "swo.mpt.cli.plugins.audit_plugin.app:app"
