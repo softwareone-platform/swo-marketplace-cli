@@ -35,7 +35,7 @@ def add_account(
     ],
     environment: Annotated[
         str, typer.Option("--environment", "-e", help="URL to the API for environment")
-    ] = "https://api.platform.softwareone.com/v1",
+    ] = "https://api.platform.softwareone.com/public/v1",
 ):
     """
     Add account to work with the SoftwareOne Marketplace
