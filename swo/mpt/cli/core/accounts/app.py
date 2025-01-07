@@ -11,6 +11,7 @@ from swo.mpt.cli.core.errors import (
 )
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import get_token
+from swo.mpt.cli.core.state import state
 
 from .flows import (
     disable_accounts_except,
@@ -45,7 +46,7 @@ def add_account(
         accounts = get_or_create_accounts(accounts_file)
 
         status.update(f"Fetching account information from environment {environment}")
-        mpt_client = MPTClient(environment, secret)
+        mpt_client = MPTClient(environment, secret, debug=state.verbose)
         try:
             token = get_token(mpt_client, secret)
         except MPTAPIError as e:
