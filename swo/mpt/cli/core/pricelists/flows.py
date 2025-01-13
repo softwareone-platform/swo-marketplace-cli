@@ -62,14 +62,25 @@ def to_operations_pricelist_json(values: list[SheetValue]) -> dict:
 
 
 def to_vendor_pricelist_json(values: list[SheetValue]) -> dict:
-    return {
+
+    pricelist_json = {
         "currency": find_value_for(constants.GENERAL_CURRENCY, values)[2],
         "precision": find_value_for(constants.GENERAL_PRECISION, values)[2],
         "notes": find_value_for(constants.GENERAL_NOTES, values)[2],
         "product": {
             "id": find_value_for(constants.GENERAL_PRODUCT_ID, values)[2],
-        },
+        }
     }
+
+    external_id_value = find_value_for(constants.EXTERNAL_ID, values)
+    external_id = external_id_value[2] if external_id_value else None
+
+    if external_id:
+        pricelist_json["externalIds"] = {
+            "vendor": external_id,
+        }
+    return pricelist_json
+
 
 
 def sync_pricelist(
