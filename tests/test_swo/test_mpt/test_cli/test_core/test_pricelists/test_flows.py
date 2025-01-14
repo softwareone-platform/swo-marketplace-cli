@@ -328,3 +328,54 @@ def test_sync_pricelist_items_operations(
             "unitPP": 12.3,
         },
     )
+
+
+def test_sync_pricelist_create_vendor_external_id(
+    mocker, mpt_client, pricelist, pricelist_new_file, active_vendor_account
+):
+    stats = PricelistStatsCollector()
+    wb = load_workbook(str(pricelist_new_file))
+    wb[constants.TAB_GENERAL].cell(row=16, column=1).value = "External ID"
+    wb[constants.TAB_GENERAL].cell(row=16, column=2).value = "my_external_id"
+    create_mock = mocker.patch(
+        "swo.mpt.cli.core.pricelists.flows.create_pricelist",
+        return_value=pricelist,
+    )
+    sync_items_mock = mocker.patch(
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
+        return_value=stats,
+    )
+
+    returned_stats, returned_pricelist = sync_pricelist(
+        mpt_client,
+        wb,
+        PricelistAction.CREATE,
+        active_vendor_account,
+        stats,
+        console,
+    )
+
+    assert returned_stats.tabs[constants.TAB_GENERAL]["synced"] == 1
+    assert wb[constants.TAB_GENERAL]["B3"].value == pricelist.id
+    assert returned_pricelist == pricelist
+    create_mock.assert_called_once_with(
+        mpt_client,
+        {
+            "currency": "EUR",
+            'externalIds': {'vendor': 'my_external_id'},
+            "precision": 2,
+            "notes": "Note 1",
+            "product": {
+                "id": "PRD-0232-2541",
+            },
+        },
+    )
+    sync_items_mock.assert_called_once_with(
+        mpt_client,
+        wb[constants.TAB_PRICE_ITEMS],
+        pricelist.id,
+        active_vendor_account,
+        stats,
+        console,
+    )
+
