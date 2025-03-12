@@ -5,6 +5,7 @@ on:
     types: [published]
 
 permissions:
+  id-token: write  # for OIDC
   contents: read
 
 jobs:
