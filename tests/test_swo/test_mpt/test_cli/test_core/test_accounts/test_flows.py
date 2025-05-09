@@ -1,5 +1,4 @@
 import json
-import os
 from operator import itemgetter
 
 import pytest
@@ -8,13 +7,12 @@ from swo.mpt.cli.core.accounts.flows import (
     does_account_exist,
     find_account,
     find_active_account,
-    from_file,
     from_token,
-    get_accounts_file_path,
     get_or_create_accounts,
     remove_account,
     write_accounts,
 )
+from swo.mpt.cli.core.accounts.handlers import JsonFileHandler
 from swo.mpt.cli.core.accounts.models import Account
 from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
@@ -36,32 +34,21 @@ def test_from_token(expected_account):
     assert account == expected_account
 
 
-def test_from_file(accounts_path, expected_account, another_expected_account):
-    accounts = from_file(accounts_path)
-
-    expected_accounts = [expected_account, another_expected_account]
-    assert accounts == expected_accounts
-
-
-def test_get_or_create_accounts_create(tmp_path):
-    file_path = tmp_path / ".swocli" / "accounts.json"
-
-    accounts = get_or_create_accounts(file_path)
+def test_get_or_create_accounts_create(mocker, tmp_path):
+    mocker.patch.object(JsonFileHandler, "_default_file_path", tmp_path / "no_exists_file.json")
+    accounts = get_or_create_accounts()
 
     assert accounts == []
 
 
 def test_get_or_create_accounts_get(
-    accounts_path, expected_account, another_expected_account
+    mocker, accounts_path, expected_account, another_expected_account
 ):
-    accounts = get_or_create_accounts(accounts_path)
+    mocker.patch.object(JsonFileHandler, "_default_file_path", accounts_path)
+    accounts = get_or_create_accounts()
 
     expected_accounts = [expected_account, another_expected_account]
     assert accounts == expected_accounts
-
-
-def test_get_accounts_file_path():
-    assert str(get_accounts_file_path()) == "/root/.swocli/accounts.json"
 
 
 def test_does_account_exist(expected_account, another_expected_account):
@@ -93,15 +80,12 @@ def test_remove_account(expected_account, another_expected_account):
     assert accounts_after_remove == [expected_account]
 
 
-def test_write_accounts(tmp_path, expected_account, another_expected_account):
+def test_write_accounts(mocker, tmp_path, expected_account, another_expected_account):
     file_path = tmp_path / ".swocli" / "accounts.json"
-
-    os.makedirs(os.path.dirname(file_path), exist_ok=True)
-    with open(file_path, "w+"):
-        pass
+    mocker.patch.object(JsonFileHandler, "_default_file_path", file_path)
 
     accounts = [expected_account, another_expected_account]
-    write_accounts(file_path, accounts)
+    write_accounts(accounts)
 
     with open(file_path) as f:
         written_accounts = json.load(f)
@@ -114,7 +98,7 @@ def test_write_accounts(tmp_path, expected_account, another_expected_account):
 def test_disable_accounts_except(expected_account, another_expected_account):
     accounts = [expected_account, another_expected_account]
 
-    accounts = disable_accounts_except(accounts, another_expected_account)
+    disable_accounts_except(accounts, another_expected_account)
 
     assert not expected_account.is_active
     assert another_expected_account.is_active
