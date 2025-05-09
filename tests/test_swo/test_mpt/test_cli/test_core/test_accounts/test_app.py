@@ -4,6 +4,7 @@ import pytest
 import typer
 from swo.mpt.cli.core.accounts import app
 from swo.mpt.cli.core.accounts.app import get_active_account
+from swo.mpt.cli.core.accounts.handlers import JsonFileHandler
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.mpt.models import Account, Token
 from typer.testing import CliRunner
@@ -42,10 +43,7 @@ def existing_token():
 
 def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=account_file_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         return_value=new_token,
@@ -70,11 +68,9 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     ]
 
 
+
 def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         return_value=new_token,
@@ -120,10 +116,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
 def test_add_account_accounts_override_environment(
     new_accounts_path, mocker, new_token
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         return_value=new_token,
@@ -175,10 +168,7 @@ def test_add_account_accounts_override_environment(
 
 
 def test_add_account_token_failed(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         side_effect=MPTAPIError("critical error", "you can't perform the operation"),
@@ -190,10 +180,7 @@ def test_add_account_token_failed(new_accounts_path, mocker):
 
 
 def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing_token):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         return_value=existing_token("new-super-secret"),
@@ -228,10 +215,7 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
 
 
 def test_add_existing_account_replace(new_accounts_path, mocker, existing_token):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
         return_value=existing_token("new-super-secret"),
@@ -267,10 +251,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
 
 def test_activate_account_accounts_file_not_exists(tmp_path, mocker):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=account_file_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
 
     result = runner.invoke(app, ["activate", "ACC-12345"])
 
@@ -278,10 +259,7 @@ def test_activate_account_accounts_file_not_exists(tmp_path, mocker):
 
 
 def test_activate_account_doesnot_exist(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["activate", "ACC-not-exists"])
 
@@ -289,10 +267,7 @@ def test_activate_account_doesnot_exist(new_accounts_path, mocker):
 
 
 def test_activate_account(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["activate", "ACC-12342"])
 
@@ -324,10 +299,7 @@ def test_activate_account(new_accounts_path, mocker):
 
 def test_remove_accounts_file_not_exists(tmp_path, mocker):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=account_file_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
 
     result = runner.invoke(app, ["remove", "ACC-12345"])
 
@@ -335,10 +307,7 @@ def test_remove_accounts_file_not_exists(tmp_path, mocker):
 
 
 def test_remove_account_doesnot_exist(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["remove", "ACC-not-exists"])
 
@@ -346,10 +315,7 @@ def test_remove_account_doesnot_exist(new_accounts_path, mocker):
 
 
 def test_remove_account_donot_remove(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["remove", "ACC-12341"], input="N\n")
 
@@ -357,10 +323,7 @@ def test_remove_account_donot_remove(new_accounts_path, mocker):
 
 
 def test_remove_account(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["remove", "ACC-12341"], input="y\n")
 
@@ -383,10 +346,7 @@ def test_remove_account(new_accounts_path, mocker):
 
 def test_list_accounts_accounts_file_not_exists(tmp_path, mocker):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=account_file_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
 
     result = runner.invoke(app, ["list"])
 
@@ -394,10 +354,7 @@ def test_list_accounts_accounts_file_not_exists(tmp_path, mocker):
 
 
 def test_list_accounts(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["list"])
 
@@ -408,10 +365,7 @@ def test_list_accounts(new_accounts_path, mocker):
 
 
 def test_list_active_account(new_accounts_path, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = runner.invoke(app, ["list", "--active"])
 
@@ -421,21 +375,13 @@ def test_list_active_account(new_accounts_path, mocker):
 
 
 def test_get_active_account(new_accounts_path, mocker, expected_account):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     assert get_active_account() == expected_account
 
 
-def test_get_active_account_no_active_account(
-    new_accounts_path, mocker, expected_account
-):
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_accounts_file_path",
-        return_value=new_accounts_path,
-    )
+def test_get_active_account_no_active_account(new_accounts_path, mocker, expected_account):
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     with open(new_accounts_path) as f:
         accounts = json.load(f)
