@@ -2,9 +2,9 @@ import re
 from pathlib import Path
 
 import pytest
-from openpyxl import load_workbook
 from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
+from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
 from swo.mpt.cli.core.mpt.models import Item
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
@@ -13,7 +13,6 @@ from swo.mpt.cli.core.products.flows import (
     check_product_definition,
     check_product_exists,
     get_definition_file,
-    get_values_for_dynamic_table,
     sync_items,
     sync_items_groups,
     sync_parameters,
@@ -22,7 +21,7 @@ from swo.mpt.cli.core.products.flows import (
     sync_templates,
 )
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
-from swo.mpt.cli.core.utils import get_values_for_table
+from swo.mpt.cli.core.utils import get_values_for_dynamic_table, get_values_for_table
 
 
 @pytest.fixture()
@@ -108,9 +107,7 @@ def test_check_product_definition_not_all_required_items_groups(product_file_roo
     assert str(stats) == "Items Groups: Required field Label is not provided\n"
 
 
-def test_check_product_definition_not_all_required_agreements_parameters(
-    product_file_root,
-):
+def test_check_product_definition_not_all_required_agreements_parameters(product_file_root):
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
@@ -226,12 +223,12 @@ def test_sync_parameters_groups(
         return_value=parameter_group,
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_PARAMETERS_GROUPS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_PARAMETERS_GROUPS)
     values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
 
     _, id_mapping = sync_parameters_groups(
-        mpt_client, ws, product, values, stats, console.status("")
+        mpt_client, file_handler, product, values, stats, console.status("")
     )
 
     assert id_mapping == {
@@ -278,11 +275,11 @@ def test_sync_parameters_groups_exception(
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_PARAMETERS_GROUPS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_PARAMETERS_GROUPS)
     values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
 
-    sync_parameters_groups(mpt_client, ws, product, values, stats, console.status(""))
+    sync_parameters_groups(mpt_client, file_handler, product, values, stats, console.status(""))
 
     assert ws["J2"].value == "Error with response body Error"
 
@@ -293,12 +290,12 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS_GROUPS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS_GROUPS)
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
     _, id_mapping = sync_items_groups(
-        mpt_client, ws, product, values, stats, console.status("")
+        mpt_client, file_handler, product, values, stats, console.status("")
     )
 
     assert id_mapping == {
@@ -347,11 +344,11 @@ def test_sync_items_groups_exception(mocker, mpt_client, new_product_file, produ
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS_GROUPS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS_GROUPS)
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
-    sync_items_groups(mpt_client, ws, product, values, stats, console.status(""))
+    sync_items_groups(mpt_client, file_handler, product, values, stats, console.status(""))
 
     assert ws["L2"].value == "Error with response body Error"
 
@@ -364,14 +361,14 @@ def test_sync_parameters(
         "swo.mpt.cli.core.products.flows.create_parameter", return_value=parameter
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_AGREEMENT_PARAMETERS)
     values = get_values_for_table(ws, constants.PARAMETERS_FIELDS)
 
     _, id_mapping = sync_parameters(
         "Agreement",
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -467,14 +464,14 @@ def test_sync_parameters_exception(
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_AGREEMENT_PARAMETERS)
     values = get_values_for_table(ws, constants.PARAMETERS_FIELDS)
 
     sync_parameters(
         "Agreement",
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -504,15 +501,15 @@ def test_sync_item(
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS)
     values = get_values_for_dynamic_table(
         ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
 
     _, id_mapping = sync_items(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -526,24 +523,9 @@ def test_sync_item(
         console.status(""),
     )
 
-    assert id_mapping == {
-        "ITM-4944-4118-0001": item,
-        "ITM-4944-4118-0002": item,
-    }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
-        item.id,
-        item.id,
-    )
-    assert (
-        ws["J2"].value,
-        ws["J3"].value,
-    ) == (
-        item_group.id,
-        item_group.id,
-    )
+    assert id_mapping == {"ITM-4944-4118-0001": item, "ITM-4944-4118-0002": item}
+    assert (ws["A2"].value, ws["A3"].value) == (item.id, item.id)
+    assert (ws["J2"].value, ws["J3"].value) == (item_group.id, item_group.id)
     assert item_mock.mock_calls[0].args == (
         mpt_client,
         {
@@ -631,15 +613,15 @@ def test_sync_item_exception(
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS)
     values = get_values_for_dynamic_table(
         ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
 
     sync_items(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -669,13 +651,13 @@ def test_sync_template(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_TEMPLATES]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_TEMPLATES)
     values = get_values_for_table(ws, constants.TEMPLATES_FIELDS)
 
     _, id_mapping = sync_templates(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -731,13 +713,13 @@ def test_sync_template_exception(
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_TEMPLATES]
+    file_handler = ExcelFileHandler(new_product_file)
+    ws = file_handler._get_worksheet(constants.TAB_TEMPLATES)
     values = get_values_for_table(ws, constants.TEMPLATES_FIELDS)
 
     sync_templates(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -837,8 +819,8 @@ def test_sync_product(
         Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    assert wb[constants.TAB_GENERAL]["B3"].value == product.id
+    file_handler = ExcelFileHandler(new_product_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == product.id
 
 
 def test_sync_product_extra_columns(
@@ -928,13 +910,11 @@ def test_sync_product_extra_columns(
         Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
-    wb = load_workbook(filename=str(extra_column_product_file))
-    assert wb[constants.TAB_GENERAL]["B15"].value == product.id
+    file_handler = ExcelFileHandler(extra_column_product_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B15") == product.id
 
 
-def test_sync_product_exception(
-    mocker, mpt_client, new_product_file, active_vendor_account
-):
+def test_sync_product_exception(mocker, mpt_client, new_product_file, active_vendor_account):
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_product",
         side_effect=MPTAPIError("Error", "Error"),
@@ -950,8 +930,10 @@ def test_sync_product_exception(
         console.status(""),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"
+    error = ExcelFileHandler(new_product_file).get_cell_value_by_coordinate(
+        constants.TAB_GENERAL, "C3"
+    )
+    assert error == "Error with response body Error"
 
 
 def test_sync_product_update_product(
