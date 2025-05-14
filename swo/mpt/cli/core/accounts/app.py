@@ -19,7 +19,6 @@ from .flows import (
     find_account,
     find_active_account,
     from_token,
-    get_accounts_file_path,
     get_or_create_accounts,
     remove_account,
     write_accounts,
@@ -39,12 +38,9 @@ def add_account(
     ] = "https://api.platform.softwareone.com/public/v1",
 ):
     """
-    Add account to work with the SoftwareOne Marketplace
+    Add an account to work with the SoftwareOne Marketplace
     """
     with console.status("Reading accounts from the configuration file") as status:
-        accounts_file = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file)
-
         status.update(f"Fetching account information from environment {environment}")
         mpt_client = MPTClient(environment, secret, debug=state.verbose)
         try:
@@ -57,6 +53,7 @@ def add_account(
             raise typer.Exit(code=3)
         account = from_token(token, environment)
 
+    accounts = get_or_create_accounts()
     if does_account_exist(accounts, account):
         _ = typer.confirm(
             f"Token for account {account.id} ({account.name}) already exists. Replace it?",
@@ -70,7 +67,7 @@ def add_account(
         accounts.append(account)
         accounts = disable_accounts_except(accounts, account)
 
-        write_accounts(accounts_file, accounts)
+        write_accounts(accounts)
 
     table = _account_table("Account has been added")
     table = _list_accounts(table, [account])
@@ -88,8 +85,7 @@ def activate_account(
     Activate SoftwareOne Marketplace account
     """
     with console.status("Reading accounts from the configuration file"):
-        accounts_file = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file)
+        accounts = get_or_create_accounts()
 
     try:
         account = find_account(accounts, account_id)
@@ -99,7 +95,7 @@ def activate_account(
 
     with console.status(f"Making account {account.id} ({account.name}) active"):
         accounts = disable_accounts_except(accounts, account)
-        write_accounts(accounts_file, accounts)
+        write_accounts(accounts)
 
     table = _account_table("Account has been activated")
     table = _list_accounts(table, [account])
@@ -117,8 +113,7 @@ def extract_account(
     Remove SoftwareOne Marketplace account
     """
     with console.status("Reading accounts from the configuration file"):
-        accounts_file = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file)
+        accounts = get_or_create_accounts()
 
     try:
         account = find_account(accounts, account_id)
@@ -133,7 +128,7 @@ def extract_account(
 
     with console.status(f"Removing account {account.id} ({account.name})"):
         accounts = remove_account(accounts, account)
-        write_accounts(accounts_file, accounts)
+        write_accounts(accounts)
 
     table = _account_table("Account has been deleted")
     table = _list_accounts(table, [account])
@@ -150,8 +145,7 @@ def list_accounts(
     List available SoftwareOne Marketplace accounts
     """
     with console.status("Reading accounts from the configuration file"):
-        accounts_file = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file)
+        accounts = get_or_create_accounts()
 
         if active_only:
             accounts = list(filter(lambda a: a.is_active, accounts))
@@ -170,8 +164,7 @@ def get_active_account() -> Account:
     Check for file and create current active account
     """
     with console.status("Reading accounts from the configuration file"):
-        accounts_file_path = get_accounts_file_path()
-        accounts = get_or_create_accounts(accounts_file_path)
+        accounts = get_or_create_accounts()
 
     try:
         account = find_active_account(accounts)

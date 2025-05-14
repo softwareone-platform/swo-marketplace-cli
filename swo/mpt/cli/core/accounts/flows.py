@@ -1,8 +1,6 @@
-import json
-import os
 from operator import attrgetter
-from pathlib import Path
 
+from swo.mpt.cli.core.accounts.handlers import JsonFileHandler
 from swo.mpt.cli.core.accounts.models import Account
 from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
 from swo.mpt.cli.core.mpt.models import Token
@@ -23,67 +21,44 @@ def from_token(token: Token, environment: str) -> Account:
     )
 
 
-def from_file(accounts_file_path: Path) -> list[Account]:
+def get_or_create_accounts() -> list[Account]:
     """
-    Extracts list of accounts from the passed file
+    Extract the list of accounts from the passed file or create empty
     """
-    with open(accounts_file_path) as f:
-        accounts = json.load(f)
-
+    json_parser = JsonFileHandler()
+    accounts = json_parser.read()
     return [Account.model_validate(account) for account in accounts]
-
-
-def get_or_create_accounts(accounts_file_path: Path) -> list[Account]:
-    """
-    Extract list of accounts from the passed file or create empty
-    """
-    if not os.path.exists(accounts_file_path):
-        os.makedirs(os.path.dirname(accounts_file_path), exist_ok=True)
-        with open(accounts_file_path, "w+") as f:
-            f.write("[]")
-
-    return from_file(accounts_file_path)
-
-
-def get_accounts_file_path() -> Path:
-    """
-    Returns accounts file path
-    """
-    return Path.home() / ".swocli" / "accounts.json"
 
 
 def does_account_exist(accounts: list[Account], account: Account) -> bool:
     """
-    Checks if account exists in the passed list
+    Checks if the account exists in the passed list
     """
     return any(a.id == account.id for a in accounts)
 
 
 def remove_account(accounts: list[Account], account: Account) -> list[Account]:
     """
-    Remove account from the passed accounts list
+    Remove an account from the passed accounts list
     """
     return [a for a in accounts if a.id != account.id]
 
 
-def write_accounts(accounts_file_path: Path, accounts: list[Account]) -> None:
+def write_accounts(accounts: list[Account]) -> None:
     """
     Write accounts list to the file
     """
-    accounts_dict: list[dict] = [
+    accounts_data = [
         a.model_dump() for a in sorted(accounts, key=attrgetter("id"))
     ]
-
-    with open(accounts_file_path, "w") as f:
-        accounts_json = json.dumps(accounts_dict, indent=2)
-        f.write(accounts_json)
+    JsonFileHandler().write(accounts_data)
 
 
 def disable_accounts_except(
     accounts: list[Account], except_account: Account
 ) -> list[Account]:
     """
-    Disable all account in the passed accounts list and enables passed account
+    Disable all accounts in the passed accounts list and enables the passed account
     """
     for account in accounts:
         if account.id == except_account.id:
@@ -107,7 +82,7 @@ def find_account(accounts: list[Account], account_id: str) -> Account:
 
 def find_active_account(accounts: list[Account]) -> Account:
     """
-    Return active account
+    Return an active account
     """
     account = next((a for a in accounts if a.is_active), None)
     if not account:
