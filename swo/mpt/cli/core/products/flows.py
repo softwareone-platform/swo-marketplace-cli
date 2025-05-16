@@ -1,17 +1,20 @@
 import enum
-import json
 import os
 import re
 from functools import partial
 from pathlib import Path
 from typing import Optional, TypeAlias, TypeVar
 
-from openpyxl import load_workbook  # type: ignore
-from openpyxl.workbook import Workbook  # type: ignore
-from openpyxl.worksheet.worksheet import Worksheet  # type: ignore
+from openpyxl.worksheet.worksheet import Worksheet
 from rich.status import Status
 from swo.mpt.cli.core.accounts.models import Account
 from swo.mpt.cli.core.errors import FileNotExistsError
+from swo.mpt.cli.core.handlers.errors import (
+    RequiredFieldsError,
+    RequiredFieldValuesError,
+    RequiredSheetsError,
+)
+from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
 from swo.mpt.cli.core.mpt.client import MPTClient
 from swo.mpt.cli.core.mpt.flows import (
     create_item as mpt_create_item,
@@ -41,18 +44,22 @@ from swo.mpt.cli.core.mpt.models import (
     Template,
 )
 from swo.mpt.cli.core.products import constants
+from swo.mpt.cli.core.products.to_json import (
+    to_item_group_json,
+    to_item_sync_json,
+    to_item_update_or_create_json,
+    to_parameter_group_json,
+    to_parameter_json,
+    to_product_json,
+    to_settings_json,
+    to_template_json,
+)
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     SheetValue,
     SheetValueGenerator,
     add_or_create_error,
-    find_first,
     find_value_for,
-    find_values_by_pattern,
-    get_values_for_dynamic_table,
-    get_values_for_general,
-    get_values_for_table,
-    set_dict_value,
     set_value,
     status_step_text,
 )
@@ -81,54 +88,51 @@ def get_definition_file(path: str) -> Path:
     Returns product definition file path. If only product id is passed assumed
     that product definition file is in the same folder with .xlsx file extension
     """
-    if ".xlsx" not in path:
-        path = f"{path}.xlsx"
-
-    return Path(path)
+    return ExcelFileHandler.normalize_file_path(path)
 
 
 def check_file_exists(product_file_path: Path) -> bool:
     """
     Check that product file exists
     """
-    is_exists = os.path.exists(product_file_path)
-    if not is_exists:
+    if not ExcelFileHandler(product_file_path).exists():
         raise FileNotExistsError(product_file_path)
 
-    return is_exists
+    return True
 
 
 def check_product_definition(
     definition_path: Path, stats: ErrorMessagesCollector
 ) -> ErrorMessagesCollector:
     """
-    Parses Product definition file and check consistensy of product definition file
+    Parses Product definition file and check consistency of product definition file
     """
-    # check all required columns are defined
     # check parameters and items refer to proper groups
-    wb = load_workbook(filename=str(definition_path))
-
-    for sheet_name in constants.REQUIRED_TABS:
-        if sheet_name not in wb.sheetnames:
+    file_handler = ExcelFileHandler(definition_path)
+    try:
+        file_handler.check_required_sheet(constants.REQUIRED_TABS)
+    except RequiredSheetsError as error:
+        for sheet_name in error.details:
             stats.add_msg(sheet_name, "", "Required tab doesn't exist")
 
-    existing_sheets = set(constants.ALL_TABS).intersection(set(wb.sheetnames))
-
+    existing_sheets = set(constants.ALL_TABS).intersection(set(file_handler.sheet_names))
     for sheet_name in existing_sheets:
         if sheet_name not in constants.REQUIRED_FIELDS_BY_TAB:
             continue
 
         if sheet_name == constants.TAB_GENERAL:
             check_required_general_fields(
+                file_handler,
                 stats,
-                wb[sheet_name],
+                sheet_name,
                 constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
                 constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[sheet_name],
             )
         else:
             check_required_columns(
+                file_handler,
                 stats,
-                wb[sheet_name],
+                sheet_name,
                 constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
             )
 
@@ -136,243 +140,55 @@ def check_product_definition(
 
 
 def check_required_general_fields(
+    file_handler: ExcelFileHandler,
     stats: ErrorMessagesCollector,
-    sheet: Worksheet,
+    sheet_name: str,
     required_field_names: list[str],
     required_values_field_names: list[str],
 ) -> ErrorMessagesCollector:
     """
     Check that required fields and values are presented in General worksheet
     """
-    column_values = {v[0].value: v[1].value for v in zip(sheet["A"], sheet["B"])}
+    try:
+        file_handler.check_required_fields_in_vertical_sheet(sheet_name, required_field_names)
+    except RequiredFieldsError as error:
+        for field in error.details:
+            stats.add_msg(sheet_name,"",f"Required field {field} is not provided")
 
-    for required_column_name in required_field_names:
-        if required_column_name not in column_values:
+    try:
+        file_handler.check_required_field_values_in_vertical_sheet(
+            sheet_name, required_values_field_names
+        )
+    except RequiredFieldValuesError as error:
+        for field in error.details:
             stats.add_msg(
-                sheet.title,
-                "",
-                f"Required field {required_column_name} is not provided",
-            )
-
-    for required_value_column_name in required_values_field_names:
-        if (
-            required_value_column_name in column_values
-            and not column_values[required_value_column_name]
-        ):
-            stats.add_msg(
-                sheet.title,
-                required_value_column_name,
-                f"Value is not provided for the required field. "
-                f"Current value: {column_values[required_value_column_name]}",
+                sheet_name,
+                field,
+                "Value is not provided for the required field. Current value: None",
             )
 
     return stats
 
 
 def check_required_columns(
+    file_handler: ExcelFileHandler,
     stats: ErrorMessagesCollector,
-    sheet: Worksheet,
+    sheet_name: str,
     required_field_names: list[str],
 ) -> ErrorMessagesCollector:
     """
     Check that required fields and values are presented in tables worksheet
     """
-    columns = {v.value for v in sheet["1"]}
-    for required_column_name in required_field_names:
-        if required_column_name not in columns:
+    try:
+        file_handler.check_required_fields_in_horizontal_sheet(sheet_name, required_field_names)
+    except RequiredFieldsError as error:
+        for field in error.details:
             stats.add_msg(
-                sheet.title,
+                sheet_name,
                 "",
-                f"Required field {required_column_name} is not provided",
+                f"Required field {field} is not provided",
             )
-
     return stats
-
-
-def to_product_json(values: list[SheetValue]) -> dict:
-    return {
-        "name": find_value_for(constants.GENERAL_PRODUCT_NAME, values)[2],
-        "shortDescription": find_value_for(
-            constants.GENERAL_CATALOG_DESCRIPTION, values
-        )[2],
-        "longDescription": find_value_for(
-            constants.GENERAL_PRODUCT_DESCRIPTION, values
-        )[2],
-        "website": find_value_for(constants.GENERAL_PRODUCT_WEBSITE, values)[2],
-        "externalIds": None,
-        "settings": None,
-    }
-
-
-def to_settings_json(values: SheetValueGenerator, mapping: dict[str, str]) -> dict:
-    settings: dict = {}
-    for value in values:
-        settings_name = find_value_for(constants.SETTINGS_SETTING, value)[2]
-        settings_value = find_value_for(constants.SETTINGS_VALUE, value)[2]
-        json_path = mapping[settings_name]
-
-        if ".label" not in json_path and ".title" not in json_path:
-            settings_value = settings_value == "Enabled"
-
-        settings = set_dict_value(settings, json_path, settings_value)
-
-    return settings
-
-
-def to_parameter_group_json(values: list[SheetValue]) -> dict:
-    return {
-        "name": find_value_for(constants.PARAMETERS_GROUPS_NAME, values)[2],
-        "label": find_value_for(constants.PARAMETERS_GROUPS_LABEL, values)[2],
-        "description": find_value_for(constants.PARAMETERS_GROUPS_DESCRIPTION, values)[
-            2
-        ],
-        "displayOrder": find_value_for(
-            constants.PARAMETERS_GROUPS_DISPLAY_ORDER, values
-        )[2],
-        "default": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2]
-        == "True",
-    }
-
-
-def to_item_group_json(values: list[SheetValue]) -> dict:
-    return {
-        "name": find_value_for(constants.ITEMS_GROUPS_NAME, values)[2],
-        "label": find_value_for(constants.ITEMS_GROUPS_LABEL, values)[2],
-        "description": find_value_for(constants.ITEMS_GROUPS_DESCRIPTION, values)[2],
-        "displayOrder": find_value_for(constants.ITEMS_GROUPS_DISPLAY_ORDER, values)[2],
-        "default": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2] == "True",
-        "multiple": find_value_for(constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values)[2]
-        == "True",
-        "required": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
-        == "True",
-    }
-
-
-def to_parameter_json(
-    scope: str,
-    parameter_group_mapping: dict[str, ParameterGroup],
-    values: list[SheetValue],
-) -> dict:
-    phase = find_value_for(constants.PARAMETERS_PHASE, values)[2]
-    options = json.loads(find_value_for(constants.PARAMETERS_OPTIONS, values)[2])
-
-    # backward compatible change for V3 Marketplace API
-    if "label" in options:
-        del options["label"]
-
-    parameter_json = {
-        "name": find_value_for(constants.PARAMETERS_NAME, values)[2],
-        "description": find_value_for(constants.PARAMETERS_DESCRIPTION, values)[2],
-        "scope": scope,
-        "phase": phase,
-        "type": find_value_for(constants.PARAMETERS_TYPE, values)[2],
-        "options": options,
-        "constraints": json.loads(
-            find_value_for(constants.PARAMETERS_CONSTRAINTS, values)[2]
-        ),
-        "externalId": find_value_for(constants.PARAMETERS_EXTERNALID, values)[2],
-        "displayOrder": find_value_for(constants.PARAMETERS_DISPLAY_ORDER, values)[2],
-    }
-
-    if phase == "Order" and scope not in ("Item", "Request"):
-        excel_group_id = find_value_for(constants.PARAMETERS_GROUP_ID, values)[2]
-        group = parameter_group_mapping[excel_group_id]
-
-        parameter_json["group"] = {"id": group.id}
-
-    return parameter_json
-
-
-def to_item_sync_json(
-    product_id: str,
-    item_group_mapping: dict[str, ItemGroup],
-    item_parameters_id_mapping: dict[str, Parameter],
-    values: list[SheetValue],
-) -> dict:
-    # TODO: remove all precalculation out of this function
-    parameters = []
-    for value in find_values_by_pattern(re.compile(r"Parameter\.*"), values):
-        _, external_id = value[1].split(".")
-        parameter = find_first(
-            lambda p, ext_id=external_id: p.external_id == ext_id,
-            item_parameters_id_mapping.values(),
-        )
-        parameters.append({"id": parameter.id, "value": value[2]})
-
-    excel_group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
-    group = item_group_mapping[excel_group_id]
-
-    return _to_item_json(product_id, group.id, values, parameters)
-
-
-def to_item_update_or_create_json(
-    product_id: str, values: list[SheetValue], is_operations: bool
-) -> dict:
-    group_id = find_value_for(constants.ITEMS_GROUP_ID, values)[2]
-    # TODO: Add item parameter update
-    return _to_item_json(product_id, group_id, values, [], is_operations)
-
-
-def _to_item_json(
-    product_id: str,
-    group_id: str,
-    values: list[SheetValue],
-    parameters: list[dict],
-    is_operations: bool = False,
-) -> dict:
-    item_json = {
-        "name": find_value_for(constants.ITEMS_NAME, values)[2],
-        "description": find_value_for(constants.ITEMS_DESCRIPTION, values)[2],
-        "group": {
-            "id": group_id,
-        },
-        "product": {
-            "id": product_id,
-        },
-        "quantityNotApplicable": find_value_for(
-            constants.ITEMS_QUANTITY_APPLICABLE, values
-        )[2]
-        == "True",
-        "unit": {
-            "id": find_value_for(constants.ITEMS_UNIT_ID, values)[2],
-        },
-        "parameters": parameters,
-    }
-
-    period = find_value_for(constants.ITEMS_BILLING_FREQUENCY, values)[2]
-
-    if period == "one-time":
-        item_json["terms"] = {
-            "period": period,
-        }
-    else:
-        item_json["terms"] = {
-            "commitment": find_value_for(constants.ITEMS_COMMITMENT_TERM, values)[2],
-            "period": period,
-        }
-
-    if is_operations:
-        item_json["externalIds"] = {
-            "operations": find_value_for(constants.ITEMS_ERP_ITEM_ID, values)[2]
-        }
-    else:
-        item_json["externalIds"] = {
-            "vendor": find_value_for(constants.ITEMS_VENDOR_ITEM_ID, values)[2],
-        }
-
-    return item_json
-
-
-def to_template_json(
-    product: Product,
-    values: list[SheetValue],
-) -> dict:
-    return {
-        "name": find_value_for(constants.TEMPLATES_NAME, values)[2],
-        "type": find_value_for(constants.TEMPLATES_TYPE, values)[2],
-        "content": find_value_for(constants.TEMPLATES_CONTENT, values)[2],
-        "default": find_value_for(constants.TEMPLATES_DEFAULT, values)[2] == "True",
-    }
 
 
 def sync_product_definition(
@@ -386,74 +202,76 @@ def sync_product_definition(
     """
     Sync product definition to the marketplace platform
     """
-    wb = load_workbook(filename=str(definition_path))
+    file_handler = ExcelFileHandler(file_path=definition_path)
 
     if action == ProductAction.UPDATE:
         stats, product = update_product_definition(
-            mpt_client, wb, active_account, stats, status
+            mpt_client, file_handler, active_account, stats, status
         )
     else:
-        stats, product = create_product_definition(mpt_client, wb, stats, status)
+        stats, product = create_product_definition(mpt_client, file_handler, stats, status)
 
-    wb.save(str(definition_path))
+    file_handler.save()
 
     return stats, product
 
 
 def create_product_definition(
     mpt_client: MPTClient,
-    wb: Workbook,
+    file_handler: ExcelFileHandler,
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
+    general_data = file_handler.get_data_from_vertical_sheet(
+        constants.TAB_GENERAL, constants.GENERAL_FIELDS
+    )
+    settings_data = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_SETTINGS, constants.SETTINGS_FIELDS
+    )
     try:
-        general_values = get_values_for_general(
-            wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
-        )
-        settings_values = get_values_for_table(
-            wb[constants.TAB_SETTINGS], constants.SETTINGS_FIELDS
-        )
         product = create_product(
             mpt_client,
-            to_product_json(general_values),
-            to_settings_json(settings_values, constants.SETTINGS_API_MAPPING),
+            to_product_json(general_data),
+            to_settings_json(settings_data, constants.SETTINGS_API_MAPPING),
             Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
         )
-        index, _, _ = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)
-        wb[constants.TAB_GENERAL][index] = product.id
+        product_data = general_data[constants.GENERAL_PRODUCT_ID]
+        file_handler.write([{constants.TAB_GENERAL: {product_data["coordinate"]: product.id}}])
         stats.add_synced(constants.TAB_GENERAL)
 
     except Exception as e:
-        add_or_create_error(wb[constants.TAB_GENERAL], general_values, e)
+        data = [(cell["coordinate"], cell["value"], None) for _, cell in general_data.items()]
+        # TODO: re-think the error handling to avoid use wb
+        wb = file_handler._workbook
+        add_or_create_error(wb[constants.TAB_GENERAL], data, e)
         stats.add_error(constants.TAB_GENERAL)
         return stats, None
 
-    parameters_groups_ws = wb[constants.TAB_PARAMETERS_GROUPS]
-    parameter_groups = get_values_for_table(
-        parameters_groups_ws, constants.PARAMETERS_GROUPS_FIELDS
+    parameter_groups = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
     )
     _, parameters_groups_id_mapping = sync_parameters_groups(
         mpt_client,
-        parameters_groups_ws,
+        file_handler,
         product,
         parameter_groups,
         stats,
         status,
     )
 
-    items_groups_ws = wb[constants.TAB_ITEMS_GROUPS]
-    item_groups = get_values_for_table(items_groups_ws, constants.ITEMS_GROUPS_FIELDS)
+    item_groups = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_ITEMS_GROUPS, constants.ITEMS_GROUPS_FIELDS
+    )
     _, items_groups_id_mapping = sync_items_groups(
-        mpt_client, items_groups_ws, product, item_groups, stats, status
+        mpt_client, file_handler, product, item_groups, stats, status
     )
 
-    agreements_parameters_ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
-    agreements_parameters = get_values_for_table(
-        agreements_parameters_ws, constants.PARAMETERS_FIELDS
+    agreements_parameters = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_AGREEMENT_PARAMETERS, constants.PARAMETERS_FIELDS
     )
     _, agreements_parameters_id_mapping = sync_agreement_parameters(
         mpt_client,
-        agreements_parameters_ws,
+        file_handler,
         product,
         agreements_parameters,
         parameters_groups_id_mapping,
@@ -461,13 +279,12 @@ def create_product_definition(
         status,
     )
 
-    item_parameters_ws = wb[constants.TAB_ITEM_PARAMETERS]
-    item_parameters = get_values_for_table(
-        item_parameters_ws, constants.PARAMETERS_FIELDS
+    item_parameters = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_ITEM_PARAMETERS, constants.PARAMETERS_FIELDS
     )
     _, item_parameters_id_mapping = sync_item_parameters(
         mpt_client,
-        item_parameters_ws,
+        file_handler,
         product,
         item_parameters,
         parameters_groups_id_mapping,
@@ -475,13 +292,12 @@ def create_product_definition(
         status,
     )
 
-    request_parameters_ws = wb[constants.TAB_REQUEST_PARAMETERS]
-    request_parameters = get_values_for_table(
-        request_parameters_ws, constants.PARAMETERS_FIELDS
+    request_parameters = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_REQUEST_PARAMETERS, constants.PARAMETERS_FIELDS
     )
     _, request_parameters_id_mapping = sync_request_parameters(
         mpt_client,
-        request_parameters_ws,
+        file_handler,
         product,
         request_parameters,
         parameters_groups_id_mapping,
@@ -489,13 +305,12 @@ def create_product_definition(
         status,
     )
 
-    subscription_parameters_ws = wb[constants.TAB_SUBSCRIPTION_PARAMETERS]
-    subscription_parameters = get_values_for_table(
-        subscription_parameters_ws, constants.PARAMETERS_FIELDS
+    subscription_parameters = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_SUBSCRIPTION_PARAMETERS, constants.PARAMETERS_FIELDS
     )
     _, subscription_parameters_id_mapping = sync_subscription_parameters(
         mpt_client,
-        subscription_parameters_ws,
+        file_handler,
         product,
         subscription_parameters,
         parameters_groups_id_mapping,
@@ -503,13 +318,12 @@ def create_product_definition(
         status,
     )
 
-    items_ws = wb[constants.TAB_ITEMS]
-    items = get_values_for_dynamic_table(
-        items_ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    items = file_handler.get_values_for_dynamic_sheet(
+        constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
     _, items_id_mapping = sync_items(
         mpt_client,
-        items_ws,
+        file_handler,
         product,
         items,
         items_groups_id_mapping,
@@ -525,11 +339,12 @@ def create_product_definition(
         **subscription_parameters_id_mapping,
     }
 
-    templates_ws = wb[constants.TAB_TEMPLATES]
-    templates = get_values_for_table(templates_ws, constants.TEMPLATES_FIELDS)
+    templates = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_TEMPLATES, constants.TEMPLATES_FIELDS
+    )
     _, templates_id_mapping = sync_templates(
         mpt_client,
-        templates_ws,
+        file_handler,
         product,
         templates,
         all_parameters_id_mapping,
@@ -542,24 +357,21 @@ def create_product_definition(
 
 def update_product_definition(
     mpt_client: MPTClient,
-    wb: Workbook,
+    file_handler: ExcelFileHandler,
     active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
-    general_values = get_values_for_general(
-        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+    general_values = file_handler.get_data_from_vertical_sheet(
+        constants.TAB_GENERAL, constants.GENERAL_FIELDS
     )
-    product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
-
-    items_ws = wb[constants.TAB_ITEMS]
-    items = get_values_for_dynamic_table(
-        items_ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    product_id = general_values[constants.GENERAL_PRODUCT_ID]["value"]
+    items = file_handler.get_values_for_dynamic_sheet(
+        constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
-
     update_items(
         mpt_client,
-        items_ws,
+        file_handler,
         product_id,
         items,
         active_account,
@@ -572,13 +384,14 @@ def update_product_definition(
 
 def update_items(
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product_id: str,
     values: SheetValueGenerator,
     active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
 ) -> None:
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS)
     for sheet_value in values:
         try:
             action = ItemAction(find_value_for(constants.ITEMS_ACTION, sheet_value)[2])
@@ -631,7 +444,7 @@ def update_item(
 
 def sync_parameters_groups(
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product: Product,
     values: SheetValueGenerator,
     stats: ProductStatsCollector,
@@ -642,7 +455,7 @@ def sync_parameters_groups(
     Returns mapping if ids {"<excel-id>": ParameterGroup}
     """
     id_mapping = {}
-
+    ws = file_handler._get_worksheet(constants.TAB_PARAMETERS_GROUPS)
     for sheet_value in values:
         try:
             parameter_group = create_parameter_group(
@@ -671,7 +484,7 @@ def sync_parameters_groups(
 
 def sync_items_groups(
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product: Product,
     values: SheetValueGenerator,
     stats: ProductStatsCollector,
@@ -682,6 +495,7 @@ def sync_items_groups(
     Returns mapping if ids {"<excel-id>": ItemGroup}
     """
     id_mapping = {}
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS_GROUPS)
 
     for sheet_value in values:
         try:
@@ -712,7 +526,7 @@ def sync_items_groups(
 def sync_parameters(
     scope: str,
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product: Product,
     values: SheetValueGenerator,
     parameter_groups_mapping: dict[str, ParameterGroup],
@@ -724,7 +538,7 @@ def sync_parameters(
     Returns mapping if ids {"<excel-id>": Parameter}
     """
     id_mapping = {}
-
+    ws = file_handler._get_worksheet(getattr(constants, f"TAB_{scope.upper()}_PARAMETERS"))
     for sheet_value in values:
         try:
             parameter = create_parameter(
@@ -767,7 +581,7 @@ sync_subscription_parameters = partial(sync_parameters, "Subscription")
 
 def sync_items(
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product: Product,
     values: SheetValueGenerator,
     items_groups_mapping: dict[str, ItemGroup],
@@ -780,7 +594,7 @@ def sync_items(
     Returns mapping if ids {"<excel-id>": Item}
     """
     id_mapping = {}
-
+    ws = file_handler._get_worksheet(constants.TAB_ITEMS)
     for sheet_value in values:
         try:
             sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
@@ -837,7 +651,7 @@ def create_item(
             product_id,
             sheet_value,
             active_account.type == "Operations",
-        ),
+            ),
     )
 
     id_index, _, sheet_id_value = find_value_for(constants.ID_COLUMN_NAME, sheet_value)
@@ -862,7 +676,7 @@ def setup_unit_of_measure(
 
 def sync_templates(
     mpt_client: MPTClient,
-    ws: Worksheet,
+    file_handler: ExcelFileHandler,
     product: Product,
     values: SheetValueGenerator,
     all_parameters_id_mapping: dict[str, Parameter],
@@ -874,7 +688,7 @@ def sync_templates(
     Returns mapping if ids {"<excel-id>": Template}
     """
     id_mapping = {}
-
+    ws = file_handler._get_worksheet(constants.TAB_TEMPLATES)
     for sheet_value in values:
         try:
             sheet_value = replace_parameter_variables(
@@ -883,7 +697,7 @@ def sync_templates(
             template = create_template(
                 mpt_client,
                 product,
-                to_template_json(product, sheet_value),
+                to_template_json(sheet_value),
             )
 
             content_index, _, sheet_content_value = find_value_for(
@@ -923,12 +737,11 @@ def replace_parameter_variables(
 def check_product_exists(
     mpt_client: MPTClient, product_definition_path: Path
 ) -> Product | None:
-    wb = load_workbook(filename=str(product_definition_path))
-    general_values = get_values_for_general(
-        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
+    file_handler = ExcelFileHandler(product_definition_path)
+    general_values = file_handler.get_data_from_vertical_sheet(
+        constants.TAB_GENERAL, constants.GENERAL_FIELDS
     )
-
-    product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
+    product_id = general_values[constants.GENERAL_PRODUCT_ID]["value"]
 
     _, products = get_products(mpt_client, 1, 0, query=f"id={product_id}")
     return products[0] if products else None
