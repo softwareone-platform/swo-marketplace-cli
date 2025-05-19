@@ -91,7 +91,6 @@ def sync_product(
     """
     with console.status("Check product definition"):
         product_definition_path = get_definition_file(product_path)
-
         try:
             check_file_exists(product_definition_path)
         except FileNotExistsError as e:
@@ -110,8 +109,6 @@ def sync_product(
     if not is_dry_run:
         active_account = get_active_account()
         mpt_client = client_from_account(active_account)
-        product_stats = ProductStatsCollector()
-
         product = check_product_exists(mpt_client, product_definition_path)
         if product and not force_create:
             _ = typer.confirm(
@@ -143,19 +140,20 @@ def sync_product(
                 product_definition_path,
                 action,
                 active_account,
-                product_stats,
+                ProductStatsCollector(),
                 status,
             )
 
+        # TODO: call product_stats.to_table()
         table = _product_stats_table(product_stats)
         table = _list_products_stats(table, product_stats)
-
         console.print(table)
 
         if product_stats.is_error:
             raise typer.Exit(code=3)
 
 
+# TODO: move to StatsCollector.to_table()
 def _product_stats_table(stats: ProductStatsCollector) -> Table:
     if stats.is_error:
         title = "Product Sync [red bold]FAILED"
@@ -172,6 +170,7 @@ def _product_stats_table(stats: ProductStatsCollector) -> Table:
     return table
 
 
+# TODO: move to StatsCollector.to_table()
 def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
     for tab_name, tab_stats in stats.tabs.items():
         table.add_row(
@@ -185,6 +184,7 @@ def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
     return table
 
 
+# TODO: move to StatsCollector.to_table()
 def _products_table(title: str) -> Table:
     table = Table(title=title, box=box.ROUNDED)
 
@@ -196,6 +196,7 @@ def _products_table(title: str) -> Table:
     return table
 
 
+# TODO: move to StatsCollector.to_table()
 def _list_products(table: Table, products: list[MPTProduct]) -> Table:
     def _wrap_product_status(status: str) -> str:  # pragma: no cover
         match status:

@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from openpyxl import load_workbook  # type: ignore
 from rich import box
 from rich.table import Table
 from swo.mpt.cli.core.accounts.app import get_active_account
@@ -55,9 +54,7 @@ def sync_pricelists(
 
     has_error = False
     for file_path in file_paths:
-        wb = load_workbook(filename=file_path)
-
-        pricelist = check_pricelist(mpt_client, wb)
+        pricelist = check_pricelist(mpt_client, file_path)
         if pricelist:
             _ = typer.confirm(
                 f"Do you want to update {pricelist.id} for "
@@ -76,7 +73,7 @@ def sync_pricelists(
         stats = PricelistStatsCollector()
         stats, pricelist = sync_pricelist(
             mpt_client,
-            wb,
+            Path(file_path),
             action,
             active_account,
             stats,
@@ -92,8 +89,6 @@ def sync_pricelists(
             console.print(pricelist_table)
         else:
             console.print("Pricelist sync [red bold]FAILED")
-
-        wb.save(file_path)
 
     if has_error:
         raise typer.Exit(code=4)
