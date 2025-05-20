@@ -126,5 +126,9 @@ ignore_missing_imports = true
 module = "gunicorn.*"
 ignore_missing_imports = true
 
+[[tool.mypy.overrides]]
+module = "openpyxl.*"
+ignore_missing_imports = true
+
 [tool.poetry.plugins."swo.mpt.cli.plugins"]
 "audit" = "swo.mpt.cli.plugins.audit_plugin.app:app"
