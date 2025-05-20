@@ -30,15 +30,13 @@ class MPTClient(Session):
         self.base_url = f"{base_url}/" if base_url[-1] != "/" else base_url
         self.api_token = api_token
 
-    def request(
-        self, method: str | bytes, url: str | bytes, *args, **kwargs
-    ) -> Response:
+    def request(self, method: str | bytes, url: str | bytes, *args, **kwargs) -> Response:
         url = self.join_url(str(url))
 
         if self.debug:
             # Get caller info
             caller_frame = inspect.currentframe().f_back  # type: ignore
-            caller_info = inspect.getframeinfo(caller_frame) # type: ignore
+            caller_info = inspect.getframeinfo(caller_frame)  # type: ignore
 
             # Log request details
             logger.debug(
@@ -54,11 +52,8 @@ class MPTClient(Session):
             logger.debug(
                 f"Response Status: {response.status_code}\n"
                 f"Response Body: {
-                    json.dumps(
-                        response.json(),
-                        indent=2
-                    ) if response.text else 'No body'
-                    }"
+                    json.dumps(response.json(), indent=2) if response.text else 'No body'
+                }"
             )
 
         return response
@@ -76,8 +71,4 @@ def client_from_account(account: Account) -> MPTClient:
     """
     Creates MPT Client from the Account
     """
-    return MPTClient(
-        api_token=account.token,
-        base_url=account.environment,
-        debug=state.verbose
-    )
+    return MPTClient(api_token=account.token, base_url=account.environment, debug=state.verbose)

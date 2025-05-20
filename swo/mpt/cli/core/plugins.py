@@ -5,12 +5,12 @@ from typer import Typer
 PLUGINS_PACKAGE = "swo.mpt.cli.plugins"
 
 
-def list_entrypoints() -> list[EntryPoint]:  # pragma: no cover
+def list_entrypoints() -> list[EntryPoint]:
     entrypoints = entry_points().select(group=PLUGINS_PACKAGE)
     if not entrypoints:
         return []
 
-    return entrypoints
+    return list(entrypoints)
 
 
 def load_plugins(app: Typer):

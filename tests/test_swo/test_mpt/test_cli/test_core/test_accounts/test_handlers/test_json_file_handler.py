@@ -5,16 +5,17 @@ import pytest
 from swo.mpt.cli.core.accounts.handlers.json_file_handler import JsonFileHandler
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_file_path(tmp_path):
     return tmp_path / "fake_accounts.json"
 
-@pytest.fixture()
+
+@pytest.fixture
 def json_file_handler(mock_file_path):
     return JsonFileHandler(file_path=mock_file_path)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_config_data():
     return {"key": "value"}
 

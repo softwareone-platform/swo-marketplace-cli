@@ -9,3 +9,6 @@ class Account(BaseModel):
     token_id: str
     environment: str
     is_active: bool = False
+
+    def is_operations(self) -> bool:
+        return self.type == "Operations"

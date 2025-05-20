@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import typer
 from rich.panel import Panel
@@ -13,11 +13,11 @@ from .utils import display_audit_records, flatten_dict, format_json_path
 app = typer.Typer(name="audit", help="Audit commands.")
 
 
-def compare_audit_trails(source_trail: Dict[str, Any], target_trail: Dict[str, Any]) -> None:
+def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
     """Compare two audit trails and display the differences."""
     # Ensure we're comparing the same object
-    source_object_id = source_trail.get('object', {}).get('id')
-    target_object_id = target_trail.get('object', {}).get('id')
+    source_object_id = source_trail.get("object", {}).get("id")
+    target_object_id = target_trail.get("object", {}).get("id")
 
     if source_object_id != target_object_id:
         console.print("[red]Cannot compare different objects[/red]")
@@ -57,7 +57,7 @@ def compare_audit_trails(source_trail: Dict[str, Any], target_trail: Dict[str, A
             table.add_row(
                 formatted_path,
                 str(source_value) if source_value is not None else "[red]<missing>[/red]",
-                str(target_value) if target_value is not None else "[red]<missing>[/red]"
+                str(target_value) if target_value is not None else "[red]<missing>[/red]",
             )
 
     if differences_found:
@@ -69,15 +69,12 @@ def compare_audit_trails(source_trail: Dict[str, Any], target_trail: Dict[str, A
 @app.command()
 def diff_by_object_id(
     object_id: str = typer.Argument(
-        ...,
-        help="Object ID to fetch and compare all audit records for"
+        ..., help="Object ID to fetch and compare all audit records for"
     ),
     positions: Optional[str] = typer.Option(
-        None,
-        "--positions",
-        help="Positions to compare (e.g. '1,3')"
+        None, "--positions", help="Positions to compare (e.g. '1,3')"
     ),
-    limit: int = typer.Option(10, "--limit", help="Maximum number of audit records to retrieve")
+    limit: int = typer.Option(10, "--limit", help="Maximum number of audit records to retrieve"),
 ):
     """Compare audit trails for a specific object."""
     account = get_active_account()
@@ -92,7 +89,7 @@ def diff_by_object_id(
 
     if positions:
         try:
-            pos1, pos2 = map(int, positions.split(','))
+            pos1, pos2 = map(int, positions.split(","))
             if not (1 <= pos1 <= len(records) and 1 <= pos2 <= len(records)):
                 raise ValueError
         except ValueError:
@@ -118,7 +115,7 @@ def diff_by_object_id(
 @app.command()
 def diff_by_records_id(
     source: str = typer.Argument(..., help="ID of the source audit record"),
-    target: str = typer.Argument(..., help="ID of the target audit record")
+    target: str = typer.Argument(..., help="ID of the target audit record"),
 ):
     """Compare audit trails between two specific audit record IDs."""
     account = get_active_account()

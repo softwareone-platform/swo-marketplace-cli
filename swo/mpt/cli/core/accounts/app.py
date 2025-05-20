@@ -30,9 +30,7 @@ app = typer.Typer()
 
 @app.command(name="add")
 def add_account(
-    secret: Annotated[
-        str, typer.Argument(help="SoftwareOne Marketplace API Token secret")
-    ],
+    secret: Annotated[str, typer.Argument(help="SoftwareOne Marketplace API Token secret")],
     environment: Annotated[
         str, typer.Option("--environment", "-e", help="URL to the API for environment")
     ] = "https://api.platform.softwareone.com/public/v1",
@@ -61,9 +59,7 @@ def add_account(
         )
         accounts = remove_account(accounts, account)
 
-    with console.status(
-        f"Adding account {account.id} ({account.name}) to the configuration file"
-    ):
+    with console.status(f"Adding account {account.id} ({account.name}) to the configuration file"):
         accounts.append(account)
         accounts = disable_accounts_except(accounts, account)
 
@@ -188,9 +184,7 @@ def _account_table(title: str) -> Table:
     return table
 
 
-def _list_accounts(
-    table: Table, accounts: list[Account], wrap_secret: bool = True
-) -> Table:
+def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = True) -> Table:
     def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
         match account_type:
             case "Vendor":

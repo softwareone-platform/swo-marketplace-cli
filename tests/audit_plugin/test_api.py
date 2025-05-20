@@ -8,14 +8,14 @@ from swo.mpt.cli.plugins.audit_plugin.api import (
 from typer import Exit
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_client():
     client = Mock()
     client.get = Mock()
     return client
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_response():
     response = Mock()
     response.json = Mock()
@@ -28,7 +28,7 @@ class TestGetAuditTrail:
         expected_data = {
             "id": "audit123",
             "object": {"id": "obj123"},
-            "actor": {"name": "Test User"}
+            "actor": {"name": "Test User"},
         }
         mock_response.json.return_value = expected_data
         mock_client.get.return_value = mock_response
@@ -71,13 +71,13 @@ class TestGetAuditRecordsByObject:
                 {
                     "id": "audit1",
                     "object": {"id": "obj123"},
-                    "timestamp": "2024-01-01T10:00:00Z"
+                    "timestamp": "2024-01-01T10:00:00Z",
                 },
                 {
                     "id": "audit2",
                     "object": {"id": "obj123"},
-                    "timestamp": "2024-01-01T11:00:00Z"
-                }
+                    "timestamp": "2024-01-01T11:00:00Z",
+                },
             ]
         }
         mock_response.json.return_value = expected_data

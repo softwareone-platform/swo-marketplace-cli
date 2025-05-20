@@ -3,7 +3,6 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from openpyxl import load_workbook  # type: ignore
 from rich import box
 from rich.table import Table
 from swo.mpt.cli.core.accounts.app import get_active_account
@@ -24,9 +23,7 @@ app = typer.Typer()
 def sync_pricelists(
     pricelists_paths: Annotated[
         list[str],
-        typer.Argument(
-            help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"
-        ),
+        typer.Argument(help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"),
     ],
 ):
     with console.status("Fetching pricelist files..."):
@@ -44,9 +41,7 @@ def sync_pricelists(
         file_paths = list(filter(lambda p: p.endswith(".xlsx"), file_paths))
 
     if not len(file_paths):
-        console.print(
-            f"No files found for provided paths {', '.join(pricelists_paths)}"
-        )
+        console.print(f"No files found for provided paths {', '.join(pricelists_paths)}")
         raise typer.Exit(code=3)
 
     _ = typer.confirm(
@@ -59,9 +54,7 @@ def sync_pricelists(
 
     has_error = False
     for file_path in file_paths:
-        wb = load_workbook(filename=file_path)
-
-        pricelist = check_pricelist(mpt_client, wb)
+        pricelist = check_pricelist(mpt_client, file_path)
         if pricelist:
             _ = typer.confirm(
                 f"Do you want to update {pricelist.id} for "
@@ -80,7 +73,7 @@ def sync_pricelists(
         stats = PricelistStatsCollector()
         stats, pricelist = sync_pricelist(
             mpt_client,
-            wb,
+            Path(file_path),
             action,
             active_account,
             stats,
@@ -97,15 +90,11 @@ def sync_pricelists(
         else:
             console.print("Pricelist sync [red bold]FAILED")
 
-        wb.save(file_path)
-
     if has_error:
         raise typer.Exit(code=4)
 
 
-def _pricelist_stats_table(
-    pricelist: Pricelist, stats: PricelistStatsCollector
-) -> Table:
+def _pricelist_stats_table(pricelist: Pricelist, stats: PricelistStatsCollector) -> Table:
     if stats.is_error:
         title = "Pricelist sync [red bold]FAILED"
     else:
@@ -125,10 +114,10 @@ def _list_pricelist_stats(table: Table, stats: PricelistStatsCollector) -> Table
     for tab_name, tab_stats in stats.tabs.items():
         table.add_row(
             tab_name,
-            f"[blue]{tab_stats["total"]}",
-            f"[green]{tab_stats["synced"]}",
-            f"[red bold]{tab_stats["error"]}",
-            f"[white]{tab_stats["skipped"]}",
+            f"[blue]{tab_stats['total']}",
+            f"[green]{tab_stats['synced']}",
+            f"[red bold]{tab_stats['error']}",
+            f"[white]{tab_stats['skipped']}",
         )
 
     return table

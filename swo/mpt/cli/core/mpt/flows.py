@@ -107,24 +107,16 @@ def create_parameter_group(
 
 
 @wrap_http_error
-def create_item_group(
-    mpt_client: MPTClient, product: Product, item_group_json: dict
-) -> ItemGroup:
-    response = mpt_client.post(
-        f"/catalog/products/{product.id}/item-groups", json=item_group_json
-    )
+def create_item_group(mpt_client: MPTClient, product: Product, item_group_json: dict) -> ItemGroup:
+    response = mpt_client.post(f"/catalog/products/{product.id}/item-groups", json=item_group_json)
     response.raise_for_status()
 
     return ItemGroup.model_validate(response.json())
 
 
 @wrap_http_error
-def create_parameter(
-    mpt_client: MPTClient, product: Product, parameter_json: dict
-) -> Parameter:
-    response = mpt_client.post(
-        f"/catalog/products/{product.id}/parameters", json=parameter_json
-    )
+def create_parameter(mpt_client: MPTClient, product: Product, parameter_json: dict) -> Parameter:
+    response = mpt_client.post(f"/catalog/products/{product.id}/parameters", json=parameter_json)
     response.raise_for_status()
 
     return Parameter.model_validate(response.json())
@@ -182,9 +174,7 @@ def get_item(mpt_client: MPTClient, product_id: str, vendor_id: str) -> Item:
 @cache
 @wrap_http_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
-    response = mpt_client.get(
-        f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0"
-    )
+    response = mpt_client.get(f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0")
     response.raise_for_status()
 
     data = response.json()["data"]
@@ -198,12 +188,8 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
 
 
 @wrap_http_error
-def create_template(
-    mpt_client: MPTClient, product: Product, template_json: dict
-) -> Template:
-    response = mpt_client.post(
-        f"/catalog/products/{product.id}/templates", json=template_json
-    )
+def create_template(mpt_client: MPTClient, product: Product, template_json: dict) -> Template:
+    response = mpt_client.post(f"/catalog/products/{product.id}/templates", json=template_json)
     response.raise_for_status()
 
     return Template.model_validate(response.json())
@@ -226,21 +212,15 @@ def create_pricelist(mpt_client: MPTClient, pricelist_json: dict) -> Pricelist:
 
 
 @wrap_http_error
-def update_pricelist(
-    mpt_client: MPTClient, pricelist_id: str, pricelist_json: dict
-) -> Pricelist:
-    response = mpt_client.put(
-        f"/catalog/price-lists/{pricelist_id}", json=pricelist_json
-    )
+def update_pricelist(mpt_client: MPTClient, pricelist_id: str, pricelist_json: dict) -> Pricelist:
+    response = mpt_client.put(f"/catalog/price-lists/{pricelist_id}", json=pricelist_json)
     response.raise_for_status()
 
     return Pricelist.model_validate(response.json())
 
 
 @wrap_http_error
-def get_pricelist_item(
-    mpt_client: MPTClient, pricelist_id: str, vendor_id: str
-) -> PricelistItem:
+def get_pricelist_item(mpt_client: MPTClient, pricelist_id: str, vendor_id: str) -> PricelistItem:
     response = mpt_client.get(
         f"/catalog/price-lists/{pricelist_id}/items?item.externalIds.vendor={vendor_id}&limit=1&offset=0"
     )

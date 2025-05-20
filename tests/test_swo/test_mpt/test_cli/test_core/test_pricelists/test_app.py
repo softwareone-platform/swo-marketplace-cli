@@ -14,9 +14,7 @@ def test_sync_pricelists_not_files_found(pricelist_new_file):
     assert "No files found for provided paths" in result.stdout
 
 
-def test_sync_pricelists_particular_file(
-    mocker, pricelist, pricelist_new_file, expected_account
-):
+def test_sync_pricelists_particular_file(mocker, pricelist, pricelist_new_file, expected_account):
     stats = PricelistStatsCollector()
     sync_pricelist = mocker.patch(
         "swo.mpt.cli.core.pricelists.app.sync_pricelist",
@@ -62,9 +60,7 @@ def test_sync_pricelists_particular_dicrectory(
     sync_pricelist.assert_called_once()
 
 
-def test_sync_pricelists_create_file(
-    mocker, pricelist, pricelist_new_file, expected_account
-):
+def test_sync_pricelists_create_file(mocker, pricelist, pricelist_new_file, expected_account):
     stats = PricelistStatsCollector()
     sync_pricelist = mocker.patch(
         "swo.mpt.cli.core.pricelists.app.sync_pricelist",

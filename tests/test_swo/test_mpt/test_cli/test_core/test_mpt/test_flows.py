@@ -48,9 +48,7 @@ def test_get_token(requests_mocker, mpt_client, mpt_token, wrap_to_mpt_list_resp
     assert token == Token.model_validate(mpt_token)
 
 
-def test_get_token_exception_zero_tokens(
-    requests_mocker, mpt_client, wrap_to_mpt_list_response
-):
+def test_get_token_exception_zero_tokens(requests_mocker, mpt_client, wrap_to_mpt_list_response):
     secret = "id123456789"
     requests_mocker.get(
         urljoin(mpt_client.base_url, f"/accounts/api-tokens?limit=2&token={secret}"),
@@ -60,9 +58,7 @@ def test_get_token_exception_zero_tokens(
     with pytest.raises(MPTAPIError) as e:
         get_token(mpt_client, secret)
 
-    assert "MPT API for Tokens returns 0 or more than 1 tokens for secret" in str(
-        e.value
-    )
+    assert "MPT API for Tokens returns 0 or more than 1 tokens for secret" in str(e.value)
 
 
 def test_get_token_exception_more_than_one(
@@ -77,9 +73,7 @@ def test_get_token_exception_more_than_one(
     with pytest.raises(MPTAPIError) as e:
         get_token(mpt_client, secret)
 
-    assert "MPT API for Tokens returns 0 or more than 1 tokens for secret" in str(
-        e.value
-    )
+    assert "MPT API for Tokens returns 0 or more than 1 tokens for secret" in str(e.value)
 
 
 def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_products):
@@ -93,9 +87,7 @@ def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_pr
     assert products == [Product.model_validate(p) for p in mpt_products]
 
 
-def test_get_products_with_query(
-    requests_mocker, mpt_client, mpt_products_response, mpt_products
-):
+def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_response, mpt_products):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -144,9 +136,7 @@ def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_p
     assert product == Product.model_validate(mpt_product)
 
 
-def test_create_product_exception(
-    requests_mocker, mpt_client, mpt_product, product_icon_path
-):
+def test_create_product_exception(requests_mocker, mpt_client, mpt_product, product_icon_path):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
@@ -166,9 +156,7 @@ def test_create_product_exception(
     assert "Internal Server Error" in str(e.value)
 
 
-def test_create_parameter_group(
-    requests_mocker, mpt_client, product, mpt_parameter_group
-):
+def test_create_parameter_group(requests_mocker, mpt_client, product, mpt_parameter_group):
     requests_mocker.post(
         urljoin(
             mpt_client.base_url,
@@ -319,9 +307,7 @@ def test_search_uom_by_name_exception(requests_mocker, mpt_client):
     assert "Internal Server Error" in str(e.value)
 
 
-def test_search_uom_by_name_not_found(
-    requests_mocker, wrap_to_mpt_list_response, mpt_client
-):
+def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response, mpt_client):
     name = "User"
     requests_mocker.get(
         urljoin(
@@ -617,9 +603,7 @@ def test_update_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist)
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
     )
 
-    returned_pricelist = update_pricelist(
-        mpt_client, "PRC-1234-1234", {"id": "PRC-1234-1234"}
-    )
+    returned_pricelist = update_pricelist(mpt_client, "PRC-1234-1234", {"id": "PRC-1234-1234"})
 
     assert returned_pricelist == pricelist
 
@@ -694,9 +678,7 @@ def test_get_pricelist_item_not_found(
     assert "is not found." in str(e.value)
 
 
-def test_update_pricelist_item(
-    requests_mocker, mpt_client, mpt_pricelist_item, pricelist_item
-):
+def test_update_pricelist_item(requests_mocker, mpt_client, mpt_pricelist_item, pricelist_item):
     requests_mocker.put(
         urljoin(
             mpt_client.base_url,
@@ -723,8 +705,6 @@ def test_update_pricelist_item_exception(requests_mocker, mpt_client):
     )
 
     with pytest.raises(MPTAPIError) as e:
-        update_pricelist_item(
-            mpt_client, "PRC-1234-1234", "PRI-1234-1234", {"id": "PRC-1234-1234"}
-        )
+        update_pricelist_item(mpt_client, "PRC-1234-1234", "PRI-1234-1234", {"id": "PRC-1234-1234"})
 
     assert "Internal Server Error" in str(e.value)

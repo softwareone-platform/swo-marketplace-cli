@@ -8,7 +8,7 @@ from swo.mpt.cli.core.handlers import FileHandler
 
 class JsonFileHandler(FileHandler):
     # TBD: should this be configurable by the user or moved to a constant?
-    _default_file_path: Path = Path.home() / '.swocli' / 'accounts.json'
+    _default_file_path: Path = Path.home() / ".swocli" / "accounts.json"
 
     def __init__(self, file_path: Path | None = None):
         if file_path is None:
@@ -44,7 +44,6 @@ class JsonFileHandler(FileHandler):
         with open(self.file_path, "w+") as f:
             json_data = json.dumps(data, indent=2)
             f.write(json_data)
-
 
     def _create_empty_file(self):
         self.write([])

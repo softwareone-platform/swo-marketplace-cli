@@ -1,10 +1,11 @@
 import re
 from pathlib import Path
+from unittest.mock import call
 
 import pytest
-from openpyxl import load_workbook
 from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
+from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
 from swo.mpt.cli.core.mpt.models import Item
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
@@ -12,8 +13,6 @@ from swo.mpt.cli.core.products.flows import (
     check_file_exists,
     check_product_definition,
     check_product_exists,
-    get_definition_file,
-    get_values_for_dynamic_table,
     sync_items,
     sync_items_groups,
     sync_parameters,
@@ -22,10 +21,9 @@ from swo.mpt.cli.core.products.flows import (
     sync_templates,
 )
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
-from swo.mpt.cli.core.utils import get_values_for_table
 
 
-@pytest.fixture()
+@pytest.fixture
 def items():
     # see tests/product_files/PRD-1234-1234-1234-file-update.xlsx file
     return [
@@ -36,25 +34,13 @@ def items():
     ]
 
 
-def test_get_definition_file():
-    file_path = "/example/PRD-1234-1234.xlsx"
-
-    assert get_definition_file(file_path) == Path(file_path)
-
-
-def test_get_definition_file_add_postfix():
-    file_path = "/example/PRD-1234-1234"
-
-    assert get_definition_file(file_path) == Path(f"{file_path}.xlsx")
-
-
 def test_check_file_exists(empty_file):
     assert check_file_exists(empty_file)
 
 
 def test_check_file_not_exists(tmp_path):
     with pytest.raises(FileNotExistsError):
-        check_file_exists("tmp_path")
+        check_file_exists(Path("tmp_path"))
 
 
 def test_check_product_definition_not_all_tabs(empty_file):
@@ -108,22 +94,16 @@ def test_check_product_definition_not_all_required_items_groups(product_file_roo
     assert str(stats) == "Items Groups: Required field Label is not provided\n"
 
 
-def test_check_product_definition_not_all_required_agreements_parameters(
-    product_file_root,
-):
+def test_check_product_definition_not_all_required_agreements_parameters(product_file_root):
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-agreements-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-agreements-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats)
-        == "Agreements Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Agreements Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_item_parameters(
@@ -146,15 +126,12 @@ def test_check_product_definition_not_all_required_request_parameters(
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-request-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-request-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats) == "Request Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Request Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_subscription_parameters(
@@ -163,16 +140,12 @@ def test_check_product_definition_not_all_required_subscription_parameters(
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-subscription-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-subscription-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats)
-        == "Subscription Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Subscription Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_items(
@@ -217,34 +190,28 @@ def test_check_product_definition_not_all_required_settings(
     assert str(stats) == "Settings: Required field Value is not provided\n"
 
 
-def test_sync_parameters_groups(
-    mocker, mpt_client, new_product_file, product, parameter_group
-):
+def test_sync_parameters_groups(mocker, mpt_client, new_product_file, product, parameter_group):
     stats = ProductStatsCollector()
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
         return_value=parameter_group,
     )
+    file_handler = ExcelFileHandler(new_product_file)
+    values = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
+    )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_PARAMETERS_GROUPS]
-    values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
-
-    _, id_mapping = sync_parameters_groups(
-        mpt_client, ws, product, values, stats, console.status("")
+    id_mapping = sync_parameters_groups(
+        mpt_client, file_handler, product, values, stats, console.status("")
     )
 
     assert id_mapping == {
         "PGR-4944-4118-0002": parameter_group,
         "PGR-4944-4118-0003": parameter_group,
     }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
-        parameter_group.id,
-        parameter_group.id,
-    )
+    a2_value = file_handler.get_cell_value_by_coordinate(constants.TAB_PARAMETERS_GROUPS, "A2")
+    a3_value = file_handler.get_cell_value_by_coordinate(constants.TAB_PARAMETERS_GROUPS, "A3")
+    assert (a2_value, a3_value) == (parameter_group.id, parameter_group.id)
     assert parameter_group_mock.mock_calls[0].args == (
         mpt_client,
         product,
@@ -269,22 +236,23 @@ def test_sync_parameters_groups(
     )
 
 
-def test_sync_parameters_groups_exception(
-    mocker, mpt_client, new_product_file, product
-):
+def test_sync_parameters_groups_exception(mocker, mpt_client, new_product_file, product):
     stats = ProductStatsCollector()
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_PARAMETERS_GROUPS]
-    values = get_values_for_table(ws, constants.PARAMETERS_GROUPS_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    sheet_name = constants.TAB_PARAMETERS_GROUPS
+    values = file_handler.get_data_from_horizontal_sheet(
+        sheet_name, constants.PARAMETERS_GROUPS_FIELDS
+    )
 
-    sync_parameters_groups(mpt_client, ws, product, values, stats, console.status(""))
+    sync_parameters_groups(mpt_client, file_handler, product, values, stats, console.status(""))
 
-    assert ws["J2"].value == "Error with response body Error"
+    j2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "J2")
+    assert j2_value == "Error with response body Error"
 
 
 def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_group):
@@ -293,25 +261,22 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS_GROUPS]
-    values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    values = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_ITEMS_GROUPS, constants.ITEMS_GROUPS_FIELDS
+    )
 
-    _, id_mapping = sync_items_groups(
-        mpt_client, ws, product, values, stats, console.status("")
+    id_mapping = sync_items_groups(
+        mpt_client, file_handler, product, values, stats, console.status("")
     )
 
     assert id_mapping == {
         "IGR-4944-4118-0002": item_group,
         "IGR-4944-4118-0003": item_group,
     }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
-        item_group.id,
-        item_group.id,
-    )
+    a2_value = file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS_GROUPS, "A2")
+    a3_value = file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS_GROUPS, "A3")
+    assert (a2_value, a3_value) == (item_group.id, item_group.id)
     assert item_group_mock.mock_calls[0].args == (
         mpt_client,
         product,
@@ -347,31 +312,30 @@ def test_sync_items_groups_exception(mocker, mpt_client, new_product_file, produ
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS_GROUPS]
-    values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    values = file_handler.get_data_from_horizontal_sheet(
+        constants.TAB_ITEMS_GROUPS, constants.ITEMS_GROUPS_FIELDS
+    )
 
-    sync_items_groups(mpt_client, ws, product, values, stats, console.status(""))
+    sync_items_groups(mpt_client, file_handler, product, values, stats, console.status(""))
 
-    assert ws["L2"].value == "Error with response body Error"
+    l2_value = file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS_GROUPS, "L2")
+    assert l2_value == "Error with response body Error"
 
 
-def test_sync_parameters(
-    mocker, mpt_client, new_product_file, product, parameter, parameter_group
-):
+def test_sync_parameters(mocker, mpt_client, new_product_file, product, parameter, parameter_group):
     stats = ProductStatsCollector()
     parameter_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter", return_value=parameter
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
-    values = get_values_for_table(ws, constants.PARAMETERS_FIELDS)
-
-    _, id_mapping = sync_parameters(
+    file_handler = ExcelFileHandler(new_product_file)
+    sheet_name = constants.TAB_AGREEMENT_PARAMETERS
+    values = file_handler.get_data_from_horizontal_sheet(sheet_name, constants.PARAMETERS_FIELDS)
+    id_mapping = sync_parameters(
         "Agreement",
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -385,14 +349,13 @@ def test_sync_parameters(
         "PAR-4944-4118-0001": parameter,
         "PAR-4944-4118-0002": parameter,
     }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
+    a2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A2")
+    a3_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A3")
+    assert (a2_value, a3_value) == (
         parameter.id,
         parameter.id,
     )
-    assert ws["H2"].value == parameter_group.id
+    assert file_handler.get_cell_value_by_coordinate(sheet_name, "H2") == parameter_group.id
     assert parameter_mock.mock_calls[0].args == (
         mpt_client,
         product,
@@ -458,23 +421,21 @@ def test_sync_parameters(
     )
 
 
-def test_sync_parameters_exception(
-    mocker, mpt_client, new_product_file, product, parameter_group
-):
+def test_sync_parameters_exception(mocker, mpt_client, new_product_file, product, parameter_group):
     stats = ProductStatsCollector()
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter",
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_AGREEMENTS_PARAMETERS]
-    values = get_values_for_table(ws, constants.PARAMETERS_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    sheet_name = constants.TAB_AGREEMENT_PARAMETERS
+    values = file_handler.get_data_from_horizontal_sheet(sheet_name, constants.PARAMETERS_FIELDS)
 
     sync_parameters(
         "Agreement",
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -484,7 +445,8 @@ def test_sync_parameters_exception(
         console.status(""),
     )
 
-    assert ws["O2"].value == "Error with response body Error"
+    o2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "O2")
+    assert o2_value == "Error with response body Error"
 
 
 def test_sync_item(
@@ -499,20 +461,17 @@ def test_sync_item(
     uom,
 ):
     stats = ProductStatsCollector()
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS]
-    values = get_values_for_dynamic_table(
-        ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    file_handler = ExcelFileHandler(new_product_file)
+    values = file_handler.get_values_for_dynamic_sheet(
+        constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
 
-    _, id_mapping = sync_items(
+    id_mapping = sync_items(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -526,92 +485,81 @@ def test_sync_item(
         console.status(""),
     )
 
-    assert id_mapping == {
-        "ITM-4944-4118-0001": item,
-        "ITM-4944-4118-0002": item,
-    }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
-        item.id,
-        item.id,
-    )
-    assert (
-        ws["J2"].value,
-        ws["J3"].value,
-    ) == (
-        item_group.id,
-        item_group.id,
-    )
-    assert item_mock.mock_calls[0].args == (
-        mpt_client,
-        {
-            "name": "Adobe PhotoKiosk",
-            "description": "Description 1",
-            "externalIds": {
-                "vendor": "65AB123BASD",
-            },
-            "group": {
-                "id": item_group.id,
-            },
-            "product": {
-                "id": product.id,
-            },
-            "quantityNotApplicable": True,
-            "terms": {
-                "commitment": "1y",
-                "period": "1m",
-            },
-            "unit": {
-                "id": uom.id,
-            },
-            "parameters": [
-                {
-                    "id": parameter.id,
-                    "value": "New",
+    assert id_mapping == {"ITM-4944-4118-0001": item, "ITM-4944-4118-0002": item}
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "A2") == item.id
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "A3") == item.id
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "J2") == item_group.id
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "J3") == item_group.id
+    assert item_mock.call_args_list == [
+        call(
+            mpt_client,
+            {
+                "name": "Adobe PhotoKiosk",
+                "description": "Description 1",
+                "externalIds": {
+                    "vendor": "65AB123BASD",
                 },
-                {
-                    "id": another_parameter.id,
-                    "value": "test ex 21",
+                "group": {
+                    "id": item_group.id,
                 },
-            ],
-        },
-    )
-    assert item_mock.mock_calls[1].args == (
-        mpt_client,
-        {
-            "name": "Customer",
-            "description": "Description 2",
-            "externalIds": {
-                "vendor": "65AB123BASD",
-            },
-            "group": {
-                "id": item_group.id,
-            },
-            "product": {
-                "id": product.id,
-            },
-            "quantityNotApplicable": False,
-            "terms": {
-                "commitment": "1y",
-                "period": "1m",
-            },
-            "unit": {
-                "id": uom.id,
-            },
-            "parameters": [
-                {
-                    "id": parameter.id,
-                    "value": "Migrate",
+                "product": {
+                    "id": product.id,
                 },
-                {
-                    "id": another_parameter.id,
-                    "value": "test ex 22",
+                "quantityNotApplicable": True,
+                "terms": {
+                    "commitment": "1y",
+                    "period": "1m",
                 },
-            ],
-        },
-    )
+                "unit": {
+                    "id": uom.id,
+                },
+                "parameters": [
+                    {
+                        "id": parameter.id,
+                        "value": "New",
+                    },
+                    {
+                        "id": another_parameter.id,
+                        "value": "test ex 21",
+                    },
+                ],
+            },
+        ),
+        call(
+            mpt_client,
+            {
+                "name": "Customer",
+                "description": "Description 2",
+                "externalIds": {
+                    "vendor": "65AB123BASD",
+                },
+                "group": {
+                    "id": item_group.id,
+                },
+                "product": {
+                    "id": product.id,
+                },
+                "quantityNotApplicable": False,
+                "terms": {
+                    "commitment": "1y",
+                    "period": "1m",
+                },
+                "unit": {
+                    "id": uom.id,
+                },
+                "parameters": [
+                    {
+                        "id": parameter.id,
+                        "value": "Migrate",
+                    },
+                    {
+                        "id": another_parameter.id,
+                        "value": "test ex 22",
+                    },
+                ],
+            },
+        ),
+    ]
 
 
 def test_sync_item_exception(
@@ -631,15 +579,14 @@ def test_sync_item_exception(
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_ITEMS]
-    values = get_values_for_dynamic_table(
-        ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
+    file_handler = ExcelFileHandler(new_product_file)
+    values = file_handler.get_values_for_dynamic_sheet(
+        constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
 
     sync_items(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -653,7 +600,8 @@ def test_sync_item_exception(
         console.status(""),
     )
 
-    assert ws["S2"].value == "Error with response body Error"
+    s2_value = file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "S2")
+    assert s2_value == "Error with response body Error"
 
 
 def test_sync_template(
@@ -669,13 +617,13 @@ def test_sync_template(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_TEMPLATES]
-    values = get_values_for_table(ws, constants.TEMPLATES_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    sheet_name = constants.TAB_TEMPLATES
+    values = file_handler.get_data_from_horizontal_sheet(sheet_name, constants.TEMPLATES_FIELDS)
 
-    _, id_mapping = sync_templates(
+    id_mapping = sync_templates(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -689,13 +637,10 @@ def test_sync_template(
         "TPL-4944-4118-0005": template,
         "TPL-4944-4118-0006": template,
     }
-    assert (
-        ws["A2"].value,
-        ws["A3"].value,
-    ) == (
-        template.id,
-        template.id,
-    )
+
+    a2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A2")
+    a3_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A3")
+    assert (a2_value, a3_value) == (template.id, template.id)
     assert template_mock.mock_calls[0].args == (
         mpt_client,
         product,
@@ -731,13 +676,13 @@ def test_sync_template_exception(
         side_effect=MPTAPIError("Error", "Error"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    ws = wb[constants.TAB_TEMPLATES]
-    values = get_values_for_table(ws, constants.TEMPLATES_FIELDS)
+    file_handler = ExcelFileHandler(new_product_file)
+    sheet_name = constants.TAB_TEMPLATES
+    values = file_handler.get_data_from_horizontal_sheet(sheet_name, constants.TEMPLATES_FIELDS)
 
     sync_templates(
         mpt_client,
-        ws,
+        file_handler,
         product,
         values,
         {
@@ -747,7 +692,8 @@ def test_sync_template_exception(
         console.status(""),
     )
 
-    assert ws["I2"].value == "Error with response body Error"
+    i2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "I2")
+    assert i2_value == "Error with response body Error"
 
 
 def test_sync_product(
@@ -784,9 +730,7 @@ def test_sync_product(
             another_parameter,
         ],
     )
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
@@ -837,8 +781,8 @@ def test_sync_product(
         Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    assert wb[constants.TAB_GENERAL]["B3"].value == product.id
+    file_handler = ExcelFileHandler(new_product_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == product.id
 
 
 def test_sync_product_extra_columns(
@@ -875,9 +819,7 @@ def test_sync_product_extra_columns(
             another_parameter,
         ],
     )
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
@@ -928,13 +870,11 @@ def test_sync_product_extra_columns(
         Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
     )
 
-    wb = load_workbook(filename=str(extra_column_product_file))
-    assert wb[constants.TAB_GENERAL]["B15"].value == product.id
+    file_handler = ExcelFileHandler(extra_column_product_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B15") == product.id
 
 
-def test_sync_product_exception(
-    mocker, mpt_client, new_product_file, active_vendor_account
-):
+def test_sync_product_exception(mocker, mpt_client, new_product_file, active_vendor_account):
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_product",
         side_effect=MPTAPIError("Error", "Error"),
@@ -950,8 +890,10 @@ def test_sync_product_exception(
         console.status(""),
     )
 
-    wb = load_workbook(filename=str(new_product_file))
-    assert wb[constants.TAB_GENERAL]["C3"].value == "Error with response body Error"
+    error = ExcelFileHandler(new_product_file).get_cell_value_by_coordinate(
+        constants.TAB_GENERAL, "C3"
+    )
+    assert error == "Error with response body Error"
 
 
 def test_sync_product_update_product(
@@ -1125,9 +1067,7 @@ def test_check_product_exists(mocker, mpt_client, new_product_file, product):
     checked_product = check_product_exists(mpt_client, new_product_file)
 
     assert checked_product == product
-    get_products_mock.assert_called_once_with(
-        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
-    )
+    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")
 
 
 def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
@@ -1139,6 +1079,4 @@ def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
     checked_product = check_product_exists(mpt_client, new_product_file)
 
     assert not checked_product
-    get_products_mock.assert_called_once_with(
-        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
-    )
+    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")

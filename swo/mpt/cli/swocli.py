@@ -76,9 +76,9 @@ def main(
         # Configure logging
         logging.basicConfig(
             level=logging.DEBUG,
-            format='%(asctime)s [%(levelname)s] %(name)s:\n%(message)s\n',
-            datefmt='%Y-%m-%d %H:%M:%S',
-            handlers=[handler]
+            format="%(asctime)s [%(levelname)s] %(name)s:\n%(message)s\n",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            handlers=[handler],
         )
         state.verbose = True
     show_banner()
