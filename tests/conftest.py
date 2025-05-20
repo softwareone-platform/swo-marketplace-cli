@@ -19,7 +19,7 @@ from swo.mpt.cli.core.mpt.models import (
 )
 
 
-@pytest.fixture()
+@pytest.fixture
 def requests_mocker():
     """
     Allow mocking of http calls made with requests.
@@ -28,17 +28,17 @@ def requests_mocker():
         yield rsps
 
 
-@pytest.fixture()
+@pytest.fixture
 def base_url():
     return "https://example.com"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_client(base_url):
     return MPTClient(base_url, "token")
 
 
-@pytest.fixture()
+@pytest.fixture
 def wrap_to_mpt_list_response():
     def _wrap_to_list(list_response):
         return {
@@ -55,7 +55,7 @@ def wrap_to_mpt_list_response():
     return _wrap_to_list
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_token():
     return {
         "id": "TKN-0000-0000-0001",
@@ -69,7 +69,7 @@ def mpt_token():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_products():
     return [
         {
@@ -95,7 +95,7 @@ def mpt_products():
     ]
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_product():
     return {
         "id": "PRD-1234-1234",
@@ -109,7 +109,7 @@ def mpt_product():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_parameter_group():
     return {
         "id": "PRG-1234-1234",
@@ -117,7 +117,7 @@ def mpt_parameter_group():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_item_group():
     return {
         "id": "ITG-1234-1234",
@@ -125,7 +125,7 @@ def mpt_item_group():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_parameter():
     return {
         "id": "PAR-1234-1234-0001",
@@ -134,7 +134,7 @@ def mpt_parameter():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_item():
     return {
         "id": "ITM-1234-1234-0001",
@@ -142,7 +142,7 @@ def mpt_item():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_uom():
     return {
         "id": "UM-1234-1234",
@@ -150,7 +150,7 @@ def mpt_uom():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_template():
     return {
         "id": "TPL-1234-1234",
@@ -158,14 +158,14 @@ def mpt_template():
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_pricelist():
     return {
         "id": "PRC-1234-1234",
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_pricelist_item(mpt_item):
     return {
         "id": "PRI-1234-1234",
@@ -173,7 +173,7 @@ def mpt_pricelist_item(mpt_item):
     }
 
 
-@pytest.fixture()
+@pytest.fixture
 def product():
     return Product(
         id="PRD-1234-1234",
@@ -183,78 +183,78 @@ def product():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def parameter_group():
     return ParameterGroup(id="PRG-1234-1234", name="Parameter Group")
 
 
-@pytest.fixture()
+@pytest.fixture
 def item_group():
     return ItemGroup(id="ITG-1234-1234", name="Item Group")
 
 
-@pytest.fixture()
+@pytest.fixture
 def parameter():
     return Parameter(id="PAR-1234-1234-0001", name="Parameter", externalId="external_1")
 
 
-@pytest.fixture()
+@pytest.fixture
 def another_parameter():
     return Parameter(id="PAR-1234-1234-0002", name="Parameter", externalId="external_2")
 
 
-@pytest.fixture()
+@pytest.fixture
 def item():
     return Item(id="ITM-1234-1234-0001", name="Item 1")
 
 
-@pytest.fixture()
+@pytest.fixture
 def uom():
     return Uom(id="UOM-1234-1234", name="User")
 
 
-@pytest.fixture()
+@pytest.fixture
 def template():
     return Template(id="TPL-0000-0000-0001", name="Template")
 
 
-@pytest.fixture()
+@pytest.fixture
 def pricelist():
     return Pricelist(id="PRC-1234-1234")
 
 
-@pytest.fixture()
+@pytest.fixture
 def pricelist_item(item):
     return PricelistItem(id="PRI-1234-1234", item=item)
 
 
-@pytest.fixture()
+@pytest.fixture
 def product_icon_path():
     return Path("swo/mpt/cli/core/icons/fake-icon.png")
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_products_response(wrap_to_mpt_list_response, mpt_products):
     return wrap_to_mpt_list_response(mpt_products)
 
 
-@pytest.fixture()
+@pytest.fixture
 def mpt_uoms_response(wrap_to_mpt_list_response, mpt_uom):
     return wrap_to_mpt_list_response([mpt_uom])
 
 
-@pytest.fixture()
+@pytest.fixture
 def accounts_path():
     return Path("tests/accounts_config/home/.swocli/accounts.json")
 
 
-@pytest.fixture()
+@pytest.fixture
 def new_accounts_path(tmp_path, accounts_path):
     shutil.copyfile(accounts_path, tmp_path / "accounts.json")
     return tmp_path / "accounts.json"
 
 
-@pytest.fixture()
+@pytest.fixture
 def expected_account():
     return CLIAccount(
         id="ACC-12341",
@@ -267,7 +267,7 @@ def expected_account():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def another_expected_account():
     return CLIAccount(
         id="ACC-12342",
@@ -280,7 +280,7 @@ def another_expected_account():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def active_vendor_account():
     return CLIAccount(
         id="ACC-12341",
@@ -293,7 +293,7 @@ def active_vendor_account():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def active_operations_account():
     return CLIAccount(
         id="ACC-12341",
@@ -306,7 +306,7 @@ def active_operations_account():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def new_token_account():
     return CLIAccount(
         id="ACC-12341",
@@ -319,33 +319,33 @@ def new_token_account():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def product_file_root():
     return Path("tests/product_files")
 
 
-@pytest.fixture()
+@pytest.fixture
 def empty_file(product_file_root):
     return product_file_root / "PRD-0000-0000-empty.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def product_file(product_file_root):
     return product_file_root / "PRD-1234-1234-1234-file.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def update_product_file(product_file_root):
     return product_file_root / "PRD-1234-1234-1234-file-update.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def new_product_file(tmp_path, product_file):
     shutil.copyfile(product_file, tmp_path / "PRD-1234-1234-1234-copied.xlsx")
     return tmp_path / "PRD-1234-1234-1234-copied.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def extra_column_product_file(tmp_path, product_file_root):
     shutil.copyfile(
         product_file_root / "PRD-1234-1234-1234-file-extra-column.xlsx",
@@ -354,15 +354,13 @@ def extra_column_product_file(tmp_path, product_file_root):
     return tmp_path / "PRD-1234-1234-1234-file-extra-column.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def new_update_product_file(tmp_path, update_product_file):
-    shutil.copyfile(
-        update_product_file, tmp_path / "PRD-1234-1234-1234-file-update-copied.xlsx"
-    )
+    shutil.copyfile(update_product_file, tmp_path / "PRD-1234-1234-1234-file-update-copied.xlsx")
     return tmp_path / "PRD-1234-1234-1234-file-update-copied.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def mock_sync_product(
     mocker,
     parameter_group,
@@ -378,9 +376,7 @@ def mock_sync_product(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
         return_value=parameter_group,
     )
-    mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
-    )
+    mocker.patch("swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group)
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter",
         side_effect=[
@@ -396,23 +392,21 @@ def mock_sync_product(
     )
     mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
-    mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_template", return_value=template
-    )
+    mocker.patch("swo.mpt.cli.core.products.flows.create_template", return_value=template)
     mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)
 
 
-@pytest.fixture()
+@pytest.fixture
 def pricelist_file_root():
     return Path("tests/pricelist_files")
 
 
-@pytest.fixture()
+@pytest.fixture
 def pricelist_file_path(pricelist_file_root):
     return pricelist_file_root / "PRC-1234-1234-1234.xlsx"
 
 
-@pytest.fixture()
+@pytest.fixture
 def pricelist_new_file(tmp_path, pricelist_file_path):
     shutil.copyfile(pricelist_file_path, tmp_path / "PRC-1234-1234-1234-copied.xlsx")
     return tmp_path / "PRC-1234-1234-1234-copied.xlsx"

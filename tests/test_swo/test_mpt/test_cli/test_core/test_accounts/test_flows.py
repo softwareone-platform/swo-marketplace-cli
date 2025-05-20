@@ -52,9 +52,7 @@ def test_get_or_create_accounts_get(
 
 
 def test_does_account_exist(expected_account, another_expected_account):
-    assert does_account_exist(
-        [expected_account, another_expected_account], expected_account
-    )
+    assert does_account_exist([expected_account, another_expected_account], expected_account)
 
 
 def test_doesnot_account_exist(expected_account, another_expected_account):
@@ -90,9 +88,7 @@ def test_write_accounts(mocker, tmp_path, expected_account, another_expected_acc
     with open(file_path) as f:
         written_accounts = json.load(f)
 
-    assert sorted(written_accounts, key=itemgetter("id")) == [
-        a.model_dump() for a in accounts
-    ]
+    assert sorted(written_accounts, key=itemgetter("id")) == [a.model_dump() for a in accounts]
 
 
 def test_disable_accounts_except(expected_account, another_expected_account):
@@ -105,9 +101,7 @@ def test_disable_accounts_except(expected_account, another_expected_account):
 
 
 def test_find_account(expected_account, another_expected_account):
-    account = find_account(
-        [expected_account, another_expected_account], expected_account.id
-    )
+    account = find_account([expected_account, another_expected_account], expected_account.id)
 
     assert account == expected_account
 

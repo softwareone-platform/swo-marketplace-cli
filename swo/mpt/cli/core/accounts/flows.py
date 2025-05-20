@@ -48,15 +48,11 @@ def write_accounts(accounts: list[Account]) -> None:
     """
     Write accounts list to the file
     """
-    accounts_data = [
-        a.model_dump() for a in sorted(accounts, key=attrgetter("id"))
-    ]
+    accounts_data = [a.model_dump() for a in sorted(accounts, key=attrgetter("id"))]
     JsonFileHandler().write(accounts_data)
 
 
-def disable_accounts_except(
-    accounts: list[Account], except_account: Account
-) -> list[Account]:
+def disable_accounts_except(accounts: list[Account], except_account: Account) -> list[Account]:
     """
     Disable all accounts in the passed accounts list and enables the passed account
     """

@@ -151,9 +151,7 @@ def test_sync_product_force_create(
     assert "Product Sync" in result.stdout
 
 
-def test_sync_product_no_product(
-    mocker, expected_account, mock_sync_product, new_product_file
-):
+def test_sync_product_no_product(mocker, expected_account, mock_sync_product, new_product_file):
     mocker.patch(
         "swo.mpt.cli.core.products.app.check_product_exists",
         return_value=None,

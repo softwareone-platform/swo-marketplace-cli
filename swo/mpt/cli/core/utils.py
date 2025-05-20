@@ -1,5 +1,7 @@
 import re
-from typing import Any, Generator, Pattern, TypeAlias
+from collections.abc import Generator
+from re import Pattern
+from typing import Any, TypeAlias
 
 from openpyxl.utils import get_column_letter  # type: ignore
 from openpyxl.utils.cell import coordinate_from_string  # type: ignore
@@ -25,9 +27,7 @@ def get_values_for_general(ws: Worksheet, fields: list[str]) -> list[SheetValue]
         max_col=2,
     ):
         if row[0].value in fields:
-            values.append(
-                (f"{row[1].column_letter}{row[1].row}", row[0].value, row[1].value)
-            )
+            values.append((f"{row[1].column_letter}{row[1].row}", row[0].value, row[1].value))
 
     return values
 
@@ -100,9 +100,7 @@ def find_value_for(field: str, values: list[SheetValue]) -> SheetValue:
     return find_first(lambda f: f[1] == field, values)
 
 
-def find_values_by_pattern(
-    pattern: Pattern[str], values: list[SheetValue]
-) -> list[SheetValue]:
+def find_values_by_pattern(pattern: Pattern[str], values: list[SheetValue]) -> list[SheetValue]:
     return list(filter(lambda sv: re.match(pattern, sv[1]), values))
 
 
@@ -115,18 +113,14 @@ def set_dict_value(original_dict: dict, path: str, value: Any) -> dict:
         current, next_path = path_list[0], path_list[-1]
 
         if current in original_dict:
-            original_dict[current] = set_dict_value(
-                original_dict[current], next_path, value
-            )
+            original_dict[current] = set_dict_value(original_dict[current], next_path, value)
         else:
             original_dict[current] = set_dict_value({}, next_path, value)
 
     return original_dict
 
 
-def set_value(
-    column_name: str, values: list[SheetValue], value: str
-) -> list[SheetValue]:
+def set_value(column_name: str, values: list[SheetValue], value: str) -> list[SheetValue]:
     return [
         (
             index,

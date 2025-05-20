@@ -50,9 +50,7 @@ def list_products(
 
         with console.status(f"Fetching #{page} page  of products"):
             mpt_client = client_from_account(active_account)
-            meta, products = get_products(
-                mpt_client, page_size, offset, query=rql_query
-            )
+            meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
 
         table = _products_table("Products")
         table = _list_products(table, products)
@@ -178,10 +176,10 @@ def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
     for tab_name, tab_stats in stats.tabs.items():
         table.add_row(
             tab_name,
-            f"[blue]{tab_stats["total"]}",
-            f"[green]{tab_stats["synced"]}",
-            f"[red bold]{tab_stats["error"]}",
-            f"[white]{tab_stats["skipped"]}",
+            f"[blue]{tab_stats['total']}",
+            f"[green]{tab_stats['synced']}",
+            f"[red bold]{tab_stats['error']}",
+            f"[white]{tab_stats['skipped']}",
         )
 
     return table

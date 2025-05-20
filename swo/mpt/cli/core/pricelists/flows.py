@@ -54,22 +54,19 @@ def check_pricelist(mpt_client: MPTClient, wb: Workbook) -> Pricelist | None:
 
 def to_operations_pricelist_json(values: list[SheetValue]) -> dict:
     pricelist_json = to_vendor_pricelist_json(values)
-    pricelist_json["defaultMarkup"] = find_value_for(
-        constants.GENERAL_DEFAULT_MARKUP, values
-    )[2]
+    pricelist_json["defaultMarkup"] = find_value_for(constants.GENERAL_DEFAULT_MARKUP, values)[2]
 
     return pricelist_json
 
 
 def to_vendor_pricelist_json(values: list[SheetValue]) -> dict:
-
     pricelist_json = {
         "currency": find_value_for(constants.GENERAL_CURRENCY, values)[2],
         "precision": find_value_for(constants.GENERAL_PRECISION, values)[2],
         "notes": find_value_for(constants.GENERAL_NOTES, values)[2],
         "product": {
             "id": find_value_for(constants.GENERAL_PRODUCT_ID, values)[2],
-        }
+        },
     }
 
     external_id_value = find_value_for(constants.EXTERNAL_ID, values)
@@ -80,7 +77,6 @@ def to_vendor_pricelist_json(values: list[SheetValue]) -> dict:
             "vendor": external_id,
         }
     return pricelist_json
-
 
 
 def sync_pricelist(
@@ -107,9 +103,7 @@ def sync_pricelist(
                     pricelist_json,
                 )
             else:
-                pricelist_id = find_value_for(
-                    constants.GENERAL_PRICELIST_ID, general_values
-                )[2]
+                pricelist_id = find_value_for(constants.GENERAL_PRICELIST_ID, general_values)[2]
                 pricelist = update_pricelist(
                     mpt_client,
                     pricelist_id,
@@ -183,9 +177,7 @@ def sync_pricelist_items(
                     stats.add_skipped(constants.TAB_PRICE_ITEMS)
                     continue
 
-                vendor_id = find_value_for(
-                    constants.PRICELIST_ITEMS_ITEM_VENDOR_ID, sheet_value
-                )[2]
+                vendor_id = find_value_for(constants.PRICELIST_ITEMS_ITEM_VENDOR_ID, sheet_value)[2]
                 pricelist_item = get_pricelist_item(mpt_client, pricelist_id, vendor_id)
 
                 if active_account.type == "Operations":
@@ -197,9 +189,7 @@ def sync_pricelist_items(
                     mpt_client, pricelist_id, pricelist_item.id, pricelist_item_json
                 )
 
-                index_id, _, _ = find_value_for(
-                    constants.PRICELIST_ITEMS_ID, sheet_value
-                )
+                index_id, _, _ = find_value_for(constants.PRICELIST_ITEMS_ID, sheet_value)
                 ws[index_id] = pricelist_item.id
                 stats.add_synced(constants.TAB_PRICE_ITEMS)
             except Exception as e:

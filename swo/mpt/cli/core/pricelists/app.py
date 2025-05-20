@@ -24,9 +24,7 @@ app = typer.Typer()
 def sync_pricelists(
     pricelists_paths: Annotated[
         list[str],
-        typer.Argument(
-            help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"
-        ),
+        typer.Argument(help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"),
     ],
 ):
     with console.status("Fetching pricelist files..."):
@@ -44,9 +42,7 @@ def sync_pricelists(
         file_paths = list(filter(lambda p: p.endswith(".xlsx"), file_paths))
 
     if not len(file_paths):
-        console.print(
-            f"No files found for provided paths {', '.join(pricelists_paths)}"
-        )
+        console.print(f"No files found for provided paths {', '.join(pricelists_paths)}")
         raise typer.Exit(code=3)
 
     _ = typer.confirm(
@@ -103,9 +99,7 @@ def sync_pricelists(
         raise typer.Exit(code=4)
 
 
-def _pricelist_stats_table(
-    pricelist: Pricelist, stats: PricelistStatsCollector
-) -> Table:
+def _pricelist_stats_table(pricelist: Pricelist, stats: PricelistStatsCollector) -> Table:
     if stats.is_error:
         title = "Pricelist sync [red bold]FAILED"
     else:
@@ -125,10 +119,10 @@ def _list_pricelist_stats(table: Table, stats: PricelistStatsCollector) -> Table
     for tab_name, tab_stats in stats.tabs.items():
         table.add_row(
             tab_name,
-            f"[blue]{tab_stats["total"]}",
-            f"[green]{tab_stats["synced"]}",
-            f"[red bold]{tab_stats["error"]}",
-            f"[white]{tab_stats["skipped"]}",
+            f"[blue]{tab_stats['total']}",
+            f"[green]{tab_stats['synced']}",
+            f"[red bold]{tab_stats['error']}",
+            f"[white]{tab_stats['skipped']}",
         )
 
     return table

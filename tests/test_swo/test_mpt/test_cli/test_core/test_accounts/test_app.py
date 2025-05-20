@@ -12,7 +12,7 @@ from typer.testing import CliRunner
 runner = CliRunner()
 
 
-@pytest.fixture()
+@pytest.fixture
 def new_token():
     return Token(
         id="TKN-123456",
@@ -25,7 +25,7 @@ def new_token():
     )
 
 
-@pytest.fixture()
+@pytest.fixture
 def existing_token():
     def _wrapper(token):
         return Token(
@@ -66,7 +66,6 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
             "is_active": True,
         }
     ]
-
 
 
 def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
@@ -113,9 +112,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     ]
 
 
-def test_add_account_accounts_override_environment(
-    new_accounts_path, mocker, new_token
-):
+def test_add_account_accounts_override_environment(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "swo.mpt.cli.core.accounts.app.get_token",
@@ -359,9 +356,7 @@ def test_list_accounts(new_accounts_path, mocker):
     result = runner.invoke(app, ["list"])
 
     assert result.exit_code == 0, result.stdout
-    assert all(
-        (account in result.stdout) for account in ["ACC-12341", "ACC-12342"]
-    ), result.stdout
+    assert all((account in result.stdout) for account in ["ACC-12341", "ACC-12342"]), result.stdout
 
 
 def test_list_active_account(new_accounts_path, mocker):

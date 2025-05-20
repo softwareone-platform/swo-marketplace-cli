@@ -6,25 +6,16 @@ from rich.console import Console
 from rich.text import Text
 
 
-def _gradient(
-    start_hex: str, end_hex: str, num_samples: int = 16
-) -> list[str]:  # pragma: no cover
+def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:  # pragma: no cover
     start_rgb = tuple(int(start_hex[i : i + 2], 16) for i in range(1, 6, 2))
     end_rgb = tuple(int(end_hex[i : i + 2], 16) for i in range(1, 6, 2))
     gradient_colors = [start_hex]
     for sample in range(1, num_samples):
-        red = int(
-            start_rgb[0]
-            + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0])
-        )
+        red = int(start_rgb[0] + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0]))
         green = int(
-            start_rgb[1]
-            + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
+            start_rgb[1] + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
         )
-        blue = int(
-            start_rgb[2]
-            + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2])
-        )
+        blue = int(start_rgb[2] + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2]))
         gradient_colors.append(f"#{red:02X}{green:02X}{blue:02X}")
 
     return gradient_colors

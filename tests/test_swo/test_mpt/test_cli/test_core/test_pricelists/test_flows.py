@@ -17,9 +17,7 @@ def test_check_pricelist(mocker, mpt_client, pricelist_new_file, pricelist):
         return_value=pricelist,
     )
 
-    returned_pricelist = check_pricelist(
-        mpt_client, load_workbook(str(pricelist_new_file))
-    )
+    returned_pricelist = check_pricelist(mpt_client, load_workbook(str(pricelist_new_file)))
 
     assert returned_pricelist == pricelist
     mocked_get_pricelist.assert_called_once_with(mpt_client, "PRC-0232-2541-0003")
@@ -31,9 +29,7 @@ def test_check_pricelist_not_found(mocker, mpt_client, pricelist_new_file, price
         side_effect=MPTAPIError("not found", "not found"),
     )
 
-    returned_pricelist = check_pricelist(
-        mpt_client, load_workbook(str(pricelist_new_file))
-    )
+    returned_pricelist = check_pricelist(mpt_client, load_workbook(str(pricelist_new_file)))
 
     assert not returned_pricelist
     mocked_get_pricelist.assert_called_once_with(mpt_client, "PRC-0232-2541-0003")
@@ -362,7 +358,7 @@ def test_sync_pricelist_create_vendor_external_id(
         mpt_client,
         {
             "currency": "EUR",
-            'externalIds': {'vendor': 'my_external_id'},
+            "externalIds": {"vendor": "my_external_id"},
             "precision": 2,
             "notes": "Note 1",
             "product": {
@@ -378,4 +374,3 @@ def test_sync_pricelist_create_vendor_external_id(
         stats,
         console,
     )
-

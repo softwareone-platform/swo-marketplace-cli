@@ -25,7 +25,7 @@ from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import get_values_for_table
 
 
-@pytest.fixture()
+@pytest.fixture
 def items():
     # see tests/product_files/PRD-1234-1234-1234-file-update.xlsx file
     return [
@@ -114,16 +114,12 @@ def test_check_product_definition_not_all_required_agreements_parameters(
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-agreements-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-agreements-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats)
-        == "Agreements Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Agreements Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_item_parameters(
@@ -146,15 +142,12 @@ def test_check_product_definition_not_all_required_request_parameters(
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-request-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-request-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats) == "Request Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Request Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_subscription_parameters(
@@ -163,16 +156,12 @@ def test_check_product_definition_not_all_required_subscription_parameters(
     stats = ErrorMessagesCollector()
 
     stats = check_product_definition(
-        product_file_root
-        / "PRD-1234-1234-1234-subscription-parameters-not-all-columns.xlsx",
+        product_file_root / "PRD-1234-1234-1234-subscription-parameters-not-all-columns.xlsx",
         stats,
     )
 
     assert not stats.is_empty()
-    assert (
-        str(stats)
-        == "Subscription Parameters: Required field ExternalId is not provided\n"
-    )
+    assert str(stats) == "Subscription Parameters: Required field ExternalId is not provided\n"
 
 
 def test_check_product_definition_not_all_required_items(
@@ -217,9 +206,7 @@ def test_check_product_definition_not_all_required_settings(
     assert str(stats) == "Settings: Required field Value is not provided\n"
 
 
-def test_sync_parameters_groups(
-    mocker, mpt_client, new_product_file, product, parameter_group
-):
+def test_sync_parameters_groups(mocker, mpt_client, new_product_file, product, parameter_group):
     stats = ProductStatsCollector()
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
@@ -269,9 +256,7 @@ def test_sync_parameters_groups(
     )
 
 
-def test_sync_parameters_groups_exception(
-    mocker, mpt_client, new_product_file, product
-):
+def test_sync_parameters_groups_exception(mocker, mpt_client, new_product_file, product):
     stats = ProductStatsCollector()
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group",
@@ -297,9 +282,7 @@ def test_sync_items_groups(mocker, mpt_client, new_product_file, product, item_g
     ws = wb[constants.TAB_ITEMS_GROUPS]
     values = get_values_for_table(ws, constants.ITEMS_GROUPS_FIELDS)
 
-    _, id_mapping = sync_items_groups(
-        mpt_client, ws, product, values, stats, console.status("")
-    )
+    _, id_mapping = sync_items_groups(mpt_client, ws, product, values, stats, console.status(""))
 
     assert id_mapping == {
         "IGR-4944-4118-0002": item_group,
@@ -356,9 +339,7 @@ def test_sync_items_groups_exception(mocker, mpt_client, new_product_file, produ
     assert ws["L2"].value == "Error with response body Error"
 
 
-def test_sync_parameters(
-    mocker, mpt_client, new_product_file, product, parameter, parameter_group
-):
+def test_sync_parameters(mocker, mpt_client, new_product_file, product, parameter, parameter_group):
     stats = ProductStatsCollector()
     parameter_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter", return_value=parameter
@@ -458,9 +439,7 @@ def test_sync_parameters(
     )
 
 
-def test_sync_parameters_exception(
-    mocker, mpt_client, new_product_file, product, parameter_group
-):
+def test_sync_parameters_exception(mocker, mpt_client, new_product_file, product, parameter_group):
     stats = ProductStatsCollector()
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter",
@@ -499,16 +478,12 @@ def test_sync_item(
     uom,
 ):
     stats = ProductStatsCollector()
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
     wb = load_workbook(filename=str(new_product_file))
     ws = wb[constants.TAB_ITEMS]
-    values = get_values_for_dynamic_table(
-        ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
-    )
+    values = get_values_for_dynamic_table(ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")])
 
     _, id_mapping = sync_items(
         mpt_client,
@@ -633,9 +608,7 @@ def test_sync_item_exception(
 
     wb = load_workbook(filename=str(new_product_file))
     ws = wb[constants.TAB_ITEMS]
-    values = get_values_for_dynamic_table(
-        ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
-    )
+    values = get_values_for_dynamic_table(ws, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")])
 
     sync_items(
         mpt_client,
@@ -784,9 +757,7 @@ def test_sync_product(
             another_parameter,
         ],
     )
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
@@ -875,9 +846,7 @@ def test_sync_product_extra_columns(
             another_parameter,
         ],
     )
-    item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item
-    )
+    item_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
@@ -932,9 +901,7 @@ def test_sync_product_extra_columns(
     assert wb[constants.TAB_GENERAL]["B15"].value == product.id
 
 
-def test_sync_product_exception(
-    mocker, mpt_client, new_product_file, active_vendor_account
-):
+def test_sync_product_exception(mocker, mpt_client, new_product_file, active_vendor_account):
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_product",
         side_effect=MPTAPIError("Error", "Error"),
@@ -1125,9 +1092,7 @@ def test_check_product_exists(mocker, mpt_client, new_product_file, product):
     checked_product = check_product_exists(mpt_client, new_product_file)
 
     assert checked_product == product
-    get_products_mock.assert_called_once_with(
-        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
-    )
+    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")
 
 
 def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
@@ -1139,6 +1104,4 @@ def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
     checked_product = check_product_exists(mpt_client, new_product_file)
 
     assert not checked_product
-    get_products_mock.assert_called_once_with(
-        mpt_client, 1, 0, query="id=PRD-1234-1234-1234"
-    )
+    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")

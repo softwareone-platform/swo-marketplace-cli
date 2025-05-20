@@ -192,12 +192,8 @@ def check_required_columns(
 def to_product_json(values: list[SheetValue]) -> dict:
     return {
         "name": find_value_for(constants.GENERAL_PRODUCT_NAME, values)[2],
-        "shortDescription": find_value_for(
-            constants.GENERAL_CATALOG_DESCRIPTION, values
-        )[2],
-        "longDescription": find_value_for(
-            constants.GENERAL_PRODUCT_DESCRIPTION, values
-        )[2],
+        "shortDescription": find_value_for(constants.GENERAL_CATALOG_DESCRIPTION, values)[2],
+        "longDescription": find_value_for(constants.GENERAL_PRODUCT_DESCRIPTION, values)[2],
         "website": find_value_for(constants.GENERAL_PRODUCT_WEBSITE, values)[2],
         "externalIds": None,
         "settings": None,
@@ -223,14 +219,9 @@ def to_parameter_group_json(values: list[SheetValue]) -> dict:
     return {
         "name": find_value_for(constants.PARAMETERS_GROUPS_NAME, values)[2],
         "label": find_value_for(constants.PARAMETERS_GROUPS_LABEL, values)[2],
-        "description": find_value_for(constants.PARAMETERS_GROUPS_DESCRIPTION, values)[
-            2
-        ],
-        "displayOrder": find_value_for(
-            constants.PARAMETERS_GROUPS_DISPLAY_ORDER, values
-        )[2],
-        "default": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2]
-        == "True",
+        "description": find_value_for(constants.PARAMETERS_GROUPS_DESCRIPTION, values)[2],
+        "displayOrder": find_value_for(constants.PARAMETERS_GROUPS_DISPLAY_ORDER, values)[2],
+        "default": find_value_for(constants.PARAMETERS_GROUPS_DEFAULT, values)[2] == "True",
     }
 
 
@@ -241,10 +232,8 @@ def to_item_group_json(values: list[SheetValue]) -> dict:
         "description": find_value_for(constants.ITEMS_GROUPS_DESCRIPTION, values)[2],
         "displayOrder": find_value_for(constants.ITEMS_GROUPS_DISPLAY_ORDER, values)[2],
         "default": find_value_for(constants.ITEMS_GROUPS_DEFAULT, values)[2] == "True",
-        "multiple": find_value_for(constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values)[2]
-        == "True",
-        "required": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2]
-        == "True",
+        "multiple": find_value_for(constants.ITEMS_GROUPS_MULTIPLE_CHOICES, values)[2] == "True",
+        "required": find_value_for(constants.ITEMS_GROUPS_REQUIRED, values)[2] == "True",
     }
 
 
@@ -267,9 +256,7 @@ def to_parameter_json(
         "phase": phase,
         "type": find_value_for(constants.PARAMETERS_TYPE, values)[2],
         "options": options,
-        "constraints": json.loads(
-            find_value_for(constants.PARAMETERS_CONSTRAINTS, values)[2]
-        ),
+        "constraints": json.loads(find_value_for(constants.PARAMETERS_CONSTRAINTS, values)[2]),
         "externalId": find_value_for(constants.PARAMETERS_EXTERNALID, values)[2],
         "displayOrder": find_value_for(constants.PARAMETERS_DISPLAY_ORDER, values)[2],
     }
@@ -329,9 +316,7 @@ def _to_item_json(
         "product": {
             "id": product_id,
         },
-        "quantityNotApplicable": find_value_for(
-            constants.ITEMS_QUANTITY_APPLICABLE, values
-        )[2]
+        "quantityNotApplicable": find_value_for(constants.ITEMS_QUANTITY_APPLICABLE, values)[2]
         == "True",
         "unit": {
             "id": find_value_for(constants.ITEMS_UNIT_ID, values)[2],
@@ -389,9 +374,7 @@ def sync_product_definition(
     wb = load_workbook(filename=str(definition_path))
 
     if action == ProductAction.UPDATE:
-        stats, product = update_product_definition(
-            mpt_client, wb, active_account, stats, status
-        )
+        stats, product = update_product_definition(mpt_client, wb, active_account, stats, status)
     else:
         stats, product = create_product_definition(mpt_client, wb, stats, status)
 
@@ -407,9 +390,7 @@ def create_product_definition(
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
     try:
-        general_values = get_values_for_general(
-            wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
-        )
+        general_values = get_values_for_general(wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS)
         settings_values = get_values_for_table(
             wb[constants.TAB_SETTINGS], constants.SETTINGS_FIELDS
         )
@@ -462,9 +443,7 @@ def create_product_definition(
     )
 
     item_parameters_ws = wb[constants.TAB_ITEM_PARAMETERS]
-    item_parameters = get_values_for_table(
-        item_parameters_ws, constants.PARAMETERS_FIELDS
-    )
+    item_parameters = get_values_for_table(item_parameters_ws, constants.PARAMETERS_FIELDS)
     _, item_parameters_id_mapping = sync_item_parameters(
         mpt_client,
         item_parameters_ws,
@@ -476,9 +455,7 @@ def create_product_definition(
     )
 
     request_parameters_ws = wb[constants.TAB_REQUEST_PARAMETERS]
-    request_parameters = get_values_for_table(
-        request_parameters_ws, constants.PARAMETERS_FIELDS
-    )
+    request_parameters = get_values_for_table(request_parameters_ws, constants.PARAMETERS_FIELDS)
     _, request_parameters_id_mapping = sync_request_parameters(
         mpt_client,
         request_parameters_ws,
@@ -547,9 +524,7 @@ def update_product_definition(
     stats: ProductStatsCollector,
     status: Status,
 ) -> tuple[ProductStatsCollector, Optional[Product]]:
-    general_values = get_values_for_general(
-        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
-    )
+    general_values = get_values_for_general(wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS)
     product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
 
     items_ws = wb[constants.TAB_ITEMS]
@@ -583,9 +558,7 @@ def update_items(
         try:
             action = ItemAction(find_value_for(constants.ITEMS_ACTION, sheet_value)[2])
             if action not in (ItemAction.SKIP, ItemAction.SKIPPED, ItemAction.CREATE):
-                item_vendor_id = find_value_for(
-                    constants.ITEMS_VENDOR_ITEM_ID, sheet_value
-                )[2]
+                item_vendor_id = find_value_for(constants.ITEMS_VENDOR_ITEM_ID, sheet_value)[2]
                 item = get_item(mpt_client, product_id, item_vendor_id)
 
             match ItemAction(action):
@@ -599,9 +572,7 @@ def update_items(
                     unpublish_item(mpt_client, item.id)
                     stats.add_synced(ws.title)
                 case ItemAction.UPDATE:
-                    update_item(
-                        mpt_client, active_account, item.id, product_id, sheet_value
-                    )
+                    update_item(mpt_client, active_account, item.id, product_id, sheet_value)
                     stats.add_synced(ws.title)
                 case ItemAction.CREATE:
                     create_item(mpt_client, active_account, product_id, ws, sheet_value)
@@ -651,9 +622,7 @@ def sync_parameters_groups(
                 to_parameter_group_json(sheet_value),
             )
 
-            index, _, sheet_id_value = find_value_for(
-                constants.PARAMETERS_GROUPS_ID, sheet_value
-            )
+            index, _, sheet_id_value = find_value_for(constants.PARAMETERS_GROUPS_ID, sheet_value)
 
             # TODO: refactor, should be done out of this function
             ws[index] = parameter_group.id
@@ -691,9 +660,7 @@ def sync_items_groups(
                 to_item_group_json(sheet_value),
             )
 
-            index, _, sheet_id_value = find_value_for(
-                constants.ITEMS_GROUPS_ID, sheet_value
-            )
+            index, _, sheet_id_value = find_value_for(constants.ITEMS_GROUPS_ID, sheet_value)
 
             # TODO: refactor, should be done out of this function
             ws[index] = item_group.id
@@ -733,9 +700,7 @@ def sync_parameters(
                 to_parameter_json(scope, parameter_groups_mapping, sheet_value),
             )
 
-            id_index, _, sheet_id_value = find_value_for(
-                constants.ID_COLUMN_NAME, sheet_value
-            )
+            id_index, _, sheet_id_value = find_value_for(constants.ID_COLUMN_NAME, sheet_value)
 
             # TODO: refactor, should be done out of this function
             ws[id_index] = parameter.id
@@ -794,17 +759,13 @@ def sync_items(
                 ),
             )
 
-            id_index, _, sheet_id_value = find_value_for(
-                constants.ID_COLUMN_NAME, sheet_value
-            )
+            id_index, _, sheet_id_value = find_value_for(constants.ID_COLUMN_NAME, sheet_value)
 
             # TODO: refactor, should be done out of this function
             ws[id_index] = item.id
             id_mapping[sheet_id_value] = item
 
-            uom_id_index, _, sheet_id_value = find_value_for(
-                constants.ITEMS_UNIT_ID, sheet_value
-            )
+            uom_id_index, _, sheet_id_value = find_value_for(constants.ITEMS_UNIT_ID, sheet_value)
             ws[uom_id_index] = sheet_id_value
 
             group_id_index, _, sheet_id_value = find_value_for(
@@ -845,15 +806,11 @@ def create_item(
     # TODO: refactor, should be done out of this function
     ws[id_index] = item.id
 
-    uom_id_index, _, sheet_id_value = find_value_for(
-        constants.ITEMS_UNIT_ID, sheet_value
-    )
+    uom_id_index, _, sheet_id_value = find_value_for(constants.ITEMS_UNIT_ID, sheet_value)
     ws[uom_id_index] = sheet_id_value
 
 
-def setup_unit_of_measure(
-    mpt_client: MPTClient, values: list[SheetValue]
-) -> list[SheetValue]:
+def setup_unit_of_measure(mpt_client: MPTClient, values: list[SheetValue]) -> list[SheetValue]:
     unit_name = find_value_for(constants.ITEMS_UNIT_NAME, values)[2]
 
     uom = search_uom_by_name(mpt_client, unit_name)
@@ -877,9 +834,7 @@ def sync_templates(
 
     for sheet_value in values:
         try:
-            sheet_value = replace_parameter_variables(
-                sheet_value, all_parameters_id_mapping
-            )
+            sheet_value = replace_parameter_variables(sheet_value, all_parameters_id_mapping)
             template = create_template(
                 mpt_client,
                 product,
@@ -891,9 +846,7 @@ def sync_templates(
             )
             ws[content_index] = sheet_content_value
 
-            id_index, _, sheet_id_value = find_value_for(
-                constants.ID_COLUMN_NAME, sheet_value
-            )
+            id_index, _, sheet_id_value = find_value_for(constants.ID_COLUMN_NAME, sheet_value)
 
             # TODO: refactor, should be done out of this function
             ws[id_index] = template.id
@@ -920,13 +873,9 @@ def replace_parameter_variables(
     return set_value(constants.TEMPLATES_CONTENT, values, content)
 
 
-def check_product_exists(
-    mpt_client: MPTClient, product_definition_path: Path
-) -> Product | None:
+def check_product_exists(mpt_client: MPTClient, product_definition_path: Path) -> Product | None:
     wb = load_workbook(filename=str(product_definition_path))
-    general_values = get_values_for_general(
-        wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS
-    )
+    general_values = get_values_for_general(wb[constants.TAB_GENERAL], constants.GENERAL_FIELDS)
 
     product_id = find_value_for(constants.GENERAL_PRODUCT_ID, general_values)[2]
 

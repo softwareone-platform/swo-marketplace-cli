@@ -12,43 +12,19 @@ class TestFlattenDict:
         assert result == {"a": 1, "b": 2}
 
     def test_nested_dict(self):
-        input_dict = {
-            "a": {
-                "b": 1,
-                "c": {
-                    "d": 2
-                }
-            }
-        }
+        input_dict = {"a": {"b": 1, "c": {"d": 2}}}
         result = flatten_dict(input_dict)
-        assert result == {
-            "a.b": 1,
-            "a.c.d": 2
-        }
+        assert result == {"a.b": 1, "a.c.d": 2}
 
     def test_dict_with_list(self):
-        input_dict = {
-            "a": [
-                {"b": 1},
-                {"c": 2}
-            ]
-        }
+        input_dict = {"a": [{"b": 1}, {"c": 2}]}
         result = flatten_dict(input_dict)
-        assert result == {
-            "a[0].b": 1,
-            "a[1].c": 2
-        }
+        assert result == {"a[0].b": 1, "a[1].c": 2}
 
     def test_dict_with_primitive_list(self):
-        input_dict = {
-            "a": [1, 2, 3]
-        }
+        input_dict = {"a": [1, 2, 3]}
         result = flatten_dict(input_dict)
-        assert result == {
-            "a[0]": 1,
-            "a[1]": 2,
-            "a[2]": 3
-        }
+        assert result == {"a[0]": 1, "a[1]": 2, "a[2]": 3}
 
 
 class TestFormatJsonPath:
@@ -61,16 +37,8 @@ class TestFormatJsonPath:
 
     def test_array_path_with_external_id(self):
         path = "items[0].value"
-        source = {
-            "items": [
-                {"value": "old", "externalId": "EXT123"}
-            ]
-        }
-        target = {
-            "items": [
-                {"value": "new", "externalId": "EXT123"}
-            ]
-        }
+        source = {"items": [{"value": "old", "externalId": "EXT123"}]}
+        target = {"items": [{"value": "new", "externalId": "EXT123"}]}
         result = format_json_path(path, source, target)
         assert result == "items[0].value (externalId: EXT123)"
 
@@ -88,12 +56,9 @@ class TestDisplayAuditRecords:
             {
                 "id": "audit1",
                 "timestamp": "2024-01-01T10:00:00Z",
-                "actor": {
-                    "name": "Test User",
-                    "account": {"name": "Test Account"}
-                },
+                "actor": {"name": "Test User", "account": {"name": "Test Account"}},
                 "event": "platform.commerce.create",
-                "details": "Created object"
+                "details": "Created object",
             }
         ]
         display_audit_records(records)
@@ -112,12 +77,7 @@ class TestDisplayAuditRecords:
         assert "object" in output
 
     def test_display_records_missing_fields(self, capsys):
-        records = [
-            {
-                "id": "audit1",
-                "timestamp": "2024-01-01T10:00:00Z"
-            }
-        ]
+        records = [{"id": "audit1", "timestamp": "2024-01-01T10:00:00Z"}]
         display_audit_records(records)
         captured = capsys.readouterr()
         output = captured.out
