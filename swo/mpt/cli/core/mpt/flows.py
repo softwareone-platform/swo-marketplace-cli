@@ -85,10 +85,7 @@ def create_product(
     products_response.raise_for_status()
     product = Product.model_validate(products_response.json())
 
-    response = mpt_client.put(
-        f"/catalog/products/{product.id}/settings",
-        json=settings_json,
-    )
+    response = mpt_client.put(f"/catalog/products/{product.id}/settings", json=settings_json)
     response.raise_for_status()
 
     return product
@@ -163,10 +160,7 @@ def get_item(mpt_client: MPTClient, product_id: str, vendor_id: str) -> Item:
 
     data = response.json()["data"]
     if not data:
-        raise MPTAPIError(
-            f"Item by Item Vendor ID '{vendor_id}' is not found.",
-            "404 not found",
-        )
+        raise MPTAPIError(f"Item by Item Vendor ID '{vendor_id}' is not found.", "404 not found")
 
     return Item.model_validate(data[0])
 
@@ -179,10 +173,7 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
 
     data = response.json()["data"]
     if not data:
-        raise MPTAPIError(
-            f"Unit of measure by name '{uom_name}' is not found.",
-            "404 not found",
-        )
+        raise MPTAPIError(f"Unit of measure by name '{uom_name}' is not found.", "404 not found")
 
     return Uom.model_validate(data[0])
 
@@ -244,8 +235,7 @@ def update_pricelist_item(
     pricelist_item_json: dict,
 ) -> PricelistItem:
     response = mpt_client.put(
-        f"/catalog/price-lists/{pricelist_id}/items/{pricelist_item_id}",
-        json=pricelist_item_json,
+        f"/catalog/price-lists/{pricelist_id}/items/{pricelist_item_id}", json=pricelist_item_json
     )
     response.raise_for_status()
 

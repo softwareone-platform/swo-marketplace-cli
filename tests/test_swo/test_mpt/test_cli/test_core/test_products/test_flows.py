@@ -906,27 +906,26 @@ def test_sync_product_update_product(
 ):
     review_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.review_item",
-        return_value=None,
+        return_value=None
     )
     publish_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.publish_item",
-        return_value=None,
+        return_value=None
     )
     update_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.mpt_update_item",
-        return_value=None,
+        return_value=None
     )
     unpublish_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.unpublish_item",
-        return_value=None,
+        "swo.mpt.cli.core.products.flows.unpublish_item", return_value=None
     )
     get_item_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.get_item",
-        side_effect=items,
+        side_effect=items
     )
     create_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.mpt_create_item",
-        side_effect=items,
+        side_effect=items
     )
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 

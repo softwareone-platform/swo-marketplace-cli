@@ -96,7 +96,7 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
         json=mpt_products_response,
     )
 
-    meta, products = get_products(mpt_client, 10, 0)
+    _, products = get_products(mpt_client, 10, 0)
 
     assert products == [Product.model_validate(p) for p in mpt_products]
 
@@ -114,18 +114,9 @@ def test_get_products_exception(requests_mocker, mpt_client):
 
 
 def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_path):
-    requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/products",
-        ),
-        json=mpt_product,
-    )
+    requests_mocker.post(urljoin(mpt_client.base_url, "/catalog/products"), json=mpt_product)
     requests_mocker.put(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{mpt_product['id']}/settings",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{mpt_product['id']}/settings"),
         match=[matchers.json_params_matcher({"settings": "1234"})],
     )
 
@@ -137,13 +128,7 @@ def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_p
 
 
 def test_create_product_exception(requests_mocker, mpt_client, mpt_product, product_icon_path):
-    requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/products",
-        ),
-        status=500,
-    )
+    requests_mocker.post(urljoin(mpt_client.base_url, "/catalog/products"), status=500)
 
     with pytest.raises(MPTAPIError) as e:
         create_product(
@@ -158,10 +143,7 @@ def test_create_product_exception(requests_mocker, mpt_client, mpt_product, prod
 
 def test_create_parameter_group(requests_mocker, mpt_client, product, mpt_parameter_group):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/parameter-groups",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/parameter-groups"),
         json=mpt_parameter_group,
         match=[matchers.json_params_matcher({"name": "Parameter Group"})],
     )
@@ -173,10 +155,7 @@ def test_create_parameter_group(requests_mocker, mpt_client, product, mpt_parame
 
 def test_create_parameter_group_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/parameter-groups",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/parameter-groups"),
         status=500,
     )
 
@@ -188,10 +167,7 @@ def test_create_parameter_group_exception(requests_mocker, mpt_client, product):
 
 def test_create_item_group(requests_mocker, mpt_client, product, mpt_item_group):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/item-groups",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/item-groups"),
         json=mpt_item_group,
         match=[matchers.json_params_matcher({"name": "Item Group"})],
     )
@@ -203,10 +179,7 @@ def test_create_item_group(requests_mocker, mpt_client, product, mpt_item_group)
 
 def test_create_item_group_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/item-groups",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/item-groups"),
         status=500,
     )
 
@@ -218,10 +191,7 @@ def test_create_item_group_exception(requests_mocker, mpt_client, product):
 
 def test_create_parameter(requests_mocker, mpt_client, product, mpt_parameter):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/parameters",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/parameters"),
         json=mpt_parameter,
         match=[matchers.json_params_matcher({"name": "Parameter Name"})],
     )
@@ -233,11 +203,7 @@ def test_create_parameter(requests_mocker, mpt_client, product, mpt_parameter):
 
 def test_create_parameter_exception(requests_mocker, mpt_client, product):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/parameters",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/parameters"), status=500
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -248,10 +214,7 @@ def test_create_parameter_exception(requests_mocker, mpt_client, product):
 
 def test_create_item(requests_mocker, mpt_client, mpt_item):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items",
-        ),
+        urljoin(mpt_client.base_url, "/catalog/items"),
         json=mpt_item,
         match=[matchers.json_params_matcher({"name": "Item Name"})],
     )
@@ -262,13 +225,7 @@ def test_create_item(requests_mocker, mpt_client, mpt_item):
 
 
 def test_create_item_exception(requests_mocker, mpt_client):
-    requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items",
-        ),
-        status=500,
-    )
+    requests_mocker.post(urljoin(mpt_client.base_url, "/catalog/items"), status=500)
 
     with pytest.raises(MPTAPIError) as e:
         create_item(mpt_client, {"name": "Item Name"})
@@ -279,10 +236,7 @@ def test_create_item_exception(requests_mocker, mpt_client):
 def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_response):
     name = "User"
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
         json=mpt_uoms_response,
     )
 
@@ -294,10 +248,7 @@ def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_respo
 def test_search_uom_by_name_exception(requests_mocker, mpt_client):
     name = "User"
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
         status=500,
     )
 
@@ -310,10 +261,7 @@ def test_search_uom_by_name_exception(requests_mocker, mpt_client):
 def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response, mpt_client):
     name = "User"
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
         json=wrap_to_mpt_list_response([]),
     )
 
@@ -340,11 +288,7 @@ def test_create_template(requests_mocker, mpt_client, product, mpt_template):
 
 def test_create_template_exception(requests_mocker, product, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/templates",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/templates"), status=500
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -355,10 +299,7 @@ def test_create_template_exception(requests_mocker, product, mpt_client):
 
 def test_create_template_400_exception(requests_mocker, product, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            f"/catalog/products/{product.id}/templates",
-        ),
+        urljoin(mpt_client.base_url, f"/catalog/products/{product.id}/templates"),
         status=400,
         json={"errors": {"description": ["error for exception"]}},
     )
@@ -371,11 +312,7 @@ def test_create_template_400_exception(requests_mocker, product, mpt_client):
 
 def test_review_item(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/review",
-        ),
-        status=200,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/review"), status=200
     )
 
     review_item(mpt_client, "ITM-1234-1234")
@@ -383,11 +320,7 @@ def test_review_item(requests_mocker, mpt_client):
 
 def test_review_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/review",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/review"), status=500
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -398,11 +331,7 @@ def test_review_exception_500(requests_mocker, mpt_client):
 
 def test_publish_item(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/publish",
-        ),
-        status=200,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/publish"), status=200
     )
 
     publish_item(mpt_client, "ITM-1234-1234")
@@ -410,11 +339,7 @@ def test_publish_item(requests_mocker, mpt_client):
 
 def test_publish_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/publish",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/publish"), status=500
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -425,11 +350,7 @@ def test_publish_exception_500(requests_mocker, mpt_client):
 
 def test_unpublish_item(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/unpublish",
-        ),
-        status=200,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/unpublish"), status=200
     )
 
     unpublish_item(mpt_client, "ITM-1234-1234")
@@ -437,11 +358,7 @@ def test_unpublish_item(requests_mocker, mpt_client):
 
 def test_unpublish_exception_500(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234/unpublish",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234/unpublish"), status=500
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -453,10 +370,7 @@ def test_unpublish_exception_500(requests_mocker, mpt_client):
 def test_update_item(requests_mocker, mpt_client):
     items_json = {"externalIds": {"operations": "erp-id"}}
     requests_mocker.put(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234",
-        ),
+        urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234"),
         status=200,
         match=[matchers.json_params_matcher(items_json)],
     )
@@ -465,13 +379,7 @@ def test_update_item(requests_mocker, mpt_client):
 
 
 def test_update_item_exception_500(requests_mocker, mpt_client):
-    requests_mocker.put(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/items/ITM-1234-1234",
-        ),
-        status=500,
-    )
+    requests_mocker.put(urljoin(mpt_client.base_url, "/catalog/items/ITM-1234-1234"), status=500)
 
     with pytest.raises(MPTAPIError) as e:
         update_item(mpt_client, "ITM-1234-1234", {})
@@ -479,13 +387,7 @@ def test_update_item_exception_500(requests_mocker, mpt_client):
     assert "Internal Server Error" in str(e.value)
 
 
-def test_get_item(
-    requests_mocker,
-    mpt_client,
-    mpt_item,
-    item,
-    wrap_to_mpt_list_response,
-):
+def test_get_item(requests_mocker, mpt_client, mpt_item, item, wrap_to_mpt_list_response):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -514,11 +416,7 @@ def test_get_item_exception(requests_mocker, mpt_client):
     assert "Internal Server Error" in str(e.value)
 
 
-def test_get_item_not_found(
-    requests_mocker,
-    mpt_client,
-    wrap_to_mpt_list_response,
-):
+def test_get_item_not_found(requests_mocker, mpt_client, wrap_to_mpt_list_response):
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -535,11 +433,7 @@ def test_get_item_not_found(
 
 def test_get_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/price-lists/PRC-1234-1234",
-        ),
-        json=mpt_pricelist,
+        urljoin(mpt_client.base_url, "/catalog/price-lists/PRC-1234-1234"), json=mpt_pricelist
     )
 
     returned_pricelist = get_pricelist(mpt_client, "PRC-1234-1234")
@@ -549,11 +443,7 @@ def test_get_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
 
 def test_get_pricelist_exception(requests_mocker, mpt_client):
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/price-lists/PRC-1234-1234",
-        ),
-        status=404,
+        urljoin(mpt_client.base_url, "/catalog/price-lists/PRC-1234-1234"), status=404
     )
 
     with pytest.raises(MPTAPIError) as e:
@@ -564,12 +454,9 @@ def test_get_pricelist_exception(requests_mocker, mpt_client):
 
 def test_create_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/price-lists",
-        ),
+        urljoin(mpt_client.base_url, "/catalog/price-lists"),
         json=mpt_pricelist,
-        match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
+        match=[matchers.json_params_matcher({"id": pricelist.id})],
     )
 
     returned_pricelist = create_pricelist(mpt_client, {"id": "PRC-1234-1234"})
@@ -579,10 +466,7 @@ def test_create_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist)
 
 def test_create_pricelist_exception(requests_mocker, mpt_client):
     requests_mocker.post(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/price-lists",
-        ),
+        urljoin(mpt_client.base_url, "/catalog/price-lists"),
         status=500,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
     )
@@ -595,10 +479,7 @@ def test_create_pricelist_exception(requests_mocker, mpt_client):
 
 def test_update_pricelist(requests_mocker, mpt_client, mpt_pricelist, pricelist):
     requests_mocker.put(
-        urljoin(
-            mpt_client.base_url,
-            "/catalog/price-lists/PRC-1234-1234",
-        ),
+        urljoin(mpt_client.base_url, "/catalog/price-lists/PRC-1234-1234"),
         json=mpt_pricelist,
         match=[matchers.json_params_matcher({"id": "PRC-1234-1234"})],
     )
