@@ -711,8 +711,7 @@ def test_sync_product(
     active_vendor_account,
 ):
     parameter_group_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_parameter_group",
-        return_value=parameter_group,
+        "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
     )
     item_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group

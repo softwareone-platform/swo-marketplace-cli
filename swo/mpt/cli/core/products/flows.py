@@ -43,14 +43,12 @@ from swo.mpt.cli.core.mpt.models import (
     Template,
 )
 from swo.mpt.cli.core.products import constants
+from swo.mpt.cli.core.products.models.items import ItemGroupData
+from swo.mpt.cli.core.products.models.parameters import ParameterGroupData, ParametersData
+from swo.mpt.cli.core.products.models.product import ProductData
 from swo.mpt.cli.core.products.to_json import (
-    to_item_group_json,
     to_item_sync_json,
     to_item_update_or_create_json,
-    to_parameter_group_json,
-    to_parameter_json,
-    to_product_json,
-    to_settings_json,
     to_template_json,
 )
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
@@ -209,18 +207,18 @@ def create_product_definition(
     general_data = file_handler.get_data_from_vertical_sheet(
         constants.TAB_GENERAL, constants.GENERAL_FIELDS
     )
-    settings_data = file_handler.get_data_from_horizontal_sheet(
+    general_data["settings"] = list(file_handler.get_data_from_horizontal_sheet(
         constants.TAB_SETTINGS, constants.SETTINGS_FIELDS
-    )
+    ))
+    product_data = ProductData.from_dict(general_data)
     try:
         product = create_product(
             mpt_client,
-            to_product_json(general_data),
-            to_settings_json(settings_data, constants.SETTINGS_API_MAPPING),
+            product_data.to_json(),
+            product_data.settings.to_json(),
             Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
         )
-        product_data = general_data[constants.GENERAL_PRODUCT_ID]
-        file_handler.write([{constants.TAB_GENERAL: {product_data["coordinate"]: product.id}}])
+        file_handler.write([{constants.TAB_GENERAL: {product_data.coordinate: product.id}}])
         stats.add_synced(constants.TAB_GENERAL)
 
     except Exception as e:
@@ -228,14 +226,14 @@ def create_product_definition(
         stats.add_error(constants.TAB_GENERAL)
         return stats, None
 
-    parameter_groups = file_handler.get_data_from_horizontal_sheet(
+    parameter_groups_data = file_handler.get_data_from_horizontal_sheet(
         constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
     )
     parameters_groups_id_mapping = sync_parameters_groups(
         mpt_client,
         file_handler,
         product,
-        parameter_groups,
+        parameter_groups_data,
         stats,
         status,
     )
@@ -440,16 +438,11 @@ def sync_parameters_groups(
     sheet_name = constants.TAB_PARAMETERS_GROUPS
     for sheet_value in values:
         try:
-            parameter_group = create_parameter_group(
-                mpt_client,
-                product,
-                to_parameter_group_json(sheet_value),
-            )
-
-            id_data = sheet_value[constants.PARAMETERS_GROUPS_ID]
-            id_mapping[id_data["value"]] = parameter_group
+            parameter_group_data = ParameterGroupData.from_dict(sheet_value)
+            parameter_group = create_parameter_group(mpt_client, product, parameter_group_data.to_json())
+            id_mapping[parameter_group_data.id] = parameter_group
             # TODO: refactor, should be done out of this function
-            file_handler.write([{sheet_name: {id_data["coordinate"]: parameter_group.id}}])
+            file_handler.write([{sheet_name: {parameter_group_data.coordinate: parameter_group.id}}])
             stats.add_synced(sheet_name)
         except Exception as e:
             add_or_create_error(file_handler, sheet_name, sheet_value, e)
@@ -477,16 +470,12 @@ def sync_items_groups(
     sheet_name = constants.TAB_ITEMS_GROUPS
     for sheet_value in values:
         try:
-            item_group = create_item_group(
-                mpt_client,
-                product,
-                to_item_group_json(sheet_value),
-            )
+            item_group_data = ItemGroupData.from_dict(sheet_value)
+            new_item_group = create_item_group(mpt_client, product, item_group_data.to_json())
 
-            id_data = sheet_value[constants.ITEMS_GROUPS_ID]
-            id_mapping[id_data["value"]] = item_group
+            id_mapping[item_group_data.id] = new_item_group
             # TODO: refactor, should be done out of this function
-            file_handler.write([{sheet_name: {id_data["coordinate"]: item_group.id}}])
+            file_handler.write([{sheet_name: {item_group_data.coordinate: new_item_group.id}}])
             stats.add_synced(sheet_name)
         except Exception as e:
             add_or_create_error(file_handler, sheet_name, sheet_value, e)
@@ -515,22 +504,17 @@ def sync_parameters(
     id_mapping = {}
     sheet_name = getattr(constants, f"TAB_{scope.upper()}_PARAMETERS")
     for sheet_value in values:
+        sheet_value["scope"] = scope
+        sheet_value["parameter_groups_mapping"] = {k: ParameterGroupData(**v.model_dump()) for k, v in parameter_groups_mapping.items()}
+        parameter_data = ParametersData.from_dict(sheet_value)
         try:
-            parameter = create_parameter(
-                mpt_client,
-                product,
-                to_parameter_json(scope, parameter_groups_mapping, sheet_value),
-            )
+            new_parameter = create_parameter(mpt_client, product, parameter_data.to_json())
 
-            id_data = sheet_value[constants.ID_COLUMN_NAME]
-            id_mapping[id_data["value"]] = parameter
-
-            fields_to_update = {id_data["coordinate"]: parameter.id}
-            phase = sheet_value[constants.PARAMETERS_PHASE]["value"]
-            if phase == "Order" and scope not in ("Item", "Request"):
-                id_data = sheet_value[constants.PARAMETERS_GROUP_ID]
-                created_group = parameter_groups_mapping[id_data["value"]]
-                fields_to_update[id_data["coordinate"]] = created_group.id
+            id_mapping[parameter_data.id] = new_parameter
+            fields_to_update = {parameter_data.coordinate: new_parameter.id}
+            if parameter_data.is_order_request():
+                created_group = parameter_groups_mapping[parameter_data.group_id]
+                fields_to_update[parameter_data.coordinate] = created_group.id
 
             # TODO: refactor, should be done out of this function
             file_handler.write([{sheet_name: fields_to_update}])

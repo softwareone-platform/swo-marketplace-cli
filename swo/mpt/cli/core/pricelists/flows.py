@@ -1,6 +1,6 @@
 import enum
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Any
 
 from rich.console import Console
 from swo.mpt.cli.core.accounts.models import Account
@@ -92,6 +92,7 @@ def sync_pricelist(
     file_handler.write([{TAB_GENERAL: {pricelist_data["coordinate"]: pricelist.id}}])
     stats.add_synced(TAB_GENERAL)
 
+
     stats = sync_pricelist_items(
         mpt_client,
         file_path,
@@ -118,7 +119,6 @@ def sync_pricelist_items(
         for row in file_handler.get_data_from_horizontal_sheet(sheet_name, PRICELIST_ITEMS_FIELDS):
             try:
                 action = PricelistItemAction(row[PRICELIST_ITEMS_ACTION]["value"])
-
                 if action != PricelistItemAction.UPDATE:
                     stats.add_skipped(sheet_name)
                     continue

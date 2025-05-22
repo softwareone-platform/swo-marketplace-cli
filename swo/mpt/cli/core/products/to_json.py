@@ -12,84 +12,84 @@ from swo.mpt.cli.core.utils import (
 )
 
 
-def to_settings_json(values: SheetDataGenerator, mapping: dict[str, str]) -> dict:
-    settings: dict = {}
-    for value in values:
-        settings_name = value[constants.SETTINGS_SETTING]["value"]
-        settings_value = value[constants.SETTINGS_VALUE]["value"]
-        json_path = mapping[settings_name]
-
-        if ".label" not in json_path and ".title" not in json_path:
-            settings_value = settings_value == "Enabled"
-
-        settings = set_dict_value(settings, json_path, settings_value)
-
-    return settings
-
-
-def to_parameter_group_json(values: SheetData) -> dict[str, Any]:
-    return {
-        "name": values[constants.PARAMETERS_GROUPS_NAME]["value"],
-        "label": values[constants.PARAMETERS_GROUPS_LABEL]["value"],
-        "description": values[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
-        "displayOrder": values[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"],
-        "default": values[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
-    }
+# def to_settings_json(values: SheetDataGenerator, mapping: dict[str, str]) -> dict:
+#     settings: dict = {}
+#     for value in values:
+#         settings_name = value[constants.SETTINGS_SETTING]["value"]
+#         settings_value = value[constants.SETTINGS_VALUE]["value"]
+#         json_path = mapping[settings_name]
+#
+#         if ".label" not in json_path and ".title" not in json_path:
+#             settings_value = settings_value == "Enabled"
+#
+#         settings = set_dict_value(settings, json_path, settings_value)
+#
+#     return settings
 
 
-def to_item_group_json(values: SheetData) -> dict[str, Any]:
-    return {
-        "name": values[constants.ITEMS_GROUPS_NAME]["value"],
-        "label": values[constants.ITEMS_GROUPS_LABEL]["value"],
-        "description": values[constants.ITEMS_GROUPS_DESCRIPTION]["value"],
-        "displayOrder": values[constants.ITEMS_GROUPS_DISPLAY_ORDER]["value"],
-        "default": values[constants.ITEMS_GROUPS_DEFAULT]["value"] == "True",
-        "multiple": values[constants.ITEMS_GROUPS_MULTIPLE_CHOICES]["value"] == "True",
-        "required": values[constants.ITEMS_GROUPS_REQUIRED]["value"] == "True",
-    }
+# def to_parameter_group_json(values: SheetData) -> dict[str, Any]:
+#     return {
+#         "name": values[constants.PARAMETERS_GROUPS_NAME]["value"],
+#         "label": values[constants.PARAMETERS_GROUPS_LABEL]["value"],
+#         "description": values[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
+#         "displayOrder": values[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"],
+#         "default": values[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
+#     }
 
 
-def to_parameter_json(
-    scope: str,
-    parameter_group_mapping: dict[str, ParameterGroup],
-    values: SheetData,
-) -> dict[str, Any]:
-    # backward compatible change for V3 Marketplace API
-    options = json.loads(values[constants.PARAMETERS_OPTIONS]["value"])
-    if "label" in options:
-        del options["label"]
-
-    phase = values[constants.PARAMETERS_PHASE]["value"]
-    parameter_json = {
-        "name": values[constants.PARAMETERS_NAME]["value"],
-        "description": values[constants.PARAMETERS_DESCRIPTION]["value"],
-        "scope": scope,
-        "phase": phase,
-        "type": values[constants.PARAMETERS_TYPE]["value"],
-        "options": options,
-        "constraints": json.loads(values[constants.PARAMETERS_CONSTRAINTS]["value"]),
-        "externalId": values[constants.PARAMETERS_EXTERNALID]["value"],
-        "displayOrder": values[constants.PARAMETERS_DISPLAY_ORDER]["value"],
-    }
-
-    if phase == "Order" and scope not in ("Item", "Request"):
-        excel_group_id = values[constants.PARAMETERS_GROUP_ID]["value"]
-        group = parameter_group_mapping[excel_group_id]
-
-        parameter_json["group"] = {"id": group.id}
-
-    return parameter_json
+# def to_item_group_json(values: SheetData) -> dict[str, Any]:
+#     return {
+#         "name": values[constants.ITEMS_GROUPS_NAME]["value"],
+#         "label": values[constants.ITEMS_GROUPS_LABEL]["value"],
+#         "description": values[constants.ITEMS_GROUPS_DESCRIPTION]["value"],
+#         "displayOrder": values[constants.ITEMS_GROUPS_DISPLAY_ORDER]["value"],
+#         "default": values[constants.ITEMS_GROUPS_DEFAULT]["value"] == "True",
+#         "multiple": values[constants.ITEMS_GROUPS_MULTIPLE_CHOICES]["value"] == "True",
+#         "required": values[constants.ITEMS_GROUPS_REQUIRED]["value"] == "True",
+#     }
 
 
-def to_product_json(data: SheetData) -> dict[str, Any]:
-    return {
-        "name": data[constants.GENERAL_PRODUCT_NAME]["value"],
-        "shortDescription": data[constants.GENERAL_CATALOG_DESCRIPTION]["value"],
-        "longDescription": data[constants.GENERAL_PRODUCT_DESCRIPTION]["value"],
-        "website": data[constants.GENERAL_PRODUCT_WEBSITE]["value"],
-        "externalIds": None,
-        "settings": None,
-    }
+# def to_parameter_json(
+#     scope: str,
+#     parameter_group_mapping: dict[str, ParameterGroup],
+#     values: SheetData,
+# ) -> dict[str, Any]:
+#     # backward compatible change for V3 Marketplace API
+#     options = json.loads(values[constants.PARAMETERS_OPTIONS]["value"])
+#     if "label" in options:
+#         del options["label"]
+#
+#     phase = values[constants.PARAMETERS_PHASE]["value"]
+#     parameter_json = {
+#         "name": values[constants.PARAMETERS_NAME]["value"],
+#         "description": values[constants.PARAMETERS_DESCRIPTION]["value"],
+#         "scope": scope,
+#         "phase": phase,
+#         "type": values[constants.PARAMETERS_TYPE]["value"],
+#         "options": options,
+#         "constraints": json.loads(values[constants.PARAMETERS_CONSTRAINTS]["value"]),
+#         "externalId": values[constants.PARAMETERS_EXTERNALID]["value"],
+#         "displayOrder": values[constants.PARAMETERS_DISPLAY_ORDER]["value"],
+#     }
+#
+#     if phase == "Order" and scope not in ("Item", "Request"):
+#         excel_group_id = values[constants.PARAMETERS_GROUP_ID]["value"]
+#         group = parameter_group_mapping[excel_group_id]
+#
+#         parameter_json["group"] = {"id": group.id}
+#
+#     return parameter_json
+
+
+# def to_product_json(data: SheetData) -> dict[str, Any]:
+#     return {
+#         "name": data[constants.GENERAL_PRODUCT_NAME]["value"],
+#         "shortDescription": data[constants.GENERAL_CATALOG_DESCRIPTION]["value"],
+#         "longDescription": data[constants.GENERAL_PRODUCT_DESCRIPTION]["value"],
+#         "website": data[constants.GENERAL_PRODUCT_WEBSITE]["value"],
+#         "externalIds": None,
+#         "settings": None,
+#     }
 
 
 def to_item_sync_json(
