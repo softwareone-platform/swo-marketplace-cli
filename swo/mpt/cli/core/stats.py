@@ -1,5 +1,9 @@
 import copy
+from abc import ABC, abstractmethod
 from typing import TypedDict
+
+from rich import box
+from rich.table import Table
 
 
 class Results(TypedDict):
@@ -59,7 +63,9 @@ class ErrorMessagesCollector:
         return msg
 
 
-class StatsCollector:
+class StatsCollector(ABC):
+    __id: str | None = None
+
     def __init__(self, tabs: dict[str, Results]) -> None:
         self.__has_error = False
         self.__tab_aliases = tabs
@@ -84,6 +90,26 @@ class StatsCollector:
     @property
     def is_error(self) -> bool:
         return self.__has_error
+
+    @abstractmethod
+    def _get_table_title(self) -> str:
+        raise NotImplementedError
+
+    def to_table(self):
+        table = Table(self._get_table_title(), box=box.ROUNDED)
+        columns = ["Total", "Synced", "Errors", "Skipped"]
+        for column in columns:
+            table.add_column(column)
+
+        for tab_name, tab_stats in self.tabs.items():
+            table.add_row(
+                tab_name,
+                f"[blue]{tab_stats['total']}",
+                f"[green]{tab_stats['synced']}",
+                f"[red bold]{tab_stats['error']}",
+                f"[white]{tab_stats['skipped']}",
+            )
+        return table
 
 
 class ProductStatsCollector(StatsCollector):
@@ -112,6 +138,10 @@ class ProductStatsCollector(StatsCollector):
 
         super().__init__(tabs)
 
+    def _get_table_title(self) -> str:
+        status = "[red bold]FAILED" if self.is_error else "[green bold]SUCCEED"
+        return f"Product Sync {status}"
+
 
 class PricelistStatsCollector(StatsCollector):
     def __init__(self) -> None:
@@ -124,3 +154,19 @@ class PricelistStatsCollector(StatsCollector):
         }
 
         super().__init__(tabs)
+
+    @property
+    def pricelist_id(self) -> str | None:
+        return self.__id
+
+    @pricelist_id.setter
+    def pricelist_id(self, value: str) -> None:
+        self.__id = value
+
+    def _get_table_title(self) -> str:
+        if self.is_error:
+            title = "Pricelist sync [red bold]FAILED"
+        else:
+            title = f"Pricelist {self.pricelist_id} sync [green bold]SUCCEED"
+
+        return title

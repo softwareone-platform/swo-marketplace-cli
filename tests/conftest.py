@@ -373,8 +373,7 @@ def mock_sync_product(
     product,
 ):
     mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_parameter_group",
-        return_value=parameter_group,
+        "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
     )
     mocker.patch("swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group)
     mocker.patch(

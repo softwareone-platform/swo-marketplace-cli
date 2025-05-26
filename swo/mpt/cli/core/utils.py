@@ -1,16 +1,17 @@
 import re
-from collections.abc import Generator
+from collections.abc import Generator, Iterable
 from re import Pattern
-from typing import Any
+from typing import Any, Callable, TypeVar
 
 from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler, SheetData
 from swo.mpt.cli.core.stats import StatsCollector
 
+T = TypeVar("T")
 
-# TODO: add typehints here
-def find_first(func, iterable, default=None):
+def find_first(
+    func: Callable, iterable: Iterable[T], default: T | None = None
+) -> T | None:
     return next(filter(func, iterable), default)
-
 
 def find_values_by_pattern(
     pattern: Pattern[str], values: SheetData

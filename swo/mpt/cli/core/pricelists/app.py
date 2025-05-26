@@ -3,17 +3,10 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from rich import box
-from rich.table import Table
 from swo.mpt.cli.core.accounts.app import get_active_account
 from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.mpt.client import client_from_account
-from swo.mpt.cli.core.mpt.models import Pricelist
-from swo.mpt.cli.core.pricelists.flows import (
-    PricelistAction,
-    check_pricelist,
-    sync_pricelist,
-)
+from swo.mpt.cli.core.pricelists.flows import PricelistAction, check_pricelist, sync_pricelist
 from swo.mpt.cli.core.stats import PricelistStatsCollector
 
 app = typer.Typer()
@@ -83,44 +76,13 @@ def sync_pricelists(
         has_error = has_error or stats.is_error
 
         if pricelist:
-            pricelist_table = _pricelist_stats_table(pricelist, stats)
-            pricelist_table = _list_pricelist_stats(pricelist_table, stats)
-
-            console.print(pricelist_table)
+            stats.pricelist_id = pricelist.id
+            console.print(stats.to_table())
         else:
             console.print("Pricelist sync [red bold]FAILED")
 
     if has_error:
         raise typer.Exit(code=4)
-
-
-def _pricelist_stats_table(pricelist: Pricelist, stats: PricelistStatsCollector) -> Table:
-    if stats.is_error:
-        title = "Pricelist sync [red bold]FAILED"
-    else:
-        title = f"Pricelist {pricelist.id} sync [green bold]SUCCEED"
-
-    table = Table(title, box=box.ROUNDED)
-
-    table.add_column("Total")
-    table.add_column("Synced")
-    table.add_column("Errors")
-    table.add_column("Skipped")
-
-    return table
-
-
-def _list_pricelist_stats(table: Table, stats: PricelistStatsCollector) -> Table:
-    for tab_name, tab_stats in stats.tabs.items():
-        table.add_row(
-            tab_name,
-            f"[blue]{tab_stats['total']}",
-            f"[green]{tab_stats['synced']}",
-            f"[red bold]{tab_stats['error']}",
-            f"[white]{tab_stats['skipped']}",
-        )
-
-    return table
 
 
 if __name__ == "__main__":
