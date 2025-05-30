@@ -144,47 +144,12 @@ def sync_product(
                 status,
             )
 
-        # TODO: call product_stats.to_table()
-        table = _product_stats_table(product_stats)
-        table = _list_products_stats(table, product_stats)
-        console.print(table)
-
+        console.print(product_stats.to_table())
         if product_stats.is_error:
             raise typer.Exit(code=3)
 
 
-# TODO: move to StatsCollector.to_table()
-def _product_stats_table(stats: ProductStatsCollector) -> Table:
-    if stats.is_error:
-        title = "Product Sync [red bold]FAILED"
-    else:
-        title = "Product Sync [green bold]SUCCEED"
-
-    table = Table(title, box=box.ROUNDED)
-
-    table.add_column("Total")
-    table.add_column("Synced")
-    table.add_column("Errors")
-    table.add_column("Skipped")
-
-    return table
-
-
-# TODO: move to StatsCollector.to_table()
-def _list_products_stats(table: Table, stats: ProductStatsCollector) -> Table:
-    for tab_name, tab_stats in stats.tabs.items():
-        table.add_row(
-            tab_name,
-            f"[blue]{tab_stats['total']}",
-            f"[green]{tab_stats['synced']}",
-            f"[red bold]{tab_stats['error']}",
-            f"[white]{tab_stats['skipped']}",
-        )
-
-    return table
-
-
-# TODO: move to StatsCollector.to_table()
+# TODO: move to to_table()
 def _products_table(title: str) -> Table:
     table = Table(title=title, box=box.ROUNDED)
 
@@ -196,7 +161,7 @@ def _products_table(title: str) -> Table:
     return table
 
 
-# TODO: move to StatsCollector.to_table()
+# TODO: move to to_table()
 def _list_products(table: Table, products: list[MPTProduct]) -> Table:
     def _wrap_product_status(status: str) -> str:  # pragma: no cover
         match status:

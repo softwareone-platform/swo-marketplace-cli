@@ -9,10 +9,7 @@ runner = CliRunner()
 def test_list_products(
     expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -31,10 +28,7 @@ def test_list_products(
 def test_list_products_with_query_and_paging(
     expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -54,17 +48,11 @@ def test_list_products_with_query_and_paging(
 
 
 def test_file_with_extension(expected_account, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
 
 def test_sync_file_doesnt_exist(expected_account, mocker):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,
@@ -76,10 +64,7 @@ def test_sync_file_doesnt_exist(expected_account, mocker):
 
 
 def test_sync_with_dry_run_failure(expected_account, mocker, empty_file):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,
@@ -91,10 +76,7 @@ def test_sync_with_dry_run_failure(expected_account, mocker, empty_file):
 
 
 def test_sync_with_dry_run(expected_account, mocker, new_product_file):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,
@@ -108,14 +90,8 @@ def test_sync_with_dry_run(expected_account, mocker, new_product_file):
 def test_sync_product_update(
     mocker, expected_account, mock_sync_product, new_product_file, product
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.check_product_exists",
-        return_value=product,
-    )
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=product)
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,
@@ -131,14 +107,8 @@ def test_sync_product_update(
 def test_sync_product_force_create(
     mocker, expected_account, mock_sync_product, new_product_file, product
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.check_product_exists",
-        return_value=product,
-    )
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=product)
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,
@@ -152,14 +122,8 @@ def test_sync_product_force_create(
 
 
 def test_sync_product_no_product(mocker, expected_account, mock_sync_product, new_product_file):
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.check_product_exists",
-        return_value=None,
-    )
-    mocker.patch(
-        "swo.mpt.cli.core.products.app.get_active_account",
-        return_value=expected_account,
-    )
+    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=None)
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
 
     result = runner.invoke(
         app,

@@ -16,8 +16,7 @@ from swo.mpt.cli.core.stats import PricelistStatsCollector
 
 def test_check_pricelist(mocker, mpt_client, pricelist_new_file, pricelist):
     mocked_get_pricelist = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.get_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.get_pricelist", return_value=pricelist
     )
 
     returned_pricelist = check_pricelist(mpt_client, pricelist_new_file)
@@ -44,12 +43,10 @@ def test_sync_pricelist_create_vendor(
     stats = PricelistStatsCollector()
 
     create_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.create_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.create_pricelist", return_value=pricelist
     )
     sync_items_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
-        return_value=stats,
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items", return_value=stats
     )
 
     returned_stats, returned_pricelist = sync_pricelist(
@@ -62,7 +59,8 @@ def test_sync_pricelist_create_vendor(
     )
 
     assert returned_stats.tabs[constants.TAB_GENERAL]["synced"] == 1
-    # assert wb[constants.TAB_GENERAL]["B3"].value == pricelist.id
+    file_handler = ExcelFileHandler(pricelist_new_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == pricelist.id
     assert returned_pricelist == pricelist
     create_mock.assert_called_once_with(
         mpt_client,
@@ -91,12 +89,10 @@ def test_sync_pricelist_create_operations(
     stats = PricelistStatsCollector()
 
     create_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.create_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.create_pricelist", return_value=pricelist
     )
     sync_items_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
-        return_value=stats,
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items", return_value=stats
     )
 
     returned_stats, returned_pricelist = sync_pricelist(
@@ -109,7 +105,8 @@ def test_sync_pricelist_create_operations(
     )
 
     assert returned_stats.tabs[constants.TAB_GENERAL]["synced"] == 1
-    # assert wb[constants.TAB_GENERAL]["B3"].value == pricelist.id
+    file_handler = ExcelFileHandler(pricelist_new_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == pricelist.id
     assert returned_pricelist == pricelist
     create_mock.assert_called_once_with(
         mpt_client,
@@ -139,12 +136,10 @@ def test_sync_pricelist_update_vendor(
     stats = PricelistStatsCollector()
 
     update_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.update_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.update_pricelist", return_value=pricelist
     )
     sync_items_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
-        return_value=stats,
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items", return_value=stats
     )
 
     returned_stats, returned_pricelist = sync_pricelist(
@@ -186,12 +181,10 @@ def test_sync_pricelist_update_operations(
     stats = PricelistStatsCollector()
 
     update_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.update_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.update_pricelist", return_value=pricelist
     )
     sync_items_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
-        return_value=stats,
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items", return_value=stats
     )
 
     returned_stats, returned_pricelist = sync_pricelist(
@@ -204,7 +197,8 @@ def test_sync_pricelist_update_operations(
     )
 
     assert returned_stats.tabs[constants.TAB_GENERAL]["synced"] == 1
-    # assert wb[constants.TAB_GENERAL]["B3"].value == pricelist.id
+    file_handler = ExcelFileHandler(pricelist_new_file)
+    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == pricelist.id
     assert returned_pricelist == pricelist
     update_mock.assert_called_once_with(
         mpt_client,
@@ -238,12 +232,10 @@ def test_sync_pricelist_items_vendor(
 ):
     stats = PricelistStatsCollector()
     update_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.update_pricelist_item",
-        return_value=pricelist_item,
+        "swo.mpt.cli.core.pricelists.flows.update_pricelist_item", return_value=pricelist_item
     )
     mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.get_pricelist_item",
-        return_value=pricelist_item,
+        "swo.mpt.cli.core.pricelists.flows.get_pricelist_item", return_value=pricelist_item
     )
 
     returned_stats = sync_pricelist_items(
@@ -279,12 +271,10 @@ def test_sync_pricelist_items_operations(
 ):
     stats = PricelistStatsCollector()
     update_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.update_pricelist_item",
-        return_value=pricelist_item,
+        "swo.mpt.cli.core.pricelists.flows.update_pricelist_item", return_value=pricelist_item
     )
     mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.get_pricelist_item",
-        return_value=pricelist_item,
+        "swo.mpt.cli.core.pricelists.flows.get_pricelist_item", return_value=pricelist_item
     )
 
     returned_stats = sync_pricelist_items(
@@ -335,12 +325,10 @@ def test_sync_pricelist_create_vendor_external_id(
         ]
     )
     create_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.create_pricelist",
-        return_value=pricelist,
+        "swo.mpt.cli.core.pricelists.flows.create_pricelist", return_value=pricelist
     )
     sync_items_mock = mocker.patch(
-        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items",
-        return_value=stats,
+        "swo.mpt.cli.core.pricelists.flows.sync_pricelist_items", return_value=stats
     )
 
     returned_stats, returned_pricelist = sync_pricelist(

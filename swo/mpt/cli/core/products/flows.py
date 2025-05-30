@@ -1,6 +1,7 @@
 import enum
 import os
 import re
+from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from typing import Optional, TypeAlias, TypeVar
@@ -19,9 +20,7 @@ from swo.mpt.cli.core.handlers.excel_file_handler import (
     SheetDataGenerator,
 )
 from swo.mpt.cli.core.mpt.client import MPTClient
-from swo.mpt.cli.core.mpt.flows import (
-    create_item as mpt_create_item,
-)
+from swo.mpt.cli.core.mpt.flows import create_item as mpt_create_item
 from swo.mpt.cli.core.mpt.flows import (
     create_item_group,
     create_parameter,
@@ -35,11 +34,8 @@ from swo.mpt.cli.core.mpt.flows import (
     search_uom_by_name,
     unpublish_item,
 )
-from swo.mpt.cli.core.mpt.flows import (
-    update_item as mpt_update_item,
-)
+from swo.mpt.cli.core.mpt.flows import update_item as mpt_update_item
 from swo.mpt.cli.core.mpt.models import (
-    Item,
     ItemGroup,
     Parameter,
     ParameterGroup,
@@ -47,19 +43,19 @@ from swo.mpt.cli.core.mpt.models import (
     Template,
 )
 from swo.mpt.cli.core.products import constants
-from swo.mpt.cli.core.products.to_json import (
-    to_item_group_json,
-    to_item_sync_json,
-    to_item_update_or_create_json,
-    to_parameter_group_json,
-    to_parameter_json,
-    to_product_json,
-    to_settings_json,
-    to_template_json,
+from swo.mpt.cli.core.products.models import (
+    ItemData,
+    ItemGroupData,
+    ParameterGroupData,
+    ParametersData,
+    ProductData,
+    TemplateData,
 )
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     add_or_create_error,
+    find_first,
+    find_values_by_pattern,
     set_value,
     status_step_text,
 )
@@ -107,33 +103,31 @@ def check_product_definition(
     """
     Parses Product definition file and check consistency of product definition file
     """
-    # check parameters and items refer to proper groups
     file_handler = ExcelFileHandler(definition_path)
     try:
         file_handler.check_required_sheet(constants.REQUIRED_TABS)
     except RequiredSheetsError as error:
-        for sheet_name in error.details:
-            stats.add_msg(sheet_name, "", "Required tab doesn't exist")
+        for section_name in error.details:
+            stats.add_msg(section_name, "", "Required tab doesn't exist")
 
-    existing_sheets = set(constants.ALL_TABS).intersection(set(file_handler.sheet_names))
-    for sheet_name in existing_sheets:
-        if sheet_name not in constants.REQUIRED_FIELDS_BY_TAB:
+    for section_name in set(constants.ALL_TABS).intersection(set(file_handler.sheet_names)):
+        if section_name not in constants.REQUIRED_FIELDS_BY_TAB:
             continue
 
-        if sheet_name == constants.TAB_GENERAL:
+        if section_name == constants.TAB_GENERAL:
             check_required_general_fields(
                 file_handler,
                 stats,
-                sheet_name,
-                constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
-                constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[sheet_name],
+                section_name,
+                constants.REQUIRED_FIELDS_BY_TAB[section_name],
+                constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[section_name],
             )
         else:
             check_required_columns(
                 file_handler,
                 stats,
-                sheet_name,
-                constants.REQUIRED_FIELDS_BY_TAB[sheet_name],
+                section_name,
+                constants.REQUIRED_FIELDS_BY_TAB[section_name],
             )
 
     return stats
@@ -142,53 +136,46 @@ def check_product_definition(
 def check_required_general_fields(
     file_handler: ExcelFileHandler,
     stats: ErrorMessagesCollector,
-    sheet_name: str,
+    section_name: str,
     required_field_names: list[str],
     required_values_field_names: list[str],
-) -> ErrorMessagesCollector:
+):
     """
     Check that required fields and values are presented in General worksheet
     """
     try:
-        file_handler.check_required_fields_in_vertical_sheet(sheet_name, required_field_names)
+        file_handler.check_required_fields_in_vertical_sheet(section_name, required_field_names)
     except RequiredFieldsError as error:
         for field in error.details:
-            stats.add_msg(sheet_name, "", f"Required field {field} is not provided")
+            stats.add_msg(section_name, "", f"Required field {field} is not provided")
 
     try:
         file_handler.check_required_field_values_in_vertical_sheet(
-            sheet_name, required_values_field_names
+            section_name, required_values_field_names
         )
     except RequiredFieldValuesError as error:
         for field in error.details:
             stats.add_msg(
-                sheet_name,
+                section_name,
                 field,
                 "Value is not provided for the required field. Current value: None",
             )
-
-    return stats
 
 
 def check_required_columns(
     file_handler: ExcelFileHandler,
     stats: ErrorMessagesCollector,
-    sheet_name: str,
+    section_name: str,
     required_field_names: list[str],
-) -> ErrorMessagesCollector:
+):
     """
     Check that required fields and values are presented in tables worksheet
     """
     try:
-        file_handler.check_required_fields_in_horizontal_sheet(sheet_name, required_field_names)
+        file_handler.check_required_fields_in_horizontal_sheet(section_name, required_field_names)
     except RequiredFieldsError as error:
         for field in error.details:
-            stats.add_msg(
-                sheet_name,
-                "",
-                f"Required field {field} is not provided",
-            )
-    return stats
+            stats.add_msg(section_name, "", f"Required field {field} is not provided")
 
 
 def sync_product_definition(
@@ -203,7 +190,6 @@ def sync_product_definition(
     Sync product definition to the marketplace platform
     """
     file_handler = ExcelFileHandler(file_path=definition_path)
-
     if action == ProductAction.UPDATE:
         stats, product = update_product_definition(
             mpt_client, file_handler, active_account, stats, status
@@ -223,18 +209,21 @@ def create_product_definition(
     general_data = file_handler.get_data_from_vertical_sheet(
         constants.TAB_GENERAL, constants.GENERAL_FIELDS
     )
-    settings_data = file_handler.get_data_from_horizontal_sheet(
-        constants.TAB_SETTINGS, constants.SETTINGS_FIELDS
-    )
+
+    general_data["settings"] = {
+        str(idx): setting for idx, setting in enumerate(
+            file_handler.get_data_from_horizontal_sheet(
+                constants.TAB_SETTINGS, constants.SETTINGS_FIELDS))
+    }
+    product_data = ProductData.from_dict(general_data)
     try:
         product = create_product(
             mpt_client,
-            to_product_json(general_data),
-            to_settings_json(settings_data, constants.SETTINGS_API_MAPPING),
+            product_data.to_json(),
+            product_data.settings.to_json(),
             Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
         )
-        product_data = general_data[constants.GENERAL_PRODUCT_ID]
-        file_handler.write([{constants.TAB_GENERAL: {product_data["coordinate"]: product.id}}])
+        file_handler.write([{constants.TAB_GENERAL: {product_data.coordinate: product.id}}])
         stats.add_synced(constants.TAB_GENERAL)
 
     except Exception as e:
@@ -242,14 +231,14 @@ def create_product_definition(
         stats.add_error(constants.TAB_GENERAL)
         return stats, None
 
-    parameter_groups = file_handler.get_data_from_horizontal_sheet(
+    parameter_groups_data = file_handler.get_data_from_horizontal_sheet(
         constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
     )
     parameters_groups_id_mapping = sync_parameters_groups(
         mpt_client,
         file_handler,
         product,
-        parameter_groups,
+        parameter_groups_data,
         stats,
         status,
     )
@@ -434,8 +423,10 @@ def update_item(
     product_id: str,
     sheet_value: SheetData,
 ) -> None:
-    item_json = to_item_update_or_create_json(product_id, sheet_value, account.is_operations())
-    mpt_update_item(mpt_client, item_id, item_json)
+    data = deepcopy(sheet_value)
+    data["product_id"] = product_id
+    data["is_operations"] = account.is_operations()
+    mpt_update_item(mpt_client, item_id, ItemData.from_dict(data).to_json())
 
 
 def sync_parameters_groups(
@@ -454,16 +445,15 @@ def sync_parameters_groups(
     sheet_name = constants.TAB_PARAMETERS_GROUPS
     for sheet_value in values:
         try:
+            parameter_group_data = ParameterGroupData.from_dict(sheet_value)
             parameter_group = create_parameter_group(
-                mpt_client,
-                product,
-                to_parameter_group_json(sheet_value),
+                mpt_client, product, parameter_group_data.to_json()
             )
-
-            id_data = sheet_value[constants.PARAMETERS_GROUPS_ID]
-            id_mapping[id_data["value"]] = parameter_group
+            id_mapping[parameter_group_data.id] = parameter_group
             # TODO: refactor, should be done out of this function
-            file_handler.write([{sheet_name: {id_data["coordinate"]: parameter_group.id}}])
+            file_handler.write(
+                [{sheet_name: {parameter_group_data.coordinate: parameter_group.id}}]
+            )
             stats.add_synced(sheet_name)
         except Exception as e:
             add_or_create_error(file_handler, sheet_name, sheet_value, e)
@@ -491,16 +481,12 @@ def sync_items_groups(
     sheet_name = constants.TAB_ITEMS_GROUPS
     for sheet_value in values:
         try:
-            item_group = create_item_group(
-                mpt_client,
-                product,
-                to_item_group_json(sheet_value),
-            )
+            item_group_data = ItemGroupData.from_dict(sheet_value)
+            new_item_group = create_item_group(mpt_client, product, item_group_data.to_json())
 
-            id_data = sheet_value[constants.ITEMS_GROUPS_ID]
-            id_mapping[id_data["value"]] = item_group
+            id_mapping[item_group_data.id] = new_item_group
             # TODO: refactor, should be done out of this function
-            file_handler.write([{sheet_name: {id_data["coordinate"]: item_group.id}}])
+            file_handler.write([{sheet_name: {item_group_data.coordinate: new_item_group.id}}])
             stats.add_synced(sheet_name)
         except Exception as e:
             add_or_create_error(file_handler, sheet_name, sheet_value, e)
@@ -529,22 +515,20 @@ def sync_parameters(
     id_mapping = {}
     sheet_name = getattr(constants, f"TAB_{scope.upper()}_PARAMETERS")
     for sheet_value in values:
+        sheet_value["scope"] = scope
+        sheet_value["parameter_groups_mapping"] = {
+            k: ParameterGroupData(**v.model_dump()) for k, v in parameter_groups_mapping.items()
+        }
+        parameter_data = ParametersData.from_dict(sheet_value)
         try:
-            parameter = create_parameter(
-                mpt_client,
-                product,
-                to_parameter_json(scope, parameter_groups_mapping, sheet_value),
-            )
+            new_parameter = create_parameter(mpt_client, product, parameter_data.to_json())
 
-            id_data = sheet_value[constants.ID_COLUMN_NAME]
-            id_mapping[id_data["value"]] = parameter
-
-            fields_to_update = {id_data["coordinate"]: parameter.id}
-            phase = sheet_value[constants.PARAMETERS_PHASE]["value"]
-            if phase == "Order" and scope not in ("Item", "Request"):
-                id_data = sheet_value[constants.PARAMETERS_GROUP_ID]
-                created_group = parameter_groups_mapping[id_data["value"]]
-                fields_to_update[id_data["coordinate"]] = created_group.id
+            id_mapping[parameter_data.id] = new_parameter
+            fields_to_update = {parameter_data.coordinate: new_parameter.id}
+            if parameter_data.is_order_request() and parameter_data.created_group_id is not None:
+                fields_to_update[parameter_data.created_group_coordinate] = (
+                    parameter_data.created_group_id
+                )
 
             # TODO: refactor, should be done out of this function
             file_handler.write([{sheet_name: fields_to_update}])
@@ -574,41 +558,44 @@ def sync_items(
     item_parameters_id_mapping: dict[str, Parameter],
     stats: ProductStatsCollector,
     status: Status,
-) -> SyncResult[Item]:
+) -> None:
     """
     Sync parameters by scope
-    Returns mapping if ids {"<excel-id>": Item}
     """
     id_mapping = {}
     sheet_name = constants.TAB_ITEMS
     for new_sheet_value in values:
+        parameters = []
+        for key, value in find_values_by_pattern(re.compile(r"Parameter\.*"), new_sheet_value):
+            _, external_id = key.split(".")
+            parameter = find_first(
+                lambda p, ext_id=external_id: p.external_id == ext_id,
+                item_parameters_id_mapping.values(),
+            )
+            if parameter is None:
+                continue
+
+            parameters.append({"id": parameter.id, "value": value["value"]})
+
+        group_id = new_sheet_value[constants.ITEMS_GROUP_ID]["value"]
+        created_group = items_groups_mapping[group_id]
+        new_sheet_value["group_id"] = created_group.id
+        new_sheet_value["parameters"] = parameters
+        new_sheet_value["product_id"] = product.id
         try:
             new_sheet_value = setup_unit_of_measure(mpt_client, new_sheet_value)
-            item = mpt_create_item(
-                mpt_client,
-                to_item_sync_json(
-                    product.id,
-                    items_groups_mapping,
-                    item_parameters_id_mapping,
-                    new_sheet_value,
-                ),
-            )
+            item_data = ItemData.from_dict(new_sheet_value)
+            item = mpt_create_item(mpt_client, item_data.to_json())
 
-            id_data = new_sheet_value[constants.ID_COLUMN_NAME]
-            id_mapping[id_data["value"]] = item
-
-            item_id_data = new_sheet_value[constants.ITEMS_UNIT_ID]
-            group_id_data = new_sheet_value[constants.ITEMS_GROUP_ID]
-            created_group = items_groups_mapping[group_id_data["value"]]
-
+            id_mapping[item_data.id] = item
             # TODO: refactor, should be done out of this function
             file_handler.write(
                 [
                     {
                         sheet_name: {
-                            id_data["coordinate"]: item.id,
-                            item_id_data["coordinate"]: group_id_data["value"],
-                            group_id_data["coordinate"]: created_group.id,
+                            item_data.coordinate: item.id,
+                            item_data.unit_coordinate: item_data.group_id,
+                            item_data.group_coordinate: created_group.id,
                         }
                     }
                 ]
@@ -621,8 +608,6 @@ def sync_items(
             step_text = status_step_text(stats, sheet_name)
             status.update(f"Syncing {sheet_name}: {step_text}")
 
-    return id_mapping
-
 
 def create_item(
     mpt_client: MPTClient,
@@ -633,24 +618,17 @@ def create_item(
     sheet_value: SheetData,
 ) -> None:
     new_sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
-    item = mpt_create_item(
-        mpt_client,
-        to_item_update_or_create_json(
-            product_id,
-            new_sheet_value,
-            active_account.is_operations(),
-        ),
-    )
-
-    id_index = new_sheet_value[constants.ID_COLUMN_NAME]["coordinate"]
-    uom_id_data = new_sheet_value[constants.ITEMS_UNIT_ID]
+    new_sheet_value["product_id"] = product_id
+    new_sheet_value["is_operations"] = active_account.is_operations()
+    item_data = ItemData.from_dict(new_sheet_value)
+    item = mpt_create_item(mpt_client, item_data.to_json())
     # TODO: refactor, should be done out of this function
     file_handler.write(
         [
             {
                 sheet_name: {
-                    id_index: item.id,
-                    uom_id_data["coordinate"]: uom_id_data["value"],
+                    item_data.coordinate: item.id,
+                    item_data.unit_coordinate: item_data.unit_id,
                 }
             }
         ]
@@ -681,18 +659,16 @@ def sync_templates(
     for sheet_value in values:
         try:
             sheet_value = replace_parameter_variables(sheet_value, all_parameters_id_mapping)
-            template = create_template(mpt_client, product, to_template_json(sheet_value))
-
-            content_data = sheet_value[constants.TEMPLATES_CONTENT]
-            id_data = sheet_value[constants.ID_COLUMN_NAME]
-            id_mapping[id_data["value"]] = template
+            template_data = TemplateData.from_dict(sheet_value)
+            template = create_template(mpt_client, product, template_data.to_json())
+            id_mapping[template_data.id] = template
             # TODO: refactor, should be done out of this function
             file_handler.write(
                 [
                     {
                         sheet_name: {
-                            id_data["coordinate"]: template.id,
-                            content_data["coordinate"]: content_data["value"],
+                            template_data.coordinate: template.id,
+                            template_data.content_coordinate: template_data.content,
                         }
                     }
                 ]

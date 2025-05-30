@@ -193,8 +193,7 @@ def test_check_product_definition_not_all_required_settings(
 def test_sync_parameters_groups(mocker, mpt_client, new_product_file, product, parameter_group):
     stats = ProductStatsCollector()
     parameter_group_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_parameter_group",
-        return_value=parameter_group,
+        "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
     )
     file_handler = ExcelFileHandler(new_product_file)
     values = file_handler.get_data_from_horizontal_sheet(
@@ -351,10 +350,7 @@ def test_sync_parameters(mocker, mpt_client, new_product_file, product, paramete
     }
     a2_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A2")
     a3_value = file_handler.get_cell_value_by_coordinate(sheet_name, "A3")
-    assert (a2_value, a3_value) == (
-        parameter.id,
-        parameter.id,
-    )
+    assert (a2_value, a3_value) == (parameter.id, parameter.id)
     assert file_handler.get_cell_value_by_coordinate(sheet_name, "H2") == parameter_group.id
     assert parameter_mock.mock_calls[0].args == (
         mpt_client,
@@ -469,7 +465,7 @@ def test_sync_item(
         constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
     )
 
-    id_mapping = sync_items(
+    sync_items(
         mpt_client,
         file_handler,
         product,
@@ -485,7 +481,6 @@ def test_sync_item(
         console.status(""),
     )
 
-    assert id_mapping == {"ITM-4944-4118-0001": item, "ITM-4944-4118-0002": item}
     assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "A2") == item.id
     assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "A3") == item.id
     assert file_handler.get_cell_value_by_coordinate(constants.TAB_ITEMS, "J2") == item_group.id
@@ -711,8 +706,7 @@ def test_sync_product(
     active_vendor_account,
 ):
     parameter_group_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_parameter_group",
-        return_value=parameter_group,
+        "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
     )
     item_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
@@ -800,8 +794,7 @@ def test_sync_product_extra_columns(
     active_vendor_account,
 ):
     parameter_group_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_parameter_group",
-        return_value=parameter_group,
+        "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
     )
     item_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_item_group", return_value=item_group
@@ -904,30 +897,14 @@ def test_sync_product_update_product(
     uom,
     items,
 ):
-    review_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.review_item",
-        return_value=None,
-    )
-    publish_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.publish_item",
-        return_value=None,
-    )
-    update_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_update_item",
-        return_value=None,
-    )
+    review_mock = mocker.patch("swo.mpt.cli.core.products.flows.review_item", return_value=None)
+    publish_mock = mocker.patch("swo.mpt.cli.core.products.flows.publish_item", return_value=None)
+    update_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_update_item", return_value=None)
     unpublish_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.unpublish_item",
-        return_value=None,
+        "swo.mpt.cli.core.products.flows.unpublish_item", return_value=None
     )
-    get_item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_item",
-        side_effect=items,
-    )
-    create_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item",
-        side_effect=items,
-    )
+    get_item_mock = mocker.patch("swo.mpt.cli.core.products.flows.get_item", side_effect=items)
+    create_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", side_effect=items)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
     stats = ProductStatsCollector()
@@ -984,30 +961,14 @@ def test_sync_product_update_product_operations(
     uom,
     items,
 ):
-    review_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.review_item",
-        return_value=None,
-    )
-    publish_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.publish_item",
-        return_value=None,
-    )
-    update_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_update_item",
-        return_value=None,
-    )
+    review_mock = mocker.patch("swo.mpt.cli.core.products.flows.review_item", return_value=None)
+    publish_mock = mocker.patch("swo.mpt.cli.core.products.flows.publish_item", return_value=None)
+    update_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_update_item", return_value=None)
     unpublish_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.unpublish_item",
-        return_value=None,
+        "swo.mpt.cli.core.products.flows.unpublish_item", return_value=None
     )
-    get_item_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_item",
-        side_effect=items,
-    )
-    create_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.mpt_create_item",
-        side_effect=items,
-    )
+    get_item_mock = mocker.patch("swo.mpt.cli.core.products.flows.get_item", side_effect=items)
+    create_mock = mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", side_effect=items)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
 
     stats = ProductStatsCollector()
@@ -1060,8 +1021,7 @@ def test_sync_product_update_product_operations(
 
 def test_check_product_exists(mocker, mpt_client, new_product_file, product):
     get_products_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_products",
-        return_value=({}, [product]),
+        "swo.mpt.cli.core.products.flows.get_products", return_value=({}, [product])
     )
 
     checked_product = check_product_exists(mpt_client, new_product_file)
@@ -1072,8 +1032,7 @@ def test_check_product_exists(mocker, mpt_client, new_product_file, product):
 
 def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
     get_products_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_products",
-        return_value=({}, []),
+        "swo.mpt.cli.core.products.flows.get_products", return_value=({}, [])
     )
 
     checked_product = check_product_exists(mpt_client, new_product_file)

@@ -44,10 +44,7 @@ def existing_token():
 def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_token",
-        return_value=new_token,
-    )
+    mocker.patch("swo.mpt.cli.core.accounts.app.get_token", return_value=new_token)
 
     result = runner.invoke(app, ["add", "new-secret"])
 
@@ -70,10 +67,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
 
 def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_token",
-        return_value=new_token,
-    )
+    mocker.patch("swo.mpt.cli.core.accounts.app.get_token", return_value=new_token)
 
     result = runner.invoke(app, ["add", "new-secret"])
 
@@ -114,10 +108,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
 
 def test_add_account_accounts_override_environment(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_token",
-        return_value=new_token,
-    )
+    mocker.patch("swo.mpt.cli.core.accounts.app.get_token", return_value=new_token)
 
     result = runner.invoke(
         app,
@@ -179,8 +170,7 @@ def test_add_account_token_failed(new_accounts_path, mocker):
 def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_token",
-        return_value=existing_token("new-super-secret"),
+        "swo.mpt.cli.core.accounts.app.get_token", return_value=existing_token("new-super-secret")
     )
 
     result = runner.invoke(app, ["add", "new-super-secret"], input="N\n")
@@ -214,8 +204,7 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
 def test_add_existing_account_replace(new_accounts_path, mocker, existing_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
-        "swo.mpt.cli.core.accounts.app.get_token",
-        return_value=existing_token("new-super-secret"),
+        "swo.mpt.cli.core.accounts.app.get_token", return_value=existing_token("new-super-secret")
     )
 
     result = runner.invoke(app, ["add", "new-super-secret"], input="y\n")
