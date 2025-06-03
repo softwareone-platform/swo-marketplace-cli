@@ -1,7 +1,7 @@
 from datetime import date
 
 from freezegun import freeze_time
-from swo.mpt.cli.core.pricelists.models import PriceListData
+from swo.mpt.cli.core.price_lists.models import PriceListData
 
 
 def test_price_list_data_from_dict(price_list_file_data):

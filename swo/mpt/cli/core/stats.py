@@ -143,7 +143,7 @@ class ProductStatsCollector(StatsCollector):
         return f"Product Sync {status}"
 
 
-class PricelistStatsCollector(StatsCollector):
+class PriceListStatsCollector(StatsCollector):
     def __init__(self) -> None:
         general: Results = copy.deepcopy(DEFAULT_RESULTS)
         price_items: Results = copy.deepcopy(DEFAULT_RESULTS)
@@ -156,17 +156,17 @@ class PricelistStatsCollector(StatsCollector):
         super().__init__(tabs)
 
     @property
-    def pricelist_id(self) -> str | None:
+    def price_list_id(self) -> str | None:
         return self.__id
 
-    @pricelist_id.setter
-    def pricelist_id(self, value: str) -> None:
+    @price_list_id.setter
+    def price_list_id(self, value: str) -> None:
         self.__id = value
 
     def _get_table_title(self) -> str:
         if self.is_error:
             title = "Pricelist sync [red bold]FAILED"
         else:
-            title = f"Pricelist {self.pricelist_id} sync [green bold]SUCCEED"
+            title = f"Pricelist {self.price_list_id} sync [green bold]SUCCEED"
 
         return title

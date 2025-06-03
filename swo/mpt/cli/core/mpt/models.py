@@ -63,10 +63,10 @@ class Template(BaseModel):
     name: str
 
 
-class Pricelist(BaseModel):
+class PriceList(BaseModel):
     id: str
 
 
-class PricelistItem(BaseModel):
+class PriceListItem(BaseModel):
     id: str
     item: Item

@@ -1,7 +1,9 @@
+import shutil
 from datetime import datetime
+from pathlib import Path
 
 import pytest
-from swo.mpt.cli.core.pricelists.constants import (
+from swo.mpt.cli.core.price_lists.constants import (
     EXTERNAL_ID,
     GENERAL_CREATED,
     GENERAL_CURRENCY,
@@ -29,8 +31,24 @@ from swo.mpt.cli.core.pricelists.constants import (
     PRICELIST_ITEMS_UNIT_LP,
     PRICELIST_ITEMS_UNIT_PP,
 )
-from swo.mpt.cli.core.pricelists.models import ItemData, PriceListData
-from swo.mpt.cli.core.pricelists.models.item import ItemAction, ItemStatus
+from swo.mpt.cli.core.price_lists.models import ItemData, PriceListData
+from swo.mpt.cli.core.price_lists.models.item import ItemAction, ItemStatus
+
+
+@pytest.fixture
+def price_list_file_root():
+    return Path("tests/pricelist_files")
+
+
+@pytest.fixture
+def price_list_file_path(price_list_file_root):
+    return price_list_file_root / "PRC-1234-1234-1234.xlsx"
+
+
+@pytest.fixture
+def price_list_new_file(tmp_path, price_list_file_path):
+    shutil.copyfile(price_list_file_path, tmp_path / "PRC-1234-1234-1234-copied.xlsx")
+    return tmp_path / "PRC-1234-1234-1234-copied.xlsx"
 
 
 # TODO: create builder for ItemData and PriceListData
@@ -52,6 +70,30 @@ def price_list_file_data():
         "type": "operations",
         EXTERNAL_ID: {"value": "test_product_com_usd_global", "coordinate": "A1"},
     }
+
+
+@pytest.fixture
+def price_list_data_from_dict():
+    return PriceListData(
+        id="PRI-0232-2541-0003-0010",
+        currency="EUR",
+        product_id="PRD-0232-2541",
+        product_name="Test Product Name",
+        vendor_id="VND-0232-2541",
+        vendor_name="Test Vendor Name",
+        export_date="2024-06-01",
+        precision=2,
+        notes="Note 1",
+        coordinate="B3",
+        default_markup=10,
+        external_id=None,
+        type="operations",
+    )
+
+
+@pytest.fixture
+def price_list_data_from_json(mpt_price_list_data):
+    return PriceListData.from_json(mpt_price_list_data)
 
 
 @pytest.fixture
@@ -213,6 +255,32 @@ def item_file_data():
 
 
 @pytest.fixture
+def item_data_from_json(mpt_item_data):
+    return ItemData.from_json(mpt_item_data)
+
+
+@pytest.fixture
+def item_data_from_dict():
+    return ItemData(
+        id="PRI-0232-2541-0003-0010",
+        billing_frequency="1y",
+        commitment="1y",
+        erp_id=None,
+        item_id="Fake-Item-ID",
+        item_name="Fake Item Name",
+        markup=0.15,
+        status=ItemStatus.FOR_SALE,
+        unit_lp=10.28,
+        unit_pp=12.1,
+        unit_sp=10.55,
+        vendor_id="65304887CA",
+        action=ItemAction.UPDATE,
+        coordinate="A38272",
+        type="operations",
+    )
+
+
+@pytest.fixture
 def mpt_item_data():
     return {
         "id": "PRI-0232-2541-0002-0002",
@@ -325,53 +393,3 @@ def mpt_item_data():
             }
         },
     }
-
-
-@pytest.fixture
-def price_list_data_from_json(mpt_price_list_data):
-    return PriceListData.from_json(mpt_price_list_data)
-
-
-@pytest.fixture
-def price_list_data_from_dict():
-    return PriceListData(
-        id="PRI-0232-2541-0003-0010",
-        currency="EUR",
-        product_id="PRD-0232-2541",
-        product_name="Test Product Name",
-        vendor_id="VND-0232-2541",
-        vendor_name="Test Vendor Name",
-        export_date="2024-06-01",
-        precision=2,
-        notes="Note 1",
-        coordinate="B3",
-        default_markup=10,
-        external_id=None,
-        type="operations",
-    )
-
-
-@pytest.fixture
-def item_data_from_json(mpt_item_data):
-    return ItemData.from_json(mpt_item_data)
-
-
-@pytest.fixture
-def item_data_from_dict():
-    return ItemData(
-        id="PRI-0232-2541-0003-0010",
-        billing_frequency="1y",
-        commitment="1y",
-        erp_id=None,
-        item_id="Fake-Item-ID",
-        item_name="Fake Item Name",
-        markup=0.15,
-        status=ItemStatus.FOR_SALE,
-        unit_lp=10.28,
-        unit_pp=12.1,
-        unit_sp=10.55,
-        vendor_id="65304887CA",
-        action=ItemAction.UPDATE,
-        coordinate="A38272",
-        type="operations",
-    )
