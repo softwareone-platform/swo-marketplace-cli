@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any
+from typing import Any, Self
 
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
@@ -44,7 +44,7 @@ class ItemData(BaseDataModel):
         return {"id": self.unit_id}
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ItemData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         if data.get("is_operations", False):
             item_type = "operations"
             external_ids = data[constants.ITEMS_ERP_ITEM_ID]["value"]
@@ -102,7 +102,7 @@ class ItemGroupData(BaseDataModel):
     required: bool
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ItemGroupData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.ITEMS_GROUPS_ID]["value"],
             coordinate=data[constants.ITEMS_GROUPS_ID]["coordinate"],

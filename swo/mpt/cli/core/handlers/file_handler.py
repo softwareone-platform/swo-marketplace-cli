@@ -18,7 +18,7 @@ class FileHandler(ABC):
         return os.path.exists(self.file_path)
 
     @abstractmethod
-    def read(self) -> list[dict[str, Any]]:
+    def read(self) -> list[dict[str, Any]]:  # pragma: no cover
         """
         Reads and returns the content of the file.
 
@@ -31,7 +31,7 @@ class FileHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def write(self, data: list[dict[str, Any]]) -> None:
+    def write(self, data: list[dict[str, Any]]) -> None:  # pragma: no cover
         """
         Writes data to the file.
 

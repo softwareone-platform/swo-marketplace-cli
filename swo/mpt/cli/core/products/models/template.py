@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Self
 
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
@@ -16,7 +16,7 @@ class TemplateData(BaseDataModel):
     default: bool
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "TemplateData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.TEMPLATES_ID]["value"],
             coordinate=data[constants.TEMPLATES_ID]["coordinate"],

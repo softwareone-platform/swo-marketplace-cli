@@ -1,7 +1,7 @@
 import json
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
+from typing import Any, Self
 
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
@@ -10,6 +10,7 @@ from swo.mpt.cli.core.products import constants
 @dataclass
 class ParameterGroupData(BaseDataModel):
     id: str
+
     name: str
     coordinate: str | None = None
     label: str | None = None
@@ -18,7 +19,7 @@ class ParameterGroupData(BaseDataModel):
     default: bool | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ParameterGroupData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.PARAMETERS_GROUPS_ID]["value"],
             coordinate=data[constants.PARAMETERS_GROUPS_ID]["coordinate"],
@@ -71,7 +72,7 @@ class ParametersData(BaseDataModel):
         return None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ParametersData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         group_id = data[constants.PARAMETERS_GROUP_ID]["value"]
         created_group = data["parameter_groups_mapping"].get(group_id) if group_id else None
         return cls(

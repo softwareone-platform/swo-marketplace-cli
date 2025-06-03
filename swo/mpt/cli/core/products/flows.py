@@ -211,9 +211,12 @@ def create_product_definition(
     )
 
     general_data["settings"] = {
-        str(idx): setting for idx, setting in enumerate(
+        str(idx): setting
+        for idx, setting in enumerate(
             file_handler.get_data_from_horizontal_sheet(
-                constants.TAB_SETTINGS, constants.SETTINGS_FIELDS))
+                constants.TAB_SETTINGS, constants.SETTINGS_FIELDS
+            )
+        )
     }
     product_data = ProductData.from_dict(general_data)
     try:

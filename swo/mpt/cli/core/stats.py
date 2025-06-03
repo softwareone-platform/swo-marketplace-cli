@@ -92,7 +92,7 @@ class StatsCollector(ABC):
         return self.__has_error
 
     @abstractmethod
-    def _get_table_title(self) -> str:
+    def _get_table_title(self) -> str:  # pragma: no cover
         raise NotImplementedError
 
     def to_table(self):

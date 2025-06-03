@@ -1,5 +1,6 @@
-from dataclasses import dataclass
-from typing import Any
+from dataclasses import dataclass, field
+from datetime import date
+from typing import Any, Self
 
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.pricelists import constants
@@ -7,15 +8,22 @@ from swo.mpt.cli.core.pricelists import constants
 
 @dataclass
 class PriceListData(BaseDataModel):
-    id: str
-    coordinate: str
+    id: str | None
     currency: str
+    product_id: str
+    product_name: str
+    vendor_id: str
+    vendor_name: str
     precision: int
     notes: str
-    product_id: int
-    type: str
-    default_markup: str | None = None
+
+    coordinate: str | None = None
+    default_markup: int | None = None
     external_id: str | None = None
+    export_date: date = field(default_factory=date.today)
+    # TODO: review this attr. Type depends on the account type, should we split into
+    # operation and vendor model?
+    type: str | None = None
 
     @property
     def product(self) -> dict[str, Any]:
@@ -25,17 +33,36 @@ class PriceListData(BaseDataModel):
         return self.type == "operations"
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "PriceListData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.GENERAL_PRICELIST_ID]["value"],
             coordinate=data[constants.GENERAL_PRICELIST_ID]["coordinate"],
             currency=data[constants.GENERAL_CURRENCY]["value"],
+            product_id=data[constants.GENERAL_PRODUCT_ID]["value"],
+            product_name=data[constants.GENERAL_PRODUCT_NAME]["value"],
+            vendor_id=data[constants.GENERAL_VENDOR_ID]["value"],
+            vendor_name=data[constants.GENERAL_VENDOR_NAME]["value"],
+            export_date=data[constants.GENERAL_EXPORT_DATE]["value"].date(),
             precision=data[constants.GENERAL_PRECISION]["value"],
             notes=data[constants.GENERAL_NOTES]["value"],
-            product_id=data[constants.GENERAL_PRODUCT_ID]["value"],
-            type=data["type"],
+            type=data.get("type"),
             default_markup=data.get(constants.GENERAL_DEFAULT_MARKUP, {}).get("value"),
             external_id=data.get(constants.EXTERNAL_ID, {}).get("value"),
+        )
+
+    @classmethod
+    def from_json(cls, data: dict[str, Any]) -> Self:
+        return cls(
+            id=data["id"],
+            currency=data["currency"],
+            product_id=data["product"]["id"],
+            product_name=data["product"]["name"],
+            vendor_id=data["vendor"]["id"],
+            vendor_name=data["vendor"]["name"],
+            precision=data["precision"],
+            notes=data["notes"],
+            default_markup=data["defaultMarkup"],
+            external_id=data.get("externalIds", {}).get("vendor"),
         )
 
     def to_json(self) -> dict[str, Any]:
