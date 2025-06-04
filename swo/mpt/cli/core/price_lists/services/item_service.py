@@ -1,5 +1,5 @@
 from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.pricelists.constants import TAB_PRICE_ITEMS
+from swo.mpt.cli.core.price_lists.constants import TAB_PRICE_ITEMS
 from swo.mpt.cli.core.services.base_service import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 

@@ -3,7 +3,7 @@ from datetime import date
 from typing import Any, Self
 
 from swo.mpt.cli.core.models import BaseDataModel
-from swo.mpt.cli.core.pricelists import constants
+from swo.mpt.cli.core.price_lists import constants
 
 
 @dataclass

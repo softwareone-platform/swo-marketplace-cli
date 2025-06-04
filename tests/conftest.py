@@ -11,8 +11,8 @@ from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
     ParameterGroup,
-    Pricelist,
-    PricelistItem,
+    PriceList,
+    PriceListItem,
     Product,
     Template,
     Uom,
@@ -157,22 +157,6 @@ def mpt_template():
         "name": "Template 1",
     }
 
-
-@pytest.fixture
-def mpt_pricelist():
-    return {
-        "id": "PRC-1234-1234",
-    }
-
-
-@pytest.fixture
-def mpt_pricelist_item(mpt_item):
-    return {
-        "id": "PRI-1234-1234",
-        "item": mpt_item,
-    }
-
-
 @pytest.fixture
 def product():
     return Product(
@@ -219,13 +203,13 @@ def template():
 
 
 @pytest.fixture
-def pricelist():
-    return Pricelist(id="PRC-1234-1234")
+def price_list():
+    return PriceList(id="PRC-1234-1234")
 
 
 @pytest.fixture
-def pricelist_item(item):
-    return PricelistItem(id="PRI-1234-1234", item=item)
+def price_list_item(item):
+    return PriceListItem(id="PRI-1234-1234", item=item)
 
 
 @pytest.fixture
@@ -394,18 +378,3 @@ def mock_sync_product(
     mocker.patch("swo.mpt.cli.core.products.flows.create_template", return_value=template)
     mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)
 
-
-@pytest.fixture
-def pricelist_file_root():
-    return Path("tests/pricelist_files")
-
-
-@pytest.fixture
-def pricelist_file_path(pricelist_file_root):
-    return pricelist_file_root / "PRC-1234-1234-1234.xlsx"
-
-
-@pytest.fixture
-def pricelist_new_file(tmp_path, pricelist_file_path):
-    shutil.copyfile(pricelist_file_path, tmp_path / "PRC-1234-1234-1234-copied.xlsx")
-    return tmp_path / "PRC-1234-1234-1234-copied.xlsx"

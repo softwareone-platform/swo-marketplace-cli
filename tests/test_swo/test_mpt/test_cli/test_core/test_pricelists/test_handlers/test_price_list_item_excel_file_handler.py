@@ -1,16 +1,16 @@
 from unittest.mock import call
 
 from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.pricelists.constants import (
+from swo.mpt.cli.core.price_lists.constants import (
     ERROR_COLUMN_NAME,
     PRICELIST_ITEMS_FIELDS,
     PRICELIST_ITEMS_ID,
     TAB_PRICE_ITEMS,
 )
-from swo.mpt.cli.core.pricelists.handlers.price_list_item_excel_file_handler import (
+from swo.mpt.cli.core.price_lists.handlers.price_list_item_excel_file_handler import (
     PriceListItemExcelFileHandler,
 )
-from swo.mpt.cli.core.pricelists.models import ItemData
+from swo.mpt.cli.core.price_lists.models import ItemData
 
 
 def test_read_items_data(mocker, item_data_from_dict):

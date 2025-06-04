@@ -1,6 +1,6 @@
 from datetime import date
 
-from swo.mpt.cli.core.pricelists.models.item import ItemAction, ItemData, ItemStatus
+from swo.mpt.cli.core.price_lists.models.item import ItemAction, ItemData, ItemStatus
 
 
 def test_item_action_missing():

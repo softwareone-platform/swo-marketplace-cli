@@ -3,23 +3,23 @@ from unittest.mock import Mock
 import pytest
 from requests import Response
 from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.pricelists.api import PriceListItemAPIService
-from swo.mpt.cli.core.pricelists.constants import TAB_PRICE_ITEMS
-from swo.mpt.cli.core.pricelists.handlers import PriceListItemExcelFileHandler
-from swo.mpt.cli.core.pricelists.models import ItemData
-from swo.mpt.cli.core.pricelists.services import ItemService
+from swo.mpt.cli.core.price_lists.api import PriceListItemAPIService
+from swo.mpt.cli.core.price_lists.constants import TAB_PRICE_ITEMS
+from swo.mpt.cli.core.price_lists.handlers import PriceListItemExcelFileHandler
+from swo.mpt.cli.core.price_lists.models import ItemData
+from swo.mpt.cli.core.price_lists.services import ItemService
 from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import PricelistStatsCollector
+from swo.mpt.cli.core.stats import PriceListStatsCollector
 
 
 @pytest.fixture
-def service_context(mpt_client, pricelist_file_path, active_vendor_account, pricelist_item):
-    stats = PricelistStatsCollector()
+def service_context(mpt_client, price_list_file_path, active_vendor_account, item_data_from_dict):
+    stats = PriceListStatsCollector()
     return ServiceContext(
         account=active_vendor_account,
-        api=PriceListItemAPIService(mpt_client, pricelist_item.id),
+        api=PriceListItemAPIService(mpt_client, item_data_from_dict.id),
         data_model=ItemData,
-        file_handler=PriceListItemExcelFileHandler(pricelist_file_path),
+        file_handler=PriceListItemExcelFileHandler(price_list_file_path),
         stats=stats,
     )
 
