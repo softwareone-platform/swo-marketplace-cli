@@ -1,5 +1,7 @@
 import re
 from collections.abc import Generator, Iterable
+from glob import glob
+from pathlib import Path
 from re import Pattern
 from typing import Any, Callable, TypeVar
 
@@ -8,10 +10,10 @@ from swo.mpt.cli.core.stats import StatsCollector
 
 T = TypeVar("T")
 
-def find_first(
-    func: Callable, iterable: Iterable[T], default: T | None = None
-) -> T | None:
+
+def find_first(func: Callable, iterable: Iterable[T], default: T | None = None) -> T | None:
     return next(filter(func, iterable), default)
+
 
 def find_values_by_pattern(
     pattern: Pattern[str], values: SheetData
@@ -65,3 +67,18 @@ def status_step_text(stats: StatsCollector, tab_name: str) -> str:
         f"[white bold]{results['skipped']}[/white bold] / "
         f"[blue]{results['total']}[/blue]"
     )
+
+
+def get_files_path(files_path: list[str]) -> list[str]:
+    file_paths = []
+
+    for file_path in files_path:
+        path = Path(file_path)
+        if path.is_file():
+            file_paths.append(file_path)
+        elif path.is_dir():
+            file_paths.extend(glob(str(path / "*")))
+        else:
+            file_paths.extend(glob(file_path))
+
+    return list(filter(lambda p: p.endswith(".xlsx"), file_paths))

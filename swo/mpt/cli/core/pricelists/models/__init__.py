@@ -1,4 +1,4 @@
-from .price_item import PriceItemData
+from .item import ItemData
 from .price_list import PriceListData
 
-__all__ = ["PriceItemData", "PriceListData"]
+__all__ = ["ItemData", "PriceListData"]

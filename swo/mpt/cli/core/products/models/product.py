@@ -1,5 +1,5 @@
 from dataclasses import dataclass, field
-from typing import Any, TypeAlias, TypedDict
+from typing import Any, Self, TypeAlias, TypedDict
 
 from swo.mpt.cli.core.models.data_model import BaseDataModel
 from swo.mpt.cli.core.products import constants
@@ -21,7 +21,7 @@ class SettingsData(BaseDataModel):
     json_path: str | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "SettingsData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             items=[
                 SettingItem(
@@ -61,7 +61,7 @@ class ProductData(BaseDataModel):
     external_ids: str | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> "ProductData":
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         settings = (
             SettingsData.from_dict(data["settings"]) if "settings" in data else SettingsData()
         )
@@ -72,7 +72,7 @@ class ProductData(BaseDataModel):
             short_description=data[constants.GENERAL_CATALOG_DESCRIPTION]["value"],
             long_description=data[constants.GENERAL_PRODUCT_DESCRIPTION]["value"],
             website=data[constants.GENERAL_PRODUCT_WEBSITE]["value"],
-            settings=settings
+            settings=settings,
         )
 
     def to_json(self) -> dict[str, Any]:
