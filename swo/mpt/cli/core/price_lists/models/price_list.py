@@ -2,6 +2,7 @@ from dataclasses import dataclass, field
 from datetime import date
 from typing import Any, Self
 
+from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.price_lists import constants
 
@@ -18,9 +19,11 @@ class PriceListData(BaseDataModel):
     notes: str
 
     coordinate: str | None = None
-    default_markup: int | None = None
+    default_markup: float | None = None
     external_id: str | None = None
     export_date: date = field(default_factory=date.today)
+    created_date: date | None = None
+    updated_date: date | None = None
     # TODO: review this attr. Type depends on the account type, should we split into
     # operation and vendor model?
     type: str | None = None
@@ -52,6 +55,7 @@ class PriceListData(BaseDataModel):
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> Self:
+        updated = data["audit"].get("updated", {}).get("at")
         return cls(
             id=data["id"],
             currency=data["currency"],
@@ -60,9 +64,11 @@ class PriceListData(BaseDataModel):
             vendor_id=data["vendor"]["id"],
             vendor_name=data["vendor"]["name"],
             precision=data["precision"],
-            notes=data["notes"],
+            notes=data.get("notes", ""),
             default_markup=data["defaultMarkup"],
             external_id=data.get("externalIds", {}).get("vendor"),
+            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            updated_date=updated and parser.parse(updated).date() or None,
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -78,3 +84,20 @@ class PriceListData(BaseDataModel):
             data["externalIds"] = {"vendor": self.external_id}
 
         return data
+
+    def to_xlsx(self) -> dict[str, Any]:
+        return {
+            constants.GENERAL_PRICELIST_ID: self.id,
+            constants.GENERAL_CURRENCY: self.currency,
+            constants.GENERAL_PRODUCT_ID: self.product_id,
+            constants.GENERAL_PRODUCT_NAME: self.product_name,
+            constants.GENERAL_VENDOR_ID: self.vendor_id,
+            constants.GENERAL_VENDOR_NAME: self.vendor_name,
+            constants.GENERAL_EXPORT_DATE: self.export_date,
+            constants.GENERAL_PRECISION: self.precision,
+            constants.GENERAL_DEFAULT_MARKUP: self.default_markup,
+            constants.GENERAL_NOTES: self.notes,
+            constants.GENERAL_CREATED: self.created_date,
+            constants.GENERAL_MODIFIED: self.updated_date,
+            constants.EXTERNAL_ID: self.external_id,
+        }

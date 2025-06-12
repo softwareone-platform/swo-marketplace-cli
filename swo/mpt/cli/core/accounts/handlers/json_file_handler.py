@@ -16,6 +16,12 @@ class JsonFileHandler(FileHandler):
 
         super().__init__(file_path)
 
+    def create(self):
+        """
+        Creates a new JSON file at the specified file path and initializes it with an empty list.
+        """
+        self.write([])
+
     def read(self) -> list[dict[str, Any]]:
         """
         Reads and returns the data stored in the file. If the file does not exist,
@@ -25,7 +31,7 @@ class JsonFileHandler(FileHandler):
             The data stored in the file.
         """
         if not self.exists():
-            self._create_empty_file()
+            self.create()
 
         with open(self.file_path) as f:
             data = json.load(f)
@@ -44,6 +50,3 @@ class JsonFileHandler(FileHandler):
         with open(self.file_path, "w+") as f:
             json_data = json.dumps(data, indent=2)
             f.write(json_data)
-
-    def _create_empty_file(self):
-        self.write([])

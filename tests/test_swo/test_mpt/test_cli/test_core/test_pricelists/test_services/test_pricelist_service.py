@@ -1,11 +1,8 @@
-from unittest.mock import Mock
-
 import pytest
-from requests import Response
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.price_lists.api import PriceListAPIService
 from swo.mpt.cli.core.price_lists.constants import TAB_GENERAL
-from swo.mpt.cli.core.price_lists.handlers import PriceListExcelFileHandler
+from swo.mpt.cli.core.price_lists.handlers import PriceListExcelFileManager
 from swo.mpt.cli.core.price_lists.models import PriceListData
 from swo.mpt.cli.core.price_lists.services import PriceListService
 from swo.mpt.cli.core.services.service_context import ServiceContext
@@ -19,21 +16,21 @@ def service_context(mpt_client, price_list_new_file, active_vendor_account):
         account=active_vendor_account,
         api=PriceListAPIService(mpt_client),
         data_model=PriceListData,
-        file_handler=PriceListExcelFileHandler(price_list_new_file),
+        file_manager=PriceListExcelFileManager(price_list_new_file),
         stats=stats,
     )
 
 
 def test_create_price_list(mocker, service_context, mpt_price_list_data, price_list_data_from_dict):
     read_general_data_mock = mocker.patch.object(
-        service_context.file_handler, "read_general_data", return_value=price_list_data_from_dict
+        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
     )
     api_post_mock = mocker.patch.object(
         service_context.api,
         "post",
         return_value=mpt_price_list_data,
     )
-    file_handler_write_mock = mocker.patch.object(service_context.file_handler, "write_id")
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = PriceListService(service_context)
 
@@ -48,14 +45,14 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
 
 def test_create_price_list_error(mocker, service_context, price_list_data_from_dict):
     read_general_data_mock = mocker.patch.object(
-        service_context.file_handler, "read_general_data", return_value=price_list_data_from_dict
+        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
     )
     api_post_mock = mocker.patch.object(
         service_context.api,
         "post",
         side_effect=MPTAPIError("API Error", "Error creating price list"),
     )
-    file_handler_write_mock = mocker.patch.object(service_context.file_handler, "write_error")
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_spy = mocker.spy(service_context.stats, "add_error")
     service = PriceListService(service_context)
 
@@ -70,9 +67,39 @@ def test_create_price_list_error(mocker, service_context, price_list_data_from_d
     file_handler_write_mock.assert_called_once()
 
 
+def test_export(mocker, service_context, mpt_price_list_data):
+    get_mock = mocker.patch.object(service_context.api, "get", return_value=mpt_price_list_data)
+    create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
+    add_mock = mocker.patch.object(service_context.file_manager, "add")
+    service = PriceListService(service_context)
+
+    result = service.export({"price_list_id": "fake_id"})
+
+    assert result.success is True
+    get_mock.assert_called()
+    create_tab_mock.assert_called_once()
+    add_mock.assert_called_once()
+
+
+def test_export_mpt_error(mocker, service_context):
+    get_mock = mocker.patch.object(
+        service_context.api, "get", side_effect=MPTAPIError("API Error", "Error retrieving item")
+    )
+    create_tab_spy = mocker.spy(service_context.file_manager, "create_tab")
+    add_spy = mocker.spy(service_context.file_manager, "add")
+    service = PriceListService(service_context)
+
+    result = service.export({"price_list_id": "fake_id"})
+
+    assert result.success is False
+    get_mock.assert_called_once()
+    create_tab_spy.assert_not_called()
+    add_spy.assert_not_called()
+
+
 def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict):
     read_general_data_mock = mocker.patch.object(
-        service_context.file_handler, "read_general_data", return_value=price_list_data_from_dict
+        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
     )
     api_exists_mock = mocker.patch.object(
         service_context.api,
@@ -94,7 +121,7 @@ def test_retrieve_price_list_not_found(mocker, service_context):
     mocker.patch.object(
         service_context.api, "exists", side_effect=MPTAPIError("Not Found", "Pricelist not found")
     )
-    file_handler_write_mock = mocker.patch.object(service_context.file_handler, "write_error")
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     service = PriceListService(service_context)
 
     result = service.retrieve()
@@ -108,7 +135,7 @@ def test_retrieve_from_mpt(mocker, service_context, mpt_price_list_data, price_l
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
-        return_value=Mock(spec=Response, json=Mock(return_value=mpt_price_list_data)),
+        return_value=mpt_price_list_data,
     )
     service = PriceListService(service_context)
 
@@ -137,7 +164,7 @@ def test_retrieve_from_mpt_error(mocker, service_context):
 
 def test_update_price_list(mocker, service_context, price_list_data_from_dict):
     read_general_data_mock = mocker.patch.object(
-        service_context.file_handler, "read_general_data", return_value=price_list_data_from_dict
+        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
     )
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = PriceListService(service_context)
@@ -152,7 +179,7 @@ def test_update_price_list(mocker, service_context, price_list_data_from_dict):
 
 def test_update_price_list_error(mocker, service_context, price_list_data_from_dict):
     read_general_data_mock = mocker.patch.object(
-        service_context.file_handler, "read_general_data", return_value=price_list_data_from_dict
+        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
     )
     api_update_mock = mocker.patch.object(
         service_context.api,
@@ -160,7 +187,7 @@ def test_update_price_list_error(mocker, service_context, price_list_data_from_d
         side_effect=MPTAPIError("API Error", "Error updating price list"),
     )
     stats_spy = mocker.spy(service_context.stats, "add_error")
-    file_handler_write_mock = mocker.patch.object(service_context.file_handler, "write_error")
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     service = PriceListService(service_context)
 
     result = service.update(price_list_data_from_dict.id)

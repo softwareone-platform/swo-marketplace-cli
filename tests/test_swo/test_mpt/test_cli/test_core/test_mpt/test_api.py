@@ -59,23 +59,27 @@ def test_exists(total, expected_response, mocker, service):
     ],
 )
 def test_list(params, expected_params, mocker, service):
-    expected_response = [{"id": "fakeId", "name": "test"}]
-    response_mock = Mock(spec=Response, json=Mock(return_value={"data": expected_response}))
+    expected_meta_data = {"offset": 0, "limit": 100, "total": 10}
+    expected_data = [{"id": "fakeId", "name": "test"}]
+    meta_data = {"pagination": expected_meta_data, "omitted": ["audit"]}
+    response = {"$meta": meta_data, "data": expected_data}
+    response_mock = Mock(spec=Response, json=Mock(return_value=response))
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
     result = service.list(params=params)
 
-    assert result == expected_response
+    assert result == {"meta": expected_meta_data, "data": expected_data}
     client_mock.assert_called_once_with("fake_url/", params=expected_params)
 
 
 def test_list_no_data(mocker, service):
-    response_mock = Mock(spec=Response, json=Mock(return_value={"data": []}))
+    data = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": []}
+    response_mock = Mock(spec=Response, json=Mock(return_value=data))
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
     result = service.list()
 
-    assert result == []
+    assert result == {"meta": {"limit": 100, "offset": 0, "total": 0}, "data": []}
     client_mock.assert_called_once_with("fake_url/", params={})
 
 
