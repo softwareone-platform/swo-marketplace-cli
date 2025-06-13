@@ -18,12 +18,16 @@ class FileHandler(ABC):
         return os.path.exists(self.file_path)
 
     @abstractmethod
+    def create(self):
+        """
+        Create an empty file with the name of the file_path
+        """
+        raise NotImplementedError
+
+    @abstractmethod
     def read(self) -> list[dict[str, Any]]:  # pragma: no cover
         """
         Reads and returns the content of the file.
-
-        This method must be implemented by subclasses of FileHandler to handle
-        specific file reading logic (e.g., reading text, binary data, or structured formats).
 
         Returns:
             The content read from the file.
@@ -34,9 +38,6 @@ class FileHandler(ABC):
     def write(self, data: list[dict[str, Any]]) -> None:  # pragma: no cover
         """
         Writes data to the file.
-
-        This method must be implemented by subclasses of FileHandler to handle
-        specific file writing logic (e.g., writing text, binary data, or structured formats).
 
         Args:
             data: The data to write to the file.

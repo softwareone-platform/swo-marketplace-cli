@@ -35,13 +35,13 @@ def test_read_existing_file(mocker, json_file_handler, mock_config_data):
 
 def test_read_creates_empty_file_when_nonexistent(mocker, json_file_handler):
     mocker.patch.object(json_file_handler, "exists", return_value=False)
-    mock_create_empty = mocker.patch.object(json_file_handler, "_create_empty_file")
+    mock_create = mocker.patch.object(json_file_handler, "create")
     mocker.patch("builtins.open", mocker.mock_open(read_data="[]"))
 
     data = json_file_handler.read()
 
     assert data == []
-    mock_create_empty.assert_called_once()
+    mock_create.assert_called_once()
 
 
 def test_write_creates_directory_if_not_exists(mocker, tmp_path):

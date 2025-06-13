@@ -3,7 +3,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
+from openpyxl.styles import NamedStyle
 from openpyxl.workbook import Workbook
+from openpyxl.worksheet.datavalidation import DataValidation
 from swo.mpt.cli.core.handlers.errors import (
     RequiredFieldsError,
     RequiredFieldValuesError,
@@ -58,6 +60,15 @@ def test_normalize_file_path(file_path, expected_path):
     normalized = ExcelFileHandler.normalize_file_path(file_path)
 
     assert normalized == Path(expected_path)
+
+
+def test_create(tmp_path):
+    file_path = tmp_path / "fake_file.xlsx"
+    handler = ExcelFileHandler(file_path)
+
+    handler.create()
+
+    assert handler.sheet_names == ["General"]
 
 
 def test_check_required_sheet(excel_file_handler):
@@ -189,3 +200,27 @@ def test_write(excel_file_handler):
     assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"
     assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"
     assert excel_file_handler._get_worksheet("FakeSheet")["J23"].value == "ValueJ23"
+
+
+def test_write_cell(excel_file_handler):
+    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue")
+
+    cell = excel_file_handler._get_worksheet("Sheet1")["C2"]
+    assert cell.value == "FakeValue"
+    assert cell.style == "Normal"
+
+
+def test_write_cell_with_style(excel_file_handler):
+    fake_style = NamedStyle("fake_style")
+    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue", style=fake_style)
+
+    assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"
+
+
+def test_write_cell_with_data_validation(excel_file_handler):
+    fake_data_validation = DataValidation()
+    excel_file_handler.write_cell(
+        "Sheet1", row=2, col=3, value="FakeValue", data_validation=fake_data_validation
+    )
+
+    assert "C2" in fake_data_validation.ranges

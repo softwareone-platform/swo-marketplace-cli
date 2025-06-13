@@ -3,6 +3,7 @@ from typing import Any, Generic, TypeVar
 from pydantic import BaseModel
 from swo.mpt.cli.core.errors import MPTAPIError, wrap_http_error
 from swo.mpt.cli.core.mpt.client import MPTClient
+from swo.mpt.cli.core.mpt.models import Meta
 
 APIModel = TypeVar("APIModel", bound=BaseModel)
 
@@ -43,19 +44,19 @@ class APIService(Generic[APIModel]):
                 f"Resource with ID {resource_id} not found at {self.url}", "404 not found"
             )
 
-        return self.api_model.model_validate(response.json()).model_dump()
+        self.api_model.model_validate(data)
+        return data
 
     @wrap_http_error
-    def list(self, params: dict[str, Any] | None = None) -> list[dict[str, Any]]:
+    def list(self, params: dict[str, Any] | None = None) -> dict[str, Any]:
         params = params or {}
 
         response = self.client.get(self.url, params=params)
         response.raise_for_status()
-        data = response.json()["data"]
-        if not data:
-            return []
 
-        return [self.api_model.model_validate(resource).model_dump() for resource in data]
+        json_body = response.json()
+        meta = Meta.model_validate(json_body["$meta"]["pagination"])
+        return {"meta": meta.model_dump(), "data": json_body["data"]}
 
     @wrap_http_error
     def post(self, data: dict[str, Any]) -> dict[str, Any]:

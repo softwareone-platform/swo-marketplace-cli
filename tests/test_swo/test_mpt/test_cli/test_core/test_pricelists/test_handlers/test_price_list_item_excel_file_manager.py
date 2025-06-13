@@ -7,10 +7,38 @@ from swo.mpt.cli.core.price_lists.constants import (
     PRICELIST_ITEMS_ID,
     TAB_PRICE_ITEMS,
 )
-from swo.mpt.cli.core.price_lists.handlers.price_list_item_excel_file_handler import (
-    PriceListItemExcelFileHandler,
+from swo.mpt.cli.core.price_lists.handlers.price_list_item_excel_file_manager import (
+    PriceListItemExcelFileManager,
 )
 from swo.mpt.cli.core.price_lists.models import ItemData
+
+
+def test_add(mocker, item_data_from_json):
+    write_cell_mock = mocker.patch.object(ExcelFileHandler, "write_cell")
+    get_sheet_next_row_mock = mocker.patch.object(
+        ExcelFileHandler, "get_sheet_next_row", return_value=2
+    )
+    save_mock = mocker.patch.object(ExcelFileHandler, "save")
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
+
+    handler.add([item_data_from_json], precision=2, currency="USD")
+
+    assert write_cell_mock.call_count == len(PRICELIST_ITEMS_FIELDS)
+    save_mock.assert_called_once()
+    get_sheet_next_row_mock.assert_called_once()
+
+
+def test_create_tab(mocker):
+    exists_mock = mocker.patch.object(ExcelFileHandler, "exists", return_value=False)
+    create_mock = mocker.patch.object(ExcelFileHandler, "create")
+    write_cell_mock = mocker.patch.object(ExcelFileHandler, "write_cell")
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
+
+    handler.create_tab()
+
+    exists_mock.assert_called_once()
+    create_mock.assert_called_once()
+    assert write_cell_mock.call_count == len(PRICELIST_ITEMS_FIELDS)
 
 
 def test_read_items_data(mocker, item_data_from_dict):
@@ -21,7 +49,7 @@ def test_read_items_data(mocker, item_data_from_dict):
     item_data_from_dict_mock = mocker.patch.object(
         ItemData, "from_dict", return_value=item_data_from_dict
     )
-    handler = PriceListItemExcelFileHandler("fake_file.xlsx")
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
 
     result = list(handler.read_items_data())
 
@@ -30,15 +58,6 @@ def test_read_items_data(mocker, item_data_from_dict):
         TAB_PRICE_ITEMS, PRICELIST_ITEMS_FIELDS
     )
     item_data_from_dict_mock.assert_called_once_with(mock_data)
-
-
-def test_write_id(mocker):
-    write_id_mock = mocker.patch.object(ExcelFileHandler, "write", return_value=None)
-    handler = PriceListItemExcelFileHandler("fake_file.xlsx")
-
-    handler.write_id("M12", "new_id")
-
-    write_id_mock.assert_called_once_with([{TAB_PRICE_ITEMS: {"M12": "new_id"}}])
 
 
 def test_write_error_existing_column(mocker, item_data_from_dict):
@@ -50,7 +69,7 @@ def test_write_error_existing_column(mocker, item_data_from_dict):
         ExcelFileHandler, "get_data_from_horizontal_sheet", return_value=iter([mock_data])
     )
     write_mock = mocker.patch.object(ExcelFileHandler, "write")
-    handler = PriceListItemExcelFileHandler("fake_file.xlsx")
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
 
     handler.write_error("fake error message", item_data_from_dict.id)
 
@@ -69,7 +88,7 @@ def test_write_error_missing_column(mocker, item_data_from_dict):
         ExcelFileHandler, "get_sheet_next_column", return_value="W"
     )
     write_mock = mocker.patch.object(ExcelFileHandler, "write")
-    handler = PriceListItemExcelFileHandler("fake_file.xlsx")
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
 
     handler.write_error("fake error message", item_data_from_dict.id)
 
