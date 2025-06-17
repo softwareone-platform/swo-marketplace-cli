@@ -119,10 +119,11 @@ def test_sync_price_lists_update(
 
 
 def test_sync_price_lists_create_error(
-    mocker, price_list_data_from_json, price_list_file_path, expected_account
+    mocker, active_operations_account, price_list_data_from_json, price_list_file_path
 ):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=expected_account
+        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
@@ -144,3 +145,107 @@ def test_sync_price_lists_create_error(
     price_list_service_retrieve_mock.assert_called_once()
     price_list_service_create_mock.assert_called_once()
     item_service_update_spy.assert_not_called()
+
+
+def test_export_price_list(mocker, active_operations_account, price_list_data_from_json):
+    mocker.patch(
+        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        return_value=active_operations_account,
+    )
+    stats = PriceListStatsCollector()
+    price_list_service_export_mock = mocker.patch(
+        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        return_value=ServiceResult(success=True, model=price_list_data_from_json, stats=stats),
+    )
+    item_service_export_mock = mocker.patch(
+        "swo.mpt.cli.core.price_lists.services.ItemService.export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
+
+    assert result.exit_code == 0
+    assert "Price list with id: PRC-1234-1234-1234 has been exported into" in result.stdout
+    price_list_service_export_mock.assert_called_once()
+    item_service_export_mock.assert_called_once()
+
+
+def test_export_file_exists(mocker, active_operations_account):
+    mocker.patch(
+        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        return_value=active_operations_account,
+    )
+    mocker.patch("pathlib.Path.exists", return_value=True)
+    price_list_service_export_spy = mocker.spy(PriceListService, "export")
+    item_service_export_spy = mocker.spy(ItemService, "export")
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="n\n")
+
+    assert result.exit_code == 0
+    assert "Skipped export for PRC-1234-1234-1234." in result.stdout
+    price_list_service_export_spy.assert_not_called()
+    item_service_export_spy.assert_not_called()
+
+
+def test_export_price_list_no_operations_account(
+    mocker, active_vendor_account, price_list_data_from_json
+):
+    mocker.patch(
+        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=active_vendor_account
+    )
+    price_list_service_export_spy = mocker.spy(PriceListService, "export")
+    item_service_export_spy = mocker.spy(ItemService, "export")
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
+
+    assert result.exit_code == 4
+    assert "Please, activate an operation account." in result.stdout
+    price_list_service_export_spy.assert_not_called()
+    item_service_export_spy.assert_not_called()
+
+
+def test_export_price_list_export_price_list_no_success(
+    mocker, active_operations_account, price_list_data_from_json
+):
+    mocker.patch(
+        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        return_value=active_operations_account,
+    )
+    stats = PriceListStatsCollector()
+    price_list_service_export_mock = mocker.patch(
+        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+    item_service_export_spy = mocker.spy(ItemService, "export")
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
+
+    assert result.exit_code == 4
+    assert "Price list export FAILED" in result.stdout
+    price_list_service_export_mock.assert_called_once()
+    item_service_export_spy.assert_not_called()
+
+
+def test_export_price_list_item_no_success(
+    mocker, active_operations_account, price_list_data_from_json
+):
+    mocker.patch(
+        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        return_value=active_operations_account,
+    )
+    stats = PriceListStatsCollector()
+    price_list_service_export_mock = mocker.patch(
+        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        return_value=ServiceResult(success=True, model=price_list_data_from_json, stats=stats),
+    )
+    item_service_export_mock = mocker.patch(
+        "swo.mpt.cli.core.price_lists.services.ItemService.export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
+
+    assert result.exit_code == 4
+    assert "Price list export FAILED" in result.stdout
+    price_list_service_export_mock.assert_called_once()
+    item_service_export_mock.assert_called_once()

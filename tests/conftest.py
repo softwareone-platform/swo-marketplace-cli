@@ -157,6 +157,7 @@ def mpt_template():
         "name": "Template 1",
     }
 
+
 @pytest.fixture
 def product():
     return Product(
@@ -377,4 +378,3 @@ def mock_sync_product(
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     mocker.patch("swo.mpt.cli.core.products.flows.create_template", return_value=template)
     mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)
-

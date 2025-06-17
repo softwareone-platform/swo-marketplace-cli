@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from swo.mpt.cli.core.services.service_context import ServiceContext
 from swo.mpt.cli.core.services.service_result import ServiceResult
@@ -11,13 +12,23 @@ class BaseService(ABC):
         self.account = service_context.account
         self.api = service_context.api
         self.data_model = service_context.data_model
-        self.file_handler = service_context.file_handler
+        self.file_manager = service_context.file_manager
         self.stats = service_context.stats
 
     @abstractmethod
     def create(self) -> ServiceResult:  # pragma: no cover
         """
-        Create a resource based on definition file
+        Create a resource based on the definition file
+
+        Returns:
+            ServiceResult object with operation results
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def export(self, context: dict[str, Any]) -> ServiceResult:  # pragma: no cover
+        """
+        Export a resource from mpt to the file
 
         Returns:
             ServiceResult object with operation results
@@ -27,7 +38,7 @@ class BaseService(ABC):
     @abstractmethod
     def retrieve(self) -> ServiceResult:  # pragma: no cover
         """
-        Publish an existing resource
+        Retrieve an existing resource from the file
 
         Returns:
             ServiceResult object with operation results

@@ -4,9 +4,12 @@ from pathlib import Path
 from re import Pattern
 from typing import Any, TypeAlias
 
+import openpyxl
 from openpyxl.reader.excel import load_workbook
+from openpyxl.styles import NamedStyle
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
+from openpyxl.worksheet.datavalidation import DataValidation
 from openpyxl.worksheet.worksheet import Worksheet
 from swo.mpt.cli.core.handlers import FileHandler
 from swo.mpt.cli.core.handlers.errors import (
@@ -17,6 +20,7 @@ from swo.mpt.cli.core.handlers.errors import (
 
 SheetData: TypeAlias = dict[str, Any]
 SheetDataGenerator: TypeAlias = Generator[SheetData, None, None]
+StyleData: TypeAlias = dict[str, dict[str, NamedStyle]]
 
 
 class ExcelFileHandler(FileHandler):
@@ -49,12 +53,23 @@ class ExcelFileHandler(FileHandler):
         """
         return Path(file_path).with_suffix(".xlsx")
 
+    def create(self):
+        """
+        Creates a new Excel workbook and saves it to the file_path.
+        """
+        wb = openpyxl.Workbook()
+        # Change the default sheet name by General
+        wb.active.title = "General"
+
+        wb.save(self.file_path)
+        wb.close()
+
     def check_required_sheet(self, required_sheets: list[str]) -> None:
         """
         Checks if specified required sheets exist in the workbook.
 
         Args:
-            required_sheets: A list of sheet names that must be present
+            required_sheets: List of required sheet names.
 
         Raises:
             RequiredSheetsError: If any required sheet is missing.
@@ -193,6 +208,9 @@ class ExcelFileHandler(FileHandler):
     def get_sheet_next_column(self, sheet_name: str) -> str:
         return get_column_letter(self._get_worksheet(sheet_name).max_column + 1)
 
+    def get_sheet_next_row(self, sheet_name: str) -> int:
+        return self._get_worksheet(sheet_name).max_row + 1
+
     def get_values_for_dynamic_sheet(
         self, sheet_name: str, fields: list[str], patterns: list[Pattern[str]]
     ) -> SheetDataGenerator:
@@ -228,6 +246,9 @@ class ExcelFileHandler(FileHandler):
                 for index, column_name in column_map.items()
             }
 
+    def merge_cells(self, sheet_name: str, range_string: str) -> None:
+        self._workbook[sheet_name].merge_cells(range_string)
+
     def read(self) -> list[Any]:
         """
         Reads data from all sheets in the workbook.
@@ -236,6 +257,10 @@ class ExcelFileHandler(FileHandler):
         """
         # TBD
         return []
+
+    def save(self) -> None:
+        self._workbook.save(self.file_path)
+        self._clean_worksheets()
 
     def write(self, data: list[SheetData]) -> None:
         """
@@ -255,9 +280,33 @@ class ExcelFileHandler(FileHandler):
                 for coordinate, value in cells.items():
                     sheet[coordinate] = value
 
-                self._clean_worksheets(sheet_name)
+        self.save()
 
-        self._save()
+    def write_cell(
+        self,
+        sheet_name: str,
+        col: int,
+        row: int,
+        value: str,
+        data_validation: DataValidation | None = None,
+        style: NamedStyle | None = None,
+    ) -> None:
+        try:
+            sheet = self._get_worksheet(sheet_name)
+        except KeyError:
+            sheet = self._workbook.create_sheet(title=sheet_name)
+
+        coordinate = f"{get_column_letter(col)}{row}"
+        if style is not None:
+            sheet[coordinate].style = style
+
+        if data_validation is not None:
+            if data_validation not in sheet.data_validations:
+                sheet.add_data_validation(data_validation)
+
+            data_validation.add(sheet[coordinate])
+
+        sheet[coordinate] = value
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
         if sheet_name is not None:
@@ -280,7 +329,3 @@ class ExcelFileHandler(FileHandler):
             self.__worksheets[sheet_name] = self._workbook[sheet_name]
 
         return self.__worksheets[sheet_name]
-
-    def _save(self) -> None:
-        self._workbook.save(self.file_path)
-        self._clean_worksheets()

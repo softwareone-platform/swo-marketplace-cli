@@ -30,20 +30,29 @@ class ItemStatus(StrEnum):
 class ItemData(BaseDataModel):
     id: str
     billing_frequency: str
-    commitment: str
+    commitment: str | None
     erp_id: str | None
     item_id: str
     item_name: str
     markup: float | None
     status: ItemStatus
-    unit_lp: float
-    unit_pp: float
+    unit_lp: float | None
+    unit_pp: float | None
     unit_sp: float | None
     vendor_id: str
 
     action: ItemAction = ItemAction.SKIP
     coordinate: str | None = None
+    lp_x1: float | None = None
+    lp_xm: float | None = None
+    lp_xy: float | None = None
     modified_date: date | None = None
+    pp_x1: float | None = None
+    pp_xm: float | None = None
+    pp_xy: float | None = None
+    sp_x1: float | None = None
+    sp_xm: float | None = None
+    sp_xy: float | None = None
     type: str | None = None
 
     def is_operations(self) -> bool:
@@ -81,17 +90,26 @@ class ItemData(BaseDataModel):
         return cls(
             id=data.get("id", ""),
             billing_frequency=data["item"]["terms"]["period"],
-            commitment=data["item"]["terms"]["commitment"],
+            commitment=data["item"]["terms"].get("commitment"),
             erp_id=data["item"]["externalIds"].get("operations"),
             item_id=data["item"]["id"],
             item_name=data["item"]["name"],
-            markup=data["markup"],
+            lp_x1=data.get("LPx1"),
+            lp_xm=data.get("LPxM"),
+            lp_xy=data.get("LPxY"),
+            markup=data.get("markup"),
+            pp_x1=data.get("PPx1"),
+            pp_xm=data.get("PPxM"),
+            pp_xy=data.get("PPxY"),
+            sp_x1=data.get("SPx1"),
+            sp_xm=data.get("SPxM"),
+            sp_xy=data.get("SPxY"),
             status=ItemStatus(data["status"]),
-            unit_lp=data["unitLP"],
-            unit_pp=data["unitPP"],
-            unit_sp=data["unitSP"],
+            unit_lp=data.get("unitLP"),
+            unit_pp=data.get("unitPP"),
+            unit_sp=data.get("unitSP"),
             vendor_id=data["item"]["externalIds"]["vendor"],
-            action=ItemAction(data.get("action", ItemAction.SKIP)),
+            action=ItemAction.SKIP,
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -111,3 +129,30 @@ class ItemData(BaseDataModel):
                 data["status"] = self.status.value
 
         return data
+
+    def to_xlsx(self) -> dict[str, Any]:
+        return {
+            constants.PRICELIST_ITEMS_ID: self.id,
+            constants.PRICELIST_ITEMS_ITEM_ID: self.item_id,
+            constants.PRICELIST_ITEMS_ITEM_NAME: self.item_name,
+            constants.PRICELIST_ITEMS_ITEM_VENDOR_ID: self.vendor_id,
+            constants.PRICELIST_ITEMS_ITEM_ERP_ID: self.erp_id,
+            constants.PRICELIST_ITEMS_BILLING_FREQUENCY: self.billing_frequency,
+            constants.PRICELIST_ITEMS_COMMITMENT: self.commitment,
+            constants.PRICELIST_ITEMS_UNIT_LP: self.unit_lp,
+            constants.PRICELIST_ITEMS_UNIT_PP: self.unit_pp,
+            constants.PRICELIST_ITEMS_MARKUP: self.markup,
+            constants.PRICELIST_ITEMS_PPx1: self.pp_x1,
+            constants.PRICELIST_ITEMS_PPxM: self.pp_xm,
+            constants.PRICELIST_ITEMS_PPxY: self.pp_xy,
+            constants.PRICELIST_ITEMS_UNIT_SP: self.unit_sp,
+            constants.PRICELIST_ITEMS_SPx1: self.sp_x1,
+            constants.PRICELIST_ITEMS_SPxM: self.sp_xm,
+            constants.PRICELIST_ITEMS_SPxY: self.sp_xy,
+            constants.PRICELIST_ITEMS_LPx1: self.lp_x1,
+            constants.PRICELIST_ITEMS_LPxM: self.lp_xm,
+            constants.PRICELIST_ITEMS_LPxY: self.lp_xy,
+            constants.PRICELIST_ITEMS_STATUS: self.status.value,
+            constants.PRICELIST_ITEMS_ACTION: self.action.value,
+            constants.PRICELIST_ITEMS_MODIFIED: self.modified_date,
+        }
