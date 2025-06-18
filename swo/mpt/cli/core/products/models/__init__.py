@@ -1,14 +1,16 @@
-from .items import ItemData, ItemGroupData
-from .parameters import ParameterGroupData, ParametersData
-from .product import ProductData, SettingData
+from .item_group import ItemGroupData
+from .items import ItemData
+from .parameter_group import ParameterGroupData
+from .parameters import ParametersData
+from .product import ProductData, SettingsData
 from .template import TemplateData
 
 __all__ = [
-    "ItemGroupData",
     "ItemData",
-    "ParameterGroupData",
+    "ItemGroupData",
     "ParametersData",
+    "ParameterGroupData",
     "ProductData",
-    "SettingData",
+    "SettingsData",
     "TemplateData",
 ]

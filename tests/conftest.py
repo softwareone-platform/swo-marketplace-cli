@@ -113,6 +113,10 @@ def mpt_product():
 def mpt_parameter_group():
     return {
         "id": "PRG-1234-1234",
+        "default": False,
+        "description": "Default parameter group",
+        "display_order": 100,
+        "label": "Parameters",
         "name": "Parameter Group 1",
     }
 
@@ -170,7 +174,14 @@ def product():
 
 @pytest.fixture
 def parameter_group():
-    return ParameterGroup(id="PRG-1234-1234", name="Parameter Group")
+    return ParameterGroup(
+        id="PRG-1234-1234",
+        default=False,
+        description="Default parameter group",
+        display_order=100,
+        label="Parameters",
+        name="Parameter Group",
+    )
 
 
 @pytest.fixture

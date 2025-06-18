@@ -34,6 +34,10 @@ class Product(BaseModel):
 
 class ParameterGroup(BaseModel):
     id: str
+    default: bool
+    description: str
+    display_order: int
+    label: str
     name: str
 
 

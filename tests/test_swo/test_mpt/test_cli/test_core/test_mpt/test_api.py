@@ -90,7 +90,7 @@ def test_post(mocker, service):
     result = service.post({"name": "test"})
 
     assert result == {"id": "fakeId", "name": "test"}
-    client_mock.assert_called_once_with("fake_url/", json={"name": "test"})
+    client_mock.assert_called_once_with("fake_url/", json={"name": "test"}, headers={})
 
 
 def test_update_success(mocker, service):

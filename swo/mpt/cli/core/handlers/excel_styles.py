@@ -6,10 +6,10 @@ general_tab_title_style.font = Font(color="FFFFFF", bold=True)
 general_tab_title_style.alignment = Alignment(horizontal="center", vertical="center")
 
 
-price_items_tab_style = NamedStyle(name="price_items_tab_style")
-price_items_tab_style.fill = PatternFill(fill_type="solid", fgColor="FF757171")
-price_items_tab_style.font = Font(color="FFFFFF", bold=True)
-price_items_tab_style.alignment = Alignment(horizontal="center", vertical="center")
+horizontal_tab_style = NamedStyle(name="price_items_tab_style")
+horizontal_tab_style.fill = PatternFill(fill_type="solid", fgColor="FF757171")
+horizontal_tab_style.font = Font(color="FFFFFF", bold=True)
+horizontal_tab_style.alignment = Alignment(horizontal="center", vertical="center")
 
 number_format_style = NamedStyle(name="number_format_style")
 

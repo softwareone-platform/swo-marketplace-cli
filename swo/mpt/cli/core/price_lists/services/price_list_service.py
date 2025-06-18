@@ -75,7 +75,7 @@ class PriceListService(BaseService):
         Retrieves a price list from the API using its resource ID.
 
         Args:
-            resource_id (str): The ID of the price list to retrieve.
+            resource_id: The ID of the price list to retrieve.
 
         Returns:
             ServiceResult: The result of the retrieval operation.
@@ -93,7 +93,7 @@ class PriceListService(BaseService):
         Updates an existing price list by sending the modified general data to the API.
 
         Args:
-            resource_id (str): The ID of the price list to update.
+            resource_id: The ID of the price list to update.
 
         Returns:
             ServiceResult: The result of the update operation.
