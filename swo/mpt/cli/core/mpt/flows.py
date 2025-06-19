@@ -1,10 +1,8 @@
 import json
 from functools import cache
-from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from urllib.parse import quote_plus
 
-from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError, wrap_http_error
 
 from .client import MPTClient
@@ -20,6 +18,9 @@ from .models import (
     Token,
     Uom,
 )
+
+if TYPE_CHECKING:  # pragma: no cover
+    from swo.mpt.cli.core.products.models import ProductData
 
 
 @wrap_http_error
@@ -65,33 +66,8 @@ def get_products(
 
 
 @wrap_http_error
-def create_product(
-    mpt_client: MPTClient, product_json: dict, settings_json: dict, icon: Path
-) -> Product:
-    parameters = MultipartEncoder(
-        fields={
-            "product": json.dumps(product_json),
-            "icon": ("icon.png", open(icon, "rb"), "image/png"),
-        }
-    )
-
-    products_response = mpt_client.post(
-        "/catalog/products",
-        data=parameters,
-        headers={"Content-Type": parameters.content_type},
-    )
-    products_response.raise_for_status()
-    product = Product.model_validate(products_response.json())
-
-    response = mpt_client.put(f"/catalog/products/{product.id}/settings", json=settings_json)
-    response.raise_for_status()
-
-    return product
-
-
-@wrap_http_error
 def create_parameter_group(
-    mpt_client: MPTClient, product: Product, parameter_group_json: dict
+    mpt_client: MPTClient, product: "ProductData", parameter_group_json: dict
 ) -> ParameterGroup:
     response = mpt_client.post(
         f"/catalog/products/{product.id}/parameter-groups", json=parameter_group_json
@@ -102,7 +78,9 @@ def create_parameter_group(
 
 
 @wrap_http_error
-def create_item_group(mpt_client: MPTClient, product: Product, item_group_json: dict) -> ItemGroup:
+def create_item_group(
+    mpt_client: MPTClient, product: "ProductData", item_group_json: dict
+) -> ItemGroup:
     response = mpt_client.post(f"/catalog/products/{product.id}/item-groups", json=item_group_json)
     response.raise_for_status()
 
@@ -110,7 +88,9 @@ def create_item_group(mpt_client: MPTClient, product: Product, item_group_json: 
 
 
 @wrap_http_error
-def create_parameter(mpt_client: MPTClient, product: Product, parameter_json: dict) -> Parameter:
+def create_parameter(
+    mpt_client: MPTClient, product: "ProductData", parameter_json: dict
+) -> Parameter:
     response = mpt_client.post(f"/catalog/products/{product.id}/parameters", json=parameter_json)
     response.raise_for_status()
 
@@ -139,7 +119,7 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
 
 
 @wrap_http_error
-def create_template(mpt_client: MPTClient, product: Product, template_json: dict) -> Template:
+def create_template(mpt_client: MPTClient, product: "ProductData", template_json: dict) -> Template:
     response = mpt_client.post(f"/catalog/products/{product.id}/templates", json=template_json)
     response.raise_for_status()
 
