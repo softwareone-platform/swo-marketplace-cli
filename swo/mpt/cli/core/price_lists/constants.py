@@ -1,3 +1,5 @@
+from typing import Any
+
 ERROR_COLUMN_NAME = "Error"
 TAB_GENERAL = "General"
 TAB_PRICE_ITEMS = "Price Items"
@@ -5,6 +7,8 @@ REQUIRED_TABS = [
     TAB_GENERAL,
     TAB_PRICE_ITEMS,
 ]
+
+REQUIRED_FIELDS_BY_TAB: dict[str, Any] = {}
 
 GENERAL_PRICELIST_ID = "Pricelist ID"
 GENERAL_CURRENCY = "Currency"

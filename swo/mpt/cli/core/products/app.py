@@ -5,20 +5,21 @@ from rich import box
 from rich.table import Table
 from swo.mpt.cli.core.accounts.app import get_active_account
 from swo.mpt.cli.core.console import console
-from swo.mpt.cli.core.errors import FileNotExistsError
 from swo.mpt.cli.core.mpt.client import client_from_account
 from swo.mpt.cli.core.mpt.flows import get_products
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
 from swo.mpt.cli.core.mpt.models import Product as MPTProduct
+from swo.mpt.cli.core.products.api.product_api_service import ProductAPIService
 from swo.mpt.cli.core.products.flows import (
     ProductAction,
-    check_file_exists,
-    check_product_definition,
-    check_product_exists,
     get_definition_file,
     sync_product_definition,
 )
-from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
+from swo.mpt.cli.core.products.handlers import ProductExcelFileManager
+from swo.mpt.cli.core.products.models import ProductData
+from swo.mpt.cli.core.products.services import ProductService
+from swo.mpt.cli.core.services.service_context import ServiceContext
+from swo.mpt.cli.core.stats import ProductStatsCollector
 
 app = typer.Typer()
 
@@ -89,64 +90,65 @@ def sync_product(
     """
     Sync product to the environment
     """
-    with console.status("Check product definition"):
-        product_definition_path = get_definition_file(product_path)
-        try:
-            check_file_exists(product_definition_path)
-        except FileNotExistsError as e:
-            console.print(str(e))
-            raise typer.Exit(code=3)
+    active_account = get_active_account()
+    mpt_client = client_from_account(active_account)
+    service_context = ServiceContext(
+        account=active_account,
+        api=ProductAPIService(mpt_client),
+        data_model=ProductData,
+        file_manager=ProductExcelFileManager(product_path),
+        stats=ProductStatsCollector(),
+    )
+    product_service = ProductService(service_context)
 
-        stats = ErrorMessagesCollector()
-        stats = check_product_definition(product_definition_path, stats)
-
-    if not stats.is_empty():
-        console.print(str(stats))
+    result = product_service.validate_definition()
+    if not result.success:
+        console.print(result.stats.errors)
         raise typer.Exit(code=3)
 
     console.print(f"Product definition [cyan]{product_path}[/cyan] is correct")
+    if is_dry_run:
+        raise typer.Exit(code=0)
 
-    if not is_dry_run:
-        active_account = get_active_account()
-        mpt_client = client_from_account(active_account)
-        product = check_product_exists(mpt_client, product_definition_path)
-        if product and not force_create:
-            _ = typer.confirm(
-                f"Do you want to update product {product.id} ({product.name}) "
-                f"for account {active_account.id} ({active_account.name})? "
-                f"To create new use --force-create or -f options.",
-                abort=True,
-            )
-            console.print("Only Items updated is supported now.")
-            action = ProductAction.UPDATE
-        elif product and force_create:
-            _ = typer.confirm(
-                f"Product {product.id} ({product.name}) for account "
-                f"{active_account.id} ({active_account.name}) exists. Do you want to create new?",
-                abort=True,
-            )
-            action = ProductAction.CREATE
-        elif not product:
-            _ = typer.confirm(
-                f"Do you want to create new product for account "
-                f"{active_account.id} ({active_account.name})?",
-                abort=True,
-            )
-            action = ProductAction.CREATE
+    product = product_service.retrieve().model
+    if product and not force_create:
+        _ = typer.confirm(
+            f"Do you want to update product {product.id} ({product.name}) "
+            f"for account {active_account.id} ({active_account.name})? "
+            f"To create new use --force-create or -f options.",
+            abort=True,
+        )
+        console.print("Only Items updated is supported now.")
+        action = ProductAction.UPDATE
+    elif product and force_create:
+        _ = typer.confirm(
+            f"Product {product.id} ({product.name}) for account "
+            f"{active_account.id} ({active_account.name}) exists. Do you want to create new?",
+            abort=True,
+        )
+        action = ProductAction.CREATE
+    elif not product:
+        _ = typer.confirm(
+            f"Do you want to create new product for account "
+            f"{active_account.id} ({active_account.name})?",
+            abort=True,
+        )
+        action = ProductAction.CREATE
 
-        with console.status("Syncing product definition...") as status:
-            product_stats, product = sync_product_definition(
-                mpt_client,
-                product_definition_path,
-                action,
-                active_account,
-                ProductStatsCollector(),
-                status,
-            )
+    with console.status("Syncing product definition...") as status:
+        product_definition_path = get_definition_file(product_path)
+        product_stats, product = sync_product_definition(
+            mpt_client,
+            product_definition_path,
+            action,
+            active_account,
+            ProductStatsCollector(),
+            status,
+        )
 
-        console.print(product_stats.to_table())
-        if product_stats.is_error:
-            raise typer.Exit(code=3)
+    console.print(product_stats.to_table())
+    if product_stats.is_error:
+        raise typer.Exit(code=3)
 
 
 # TODO: move to to_table()

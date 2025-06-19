@@ -87,9 +87,9 @@ def test_retrieve_from_mpt_error(mocker, service_context):
 def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict):
     mocker.patch.object(item_data_from_dict, "to_update", return_value=True)
     mocker.patch.object(
-        service_context.file_manager, "read_items_data", return_value=[item_data_from_dict]
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
-    mocker.patch.object(service_context.api, "list", return_value=[mpt_item_data])
+    mocker.patch.object(service_context.api, "list", return_value={"data": [mpt_item_data]})
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
     update_mock = mocker.patch.object(service_context.api, "update", return_value=mpt_item_data)
     stats_spy = mocker.spy(service_context.stats, "add_synced")
@@ -145,7 +145,7 @@ def test_update_item_not_found(mocker, service_context):
 
 def test_update_item_skip(mocker, service_context, mpt_item_data, item_data_from_json):
     mocker.patch.object(
-        service_context.file_manager, "read_items_data", return_value=[item_data_from_json]
+        service_context.file_manager, "read_data", return_value=[item_data_from_json]
     )
     mocker.patch.object(item_data_from_json, "to_update", return_value=False)
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")

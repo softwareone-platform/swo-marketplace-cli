@@ -1,6 +1,10 @@
+from unittest.mock import Mock
 from urllib.parse import urljoin
 
 from swo.mpt.cli.core.products import app
+from swo.mpt.cli.core.products.services import ProductService
+from swo.mpt.cli.core.services.service_result import ServiceResult
+from swo.mpt.cli.core.stats import ProductStatsCollector
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -88,10 +92,23 @@ def test_sync_with_dry_run(expected_account, mocker, new_product_file):
 
 
 def test_sync_product_update(
-    mocker, expected_account, mock_sync_product, new_product_file, product
+    mocker, expected_account, mock_sync_product, new_product_file, product, product_data_from_dict
 ):
-    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=product)
     mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    stats_mock = Mock(spec=ProductStatsCollector, is_error=False, to_table=Mock(return_value=""))
+    validate_definition_mock = mocker.patch.object(
+        ProductService,
+        "validate_definition",
+        return_value=ServiceResult(success=True, model=None, stats=stats_mock),
+    )
+    retrieve_mock = mocker.patch.object(
+        ProductService,
+        "retrieve",
+        return_value=ServiceResult(success=True, model=product_data_from_dict, stats=stats_mock),
+    )
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.sync_product_definition", return_value=(stats_mock, product)
+    )
 
     result = runner.invoke(
         app,
@@ -101,14 +118,25 @@ def test_sync_product_update(
 
     assert result.exit_code == 0, result.stdout
     assert "Do you want to update product" in result.stdout
-    assert "Product Sync" in result.stdout
+    validate_definition_mock.assert_called_once()
+    retrieve_mock.assert_called_once()
 
 
 def test_sync_product_force_create(
-    mocker, expected_account, mock_sync_product, new_product_file, product
+    mocker, expected_account, mock_sync_product, new_product_file, product_data_from_dict
 ):
-    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=product)
     mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    stats_mock = Mock(spec=ProductStatsCollector, is_error=False, to_table=Mock(return_value=""))
+    validate_definition_mock = mocker.patch.object(
+        ProductService,
+        "validate_definition",
+        return_value=ServiceResult(success=True, model=None, stats=stats_mock),
+    )
+    retrieve_mock = mocker.patch.object(
+        ProductService,
+        "retrieve",
+        return_value=ServiceResult(success=True, model=product_data_from_dict, stats=stats_mock),
+    )
 
     result = runner.invoke(
         app,
@@ -119,11 +147,23 @@ def test_sync_product_force_create(
     assert result.exit_code == 0, result.stdout
     assert "Do you want to create new?" in result.stdout
     assert "Product Sync" in result.stdout
+    validate_definition_mock.assert_called_once()
+    retrieve_mock.assert_called_once()
 
 
 def test_sync_product_no_product(mocker, expected_account, mock_sync_product, new_product_file):
-    mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=None)
     mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    stats_mock = Mock(spec=ProductStatsCollector, is_error=False, to_table=Mock(return_value=""))
+    validate_definition_mock = mocker.patch.object(
+        ProductService,
+        "validate_definition",
+        return_value=ServiceResult(success=True, model=None, stats=stats_mock),
+    )
+    retrieve_mock = mocker.patch.object(
+        ProductService,
+        "retrieve",
+        return_value=ServiceResult(success=True, model=None, stats=stats_mock),
+    )
 
     result = runner.invoke(
         app,
@@ -134,3 +174,5 @@ def test_sync_product_no_product(mocker, expected_account, mock_sync_product, ne
     assert result.exit_code == 0, result.stdout
     assert "Do you want to create new product for account" in result.stdout
     assert "Product Sync" in result.stdout
+    validate_definition_mock.assert_called_once()
+    retrieve_mock.assert_called_once()

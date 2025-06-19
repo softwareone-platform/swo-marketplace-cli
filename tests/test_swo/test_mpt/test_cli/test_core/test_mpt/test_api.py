@@ -93,6 +93,15 @@ def test_post(mocker, service):
     client_mock.assert_called_once_with("fake_url/", json={"name": "test"}, headers={})
 
 
+def test_post_action(mocker, service):
+    response_mock = Mock(spec=Response)
+    client_mock = mocker.patch.object(MPTClient, "post", return_value=response_mock)
+
+    service.post_action("fake_resource_id", "fake_action")
+
+    client_mock.assert_called_once_with("fake_url/fake_resource_id/fake_action")
+
+
 def test_update_success(mocker, service):
     client_mock = mocker.patch.object(MPTClient, "put")
 

@@ -15,28 +15,29 @@ class ItemAction(StrEnum):
     PUBLISH = "publish"
     UNPUBLISH = "unpublish"
     SKIP = "-"
+    SKIPPED = ""
 
 
 @dataclass
 class ItemData(BaseDataModel):
     id: str
-    commitment: str
     description: str
     group_id: str
     name: str
     period: str
-    product_id: str
     quantity_not_applicable: bool
     unit_id: str
     vendor_id: str
 
     action: ItemAction = ItemAction.SKIP
+    commitment: str | None = None
     coordinate: str | None = None
     group_coordinate: str | None = None
     group_name: str | None = None
     item_type: str | None = None
     operations_id: str | None = None
     parameters: list[dict[str, Any]] = field(default_factory=list)
+    product_id: str | None = None
     status: str | None = None
     unit_coordinate: str | None = None
     unit_name: str | None = None
@@ -59,9 +60,33 @@ class ItemData(BaseDataModel):
     def terms(self) -> dict[str, Any]:
         data = {"period": self.period}
         if self.period != "one-time":
-            data["commitment"] = self.commitment
+            data["commitment"] = self.commitment  # type: ignore
 
         return data
+
+    @property
+    def to_create(self) -> bool:
+        return self.action == ItemAction.CREATE
+
+    @property
+    def to_publish(self) -> bool:
+        return self.action == ItemAction.PUBLISH
+
+    @property
+    def to_review(self) -> bool:
+        return self.action == ItemAction.REVIEW
+
+    @property
+    def to_skip(self) -> bool:
+        return self.action == ItemAction.SKIP or self.action == ItemAction.SKIPPED
+
+    @property
+    def to_unpublish(self) -> bool:
+        return self.action == ItemAction.UNPUBLISH
+
+    @property
+    def to_update(self) -> bool:
+        return self.action == ItemAction.UPDATE
 
     @property
     def unit(self) -> dict[str, Any]:
@@ -85,7 +110,6 @@ class ItemData(BaseDataModel):
             item_type="operations" if data.get("is_operations", False) else "vendor",
             name=data[constants.ITEMS_NAME]["value"],
             period=data[constants.ITEMS_BILLING_FREQUENCY]["value"],
-            product_id=data["product_id"],
             quantity_not_applicable=data[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
             unit_name=data[constants.ITEMS_UNIT_NAME]["value"],
             unit_coordinate=data[constants.ITEMS_UNIT_ID]["coordinate"],
@@ -103,7 +127,7 @@ class ItemData(BaseDataModel):
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
             id=data["id"],
-            commitment=data["commitment"],
+            commitment=data["terms"].get("commitment"),
             description=data["description"],
             group_id=data["group"]["id"],
             name=data["name"],
@@ -113,7 +137,7 @@ class ItemData(BaseDataModel):
             unit_id=data["unit"]["id"],
             vendor_id=data["externalIds"]["vendor"],
             group_name=data["group"]["name"],
-            operations_id=data["operations"]["id"],
+            operations_id=data["externalIds"].get("operations"),
             parameters=[],
             status=data["status"],
             unit_name=data["unit"]["name"],

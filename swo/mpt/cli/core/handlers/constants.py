@@ -1,0 +1,1 @@
+ERROR_COLUMN_NAME = "Error"

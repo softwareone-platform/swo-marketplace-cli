@@ -31,7 +31,7 @@ class ParameterGroupData(BaseDataModel):
             coordinate=data[constants.PARAMETERS_GROUPS_ID]["coordinate"],
             default=data[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
             description=data[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
-            display_order=data[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"],
+            display_order=int(data[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"]),
             label=data[constants.PARAMETERS_GROUPS_LABEL]["value"],
             name=data[constants.PARAMETERS_GROUPS_NAME]["value"],
             created_date=created_date.date() if created_date else None,

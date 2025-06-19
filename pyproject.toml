@@ -85,6 +85,9 @@ include = [
     "swo/mpt/cli/**",
     "swo/mpt/cli/plugins/audit_plugin/**",
 ]
+omit = [
+    "*/__init__.py"
+]
 
 [tool.ruff]
 extend-exclude = [".vscode", ".devcontainer"]
