@@ -7,12 +7,6 @@ from typing import Optional, TypeAlias, TypeVar
 
 from rich.status import Status
 from swo.mpt.cli.core.accounts.models import Account
-from swo.mpt.cli.core.errors import FileNotExistsError
-from swo.mpt.cli.core.handlers.errors import (
-    RequiredFieldsError,
-    RequiredFieldValuesError,
-    RequiredSheetsError,
-)
 from swo.mpt.cli.core.handlers.excel_file_handler import (
     ExcelFileHandler,
     SheetData,
@@ -26,7 +20,6 @@ from swo.mpt.cli.core.mpt.flows import (
     create_parameter_group,
     create_product,
     create_template,
-    get_products,
     search_uom_by_name,
 )
 from swo.mpt.cli.core.mpt.models import (
@@ -49,7 +42,7 @@ from swo.mpt.cli.core.products.models import (
 )
 from swo.mpt.cli.core.products.services import ItemService, ProductService
 from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
+from swo.mpt.cli.core.stats import ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     add_or_create_error,
     find_first,
@@ -73,97 +66,6 @@ def get_definition_file(path: str) -> Path:
     that product definition file is in the same folder with .xlsx file extension
     """
     return ExcelFileHandler.normalize_file_path(path)
-
-
-def check_file_exists(product_file_path: Path) -> bool:
-    """
-    Check that product file exists
-    """
-    if not ExcelFileHandler(product_file_path).exists():
-        raise FileNotExistsError(product_file_path)
-
-    return True
-
-
-def check_product_definition(
-    definition_path: Path, stats: ErrorMessagesCollector
-) -> ErrorMessagesCollector:
-    """
-    Parses Product definition file and check consistency of product definition file
-    """
-    file_handler = ExcelFileHandler(definition_path)
-    try:
-        file_handler.check_required_sheet(constants.REQUIRED_TABS)
-    except RequiredSheetsError as error:
-        for section_name in error.details:
-            stats.add_msg(section_name, "", "Required tab doesn't exist")
-
-    for section_name in set(constants.ALL_TABS).intersection(set(file_handler.sheet_names)):
-        if section_name not in constants.REQUIRED_FIELDS_BY_TAB:
-            continue
-
-        if section_name == constants.TAB_GENERAL:
-            check_required_general_fields(
-                file_handler,
-                stats,
-                section_name,
-                constants.REQUIRED_FIELDS_BY_TAB[section_name],
-                constants.REQUIRED_FIELDS_WITH_VALUES_BY_TAB[section_name],
-            )
-        else:
-            check_required_columns(
-                file_handler,
-                stats,
-                section_name,
-                constants.REQUIRED_FIELDS_BY_TAB[section_name],
-            )
-
-    return stats
-
-
-def check_required_general_fields(
-    file_handler: ExcelFileHandler,
-    stats: ErrorMessagesCollector,
-    section_name: str,
-    required_field_names: list[str],
-    required_values_field_names: list[str],
-):
-    """
-    Check that required fields and values are presented in General worksheet
-    """
-    try:
-        file_handler.check_required_fields_in_vertical_sheet(section_name, required_field_names)
-    except RequiredFieldsError as error:
-        for field in error.details:
-            stats.add_msg(section_name, "", f"Required field {field} is not provided")
-
-    try:
-        file_handler.check_required_field_values_in_vertical_sheet(
-            section_name, required_values_field_names
-        )
-    except RequiredFieldValuesError as error:
-        for field in error.details:
-            stats.add_msg(
-                section_name,
-                field,
-                "Value is not provided for the required field. Current value: None",
-            )
-
-
-def check_required_columns(
-    file_handler: ExcelFileHandler,
-    stats: ErrorMessagesCollector,
-    section_name: str,
-    required_field_names: list[str],
-):
-    """
-    Check that required fields and values are presented in tables worksheet
-    """
-    try:
-        file_handler.check_required_fields_in_horizontal_sheet(section_name, required_field_names)
-    except RequiredFieldsError as error:
-        for field in error.details:
-            stats.add_msg(section_name, "", f"Required field {field} is not provided")
 
 
 def sync_product_definition(
@@ -587,14 +489,3 @@ def replace_parameter_variables(
         content = content.replace(sheet_param_id, param.id)
 
     return set_value(constants.TEMPLATES_CONTENT, values, content)
-
-
-def check_product_exists(mpt_client: MPTClient, product_definition_path: Path) -> Product | None:
-    file_handler = ExcelFileHandler(product_definition_path)
-    general_values = file_handler.get_data_from_vertical_sheet(
-        constants.TAB_GENERAL, constants.GENERAL_FIELDS
-    )
-    product_id = general_values[constants.GENERAL_PRODUCT_ID]["value"]
-
-    _, products = get_products(mpt_client, 1, 0, query=f"id={product_id}")
-    return products[0] if products else None
