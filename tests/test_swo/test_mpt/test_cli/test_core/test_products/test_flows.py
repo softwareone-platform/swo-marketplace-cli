@@ -4,15 +4,12 @@ from unittest.mock import Mock, call
 
 import pytest
 from swo.mpt.cli.core.console import console
-from swo.mpt.cli.core.errors import FileNotExistsError, MPTAPIError
+from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
 from swo.mpt.cli.core.mpt.models import Item
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.flows import (
     ProductAction,
-    check_file_exists,
-    check_product_definition,
-    check_product_exists,
     sync_items,
     sync_items_groups,
     sync_parameters,
@@ -21,7 +18,7 @@ from swo.mpt.cli.core.products.flows import (
     sync_templates,
 )
 from swo.mpt.cli.core.products.services import ItemService, ProductService
-from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
+from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture
@@ -33,162 +30,6 @@ def items():
         Item(id="ITM-1213-3316-0003", name="Customer"),
         Item(id="ITM-1213-3316-0005", name="Customer"),
     ]
-
-
-def test_check_file_exists(empty_file):
-    assert check_file_exists(empty_file)
-
-
-def test_check_file_not_exists(tmp_path):
-    with pytest.raises(FileNotExistsError):
-        check_file_exists(Path("tmp_path"))
-
-
-def test_check_product_definition_not_all_tabs(empty_file):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(empty_file, stats)
-
-    expected_message = """General: Required tab doesn't exist
-Settings: Required tab doesn't exist\n"""
-
-    assert not stats.is_empty()
-    assert str(stats) == expected_message
-
-
-def test_check_product_definition_not_all_required_general(product_file_root):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-general-not-all.xlsx", stats
-    )
-
-    assert not stats.is_empty()
-    assert (
-        str(stats)
-        == """General: Required field Product Name is not provided
-\t\tProduct Website: Value is not provided for the required field. Current value: None"""
-    )
-
-
-def test_check_product_definition_not_all_required_parameter_groups(product_file_root):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-parameter-groups-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Parameters Groups: Required field Label is not provided\n"
-
-
-def test_check_product_definition_not_all_required_items_groups(product_file_root):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-items-groups-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Items Groups: Required field Label is not provided\n"
-
-
-def test_check_product_definition_not_all_required_agreements_parameters(product_file_root):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-agreements-parameters-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Agreements Parameters: Required field ExternalId is not provided\n"
-
-
-def test_check_product_definition_not_all_required_item_parameters(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-item-parameters-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Item Parameters: Required field ExternalId is not provided\n"
-
-
-def test_check_product_definition_not_all_required_request_parameters(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-request-parameters-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Request Parameters: Required field ExternalId is not provided\n"
-
-
-def test_check_product_definition_not_all_required_subscription_parameters(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-subscription-parameters-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Subscription Parameters: Required field ExternalId is not provided\n"
-
-
-def test_check_product_definition_not_all_required_items(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-items-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Items: Required field Billing Frequency is not provided\n"
-
-
-def test_check_product_definition_not_all_required_templates(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-templates-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Templates: Required field Content is not provided\n"
-
-
-def test_check_product_definition_not_all_required_settings(
-    product_file_root,
-):
-    stats = ErrorMessagesCollector()
-
-    stats = check_product_definition(
-        product_file_root / "PRD-1234-1234-1234-settings-not-all-columns.xlsx",
-        stats,
-    )
-
-    assert not stats.is_empty()
-    assert str(stats) == "Settings: Required field Value is not provided\n"
 
 
 def test_sync_parameters_groups(mocker, mpt_client, new_product_file, product, parameter_group):
@@ -910,25 +751,3 @@ def test_sync_product_update_product(
 
     retrieve_mock.assert_called_once()
     update_mock.assert_called_once()
-
-
-def test_check_product_exists(mocker, mpt_client, new_product_file, product):
-    get_products_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_products", return_value=({}, [product])
-    )
-
-    checked_product = check_product_exists(mpt_client, new_product_file)
-
-    assert checked_product == product
-    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")
-
-
-def test_check_product_exists_no_product(mocker, mpt_client, new_product_file):
-    get_products_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.get_products", return_value=({}, [])
-    )
-
-    checked_product = check_product_exists(mpt_client, new_product_file)
-
-    assert not checked_product
-    get_products_mock.assert_called_once_with(mpt_client, 1, 0, query="id=PRD-1234-1234-1234")

@@ -102,6 +102,12 @@ class ProductService(BaseService):
         return ServiceResult(success=True, model=product, stats=self.stats)
 
     def validate_definition(self) -> ServiceResult:
+        # TODO: Review this logic. It should be implemented in the file_manager
+        if not self.file_manager.file_handler.exists():
+            msg = "Provided file path doesn't exist"
+            self.stats.errors.add_msg("", "", msg)
+            return ServiceResult(success=False, errors=[msg], model=None, stats=self.stats)
+
         try:
             self.file_manager.check_required_tabs()
         except RequiredSheetsError as error:
