@@ -11,8 +11,6 @@ from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
     ParameterGroup,
-    PriceList,
-    PriceListItem,
     Product,
     Template,
     Uom,
@@ -96,20 +94,6 @@ def mpt_products():
             },
         },
     ]
-
-
-@pytest.fixture
-def mpt_product():
-    return {
-        "id": "PRD-1234-1234",
-        "name": "Adobe for Commercial",
-        "status": "Published",
-        "vendor": {
-            "id": "ACC-4321",
-            "name": "Adobe",
-            "type": "Vendor",
-        },
-    }
 
 
 @pytest.fixture
@@ -215,21 +199,6 @@ def uom():
 @pytest.fixture
 def template():
     return Template(id="TPL-0000-0000-0001", name="Template")
-
-
-@pytest.fixture
-def price_list():
-    return PriceList(id="PRC-1234-1234")
-
-
-@pytest.fixture
-def price_list_item(item):
-    return PriceListItem(id="PRI-1234-1234", item=item)
-
-
-@pytest.fixture
-def product_icon_path():
-    return Path("swo/mpt/cli/core/icons/fake-icon.png")
 
 
 @pytest.fixture
