@@ -65,6 +65,7 @@ class ErrorMessagesCollector:
 
 class StatsCollector(ABC):
     __id: str | None = None
+    errors = ErrorMessagesCollector()
 
     def __init__(self, tabs: dict[str, Results]) -> None:
         self.__has_error = False

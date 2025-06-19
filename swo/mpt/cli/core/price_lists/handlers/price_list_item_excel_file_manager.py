@@ -1,6 +1,7 @@
 from collections.abc import Generator
 
 from openpyxl.worksheet.datavalidation import DataValidation
+from swo.mpt.cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
 from swo.mpt.cli.core.handlers.file_manager import ExcelFileManager
 from swo.mpt.cli.core.price_lists.constants import (
     ERROR_COLUMN_NAME,
@@ -8,10 +9,6 @@ from swo.mpt.cli.core.price_lists.constants import (
     PRICELIST_ITEMS_FIELDS,
     PRICELIST_ITEMS_ID,
     TAB_PRICE_ITEMS,
-)
-from swo.mpt.cli.core.price_lists.handlers.excel_styles import (
-    get_number_format_style,
-    price_items_tab_style,
 )
 from swo.mpt.cli.core.price_lists.models import ItemData
 
@@ -59,7 +56,7 @@ class PriceListItemExcelFileManager(ExcelFileManager):
                 row=1,
                 col=col,
                 value=field,
-                style=price_items_tab_style,
+                style=horizontal_tab_style,
             )
 
     def read_items_data(self) -> Generator[ItemData, None, None]:

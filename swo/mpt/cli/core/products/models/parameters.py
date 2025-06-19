@@ -7,39 +7,6 @@ from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
 
 
-@dataclass
-class ParameterGroupData(BaseDataModel):
-    id: str
-
-    name: str
-    coordinate: str | None = None
-    label: str | None = None
-    description: str | None = None
-    displayOrder: str | None = None
-    default: bool | None = None
-
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        return cls(
-            id=data[constants.PARAMETERS_GROUPS_ID]["value"],
-            coordinate=data[constants.PARAMETERS_GROUPS_ID]["coordinate"],
-            name=data[constants.PARAMETERS_GROUPS_NAME]["value"],
-            label=data[constants.PARAMETERS_GROUPS_LABEL]["value"],
-            description=data[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
-            displayOrder=data[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"],
-            default=data[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
-        )
-
-    def to_json(self) -> dict[str, Any]:
-        return {
-            "name": self.name,
-            "label": self.label,
-            "description": self.description,
-            "displayOrder": self.displayOrder,
-            "default": self.default,
-        }
-
-
 class ScopeEnum(StrEnum):
     AGREEMENT = "Agreement"
     ITEM = "Item"

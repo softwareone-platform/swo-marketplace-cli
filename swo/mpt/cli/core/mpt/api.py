@@ -59,8 +59,9 @@ class APIService(Generic[APIModel]):
         return {"meta": meta.model_dump(), "data": json_body["data"]}
 
     @wrap_http_error
-    def post(self, data: dict[str, Any]) -> dict[str, Any]:
-        response = self.client.post(self.url, json=data)
+    def post(self, data: dict[str, Any], headers: dict[str, Any] | None = None) -> dict[str, Any]:
+        headers = headers or {}
+        response = self.client.post(self.url, json=data, headers=headers)
         response.raise_for_status()
         return self.api_model.model_validate(response.json()).model_dump()
 

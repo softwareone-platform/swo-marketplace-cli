@@ -1,5 +1,6 @@
 from typing import Any
 
+from swo.mpt.cli.core.handlers.excel_styles import general_tab_title_style
 from swo.mpt.cli.core.handlers.file_manager import ExcelFileManager
 from swo.mpt.cli.core.price_lists.constants import (
     ERROR_COLUMN_NAME,
@@ -7,7 +8,6 @@ from swo.mpt.cli.core.price_lists.constants import (
     GENERAL_PRICELIST_ID,
     TAB_GENERAL,
 )
-from swo.mpt.cli.core.price_lists.handlers.excel_styles import general_tab_title_style
 from swo.mpt.cli.core.price_lists.models import PriceListData
 
 
