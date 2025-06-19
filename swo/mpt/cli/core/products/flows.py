@@ -1,5 +1,4 @@
 import enum
-import os
 import re
 from functools import partial
 from pathlib import Path
@@ -18,7 +17,6 @@ from swo.mpt.cli.core.mpt.flows import (
     create_item_group,
     create_parameter,
     create_parameter_group,
-    create_product,
     create_template,
     search_uom_by_name,
 )
@@ -26,7 +24,6 @@ from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
     ParameterGroup,
-    Product,
     Template,
 )
 from swo.mpt.cli.core.products import constants
@@ -75,20 +72,19 @@ def sync_product_definition(
     active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
-) -> tuple[ProductStatsCollector, Optional[Product]]:
+) -> tuple[ProductStatsCollector, Optional[ProductData]]:
     """
     Sync product definition to the marketplace platform
     """
-    file_handler = ExcelFileHandler(file_path=definition_path)
+    product_service_context = ServiceContext(
+        account=active_account,
+        api=ProductAPIService(mpt_client),
+        data_model=ProductData,
+        file_manager=ProductExcelFileManager(str(definition_path)),
+        stats=stats,
+    )
+    product_service = ProductService(product_service_context)
     if action == ProductAction.UPDATE:
-        service_context = ServiceContext(
-            account=active_account,
-            api=ProductAPIService(mpt_client),
-            data_model=ProductData,
-            file_manager=ProductExcelFileManager(str(definition_path)),
-            stats=stats,
-        )
-        product_service = ProductService(service_context)
         result = product_service.retrieve()
         if not result.success or result.model is None:
             return stats, None
@@ -107,7 +103,13 @@ def sync_product_definition(
         return stats, product
 
     else:
-        stats, product = create_product_definition(mpt_client, file_handler, stats, status)
+        result = product_service.create()
+        if not result.success or result.model is None:
+            return stats, None
+
+        product = result.model
+        file_handler = ExcelFileHandler(file_path=definition_path)
+        stats, product = create_product_definition(mpt_client, file_handler, stats, status, product)
 
     return stats, product
 
@@ -117,35 +119,8 @@ def create_product_definition(
     file_handler: ExcelFileHandler,
     stats: ProductStatsCollector,
     status: Status,
-) -> tuple[ProductStatsCollector, Optional[Product]]:
-    general_data = file_handler.get_data_from_vertical_sheet(
-        constants.TAB_GENERAL, constants.GENERAL_FIELDS
-    )
-
-    general_data["settings"] = {
-        str(idx): setting
-        for idx, setting in enumerate(
-            file_handler.get_data_from_horizontal_sheet(
-                constants.TAB_SETTINGS, constants.SETTINGS_FIELDS
-            )
-        )
-    }
-    product_data = ProductData.from_dict(general_data)
-    try:
-        product = create_product(
-            mpt_client,
-            product_data.to_json(),
-            product_data.settings.to_json(),
-            Path(os.path.dirname(__file__)) / "../icons/fake-icon.png",
-        )
-        file_handler.write([{constants.TAB_GENERAL: {product_data.coordinate: product.id}}])
-        stats.add_synced(constants.TAB_GENERAL)
-
-    except Exception as e:
-        add_or_create_error(file_handler, constants.TAB_GENERAL, general_data, e)
-        stats.add_error(constants.TAB_GENERAL)
-        return stats, None
-
+    product: ProductData,
+) -> tuple[ProductStatsCollector, Optional[ProductData]]:
     parameter_groups_data = file_handler.get_data_from_horizontal_sheet(
         constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
     )
@@ -257,7 +232,7 @@ def create_product_definition(
 def sync_parameters_groups(
     mpt_client: MPTClient,
     file_handler: ExcelFileHandler,
-    product: Product,
+    product: ProductData,
     values: SheetDataGenerator,
     stats: ProductStatsCollector,
     status: Status,
@@ -293,7 +268,7 @@ def sync_parameters_groups(
 def sync_items_groups(
     mpt_client: MPTClient,
     file_handler: ExcelFileHandler,
-    product: Product,
+    product: ProductData,
     values: SheetDataGenerator,
     stats: ProductStatsCollector,
     status: Status,
@@ -327,7 +302,7 @@ def sync_parameters(
     scope: str,
     mpt_client: MPTClient,
     file_handler: ExcelFileHandler,
-    product: Product,
+    product: ProductData,
     values: SheetDataGenerator,
     parameter_groups_mapping: dict[str, ParameterGroup],
     stats: ProductStatsCollector,
@@ -377,7 +352,7 @@ sync_subscription_parameters = partial(sync_parameters, "Subscription")
 def sync_items(
     mpt_client: MPTClient,
     file_handler: ExcelFileHandler,
-    product: Product,
+    product: ProductData,
     values: SheetDataGenerator,
     items_groups_mapping: dict[str, ItemGroup],
     item_parameters_id_mapping: dict[str, Parameter],
@@ -441,7 +416,7 @@ def set_unit_of_measure(mpt_client: MPTClient, item: ItemData) -> None:
 def sync_templates(
     mpt_client: MPTClient,
     file_handler: ExcelFileHandler,
-    product: Product,
+    product: ProductData,
     values: SheetDataGenerator,
     all_parameters_id_mapping: dict[str, Parameter],
     stats: ProductStatsCollector,
