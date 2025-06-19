@@ -22,8 +22,8 @@ def service_context(mpt_client, price_list_new_file, active_vendor_account):
 
 
 def test_create_price_list(mocker, service_context, mpt_price_list_data, price_list_data_from_dict):
-    read_general_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_post_mock = mocker.patch.object(
         service_context.api,
@@ -37,15 +37,15 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
     result = service.create()
 
     assert result.success is True
-    read_general_data_mock.assert_called_once()
+    read_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
     file_handler_write_mock.assert_called_once_with("B3", price_list_data_from_dict.id)
     api_post_mock.assert_called_once()
 
 
 def test_create_price_list_error(mocker, service_context, price_list_data_from_dict):
-    read_general_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_post_mock = mocker.patch.object(
         service_context.api,
@@ -62,7 +62,7 @@ def test_create_price_list_error(mocker, service_context, price_list_data_from_d
     assert result.errors == ["API Error with response body Error creating price list"]
     assert result.model is None
     stats_spy.assert_called_once_with(TAB_GENERAL)
-    read_general_data_mock.assert_called_once()
+    read_data_mock.assert_called_once()
     api_post_mock.assert_called_once()
     file_handler_write_mock.assert_called_once()
 
@@ -98,8 +98,8 @@ def test_export_mpt_error(mocker, service_context):
 
 
 def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict):
-    read_general_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_exists_mock = mocker.patch.object(
         service_context.api,
@@ -113,7 +113,7 @@ def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict)
 
     assert result.success is True
     assert result.model == price_list_data_from_dict
-    read_general_data_mock.assert_called_once()
+    read_data_mock.assert_called_once()
     api_exists_mock.assert_called_once()
 
 
@@ -163,8 +163,8 @@ def test_retrieve_from_mpt_error(mocker, service_context):
 
 
 def test_update_price_list(mocker, service_context, price_list_data_from_dict):
-    read_general_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = PriceListService(service_context)
@@ -173,13 +173,13 @@ def test_update_price_list(mocker, service_context, price_list_data_from_dict):
 
     assert result.success is True
     assert result.model is not None
-    read_general_data_mock.assert_called_once()
+    read_data_mock.assert_called_once()
     api_update_mock.assert_called_once()
 
 
 def test_update_price_list_error(mocker, service_context, price_list_data_from_dict):
-    read_general_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_general_data", return_value=price_list_data_from_dict
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_update_mock = mocker.patch.object(
         service_context.api,
@@ -195,7 +195,7 @@ def test_update_price_list_error(mocker, service_context, price_list_data_from_d
     assert result.success is False
     assert result.errors == ["API Error with response body Error updating price list"]
     assert result.model is None
-    read_general_data_mock.assert_called_once()
+    read_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
     file_handler_write_mock.assert_called_once()
     api_update_mock.assert_called_once()

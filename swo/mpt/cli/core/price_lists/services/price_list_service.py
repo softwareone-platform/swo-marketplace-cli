@@ -14,7 +14,7 @@ class PriceListService(BaseService):
         Returns:
             ServiceResult: The result of the creation operation.
         """
-        price_list = self.file_manager.read_general_data()
+        price_list = self.file_manager.read_data()
         # TODO: this logic should be moved to the price list data model creation
         price_list.type = "operations" if self.account.is_operations() else "vendor"
         try:
@@ -58,7 +58,7 @@ class PriceListService(BaseService):
         Returns:
             ServiceResult: The result of the retrieval operation.
         """
-        price_list = self.file_manager.read_general_data()
+        price_list = self.file_manager.read_data()
         if price_list.id is None:
             return ServiceResult(success=True, model=None, stats=self.stats)
 
@@ -98,7 +98,7 @@ class PriceListService(BaseService):
         Returns:
             ServiceResult: The result of the update operation.
         """
-        price_list = self.file_manager.read_general_data()
+        price_list = self.file_manager.read_data()
         # TODO: this logic should be moved to the price list data model creation
         price_list.type = "operations" if self.account.is_operations() else "vendor"
         try:

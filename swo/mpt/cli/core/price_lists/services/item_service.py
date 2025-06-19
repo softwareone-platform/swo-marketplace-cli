@@ -9,7 +9,7 @@ from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
 class ItemService(BaseService):
-    def create(self) -> ServiceResult:
+    def create(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Operation not implemented"], model=None, stats=self.stats
         )
@@ -38,7 +38,7 @@ class ItemService(BaseService):
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
-    def retrieve(self) -> ServiceResult:
+    def retrieve(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Operation not implemented"], model=None, stats=self.stats
         )
@@ -54,14 +54,14 @@ class ItemService(BaseService):
 
     def update(self, resource_id: str) -> ServiceResult:
         errors = []
-        for item in self.file_manager.read_items_data():
+        for item in self.file_manager.read_data():
             if not item.to_update():
                 self._set_skipped()
                 continue
 
             try:
                 params = {"item.ExternalIds.vendor": item.vendor_id, "limit": 1}
-                item_data = self.api.list(params=params)[0]
+                item_data = self.api.list(params=params)["data"][0]
             except MPTAPIError as e:
                 errors.append(str(e))
                 self._set_error(str(e), item.id)

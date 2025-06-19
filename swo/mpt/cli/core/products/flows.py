@@ -1,7 +1,6 @@
 import enum
 import os
 import re
-from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from typing import Optional, TypeAlias, TypeVar
@@ -27,14 +26,9 @@ from swo.mpt.cli.core.mpt.flows import (
     create_parameter_group,
     create_product,
     create_template,
-    get_item,
     get_products,
-    publish_item,
-    review_item,
     search_uom_by_name,
-    unpublish_item,
 )
-from swo.mpt.cli.core.mpt.flows import update_item as mpt_update_item
 from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
@@ -43,6 +37,8 @@ from swo.mpt.cli.core.mpt.models import (
     Template,
 )
 from swo.mpt.cli.core.products import constants
+from swo.mpt.cli.core.products.api import ItemAPIService, ProductAPIService
+from swo.mpt.cli.core.products.handlers import ItemExcelFileManager, ProductExcelFileManager
 from swo.mpt.cli.core.products.models import (
     ItemData,
     ItemGroupData,
@@ -51,6 +47,8 @@ from swo.mpt.cli.core.products.models import (
     ProductData,
     TemplateData,
 )
+from swo.mpt.cli.core.products.services import ItemService, ProductService
+from swo.mpt.cli.core.services.service_context import ServiceContext
 from swo.mpt.cli.core.stats import ErrorMessagesCollector, ProductStatsCollector
 from swo.mpt.cli.core.utils import (
     add_or_create_error,
@@ -67,16 +65,6 @@ SyncResult: TypeAlias = dict[str, T]
 class ProductAction(enum.Enum):
     CREATE = "create"
     UPDATE = "update"
-
-
-class ItemAction(enum.Enum):
-    CREATE = "create"
-    UPDATE = "update"
-    REVIEW = "review"
-    PUBLISH = "publish"
-    UNPUBLISH = "unpublish"
-    SKIP = "-"
-    SKIPPED = ""
 
 
 def get_definition_file(path: str) -> Path:
@@ -191,9 +179,31 @@ def sync_product_definition(
     """
     file_handler = ExcelFileHandler(file_path=definition_path)
     if action == ProductAction.UPDATE:
-        stats, product = update_product_definition(
-            mpt_client, file_handler, active_account, stats, status
+        service_context = ServiceContext(
+            account=active_account,
+            api=ProductAPIService(mpt_client),
+            data_model=ProductData,
+            file_manager=ProductExcelFileManager(str(definition_path)),
+            stats=stats,
         )
+        product_service = ProductService(service_context)
+        result = product_service.retrieve()
+        if not result.success or result.model is None:
+            return stats, None
+
+        product = result.model
+        item_service_context = ServiceContext(
+            account=active_account,
+            api=ItemAPIService(mpt_client),
+            data_model=ItemData,
+            file_manager=ItemExcelFileManager(str(definition_path)),
+            stats=stats,
+        )
+        item_service = ItemService(item_service_context)
+        item_service.update(product.id)
+
+        return stats, product
+
     else:
         stats, product = create_product_definition(mpt_client, file_handler, stats, status)
 
@@ -340,96 +350,6 @@ def create_product_definition(
     )
 
     return stats, product
-
-
-def update_product_definition(
-    mpt_client: MPTClient,
-    file_handler: ExcelFileHandler,
-    active_account: Account,
-    stats: ProductStatsCollector,
-    status: Status,
-) -> tuple[ProductStatsCollector, Optional[Product]]:
-    general_values = file_handler.get_data_from_vertical_sheet(
-        constants.TAB_GENERAL, constants.GENERAL_FIELDS
-    )
-    product_id = general_values[constants.GENERAL_PRODUCT_ID]["value"]
-    items = file_handler.get_values_for_dynamic_sheet(
-        constants.TAB_ITEMS, constants.ITEMS_FIELDS, [re.compile(r"Parameter\.*")]
-    )
-    update_items(
-        mpt_client,
-        file_handler,
-        product_id,
-        items,
-        active_account,
-        stats,
-        status,
-    )
-
-    return stats, None
-
-
-def update_items(
-    mpt_client: MPTClient,
-    file_handler: ExcelFileHandler,
-    product_id: str,
-    values: SheetDataGenerator,
-    active_account: Account,
-    stats: ProductStatsCollector,
-    status: Status,
-) -> None:
-    sheet_name = constants.TAB_ITEMS
-    for sheet_value in values:
-        try:
-            action = ItemAction(sheet_value[constants.ITEMS_ACTION]["value"])
-            if action not in (ItemAction.SKIP, ItemAction.SKIPPED, ItemAction.CREATE):
-                item_vendor_id = sheet_value[constants.ITEMS_VENDOR_ITEM_ID]["value"]
-                item = get_item(mpt_client, product_id, item_vendor_id)
-
-            match ItemAction(action):
-                case ItemAction.REVIEW:
-                    review_item(mpt_client, item.id)
-                    stats.add_synced(sheet_name)
-                case ItemAction.PUBLISH:
-                    publish_item(mpt_client, item.id)
-                    stats.add_synced(sheet_name)
-                case ItemAction.UNPUBLISH:
-                    unpublish_item(mpt_client, item.id)
-                    stats.add_synced(sheet_name)
-                case ItemAction.UPDATE:
-                    update_item(mpt_client, active_account, item.id, product_id, sheet_value)
-                    stats.add_synced(sheet_name)
-                case ItemAction.CREATE:
-                    create_item(
-                        mpt_client,
-                        active_account,
-                        product_id,
-                        file_handler,
-                        sheet_name,
-                        sheet_value,
-                    )
-                    stats.add_synced(sheet_name)
-                case _:
-                    stats.add_skipped(sheet_name)
-        except Exception as e:
-            add_or_create_error(file_handler, sheet_name, sheet_value, e)
-            stats.add_error(sheet_name)
-        finally:
-            step_text = status_step_text(stats, sheet_name)
-            status.update(f"Syncing {sheet_name}: {step_text}")
-
-
-def update_item(
-    mpt_client: MPTClient,
-    account: Account,
-    item_id: str,
-    product_id: str,
-    sheet_value: SheetData,
-) -> None:
-    data = deepcopy(sheet_value)
-    data["product_id"] = product_id
-    data["is_operations"] = account.is_operations()
-    mpt_update_item(mpt_client, item_id, ItemData.from_dict(data).to_json())
 
 
 def sync_parameters_groups(
@@ -584,10 +504,10 @@ def sync_items(
         created_group = items_groups_mapping[group_id]
         new_sheet_value["group_id"] = created_group.id
         new_sheet_value["parameters"] = parameters
-        new_sheet_value["product_id"] = product.id
+        item_data = ItemData.from_dict(new_sheet_value)
+        item_data.product_id = product.id
         try:
-            new_sheet_value = setup_unit_of_measure(mpt_client, new_sheet_value)
-            item_data = ItemData.from_dict(new_sheet_value)
+            set_unit_of_measure(mpt_client, item_data)
             item = mpt_create_item(mpt_client, item_data.to_json())
 
             id_mapping[item_data.id] = item
@@ -612,36 +532,8 @@ def sync_items(
             status.update(f"Syncing {sheet_name}: {step_text}")
 
 
-def create_item(
-    mpt_client: MPTClient,
-    active_account: Account,
-    product_id: str,
-    file_handler: ExcelFileHandler,
-    sheet_name: str,
-    sheet_value: SheetData,
-) -> None:
-    new_sheet_value = setup_unit_of_measure(mpt_client, sheet_value)
-    new_sheet_value["product_id"] = product_id
-    new_sheet_value["is_operations"] = active_account.is_operations()
-    item_data = ItemData.from_dict(new_sheet_value)
-    item = mpt_create_item(mpt_client, item_data.to_json())
-    # TODO: refactor, should be done out of this function
-    file_handler.write(
-        [
-            {
-                sheet_name: {
-                    item_data.coordinate: item.id,
-                    item_data.unit_coordinate: item_data.unit_id,
-                }
-            }
-        ]
-    )
-
-
-def setup_unit_of_measure(mpt_client: MPTClient, values: SheetData) -> SheetData:
-    unit_name = values[constants.ITEMS_UNIT_NAME]["value"]
-    uom = search_uom_by_name(mpt_client, unit_name)
-    return set_value(constants.ITEMS_UNIT_ID, values, uom.id)
+def set_unit_of_measure(mpt_client: MPTClient, item: ItemData) -> None:
+    item.unit_id = search_uom_by_name(mpt_client, item.unit_name).id
 
 
 def sync_templates(

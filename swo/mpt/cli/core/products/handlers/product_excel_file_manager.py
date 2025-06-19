@@ -1,18 +1,18 @@
 from swo.mpt.cli.core.handlers.vertical_tab_file_manager import VerticalTabFileManager
-from swo.mpt.cli.core.price_lists.constants import (
+from swo.mpt.cli.core.products.constants import (
     GENERAL_FIELDS,
-    GENERAL_PRICELIST_ID,
+    GENERAL_PRODUCT_ID,
     REQUIRED_FIELDS_BY_TAB,
     REQUIRED_TABS,
     TAB_GENERAL,
 )
-from swo.mpt.cli.core.price_lists.models import PriceListData
+from swo.mpt.cli.core.products.models import ProductData
 
 
-class PriceListExcelFileManager(VerticalTabFileManager):
-    _data_model = PriceListData
+class ProductExcelFileManager(VerticalTabFileManager):
+    _data_model = ProductData
     _fields = GENERAL_FIELDS
-    _id_field = GENERAL_PRICELIST_ID
+    _id_field = GENERAL_PRODUCT_ID
     _required_tabs = REQUIRED_TABS
     _required_fields_by_tab = REQUIRED_FIELDS_BY_TAB
     _sheet_name = TAB_GENERAL

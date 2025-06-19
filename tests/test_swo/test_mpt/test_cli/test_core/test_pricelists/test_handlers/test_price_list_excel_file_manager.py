@@ -38,7 +38,7 @@ def test_create_tab(mocker):
     assert write_mock.call_count == len(GENERAL_FIELDS)
 
 
-def test_read_general_data(mocker, price_list_data_from_dict):
+def test_read_data(mocker, price_list_data_from_dict):
     mock_data = {"fake_field1": {"field"}}
     get_data_from_vertical_sheet_mock = mocker.patch.object(
         ExcelFileHandler, "get_data_from_vertical_sheet", return_value=mock_data
@@ -48,7 +48,7 @@ def test_read_general_data(mocker, price_list_data_from_dict):
     )
     handler = PriceListExcelFileManager("fake_file.xlsx")
 
-    result = handler.read_general_data()
+    result = handler.read_data()
 
     assert result == price_list_data_from_dict
     get_data_from_vertical_sheet_mock.assert_called_once_with(TAB_GENERAL, GENERAL_FIELDS)

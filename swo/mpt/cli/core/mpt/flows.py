@@ -125,44 +125,6 @@ def create_item(mpt_client: MPTClient, item_json: dict) -> Item:
     return Item.model_validate(response.json())
 
 
-@wrap_http_error
-def review_item(mpt_client: MPTClient, item_id: str) -> None:
-    response = mpt_client.post(f"/catalog/items/{item_id}/review")
-    response.raise_for_status()
-
-
-@wrap_http_error
-def publish_item(mpt_client: MPTClient, item_id: str) -> None:
-    response = mpt_client.post(f"/catalog/items/{item_id}/publish")
-    response.raise_for_status()
-
-
-@wrap_http_error
-def unpublish_item(mpt_client: MPTClient, item_id: str) -> None:
-    response = mpt_client.post(f"/catalog/items/{item_id}/unpublish")
-    response.raise_for_status()
-
-
-@wrap_http_error
-def update_item(mpt_client, item_id: str, item_json: dict) -> None:
-    response = mpt_client.put(f"/catalog/items/{item_id}", json=item_json)
-    response.raise_for_status()
-
-
-@wrap_http_error
-def get_item(mpt_client: MPTClient, product_id: str, vendor_id: str) -> Item:
-    response = mpt_client.get(
-        f"/catalog/items?externalIds.vendor={vendor_id}&product.id={product_id}&limit=1&offset=0"
-    )
-    response.raise_for_status()
-
-    data = response.json()["data"]
-    if not data:
-        raise MPTAPIError(f"Item by Item Vendor ID '{vendor_id}' is not found.", "404 not found")
-
-    return Item.model_validate(data[0])
-
-
 @cache
 @wrap_http_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:

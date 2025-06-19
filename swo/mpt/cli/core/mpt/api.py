@@ -66,6 +66,11 @@ class APIService(Generic[APIModel]):
         return self.api_model.model_validate(response.json()).model_dump()
 
     @wrap_http_error
+    def post_action(self, resource_id: str, action: str) -> None:
+        response = self.client.post(f"{self.url}{resource_id}/{action}")
+        response.raise_for_status()
+
+    @wrap_http_error
     def update(self, resource_id: str, data: dict[str, Any]) -> None:
         response = self.client.put(f"{self.url}{resource_id}", json=data)
         response.raise_for_status()

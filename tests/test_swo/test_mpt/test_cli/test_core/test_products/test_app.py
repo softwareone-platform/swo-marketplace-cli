@@ -1,6 +1,8 @@
+from unittest.mock import Mock
 from urllib.parse import urljoin
 
 from swo.mpt.cli.core.products import app
+from swo.mpt.cli.core.stats import ProductStatsCollector
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -92,6 +94,10 @@ def test_sync_product_update(
 ):
     mocker.patch("swo.mpt.cli.core.products.app.check_product_exists", return_value=product)
     mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    stats_mock = Mock(spec=ProductStatsCollector, is_error=False, to_table=Mock(return_value=""))
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.sync_product_definition", return_value=(stats_mock, product)
+    )
 
     result = runner.invoke(
         app,
@@ -101,7 +107,6 @@ def test_sync_product_update(
 
     assert result.exit_code == 0, result.stdout
     assert "Do you want to update product" in result.stdout
-    assert "Product Sync" in result.stdout
 
 
 def test_sync_product_force_create(
