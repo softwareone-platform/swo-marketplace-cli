@@ -11,12 +11,13 @@ from swo.mpt.cli.core.mpt.models import (
     ItemGroup,
     Parameter,
     ParameterGroup,
-    PriceList,
-    PriceListItem,
     Product,
     Template,
     Uom,
 )
+from swo.mpt.cli.core.products.services import ProductService
+from swo.mpt.cli.core.services.service_result import ServiceResult
+from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture
@@ -93,20 +94,6 @@ def mpt_products():
             },
         },
     ]
-
-
-@pytest.fixture
-def mpt_product():
-    return {
-        "id": "PRD-1234-1234",
-        "name": "Adobe for Commercial",
-        "status": "Published",
-        "vendor": {
-            "id": "ACC-4321",
-            "name": "Adobe",
-            "type": "Vendor",
-        },
-    }
 
 
 @pytest.fixture
@@ -212,21 +199,6 @@ def uom():
 @pytest.fixture
 def template():
     return Template(id="TPL-0000-0000-0001", name="Template")
-
-
-@pytest.fixture
-def price_list():
-    return PriceList(id="PRC-1234-1234")
-
-
-@pytest.fixture
-def price_list_item(item):
-    return PriceListItem(id="PRI-1234-1234", item=item)
-
-
-@pytest.fixture
-def product_icon_path():
-    return Path("swo/mpt/cli/core/icons/fake-icon.png")
 
 
 @pytest.fixture
@@ -366,7 +338,7 @@ def mock_sync_product(
     item,
     uom,
     template,
-    product,
+    product_data_from_json,
 ):
     mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
@@ -388,4 +360,9 @@ def mock_sync_product(
     mocker.patch("swo.mpt.cli.core.products.flows.mpt_create_item", return_value=item)
     mocker.patch("swo.mpt.cli.core.products.flows.search_uom_by_name", return_value=uom)
     mocker.patch("swo.mpt.cli.core.products.flows.create_template", return_value=template)
-    mocker.patch("swo.mpt.cli.core.products.flows.create_product", return_value=product)
+    stats = ProductStatsCollector()
+    mocker.patch.object(
+        ProductService,
+        "create",
+        return_value=ServiceResult(success=True, model=product_data_from_json, stats=stats),
+    )

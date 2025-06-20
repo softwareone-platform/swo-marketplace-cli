@@ -8,7 +8,6 @@ from swo.mpt.cli.core.mpt.flows import (
     create_item_group,
     create_parameter,
     create_parameter_group,
-    create_product,
     create_template,
     get_products,
     get_token,
@@ -99,34 +98,6 @@ def test_get_products_exception(requests_mocker, mpt_client):
 
     with pytest.raises(MPTAPIError) as e:
         get_products(mpt_client, 10, 0)
-
-    assert "Internal Server Error" in str(e.value)
-
-
-def test_create_product(requests_mocker, mpt_client, mpt_product, product_icon_path):
-    requests_mocker.post(urljoin(mpt_client.base_url, "/catalog/products"), json=mpt_product)
-    requests_mocker.put(
-        urljoin(mpt_client.base_url, f"/catalog/products/{mpt_product['id']}/settings"),
-        match=[matchers.json_params_matcher({"settings": "1234"})],
-    )
-
-    product = create_product(
-        mpt_client, {"name": "Create product"}, {"settings": "1234"}, product_icon_path
-    )
-
-    assert product == Product.model_validate(mpt_product)
-
-
-def test_create_product_exception(requests_mocker, mpt_client, mpt_product, product_icon_path):
-    requests_mocker.post(urljoin(mpt_client.base_url, "/catalog/products"), status=500)
-
-    with pytest.raises(MPTAPIError) as e:
-        create_product(
-            mpt_client,
-            {"name": "Create product"},
-            {"settings": "1234"},
-            product_icon_path,
-        )
 
     assert "Internal Server Error" in str(e.value)
 

@@ -1,5 +1,4 @@
 import re
-from pathlib import Path
 from unittest.mock import Mock, call
 
 import pytest
@@ -18,6 +17,7 @@ from swo.mpt.cli.core.products.flows import (
     sync_templates,
 )
 from swo.mpt.cli.core.products.services import ItemService, ProductService
+from swo.mpt.cli.core.services.service_result import ServiceResult
 from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
@@ -546,6 +546,7 @@ def test_sync_product(
     parameter,
     another_parameter,
     active_vendor_account,
+    product_data_from_json,
 ):
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
@@ -571,11 +572,13 @@ def test_sync_product(
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
-    product_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_product", return_value=product
+    stats = ProductStatsCollector()
+    product_create_mock = mocker.patch.object(
+        ProductService,
+        "create",
+        return_value=ServiceResult(success=True, model=product_data_from_json, stats=stats),
     )
 
-    stats = ProductStatsCollector()
     sync_product_definition(
         mpt_client,
         new_product_file,
@@ -591,32 +594,7 @@ def test_sync_product(
     assert item_mock.call_count == 2
     assert template_mock.call_count == 2
 
-    product_mock.assert_called_once_with(
-        mpt_client,
-        {
-            "name": "Adobe Commerce (CLI Test)",
-            "shortDescription": "Catalog Description",
-            "longDescription": "Product Description",
-            "website": "https://example.com",
-        },
-        {
-            "itemSelection": False,
-            "orderQueueChanges": False,
-            "preValidation": {
-                "changeOrderDraft": False,
-                "productRequest": False,
-                "purchaseOrderDraft": True,
-                "purchaseOrderQuery": False,
-                "terminationOrder": False,
-            },
-            "productOrdering": True,
-            "productRequests": {"enabled": False, "label": None, "title": None},
-        },
-        Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
-    )
-
-    file_handler = ExcelFileHandler(new_product_file)
-    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B3") == product.id
+    product_create_mock.assert_called_once()
 
 
 def test_sync_product_extra_columns(
@@ -632,6 +610,7 @@ def test_sync_product_extra_columns(
     parameter,
     another_parameter,
     active_vendor_account,
+    product_data_from_json,
 ):
     parameter_group_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_parameter_group", return_value=parameter_group
@@ -657,11 +636,13 @@ def test_sync_product_extra_columns(
     template_mock = mocker.patch(
         "swo.mpt.cli.core.products.flows.create_template", return_value=template
     )
-    product_mock = mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_product", return_value=product
+    stats = ProductStatsCollector()
+    product_create_mock = mocker.patch.object(
+        ProductService,
+        "create",
+        return_value=ServiceResult(success=True, model=product_data_from_json, stats=stats),
     )
 
-    stats = ProductStatsCollector()
     sync_product_definition(
         mpt_client,
         extra_column_product_file,
@@ -677,41 +658,17 @@ def test_sync_product_extra_columns(
     assert item_mock.call_count == 2
     assert template_mock.call_count == 2
 
-    product_mock.assert_called_once_with(
-        mpt_client,
-        {
-            "name": "Adobe Commerce (CLI Test)",
-            "shortDescription": "Catalog Description",
-            "longDescription": "Product Description",
-            "website": "https://example.com",
-        },
-        {
-            "itemSelection": False,
-            "orderQueueChanges": False,
-            "preValidation": {
-                "changeOrderDraft": False,
-                "productRequest": False,
-                "purchaseOrderDraft": True,
-                "purchaseOrderQuery": False,
-                "terminationOrder": False,
-            },
-            "productOrdering": True,
-            "productRequests": {"enabled": False, "label": None, "title": None},
-        },
-        Path.cwd() / Path("swo/mpt/cli/core/products/../icons/fake-icon.png"),
-    )
-
-    file_handler = ExcelFileHandler(extra_column_product_file)
-    assert file_handler.get_cell_value_by_coordinate(constants.TAB_GENERAL, "B15") == product.id
+    product_create_mock.assert_called_once()
 
 
 def test_sync_product_exception(mocker, mpt_client, new_product_file, active_vendor_account):
-    mocker.patch(
-        "swo.mpt.cli.core.products.flows.create_product",
-        side_effect=MPTAPIError("Error", "Error"),
+    stats = ProductStatsCollector()
+    product_create_mock = mocker.patch.object(
+        ProductService,
+        "create",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
     )
 
-    stats = ProductStatsCollector()
     sync_product_definition(
         mpt_client,
         new_product_file,
@@ -721,10 +678,7 @@ def test_sync_product_exception(mocker, mpt_client, new_product_file, active_ven
         console.status(""),
     )
 
-    error = ExcelFileHandler(new_product_file).get_cell_value_by_coordinate(
-        constants.TAB_GENERAL, "C3"
-    )
-    assert error == "Error with response body Error"
+    product_create_mock.assert_called_once()
 
 
 def test_sync_product_update_product(

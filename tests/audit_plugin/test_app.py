@@ -1,25 +1,10 @@
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 import pytest
 from swo.mpt.cli.plugins.audit_plugin.app import app, compare_audit_trails
 from typer.testing import CliRunner
 
 runner = CliRunner()
-
-
-@pytest.fixture
-def mock_client():
-    return Mock()
-
-
-@pytest.fixture
-def mock_get_active_account():
-    return Mock()
-
-
-@pytest.fixture
-def mock_client_from_account():
-    return Mock()
 
 
 @pytest.fixture
