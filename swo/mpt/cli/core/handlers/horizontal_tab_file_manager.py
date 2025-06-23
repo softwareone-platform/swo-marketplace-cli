@@ -19,6 +19,14 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
     _sheet_name: str
 
     def add(self, items: list[DataModel], precision: int, currency: str) -> None:
+        """
+        Add a row for each item to the tab.
+
+        Args:
+            items: The items to add.
+            precision: The number of decimal places to round to.
+            currency: The currency to round to.
+        """
         for row, item in enumerate(items, self.file_handler.get_sheet_next_row(self._sheet_name)):
             item_xlsx = item.to_xlsx()
             for col, field in enumerate(self._fields, 1):
@@ -41,8 +49,7 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
     def create_tab(self) -> None:
         """
-        Creates the products items tab in the Excel file.
-        If the file does not exist, it is created.
+        Creates the tab in the Excel file. If the file does not exist, it is created.
         """
         if not self.file_handler.exists():
             self.file_handler.create()
@@ -58,10 +65,10 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
     def read_data(self) -> Generator[BaseDataModel, None, None]:
         """
-        Reads all item rows from the product items sheet and yields them as ItemData objects.
+        Reads all item rows from the sheet and yields them as DataModel objects.
 
         Yields:
-            ItemData: An object containing the data for each item row.
+            DataModel: An object containing the data for each item row.
         """
         for item in self._read_data():
             yield self._data_model.from_dict(item)

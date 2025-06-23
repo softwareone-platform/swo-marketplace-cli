@@ -4,7 +4,6 @@ from typing import Any
 from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
-from swo.mpt.cli.core.products.constants import TAB_GENERAL
 from swo.mpt.cli.core.services.base_service import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
@@ -144,14 +143,3 @@ class ProductService(BaseService):
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product, stats=self.stats)
-
-    def _set_error(self, error: str) -> None:
-        self.file_manager.write_error(error)
-        self.stats.add_error(TAB_GENERAL)
-
-    def _set_synced(self, resource_id: str, item_coordinate: str) -> None:
-        self.file_manager.write_id(item_coordinate, resource_id)
-        self.stats.add_synced(TAB_GENERAL)
-
-    def _set_skipped(self):
-        self.stats.add_skipped(TAB_GENERAL)
