@@ -1,3 +1,4 @@
+from functools import partial
 from typing import Annotated
 
 import typer
@@ -9,15 +10,46 @@ from swo.mpt.cli.core.mpt.client import client_from_account
 from swo.mpt.cli.core.mpt.flows import get_products
 from swo.mpt.cli.core.mpt.models import Account as MPTAccount
 from swo.mpt.cli.core.mpt.models import Product as MPTProduct
-from swo.mpt.cli.core.products.api.product_api_service import ProductAPIService
-from swo.mpt.cli.core.products.flows import (
-    ProductAction,
-    get_definition_file,
-    sync_product_definition,
+from swo.mpt.cli.core.products.api import (
+    ItemAPIService,
+    ItemGroupAPIService,
+    ParameterGroupAPIService,
+    ParametersAPIService,
+    TemplateAPIService,
 )
-from swo.mpt.cli.core.products.handlers import ProductExcelFileManager
-from swo.mpt.cli.core.products.models import ProductData
-from swo.mpt.cli.core.products.services import ProductService
+from swo.mpt.cli.core.products.api.product_api_service import ProductAPIService
+from swo.mpt.cli.core.products.handlers import (
+    AgreementParametersExcelFileManager,
+    ItemExcelFileManager,
+    ItemGroupExcelFileManager,
+    ItemParametersExcelFileManager,
+    ProductExcelFileManager,
+    RequestParametersExcelFileManager,
+    SubscriptionParametersExcelFileManager,
+    TemplateExcelFileManager,
+)
+from swo.mpt.cli.core.products.handlers.parameter_group_excel_file_manager import (
+    ParameterGroupExcelFileManager,
+)
+from swo.mpt.cli.core.products.models import (
+    AgreementParametersData,
+    ItemData,
+    ItemGroupData,
+    ItemParametersData,
+    ParameterGroupData,
+    ProductData,
+    RequestParametersData,
+    SubscriptionParametersData,
+    TemplateData,
+)
+from swo.mpt.cli.core.products.services import (
+    ItemGroupService,
+    ItemService,
+    ParameterGroupService,
+    ParametersService,
+    ProductService,
+    TemplateService,
+)
 from swo.mpt.cli.core.services.service_context import ServiceContext
 from swo.mpt.cli.core.stats import ProductStatsCollector
 
@@ -111,7 +143,26 @@ def sync_product(
         raise typer.Exit(code=0)
 
     product = product_service.retrieve().model
-    if product and not force_create:
+    stats = ProductStatsCollector()
+    if product is None or force_create:
+        if product is None:
+            msg = (
+                "Do you want to create new product for account {active_account.id} "
+                "({active_account.name})"
+            )
+        else:
+            msg = (
+                "Do you want to create new product for account {active_account.id} "
+                "({active_account.name}) because the product ID exists in the SWO Platform?"
+            )
+
+        _ = typer.confirm(msg, abort=True)
+
+        with console.status("Create product...") as status:
+            stats, product = create_product(
+                active_account, mpt_client, str(product_path), stats, status
+            )
+    else:
         _ = typer.confirm(
             f"Do you want to update product {product.id} ({product.name}) "
             f"for account {active_account.id} ({active_account.name})? "
@@ -119,36 +170,149 @@ def sync_product(
             abort=True,
         )
         console.print("Only Items updated is supported now.")
-        action = ProductAction.UPDATE
-    elif product and force_create:
-        _ = typer.confirm(
-            f"Product {product.id} ({product.name}) for account "
-            f"{active_account.id} ({active_account.name}) exists. Do you want to create new?",
-            abort=True,
-        )
-        action = ProductAction.CREATE
-    elif not product:
-        _ = typer.confirm(
-            f"Do you want to create new product for account "
-            f"{active_account.id} ({active_account.name})?",
-            abort=True,
-        )
-        action = ProductAction.CREATE
+        with console.status("Update product...") as status:
+            stats, product = update_product(
+                active_account, mpt_client, str(product_path), stats, product, status
+            )
 
-    with console.status("Syncing product definition...") as status:
-        product_definition_path = get_definition_file(product_path)
-        product_stats, product = sync_product_definition(
-            mpt_client,
-            product_definition_path,
-            action,
-            active_account,
-            ProductStatsCollector(),
-            status,
-        )
-
-    console.print(product_stats.to_table())
-    if product_stats.is_error:
+    console.print(stats.to_table())
+    if stats.is_error:
         raise typer.Exit(code=3)
+
+
+def create_product(active_account, mpt_client, product_path, product_stats, status):
+    PartialServiceContext = partial(ServiceContext, account=active_account, stats=product_stats)
+    product_service = ProductService(
+        PartialServiceContext(
+            api=ProductAPIService(mpt_client),
+            data_model=ProductData,
+            file_manager=ProductExcelFileManager(product_path),
+        )
+    )
+    status.update("Create product...")
+    result = product_service.create()
+    if not result.success or result.model is None:
+        return product_stats, None
+
+    product = result.model
+    item_group_service = ItemGroupService(
+        PartialServiceContext(
+            api=ItemGroupAPIService(mpt_client, product.id),
+            data_model=ItemGroupData,
+            file_manager=ItemGroupExcelFileManager(product_path),
+        )
+    )
+    status.update(f"Create items groups for product {product.id}...")
+    item_group_data_collection = item_group_service.create().collection
+
+    parameter_group_service = ParameterGroupService(
+        PartialServiceContext(
+            api=ParameterGroupAPIService(mpt_client, product.id),
+            data_model=ParameterGroupData,
+            file_manager=ParameterGroupExcelFileManager(product_path),
+        )
+    )
+    status.update(f"Create parameters groups for product {product.id}...")
+    parameter_group_collection_data = parameter_group_service.create().collection
+
+    PartialParameterServiceContext = partial(
+        PartialServiceContext, api=ParametersAPIService(mpt_client, product.id)
+    )
+
+    agreement_parameter_service = ParametersService(
+        PartialParameterServiceContext(
+            data_model=AgreementParametersData,
+            file_manager=AgreementParametersExcelFileManager(product_path),
+        )
+    )
+    if parameter_group_collection_data is not None:
+        agreement_parameter_service.set_new_parameter_group(parameter_group_collection_data)
+
+    status.update(f"Create agreement parameters for product {product.id}...")
+    parameters_data_collection = agreement_parameter_service.create().collection
+    item_parameter_service = ParametersService(
+        PartialParameterServiceContext(
+            data_model=ItemParametersData, file_manager=ItemParametersExcelFileManager(product_path)
+        )
+    )
+    if parameter_group_collection_data is not None:
+        item_parameter_service.set_new_parameter_group(parameter_group_collection_data)
+
+    status.update(f"Create item parameters for product {product.id}...")
+    item_parameter_data_collection = item_parameter_service.create().collection
+    if item_parameter_data_collection is not None:
+        parameters_data_collection.add(item_parameter_data_collection.collection)
+
+    request_parameters_service = ParametersService(
+        PartialParameterServiceContext(
+            data_model=RequestParametersData,
+            file_manager=RequestParametersExcelFileManager(product_path),
+        )
+    )
+    if parameter_group_collection_data is not None:
+        request_parameters_service.set_new_parameter_group(parameter_group_collection_data)
+
+    status.update(f"Create request parameters for product {product.id}...")
+    request_parameter_data_collection = request_parameters_service.create().collection
+    if request_parameter_data_collection is not None:
+        parameters_data_collection.add(request_parameter_data_collection.collection)
+
+    subscription_parameter_service = ParametersService(
+        PartialParameterServiceContext(
+            data_model=SubscriptionParametersData,
+            file_manager=SubscriptionParametersExcelFileManager(product_path),
+        )
+    )
+    if parameter_group_collection_data is not None:
+        subscription_parameter_service.set_new_parameter_group(parameter_group_collection_data)
+
+    status.update(f"Create subscription parameters for product {product.id}...")
+    subscription_parameter_data_collection = subscription_parameter_service.create().collection
+    if subscription_parameter_data_collection is not None:
+        parameters_data_collection.add(subscription_parameter_data_collection.collection)
+
+    template_service = TemplateService(
+        PartialServiceContext(
+            api=TemplateAPIService(mpt_client, product.id),
+            data_model=TemplateData,
+            file_manager=TemplateExcelFileManager(product_path),
+        )
+    )
+    if parameters_data_collection is not None:
+        template_service.set_new_parameter_group(parameters_data_collection)
+
+    status.update(f"Create template parameters for product {product.id}...")
+    template_service.create()
+
+    item_service = ItemService(
+        PartialServiceContext(
+            api=ItemAPIService(mpt_client),
+            data_model=ItemData,
+            file_manager=ItemExcelFileManager(product_path),
+        )
+    )
+    if item_group_data_collection is not None:
+        item_service.set_new_item_groups(item_group_data_collection)
+
+    status.update(f"Create items for product {product.id}...")
+    item_service.create(product_id=product.id)
+
+    return product_stats, product
+
+
+def update_product(active_account, mpt_client, product_path, product_stats, product, status):
+    PartialServiceContext = partial(ServiceContext, account=active_account, stats=product_stats)
+    item_service = ItemService(
+        PartialServiceContext(
+            api=ItemAPIService(mpt_client),
+            data_model=ItemData,
+            file_manager=ItemExcelFileManager(product_path),
+        )
+    )
+    status.update(f"Update item for {product.id}...")
+    item_service.update(product.id)
+
+    return product_stats, product
 
 
 # TODO: move to to_table()

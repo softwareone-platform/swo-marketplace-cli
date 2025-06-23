@@ -17,7 +17,7 @@ class PriceListService(BaseService):
         # TODO: this logic should be moved to the price list data model creation
         price_list.type = "operations" if self.account.is_operations() else "vendor"
         try:
-            new_price_list_data = self.api.post(price_list.to_json())
+            new_price_list_data = self.api.post(json=price_list.to_json())
         except Exception as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)

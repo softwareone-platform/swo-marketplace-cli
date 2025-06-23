@@ -31,14 +31,142 @@ from swo.mpt.cli.core.products.constants import (
     ITEMS_UNIT_ID,
     ITEMS_UNIT_NAME,
     ITEMS_VENDOR_ITEM_ID,
+    PARAMETERS_ACTION,
+    PARAMETERS_GROUPS_CREATED,
+    PARAMETERS_GROUPS_DEFAULT,
+    PARAMETERS_GROUPS_DESCRIPTION,
+    PARAMETERS_GROUPS_DISPLAY_ORDER,
+    PARAMETERS_GROUPS_ID,
+    PARAMETERS_GROUPS_LABEL,
+    PARAMETERS_GROUPS_MODIFIED,
+    PARAMETERS_GROUPS_NAME,
 )
-from swo.mpt.cli.core.products.models import ItemData, ProductData, SettingsData
+from swo.mpt.cli.core.products.models import (
+    AgreementParametersData,
+    ItemData,
+    ItemGroupData,
+    ParameterGroupData,
+    ProductData,
+    SettingsData,
+    TemplateData,
+)
 from swo.mpt.cli.core.products.models.items import ItemAction
+
+
+@pytest.fixture
+def parameters_data_from_dict():
+    return AgreementParametersData(
+        id="PAR-9939-6700-0001",
+        coordinate="K234",
+        name="Agreement type",
+        external_id="agreementType",
+        phase="Order",
+        type="Choice",
+        description="When you are creating a new agreement with SoftwareOne, you have the option "
+        "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
+        "VIP account to Adobe VIP Marketplace.",
+        display_order=101,
+        group_id="PGR-9939-6700-0001",
+        options={
+            "optionsList": [
+                {
+                    "label": "Create account",
+                    "value": "New",
+                    "description": """
+                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
+       products before, or if you wish to set up a new account in addition to an account you may
+       already have. You will need to provide details such as your company address and contacts,
+       and you will be required to accept both the Adobe Terms and Conditions as well as
+       SoftwareOne\u0027s terms and conditions.""",
+                },
+                {
+                    "label": "Migrate account",
+                    "value": "Migrate",
+                    "description": """Migrate from Adobe VIP if you are currently purchasing
+                    products under the Adobe VIP licensing program. This comes with several
+                    advantages including the ability to self-service manage your subscriptions
+                    within the SoftwareOne Marketplace. You will need to provide details such as
+                    your company address and contacts, and you will be required to accept  both the
+                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
+                    conditions.\n\n Note: If you are purchasing Adobe products under a different
+                    licensing program such as CLP or TLP, you cannot use this option.""",
+                },
+            ],
+            "defaultValue": None,
+            "hintText": "Please select one option to continue",
+            "label": "Agreement type",
+        },
+        constraints={"hidden": False, "readonly": False, "optional": True, "required": False},
+        group_id_coordinate="I22",
+    )
+
+
+@pytest.fixture
+def mpt_parameters_data():
+    return {
+        "id": "PAR-0232-2541-0001",
+        "name": "Agreement type",
+        "description": "When you are creating a new agreement with SoftwareOne, you have the option"
+        " to create a new Adobe VIP Marketplace account or migrate your existing "
+        "Adobe VIP account to Adobe VIP Marketplace.",
+        "group": {"id": "PGR-0232-2541-0002", "name": "Create agreement"},
+        "scope": "Agreement",
+        "phase": "Order",
+        "context": "None",
+        "externalId": "agreementType",
+        "displayOrder": 101,
+        "constraints": {"hidden": False, "readonly": False, "required": True},
+        "product": {
+            "id": "PRD-0232-2541",
+            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
+            "externalIds": {"operations": ""},
+            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
+            "status": "Unpublished",
+        },
+        "options": {
+            "optionsList": [
+                {
+                    "label": "Create account",
+                    "value": "New",
+                    "description": "Create a new Adobe VIP Marketplace account if you have never "
+                    "purchased Adobe products before, or if you wish to set up an "
+                    "new account in addition to an account you may already have. "
+                    "You will need to provide details such as your company address "
+                    "and contacts, and you will be required to accept both the Adobe"
+                    " Terms and Conditions as well as SoftwareOne's terms and "
+                    "conditions.",
+                },
+                {
+                    "label": "Migrate account",
+                    "value": "Migrate",
+                    "description": "Migrate from Adobe VIP if you are currently purchasing products"
+                    " under the Adobe VIP licensing program. This comes with several"
+                    " advantages including the ability to self-service manage your"
+                    " subscriptions within the SoftwareOne Marketplace. You will"
+                    " need to provide details such as your company address and"
+                    " contacts, and you will be required to accept both the Adobe"
+                    " Terms and Conditions as well as SoftwareOne's terms and"
+                    " conditions.\n\nNote: If you are purchasing Adobe products"
+                    " under a different licensing program such as CLP or TLP, you"
+                    " cannot use this option.",
+                },
+            ],
+            "defaultValue": "New",
+            "hintText": "Some hint text",
+        },
+        "type": "Choice",
+        "status": "Active",
+    }
 
 
 @pytest.fixture
 def product_file_root():
     return Path("tests/product_files")
+
+
+@pytest.fixture
+def product_empty_file(product_file_root):
+    return product_file_root / "PRD-0000-0000-empty.xlsx"
 
 
 @pytest.fixture
@@ -49,7 +177,7 @@ def product_file_path(product_file_root):
 @pytest.fixture
 def product_new_file(tmp_path, product_file_path):
     shutil.copyfile(product_file_path, tmp_path / "PRD-1234-1234-1234-copied.xlsx")
-    return tmp_path / "PRD-1234-1234-1234-copied.xlsx"
+    return str(tmp_path / "PRD-1234-1234-1234-copied.xlsx")
 
 
 @pytest.fixture
@@ -202,6 +330,7 @@ def item_data_from_dict():
         product_id="PRD-0232-2541",
         quantity_not_applicable=True,
         unit_id="UNT-1916",
+        unit_coordinate="J38272",
         vendor_id="NAV12345",
         status="Published",
         action=ItemAction.UPDATE,
@@ -245,4 +374,170 @@ def mpt_item_data():
                 "by": {"id": "USR-0000-0055", "name": "User55"},
             },
         },
+    }
+
+
+@pytest.fixture
+def item_group_data_from_dict():
+    return ItemGroupData(
+        id="IGR-0400-9557-0002",
+        coordinate="J2",
+        name="Items",
+        label="Select items",
+        description="""About this step:
+1. If you are creating a Change order for an existing agreement, you may add items or increase
+the quantities of existing subscriptions.
+2. If you are creating a Purchase order for a new cloud account, you may add new items and set the
+quantities of those items.
+3. If you are creating a Purchase order to migrate from Adobe VIP, the items will be added for you.
+You may not add items or adjust the quantity of items. You will not be billed for this order until
+your anniversary date since these items have already been paid for under the Adobe VIP program for
+the current term.""",
+        display_order=10,
+        default=True,
+        multiple=True,
+        required=True,
+    )
+
+
+@pytest.fixture
+def mpt_item_group_data():
+    return {
+        "id": "IGR-0232-2541-0001",
+        "name": "Items",
+        "label": "Items",
+        "description": "Default item group",
+        "displayOrder": 100,
+        "default": True,
+        "multiple": True,
+        "required": True,
+        "itemCount": 761,
+        "product": {
+            "id": "PRD-0232-2541",
+            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
+            "externalIds": {"operations": ""},
+            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
+            "status": "Unpublished",
+        },
+    }
+
+
+@pytest.fixture
+def parameter_group_file_data():
+    return {
+        PARAMETERS_GROUPS_ID: {"value": "IGR-3114-5854-0002", "coordinate": "A325"},
+        PARAMETERS_GROUPS_NAME: {"value": "Details", "coordinate": "B325"},
+        PARAMETERS_ACTION: {"value": "-", "coordinate": "C325"},
+        PARAMETERS_GROUPS_LABEL: {"value": "Agreement details", "coordinate": "D325"},
+        PARAMETERS_GROUPS_DISPLAY_ORDER: {"value": "232", "coordinate": "E325"},
+        PARAMETERS_GROUPS_DESCRIPTION: {"value": "Fake Description", "coordinate": "F325"},
+        PARAMETERS_GROUPS_DEFAULT: {"value": "False", "coordinate": "G325"},
+        PARAMETERS_GROUPS_CREATED: {"value": datetime(2024, 5, 23, 0, 0), "coordinate": "H325"},
+        PARAMETERS_GROUPS_MODIFIED: {"value": datetime(2024, 8, 14, 0, 0), "coordinate": "I325"},
+    }
+
+
+@pytest.fixture
+def parameter_group_data_from_dict():
+    return ParameterGroupData(
+        id="PGR-9939-6700-0001",
+        coordinate="A2",
+        name="Agreement",
+        label="Create agreement",
+        description="When you are creating a new agreement with SoftwareOne, you have the option "
+        "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
+        "VIP account to Adobe VIP Marketplace.",
+        display_order=10,
+        default=True,
+        created_date=datetime(2024, 5, 6, 0, 0),
+        updated_date=datetime(2024, 5, 18, 0, 0),
+    )
+
+
+@pytest.fixture
+def mpt_parameter_group_data():
+    return {
+        "id": "PGR-0232-2541-0002",
+        "name": "Create agreement",
+        "label": "Create agreement",
+        "description": "When you are creating a new agreement with SoftwareOne, you have the option"
+        " to establish a new Microsoft account or connect it to an existing account "
+        "you already hold with Adobe.",
+        "displayOrder": 101,
+        "default": True,
+        "parameterCount": 3,
+        "product": {
+            "id": "PRD-0232-2541",
+            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
+            "externalIds": {"operations": ""},
+            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
+            "status": "Unpublished",
+        },
+        "audit": {
+            "created": {
+                "at": "2024-03-19T11:25:18.976Z",
+                "by": {
+                    "id": "USR-0000-0022",
+                    "name": "User22",
+                    "icon": "/v1/accounts/users/USR-0000-0022/icon",
+                },
+            },
+            "updated": {
+                "at": "2025-06-10T16:16:51.892Z",
+                "by": {"id": "USR-0000-0044", "name": "User44"},
+            },
+        },
+    }
+
+
+@pytest.fixture
+def template_data_from_dict():
+    return TemplateData(
+        id="TPL-0400-9557-0005",
+        coordinate="A2",
+        name="Change",
+        type="OrderCompleted",
+        content=r"""## Your order is complete
+
+Your order has completed and your subscriptions are ready for use.
+
+You can continue to use the Adobe Admin Console to assign licenses to users in your organization.
+<br />Your existing username and password for the Adobe Admin Console remain unchanged.
+
+[Adobe Admin Console](https://adminconsole.adobe.com/)
+
+You can view and manage your agreements and subscriptions within the SoftwareOne Marketplace.
+
+***
+
+## Completed steps
+
+We have completed the following steps:
+
+1\. We changed the quantities of any subscriptions you modified in the order.
+
+2\. We created any new subscriptions based on items added to your order.
+
+***
+
+## Need help?
+
+If you have any questions regarding your order, please contact your SoftwareOne account team.
+
+Thanks for choosing SoftwareOne.
+""",
+        content_coordinate="F2",
+        default=False,
+    )
+
+
+@pytest.fixture
+def mpt_template_data():
+    return {
+        "id": "TPL-0232-2541-0005",
+        "name": "Default Processing Template",
+        "content": "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
+        "we are working on your order.",
+        "type": "OrderProcessing",
+        "default": False,
     }

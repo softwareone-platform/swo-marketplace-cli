@@ -28,15 +28,8 @@ def test_create(mocker, service_context, mpt_product_data, product_data_from_dic
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
-    api_post_mock = mocker.patch.object(
-        service_context.api,
-        "post",
-        return_value=mpt_product_data,
-    )
-    api_update_mock = mocker.patch.object(
-        service_context.api,
-        "update",
-    )
+    api_post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
+    api_update_mock = mocker.patch.object(service_context.api, "update")
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = ProductService(service_context)

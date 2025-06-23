@@ -1,7 +1,7 @@
 from enum import StrEnum
 
 
-class DataAction(StrEnum):
+class DataActionEnum(StrEnum):
     CREATE = "create"
     DELETE = "delete"
     UPDATE = "update"

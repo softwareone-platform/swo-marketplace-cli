@@ -1,5 +1,3 @@
-from typing import Annotated
-
 from pydantic import BaseModel, Field
 
 
@@ -48,7 +46,7 @@ class ItemGroup(BaseModel):
 class Parameter(BaseModel):
     id: str
     name: str
-    external_id: Annotated[str, Field(alias="externalId")]
+    external_id: str = Field(alias="externalId")
 
 
 class Item(BaseModel):

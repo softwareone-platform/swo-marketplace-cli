@@ -5,7 +5,7 @@ from typing import Any, Self
 from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
-from swo.mpt.cli.core.products.models.data_actions import DataAction
+from swo.mpt.cli.core.products.models.data_actions import DataActionEnum
 
 
 @dataclass
@@ -17,7 +17,7 @@ class ParameterGroupData(BaseDataModel):
     label: str
     name: str
 
-    action: DataAction = DataAction.SKIP
+    action: DataActionEnum = DataActionEnum.SKIP
     coordinate: str | None = None
     created_date: date | None = None
     updated_date: date | None = None
