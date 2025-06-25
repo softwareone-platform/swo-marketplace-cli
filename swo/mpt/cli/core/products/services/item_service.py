@@ -81,14 +81,3 @@ class ItemService(BaseService):
             self._set_synced(item.id, item.coordinate)
 
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
-
-    def _set_error(self, error: str, resource_id: str) -> None:
-        self.file_manager.write_error(error, resource_id)
-        self.stats.add_error(TAB_ITEMS)
-
-    def _set_synced(self, resource_id: str, item_coordinate: str) -> None:
-        self.file_manager.write_id(item_coordinate, resource_id)
-        self.stats.add_synced(TAB_ITEMS)
-
-    def _set_skipped(self):
-        self.stats.add_skipped(TAB_ITEMS)

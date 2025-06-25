@@ -24,6 +24,4 @@ class PriceListItemExcelFileManager(HorizontalTabFileManager):
     }
 
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
-        return self.file_handler.get_data_from_horizontal_sheet(
-            self._sheet_name, PRICELIST_ITEMS_FIELDS
-        )
+        return self.file_handler.get_data_from_horizontal_sheet(self._sheet_name, self._fields)
