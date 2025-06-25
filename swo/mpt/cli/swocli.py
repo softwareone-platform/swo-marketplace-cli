@@ -1,7 +1,7 @@
 import logging
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from swo.mpt.cli.core.accounts import app as accounts_app
@@ -40,7 +40,7 @@ def version_callback(value: bool):
 @app.callback()
 def main(
     version: Annotated[
-        Optional[bool],
+        bool | None,
         typer.Option("--version", callback=version_callback, is_eager=True),
     ] = None,
     verbose: Annotated[
@@ -52,7 +52,7 @@ def main(
         ),
     ] = False,
     log_file: Annotated[
-        Optional[Path],
+        Path | None,
         typer.Option(
             "--log-file",
             help="File path for debug logs (disables console output)",

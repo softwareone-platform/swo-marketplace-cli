@@ -1,4 +1,4 @@
-from typing import Annotated, TypeAlias, TypeVar
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -9,8 +9,7 @@ class Meta(BaseModel):
     total: int
 
 
-T = TypeVar("T", bound=BaseModel)
-ListResponse: TypeAlias = tuple[Meta, list[T]]
+type ListResponse[BaseModel] = tuple[Meta, list[BaseModel]]
 
 
 class Account(BaseModel):

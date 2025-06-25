@@ -1,6 +1,6 @@
 import os
 from pathlib import Path
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from swo.mpt.cli.core.accounts.app import get_active_account
@@ -107,7 +107,7 @@ def export(
         typer.Argument(help="List of price lists IDs to export"),
     ],
     out_path: Annotated[
-        Optional[str],
+        str | None,
         typer.Option(
             "--out",
             "-o",

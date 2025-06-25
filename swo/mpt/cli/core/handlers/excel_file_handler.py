@@ -2,7 +2,7 @@ import re
 from collections.abc import Generator
 from pathlib import Path
 from re import Pattern
-from typing import Any, TypeAlias
+from typing import Any
 
 import openpyxl
 from openpyxl.reader.excel import load_workbook
@@ -18,9 +18,9 @@ from swo.mpt.cli.core.handlers.errors import (
     RequiredSheetsError,
 )
 
-SheetData: TypeAlias = dict[str, Any]
-SheetDataGenerator: TypeAlias = Generator[SheetData, None, None]
-StyleData: TypeAlias = dict[str, dict[str, NamedStyle]]
+type SheetData = dict[str, Any]
+type SheetDataGenerator = Generator[SheetData, None, None]
+type StyleData = dict[str, dict[str, NamedStyle]]
 
 
 class ExcelFileHandler(FileHandler):
