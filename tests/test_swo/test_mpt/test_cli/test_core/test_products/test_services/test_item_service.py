@@ -1,5 +1,8 @@
+from unittest.mock import Mock, call
+
 import pytest
 from swo.mpt.cli.core.errors import MPTAPIError
+from swo.mpt.cli.core.models import DataCollectionModel
 from swo.mpt.cli.core.products.api import ItemAPIService
 from swo.mpt.cli.core.products.constants import TAB_ITEMS
 from swo.mpt.cli.core.products.handlers import ItemExcelFileManager
@@ -12,14 +15,68 @@ from swo.mpt.cli.core.stats import ProductStatsCollector
 
 @pytest.fixture
 def service_context(mpt_client, product_file_path, active_vendor_account, item_data_from_dict):
-    stats = ProductStatsCollector()
     return ServiceContext(
         account=active_vendor_account,
         api=ItemAPIService(mpt_client),
         data_model=ItemData,
         file_manager=ItemExcelFileManager(product_file_path),
-        stats=stats,
+        stats=ProductStatsCollector(),
     )
+
+
+def test_create_item(mocker, service_context, item_data_from_dict, mpt_item_data):
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    set_unit_of_measure_mock = mocker.patch(
+        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Mock(id="fake_unit_id"),
+    )
+    post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
+    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    stats_spy = mocker.spy(service_context.stats, "add_synced")
+    service = ItemService(service_context)
+
+    result = service.create(product_id="fake_product_id")
+
+    assert result.success is True
+    assert result.model is None
+    assert service_context.stats.tabs["Items"]["synced"] == 1
+    set_unit_of_measure_mock.assert_called_once()
+    post_mock.assert_called_once()
+    write_id_mock.assert_has_calls(
+        [
+            call(item_data_from_dict.coordinate, mpt_item_data["id"]),
+            call(item_data_from_dict.unit_coordinate, item_data_from_dict.unit_id),
+        ]
+    )
+    stats_spy.assert_called_once()
+
+
+def test_create_item_api_error(mocker, service_context, item_data_from_dict):
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    post_mock = mocker.patch.object(
+        service_context.api, "post", side_effect=MPTAPIError("API Error", "Error creating item")
+    )
+    search_uom_by_name_mock = mocker.patch(
+        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Mock(id="fake_unit_id"),
+    )
+    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    stats_spy = mocker.spy(service_context.stats, "add_error")
+    service = ItemService(service_context)
+
+    result = service.create(product_id="fake_product_id")
+
+    assert result.success is False
+    assert len(result.errors) == 1
+    assert service_context.stats.tabs["Items"]["error"] == 1
+    search_uom_by_name_mock.assert_called_once()
+    post_mock.assert_called_once()
+    write_error_mock.assert_called_once()
+    stats_spy.assert_called_once_with(TAB_ITEMS)
 
 
 def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_item_data):
@@ -28,7 +85,10 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
     post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
-    set_unit_of_measure_mock = mocker.patch("swo.mpt.cli.core.products.flows.set_unit_of_measure")
+    search_uom_by_name_mock = mocker.patch(
+        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Mock(id="fake_unit_id"),
+    )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
     update_spy = mocker.spy(service_context.api, "update")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
@@ -39,13 +99,41 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     assert result.success is True
     assert result.model is None
     assert service_context.stats.tabs["Items"]["synced"] == 1
-    set_unit_of_measure_mock.assert_called_once()
+    search_uom_by_name_mock.assert_called_once()
     post_mock.assert_called_once()
     file_handler_write_mock.assert_called_once_with(
         item_data_from_dict.coordinate, mpt_item_data["id"]
     )
     update_spy.assert_not_called()
     stats_spy.assert_called_once_with(TAB_ITEMS)
+
+
+def test_update_item_create_error(mocker, service_context, item_data_from_dict):
+    item_data_from_dict.action = ItemAction.CREATE
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    post_mock = mocker.patch.object(
+        service_context.api, "post", side_effect=MPTAPIError("API Error", "Error updating item")
+    )
+    search_uom_by_name_mock = mocker.patch(
+        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Mock(id="fake_unit_id"),
+    )
+    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    update_spy = mocker.spy(service_context.api, "update")
+    add_error_spy = mocker.spy(service_context.stats, "add_error")
+    service = ItemService(service_context)
+
+    result = service.update(item_data_from_dict.id)
+
+    assert result.success is False
+    assert service_context.stats.tabs["Items"]["error"] == 1
+    search_uom_by_name_mock.assert_called_once()
+    post_mock.assert_called_once()
+    write_error_mock.assert_called_once()
+    update_spy.assert_not_called()
+    add_error_spy.assert_called_once_with(TAB_ITEMS)
 
 
 def test_update_item_skip(mocker, service_context, item_data_from_dict, mpt_item_data):
@@ -158,3 +246,38 @@ def test_update_item_update_error(mocker, service_context, item_data_from_dict, 
     write_error_mock.assert_called()
     stats_add_error_spy.assert_called_once_with(TAB_ITEMS)
     stats_add_synced_spy.assert_not_called()
+
+
+def test_set_new_item_groups(
+    mocker, service_context, item_data_from_dict, item_group_data_from_dict
+):
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    param_group = DataCollectionModel(collection={"old_group_id": item_group_data_from_dict})
+    item_data_from_dict.group_id = "old_group_id"
+    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    service = ItemService(service_context)
+
+    service.set_new_item_groups(param_group)
+
+    read_data_mock.assert_called_once()
+    write_id_mock.assert_called_once_with(
+        item_data_from_dict.group_coordinate, item_group_data_from_dict.id
+    )
+
+
+def test_set_new_item_groups_error(
+    mocker, service_context, item_data_from_dict, item_group_data_from_dict
+):
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    param_group = DataCollectionModel(collection={"not_found_it": item_group_data_from_dict})
+    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    service = ItemService(service_context)
+
+    service.set_new_item_groups(param_group)
+
+    read_data_mock.assert_called_once()
+    write_id_mock.assert_not_called()

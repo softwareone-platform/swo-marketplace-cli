@@ -1,3 +1,4 @@
+from abc import ABC
 from typing import Any, Generic, TypeVar
 
 from pydantic import BaseModel
@@ -8,7 +9,7 @@ from swo.mpt.cli.core.mpt.models import Meta
 APIModel = TypeVar("APIModel", bound=BaseModel)
 
 
-class APIService(Generic[APIModel]):
+class APIService(ABC, Generic[APIModel]):
     _base_url: str
     _api_model: APIModel
 
@@ -59,11 +60,16 @@ class APIService(Generic[APIModel]):
         return {"meta": meta.model_dump(), "data": json_body["data"]}
 
     @wrap_http_error
-    def post(self, data: dict[str, Any], headers: dict[str, Any] | None = None) -> dict[str, Any]:
+    def post(
+        self,
+        data: dict[str, Any] | None = None,
+        json: dict[str, Any] | None = None,
+        headers: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         headers = headers or {}
-        response = self.client.post(self.url, json=data, headers=headers)
+        response = self.client.post(self.url, data=data, json=json, headers=headers)
         response.raise_for_status()
-        return self.api_model.model_validate(response.json()).model_dump()
+        return self.api_model.model_validate(response.json(), by_alias=True).model_dump()
 
     @wrap_http_error
     def post_action(self, resource_id: str, action: str) -> None:
@@ -74,3 +80,15 @@ class APIService(Generic[APIModel]):
     def update(self, resource_id: str, data: dict[str, Any]) -> None:
         response = self.client.put(f"{self.url}{resource_id}", json=data)
         response.raise_for_status()
+
+
+class RelatedAPIService(APIService, ABC):
+    _resource_id: str
+
+    def __init__(self, client, resource_id: str):
+        super().__init__(client)
+        self._resource_id = resource_id
+
+    @property
+    def url(self) -> str:
+        return self._base_url.format(resource_id=self._resource_id)

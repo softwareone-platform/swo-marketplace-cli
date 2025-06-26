@@ -1,3 +1,3 @@
-from .data_model import BaseDataModel
+from .data_model import BaseDataModel, DataCollectionModel
 
-__all__ = ["BaseDataModel"]
+__all__ = ["BaseDataModel", "DataCollectionModel"]

@@ -1,6 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Self
+from typing import Any, Generic, Self, TypeVar
+
+DataModel = TypeVar("DataModel", bound="BaseDataModel")
+type CollectionModel[DataModel] = dict[str, DataModel]
 
 
 @dataclass
@@ -24,3 +27,14 @@ class BaseDataModel(ABC):
     # @abstractmethod
     def to_xlsx(self) -> dict[str, Any]:  # pragma: no cover
         raise NotImplementedError
+
+
+@dataclass
+class DataCollectionModel(Generic[DataModel]):
+    collection: CollectionModel
+
+    def add(self, collection: CollectionModel) -> None:
+        self.collection.update(collection)
+
+    def retrieve_by_id(self, item_id: str) -> DataModel:
+        return self.collection[item_id]

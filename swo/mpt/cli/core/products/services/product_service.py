@@ -20,12 +20,12 @@ class ProductService(BaseService):
         data = MultipartEncoder(
             fields={
                 "product": json.dumps(product.to_json()),
-                "icon": product.icon,
+                "icon": ("icon.png", product.icon, "image/png"),
             }
         )
         headers = {"Content-Type": data.content_type}
         try:
-            new_product_data = self.api.post(data, headers=headers)
+            new_product_data = self.api.post(data=data, headers=headers)
         except Exception as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
