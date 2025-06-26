@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 import typer
 from rich import box
@@ -35,7 +35,7 @@ def list_products(
         typer.Option("--page", "-p", help="Products page size"),
     ] = 10,
     rql_query: Annotated[
-        Optional[str],
+        str | None,
         typer.Option("--query", "-q", help="RQL Query to filter products list"),
     ] = None,
 ):

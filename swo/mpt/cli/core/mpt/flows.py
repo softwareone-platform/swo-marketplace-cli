@@ -1,6 +1,6 @@
 import json
 from functools import cache
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from urllib.parse import quote_plus
 
 from swo.mpt.cli.core.errors import MPTAPIError, wrap_http_error
@@ -44,7 +44,7 @@ def get_token(mpt_client: MPTClient, secret: str) -> Token:
 
 @wrap_http_error
 def get_products(
-    mpt_client: MPTClient, limit: int, offset: int, query: Optional[str] = None
+    mpt_client: MPTClient, limit: int, offset: int, query: str | None = None
 ) -> ListResponse[Product]:
     """
     Retrieves Products from the MPT Platform

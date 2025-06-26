@@ -1,9 +1,9 @@
 import re
-from collections.abc import Generator, Iterable
+from collections.abc import Callable, Generator, Iterable
 from glob import glob
 from pathlib import Path
 from re import Pattern
-from typing import Any, Callable, TypeVar
+from typing import Any, TypeVar
 
 from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler, SheetData
 from swo.mpt.cli.core.stats import StatsCollector

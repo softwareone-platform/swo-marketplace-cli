@@ -1,20 +1,11 @@
-[tool.poetry]
+[project]
 name = "mpt-cli"
 version = "2.0.0"
 description = "Command line utility for SoftwareOne Marketplace Platform"
-authors = ["SoftwareOne AG"]
-license = "Apache-2.0 license"
-packages = [
-    { include = "swo" }
-]
+authors = [{ name = "SoftwareOne AG" }]
+requires-python = ">=3.12,<4"
 readme = "README.md"
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Environment :: Console",
-    "Operating System :: POSIX :: Linux",
-    "Programming Language :: Python :: 3.12",
-    "Topic :: Utilities"
-]
+license = {text = "Apache-2.0 license"}
 keywords = [
     "fulfillment",
     "command",
@@ -25,42 +16,59 @@ keywords = [
     "softwareone",
     "marketplace",
 ]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: Console",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "openpyxl==3.1.*",
+    "pydantic==2.11.*",
+    "pyfiglet==1.0.*",
+    "python-dateutil==2.9.*",
+    "requests==2.32.*",
+    "requests-toolbelt==1.0.*",
+    "typer==0.15.*",
+]
 
-[tool.poetry.dependencies]
-python = ">=3.12,<4"
-openpyxl = "3.1.*"
-pydantic = "2.11.*"
-pyfiglet = "1.0.*"
-python-dateutil = "2.9.*"
-requests = "2.32.*"
-requests-toolbelt = "1.0.*"
-typer = "0.15.*"
+[project.scripts]
+mpt-cli = "swo.mpt.cli.swocli:app"
 
-[tool.poetry.group.dev.dependencies]
-freezegun = "1.5.*"
-ipdb = "0.13.*"
-ipython = "9.*"
-mypy = "1.15.*"
-poetry-plugin-sort = "0.3.*"
-pre-commit = "4.2.*"
-pytest = "8.3.*"
-pytest-cov = "6.1.*"
-pytest-deadfixtures = "2.2.*"
-pytest-mock = "3.14.*"
-pytest-randomly = "3.16.*"
-pytest-xdist = "3.6.*"
-responses = "0.25.*"
-ruff = "0.11.*"
-types-python-dateutil = "2.9.*"
-types-requests = "2.31.*"
-typing-extensions = "4.13.*"
+[project.entry-points."swo.mpt.cli.plugins"]
+audit = "swo.mpt.cli.plugins.audit_plugin.app:app"
 
-[tool.poetry.scripts]
-mpt-cli = 'swo.mpt.cli.swocli:app'
+[dependency-groups]
+dev = [
+    "freezegun==1.5.*",
+    "ipdb==0.13.*",
+    "ipython==9.*",
+    "mypy==1.15.*",
+    "poetry-plugin-sort==0.3.*",
+    "pre-commit==4.2.*",
+    "pytest==8.3.*",
+    "pytest-cov==6.1.*",
+    "pytest-deadfixtures==2.2.*",
+    "pytest-mock==3.14.*",
+    "pytest-randomly==3.16.*",
+    "pytest-xdist==3.6.*",
+    "responses==0.25.*",
+    "ruff==0.11.*",
+    "types-python-dateutil==2.9.*",
+    "types-requests==2.31.*",
+    "typing-extensions==4.13.*",
+]
+
+[tool.hatch.build.targets.sdist]
+include = ["swo"]
+
+[tool.hatch.build.targets.wheel]
+include = ["swo"]
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
 
 [tool.pytest.ini_options]
 testpaths = "tests"
@@ -135,6 +143,3 @@ ignore_missing_imports = true
 [[tool.mypy.overrides]]
 module = "openpyxl.*"
 ignore_missing_imports = true
-
-[tool.poetry.plugins."swo.mpt.cli.plugins"]
-"audit" = "swo.mpt.cli.plugins.audit_plugin.app:app"

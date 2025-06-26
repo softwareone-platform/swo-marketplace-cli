@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import typer
 from rich.panel import Panel
@@ -71,7 +71,7 @@ def diff_by_object_id(
     object_id: str = typer.Argument(
         ..., help="Object ID to fetch and compare all audit records for"
     ),
-    positions: Optional[str] = typer.Option(
+    positions: str | None = typer.Option(
         None, "--positions", help="Positions to compare (e.g. '1,3')"
     ),
     limit: int = typer.Option(10, "--limit", help="Maximum number of audit records to retrieve"),

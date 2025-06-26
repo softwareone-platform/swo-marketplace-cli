@@ -2,7 +2,7 @@ import enum
 import re
 from functools import partial
 from pathlib import Path
-from typing import Optional, TypeAlias, TypeVar
+from typing import TypeVar
 
 from rich.status import Status
 from swo.mpt.cli.core.accounts.models import Account
@@ -49,7 +49,7 @@ from swo.mpt.cli.core.utils import (
 )
 
 T = TypeVar("T")
-SyncResult: TypeAlias = dict[str, T]
+type SyncResult[T] = dict[str, T]
 
 
 class ProductAction(enum.Enum):
@@ -72,7 +72,7 @@ def sync_product_definition(
     active_account: Account,
     stats: ProductStatsCollector,
     status: Status,
-) -> tuple[ProductStatsCollector, Optional[ProductData]]:
+) -> tuple[ProductStatsCollector, ProductData | None]:
     """
     Sync product definition to the marketplace platform
     """
@@ -120,7 +120,7 @@ def create_product_definition(
     stats: ProductStatsCollector,
     status: Status,
     product: ProductData,
-) -> tuple[ProductStatsCollector, Optional[ProductData]]:
+) -> tuple[ProductStatsCollector, ProductData | None]:
     parameter_groups_data = file_handler.get_data_from_horizontal_sheet(
         constants.TAB_PARAMETERS_GROUPS, constants.PARAMETERS_GROUPS_FIELDS
     )
