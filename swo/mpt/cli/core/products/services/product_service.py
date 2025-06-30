@@ -3,6 +3,7 @@ import json
 from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
+from swo.mpt.cli.core.products.handlers import SettingsExcelFileManager
 from swo.mpt.cli.core.services.base_service import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
@@ -47,6 +48,16 @@ class ProductService(BaseService):
 
         self.file_manager.create_tab()
         self.file_manager.add(product)
+
+        # NOTE: Product Settings don't follow the same structure as other related components.
+        # They cannot be retrieved as separate resources, so special handling is required
+        # to maintain simple code organization and logic.
+        settings_excel_file_manager = SettingsExcelFileManager(
+            self.file_manager.file_handler.file_path
+        )
+        settings_excel_file_manager.create_tab()
+
+        settings_excel_file_manager.add(product.settings.items)
 
         return ServiceResult(success=True, model=product, stats=self.stats)
 
@@ -113,12 +124,9 @@ class ProductService(BaseService):
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
-    def update(self, resource_id: str) -> ServiceResult:
+    def update(self) -> ServiceResult:
         """
         Updates an existing product by sending the modified general data to the API.
-
-        Args:
-            resource_id (str): The ID of the product to update.
 
         Returns:
             ServiceResult: The result of the update operation.

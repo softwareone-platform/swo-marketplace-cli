@@ -50,7 +50,7 @@ class ItemService(RelatedBaseService):
         item_model = self.data_model.from_json(response.json())
         return ServiceResult(success=True, model=item_model, stats=self.stats)
 
-    def update(self, resource_id: str) -> ServiceResult:
+    def update(self) -> ServiceResult:
         errors = []
         for item in self.file_manager.read_data():
             if not item.to_update():

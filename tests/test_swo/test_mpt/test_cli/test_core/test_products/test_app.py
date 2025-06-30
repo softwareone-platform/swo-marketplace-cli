@@ -1,3 +1,4 @@
+from pathlib import Path
 from unittest.mock import Mock
 from urllib.parse import urljoin
 
@@ -401,6 +402,280 @@ def test_create_product_collections_is_empty(
     set_new_item_groups_mock.assert_not_called()
 
 
+def test_export_product(
+    mocker,
+    operations_account,
+    mpt_client,
+    tmp_path,
+    product_data_from_dict,
+    item_data_from_dict,
+    parameter_group_data_from_dict,
+    parameters_data_from_dict,
+    template_data_from_dict,
+):
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account", return_value=operations_account
+    )
+    mocker.patch("swo.mpt.cli.core.products.app.client_from_account", return_value=mpt_client)
+    stats = ProductStatsCollector()
+    product_export_mock = mocker.patch.object(
+        ProductService,
+        "export",
+        return_value=ServiceResult(success=True, model=product_data_from_dict, stats=stats),
+    )
+    item_group_export_mock = mocker.patch.object(
+        ItemGroupService,
+        "export",
+        return_value=ServiceResult(
+            success=True,
+            model=None,
+            collection=DataCollectionModel(collection={"fake_id": item_data_from_dict}),
+            stats=stats,
+        ),
+    )
+    item_export_mock = mocker.patch.object(
+        ItemService,
+        "export",
+        return_value=ServiceResult(success=True, model=item_data_from_dict, stats=stats),
+    )
+    parameter_group_export_mock = mocker.patch.object(
+        ParameterGroupService,
+        "export",
+        return_value=ServiceResult(
+            success=True,
+            model=None,
+            collection=DataCollectionModel(collection={"fake_id": parameter_group_data_from_dict}),
+            stats=stats,
+        ),
+    )
+    parameters_export_mock = mocker.patch.object(
+        ParametersService,
+        "export",
+        return_value=ServiceResult(
+            success=True,
+            model=None,
+            collection=DataCollectionModel(collection={"fake_id": parameters_data_from_dict}),
+            stats=stats,
+        ),
+    )
+    template_export_mock = mocker.patch.object(
+        TemplateService,
+        "export",
+        return_value=ServiceResult(success=True, model=template_data_from_dict, stats=stats),
+    )
+    product_id = "fake_product_id"
+    out_path = tmp_path / product_id
+
+    result = runner.invoke(app, ["export", product_id, "--out", str(out_path)], input="y\n")
+
+    assert result.exit_code == 0, result.stdout
+    product_export_mock.assert_called_once()
+    item_group_export_mock.assert_called_once()
+    item_export_mock.assert_called_once()
+    parameter_group_export_mock.assert_called_once()
+    assert parameters_export_mock.call_count == 4
+    template_export_mock.assert_called_once()
+
+
+def test_export_product_account_not_allowed(mocker, expected_account):
+    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+
+    result = runner.invoke(app, ["export", "fake_id"])
+
+    assert result.exit_code == 4, result.stdout
+
+
+def test_export_product_error_exporting_product(
+    mocker,
+    operations_account,
+    mpt_client,
+    tmp_path,
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account", return_value=operations_account
+    )
+    mocker.patch("swo.mpt.cli.core.products.app.client_from_account", return_value=mpt_client)
+    product_export_mock = mocker.patch.object(
+        ProductService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+
+    item_export_spy = mocker.spy(ItemService, "export")
+
+    result = runner.invoke(app, ["export", "fake_id"], input="y\n")
+
+    assert result.exit_code == 3, result.stdout
+
+    product_export_mock.assert_called_once()
+    item_export_spy.assert_not_called()
+
+
+def test_export_item_error_exporting_related_components(
+    mocker,
+    operations_account,
+    mpt_client,
+    tmp_path,
+    product_data_from_dict,
+    item_data_from_dict,
+    parameter_group_data_from_dict,
+    parameters_data_from_dict,
+    template_data_from_dict,
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account", return_value=operations_account
+    )
+    mocker.patch("swo.mpt.cli.core.products.app.client_from_account", return_value=mpt_client)
+    product_export_mock = mocker.patch.object(
+        ProductService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+    item_group_export_mock = mocker.patch.object(
+        ItemGroupService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+    item_export_mock = mocker.patch.object(
+        ItemService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+    parameter_group_export_mock = mocker.patch.object(
+        ParameterGroupService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+    parameters_export_mock = mocker.patch.object(
+        ParametersService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+    template_export_mock = mocker.patch.object(
+        TemplateService,
+        "export",
+        return_value=ServiceResult(success=False, model=None, stats=stats),
+    )
+
+    result = runner.invoke(app, ["export", "fake_id"], input="y\n")
+
+    assert result.exit_code == 3, result.stdout
+
+    product_export_mock.assert_called_once()
+    item_group_export_mock.assert_called_once()
+    item_export_mock.assert_called_once()
+    parameter_group_export_mock.assert_called_once()
+    assert parameters_export_mock.call_count == 4
+    template_export_mock.assert_called_once()
+
+
+def test_export_product_overwrites_existing_files(
+    mocker,
+    operations_account,
+    mpt_client,
+    tmp_path,
+    product_data_from_dict,
+):
+    stats = ProductStatsCollector()
+    mocker.patch(
+        "swo.mpt.cli.core.products.app.get_active_account", return_value=operations_account
+    )
+    mocker.patch("swo.mpt.cli.core.products.app.client_from_account", return_value=mpt_client)
+    exists_mock = mocker.patch.object(Path, "exists", return_value=True)
+    os_remove_mock = mocker.patch("swo.mpt.cli.core.products.app.os.remove")
+
+    mocker.patch.object(
+        ProductService,
+        "export",
+        return_value=ServiceResult(success=True, model=product_data_from_dict, stats=stats),
+    )
+    mocker.patch.object(
+        ItemGroupService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+    mocker.patch.object(
+        ItemService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+    mocker.patch.object(
+        ParameterGroupService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+    mocker.patch.object(
+        ParametersService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+    mocker.patch.object(
+        TemplateService,
+        "export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+
+    product_id = "PRD-1234"
+    tmp_file = tmp_path / f"{product_id}.xlsx"
+    tmp_file.touch()
+
+    result = runner.invoke(
+        app,
+        ["export", product_id, "--out", str(tmp_file)],
+        input="y\ny\n",
+    )
+
+    assert result.exit_code == 0, result.stdout
+    exists_mock.assert_called_once()
+    assert tmp_file.exists()
+    os_remove_mock.assert_called_once()
+
+
+def test_update_no_overwrite_file(
+    mocker,
+    expected_account,
+    mpt_client,
+    product_new_file,
+    product_data_from_dict,
+    item_data_from_dict,
+):
+    def test_export_product_overwrites_existing_files(
+        mocker,
+        operations_account,
+        mpt_client,
+        tmp_path,
+        product_data_from_dict,
+    ):
+        mocker.patch(
+            "swo.mpt.cli.core.products.app.get_active_account", return_value=operations_account
+        )
+        mocker.patch("swo.mpt.cli.core.products.app.client_from_account", return_value=mpt_client)
+        exists_mock = mocker.patch.object(Path, "exists", return_value=True)
+        os_remove_mock = mocker.patch("swo.mpt.cli.core.products.app.os.remove")
+        product_export_spy = mocker.spy(
+            ProductService,
+            "export",
+        )
+
+        product_id = "PRD-1234"
+        tmp_file = tmp_path / f"{product_id}.xlsx"
+        tmp_file.touch()
+
+        result = runner.invoke(
+            app,
+            ["export", product_id, "--out", str(tmp_file)],
+            input="y\nn\n",
+        )
+
+        assert result.exit_code == 0, result.stdout
+        exists_mock.assert_called_once()
+        assert tmp_file.exists()
+        os_remove_mock.assert_called_once()
+        product_export_spy.assert_not_called()
+
+
 def test_update_product(
     mocker,
     expected_account,
@@ -408,9 +683,6 @@ def test_update_product(
     product_new_file,
     product_data_from_dict,
     item_data_from_dict,
-    parameter_group_data_from_dict,
-    parameters_data_from_dict,
-    template_data_from_dict,
 ):
     stats = ProductStatsCollector()
     update_item_service_mock = mocker.patch.object(

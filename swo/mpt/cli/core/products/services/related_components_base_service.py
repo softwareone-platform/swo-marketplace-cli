@@ -31,10 +31,25 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             stats=self.stats,
         )
 
-    def export(self) -> ServiceResult:  # pragma: no cover
-        return ServiceResult(
-            success=False, errors=["Export method not implemented"], model=None, stats=self.stats
-        )
+    def export(self) -> ServiceResult:
+        self.file_manager.create_tab()
+        params = self.export_params
+        while True:
+            try:
+                response = self.api.list(params=params)
+            except MPTAPIError as e:
+                self._set_error(str(e))
+                return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
+
+            self.file_manager.add([self.data_model.from_json(item) for item in response["data"]])
+
+            meta_data = response["meta"]
+            if meta_data["offset"] + meta_data["limit"] < meta_data["total"]:
+                params["offset"] += params["limit"]
+            else:
+                break
+
+        return ServiceResult(success=True, model=None, stats=self.stats)
 
     def retrieve(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
@@ -49,7 +64,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             stats=self.stats,
         )
 
-    def update(self, product_id: str) -> ServiceResult:  # pragma: no cover
+    def update(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Updated method not implemented"], model=None, stats=self.stats
         )

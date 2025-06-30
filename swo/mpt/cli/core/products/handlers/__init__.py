@@ -8,6 +8,7 @@ from .parameters_excel_file_manager import (
     SubscriptionParametersExcelFileManager,
 )
 from .product_excel_file_manager import ProductExcelFileManager
+from .settings_excel_file_manager import SettingsExcelFileManager
 from .template_excel_file_manager import TemplateExcelFileManager
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "ParameterGroupExcelFileManager",
     "ProductExcelFileManager",
     "RequestParametersExcelFileManager",
+    "SettingsExcelFileManager",
     "SubscriptionParametersExcelFileManager",
     "TemplateExcelFileManager",
 ]

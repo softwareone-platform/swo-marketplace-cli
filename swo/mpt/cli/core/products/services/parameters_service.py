@@ -1,3 +1,5 @@
+from typing import Any
+
 from swo.mpt.cli.core.models import DataCollectionModel
 from swo.mpt.cli.core.products.services.related_components_base_service import (
     RelatedComponentsBaseService,
@@ -13,3 +15,8 @@ class ParametersService(RelatedComponentsBaseService):
                 continue
 
             self.file_manager.write_id(data_model.group_id_coordinate, new_group.id)
+
+    def set_export_params(self) -> dict[str, Any]:
+        params = super().set_export_params()
+        params.update({"scope": self.data_model.scope})
+        return params

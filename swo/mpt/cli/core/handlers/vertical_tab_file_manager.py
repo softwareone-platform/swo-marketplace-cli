@@ -1,11 +1,9 @@
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic
 
 from swo.mpt.cli.core.handlers.constants import ERROR_COLUMN_NAME
 from swo.mpt.cli.core.handlers.excel_styles import general_tab_title_style
 from swo.mpt.cli.core.handlers.file_manager import ExcelFileManager
-from swo.mpt.cli.core.models import BaseDataModel
-
-DataModel = TypeVar("DataModel", bound=BaseDataModel)
+from swo.mpt.cli.core.models.data_model import DataModel
 
 
 class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
@@ -16,7 +14,7 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
     _required_fields_by_tab: dict[str, Any]
     _sheet_name: str
 
-    def add(self, data_model: BaseDataModel) -> None:
+    def add(self, data_model: DataModel) -> None:
         data_xlsx = data_model.to_xlsx()
         data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
         self.file_handler.write([{self._sheet_name: data}])
@@ -52,7 +50,7 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
         for row, field in enumerate(self._fields, 2):
             self.file_handler.write([{self._sheet_name: {f"A{row}": field}}])
 
-    def read_data(self) -> BaseDataModel:
+    def read_data(self) -> DataModel:
         """
         Reads the general information fields from the sheet.
 

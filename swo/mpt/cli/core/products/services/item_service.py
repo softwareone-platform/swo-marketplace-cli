@@ -1,13 +1,18 @@
+from typing import Any
+
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.models import DataCollectionModel
 from swo.mpt.cli.core.mpt.flows import search_uom_by_name
 from swo.mpt.cli.core.products.constants import TAB_ITEMS
 from swo.mpt.cli.core.products.models import ItemData
-from swo.mpt.cli.core.services import BaseService
+from swo.mpt.cli.core.products.services.related_components_base_service import (
+    RelatedComponentsBaseService,
+)
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
-class ItemService(BaseService):
+class ItemService(RelatedComponentsBaseService):
+    # TODO: move to RelatedComponentsBaseService
     def create(self, **kwargs) -> ServiceResult:
         errors = []
         for item in self.file_manager.read_data():
@@ -28,37 +33,16 @@ class ItemService(BaseService):
 
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
 
-    def export(self, resource_id: str) -> ServiceResult:  # pragma: no cover
-        return ServiceResult(
-            success=False, errors=["Export method not implemented"], model=None, stats=self.stats
-        )
-
-    def retrieve(self) -> ServiceResult:  # pragma: no cover
-        return ServiceResult(
-            success=False, errors=["Retrieve not implemented"], model=None, stats=self.stats
-        )
-
-    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:  # pragma: no cover
-        return ServiceResult(
-            success=False,
-            errors=["Retrieve from mpt not implemented"],
-            model=None,
-            stats=self.stats,
-        )
-
-    def update(self, product_id: str) -> ServiceResult:
+    def update(self) -> ServiceResult:
         """
         Updates an existing item
-
-        Args:
-            product_id: The product ID related to the items to update
 
         Returns:
             ServiceResult: The result of the update operation
         """
         errors = []
         for item in self.file_manager.read_data():
-            item.product_id = product_id
+            item.product_id = self.resource_id
             if item.to_skip:
                 self.stats.add_skipped(TAB_ITEMS)
                 continue
@@ -113,3 +97,8 @@ class ItemService(BaseService):
 
     def _get_unit_of_measure_id(self, item: ItemData) -> str:
         return search_uom_by_name(self.api.client, item.unit_name).id
+
+    def set_export_params(self) -> dict[str, Any]:
+        params = super().set_export_params()
+        params.update({"product.id": self.resource_id})
+        return params

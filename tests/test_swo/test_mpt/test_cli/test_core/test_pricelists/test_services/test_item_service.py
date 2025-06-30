@@ -95,7 +95,7 @@ def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = ItemService(service_context)
 
-    result = service.update(item_data_from_dict.id)
+    result = service.update()
 
     assert result.success is True
     assert result.model is None
@@ -118,7 +118,7 @@ def test_update_item_error(mocker, service_context):
     stats_add_synced_spy = mocker.spy(service_context.stats, "add_synced")
     service = ItemService(service_context)
 
-    result = service.update("fake_id")
+    result = service.update()
 
     assert result.success is False
     assert len(result.errors) > 0
@@ -134,7 +134,7 @@ def test_update_item_not_found(mocker, service_context):
     stats_spy = mocker.spy(service_context.stats, "add_error")
     service = ItemService(service_context)
 
-    result = service.update("fake-id")
+    result = service.update()
 
     assert not result.success
     assert len(result.errors) > 0
@@ -153,7 +153,7 @@ def test_update_item_skip(mocker, service_context, mpt_item_data, item_data_from
     stats_spy = mocker.spy(service_context.stats, "add_skipped")
     service = ItemService(service_context)
 
-    result = service.update(item_data_from_json.id)
+    result = service.update()
 
     assert result.success is True
     file_handler_write_mock.assert_not_called()
