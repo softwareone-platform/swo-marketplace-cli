@@ -2,43 +2,84 @@ import os
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
-from typing import Any, Self, TypedDict
+from typing import Any, Self
 
 from dateutil import parser
 from swo.mpt.cli.core.models.data_model import BaseDataModel
 from swo.mpt.cli.core.products import constants
+from swo.mpt.cli.core.products.models import DataActionEnum
 from swo.mpt.cli.core.utils import set_dict_value
 
 
-class SettingItem(TypedDict):
-    name: str
-    value: str
-    coordinate: str | None
-
-
 @dataclass
-class SettingsData(BaseDataModel):
-    items: list[SettingItem] = field(default_factory=list)
-    json_path: str | None = None
+class SettingsItem(BaseDataModel):
+    name: str
+    value: str | bool
+
+    action: DataActionEnum = DataActionEnum.SKIP
+    coordinate: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
-            items=[
-                SettingItem(
-                    name=item[constants.SETTINGS_SETTING]["value"],
-                    value=item[constants.SETTINGS_VALUE]["value"],
-                    coordinate=item[constants.SETTINGS_VALUE]["coordinate"],
-                )
-                for _, item in data.items()
-            ]
+            name=data[constants.SETTINGS_SETTING],
+            value=data["value"],
+            coordinate=data["coordinate"],
         )
+
+    @classmethod
+    def from_json(cls, data: dict[str, Any]) -> Self:
+        return cls(name=data["name"], value=cls._parse_json_value(data["value"]))
+
+    def to_json(self) -> dict[str, Any]:
+        return {}
+
+    def to_xlsx(self) -> dict[str, Any]:
+        return {
+            constants.SETTINGS_SETTING: self.name,
+            constants.SETTINGS_ACTION: self.action,
+            constants.SETTINGS_VALUE: self.value,
+        }
+
+    @staticmethod
+    def _parse_json_value(value: str | bool) -> str | bool:
+        match value:
+            case True:
+                return "Enabled"
+            case False:
+                return "Off"
+
+        return value
+
+
+@dataclass
+class SettingsData(BaseDataModel):
+    items: list[SettingsItem] = field(default_factory=list)
+    json_path: str | None = None
+
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        items = []
+        for key, item in data.items():
+            item.update({constants.SETTINGS_SETTING: key})
+            items.append(SettingsItem.from_dict(item))
+
+        return cls(items=items)
+
+    @classmethod
+    def from_json(cls, data: dict[str, Any]) -> Self:
+        formatted_settings = cls._format_data_from_json(data)
+        items = [
+            SettingsItem.from_json({"name": key, "value": formatted_settings.get(value)})
+            for key, value in constants.SETTINGS_API_MAPPING.items()
+        ]
+        return cls(items=items)
 
     def to_json(self) -> dict[str, Any]:
         settings: dict[str, Any] = {}
-        for setting in self.items:
-            settings_name = setting["name"]
-            settings_value: str | bool = setting["value"]
+        for setting_item in self.items:
+            settings_name = setting_item.name
+            settings_value: str | bool = setting_item.value
             json_path = constants.SETTINGS_API_MAPPING[settings_name]
 
             # Convert value to boolean only for certain paths
@@ -48,6 +89,21 @@ class SettingsData(BaseDataModel):
             settings = set_dict_value(settings, json_path, settings_value)
 
         return settings
+
+    def to_xlsx(self) -> dict[str, Any]:
+        return {}
+
+    @staticmethod
+    def _format_data_from_json(data: dict[str, Any]) -> dict[str, Any]:
+        formatted_data = {}
+        for key, value in data.items():
+            if isinstance(value, dict):
+                for sub_key, sub_value in value.items():
+                    formatted_data[f"{key}.{sub_key}"] = sub_value
+            else:
+                formatted_data[key] = value
+
+        return formatted_data
 
 
 @dataclass
@@ -94,13 +150,15 @@ class ProductData(BaseDataModel):
         return cls(
             id=data["id"],
             name=data["name"],
+            account_id=data["vendor"]["id"],
+            account_name=data["vendor"]["name"],
             short_description=data["shortDescription"],
             long_description=data["longDescription"],
             website=data["website"],
-            export_date=date.today(),
+            status=data["status"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
             updated_date=updated and parser.parse(updated).date() or None,
-            settings=cls._get_settings_from_json(data["settings"]),
+            settings=SettingsData.from_json(data["settings"]),
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -130,17 +188,3 @@ class ProductData(BaseDataModel):
     def _get_default_icon() -> bytes:
         icon = Path(os.path.dirname(__file__)) / "icons/fake-icon.png"
         return open(icon, "rb").read()
-
-    @staticmethod
-    def _get_settings_from_json(settings) -> SettingsData:
-        items = []
-        for key, value in settings.items():
-            if isinstance(value, dict):
-                for sub_key, sub_value in value.items():
-                    items.append(
-                        SettingItem(name=f"{key}.{sub_key}", value=sub_value, coordinate=None)
-                    )
-            else:
-                items.append(SettingItem(name=key, value=value, coordinate=None))
-
-        return SettingsData(items=items)

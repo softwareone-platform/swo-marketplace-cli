@@ -118,8 +118,6 @@ class ItemData(BaseDataModel):
             operations_id=data.get(constants.ITEMS_ERP_ITEM_ID, {}).get("value"),
             parameters=data.get("parameters", []),
             unit_id=data.get(constants.ITEMS_UNIT_ID, {}).get("value"),
-            created_date=data.get(constants.ITEMS_CREATED, {}).get("value"),
-            updated_date=data.get(constants.ITEMS_MODIFIED, {}).get("value"),
         )
 
     @classmethod
@@ -163,17 +161,17 @@ class ItemData(BaseDataModel):
             constants.ITEMS_ID: self.id,
             constants.ITEMS_NAME: self.name,
             constants.ITEMS_ACTION: self.action,
-            constants.ITEMS_VENDOR_ITEM_ID: "",
-            constants.ITEMS_ERP_ITEM_ID: "",
+            constants.ITEMS_VENDOR_ITEM_ID: self.vendor_id,
+            constants.ITEMS_ERP_ITEM_ID: self.operations_id,
             constants.ITEMS_DESCRIPTION: self.description,
             constants.ITEMS_BILLING_FREQUENCY: self.period,
             constants.ITEMS_COMMITMENT_TERM: self.commitment,
             constants.ITEMS_STATUS: self.status,
-            constants.ITEMS_GROUPS_ID: self.group_id,
-            constants.ITEMS_GROUPS_NAME: self.group_name,
+            constants.ITEMS_GROUP_ID: self.group_id,
+            constants.ITEMS_GROUP_NAME: self.group_name,
             constants.ITEMS_UNIT_ID: self.unit_id,
             constants.ITEMS_UNIT_NAME: self.unit_name,
-            constants.ITEMS_QUANTITY_APPLICABLE: self.quantity_not_applicable,
+            constants.ITEMS_QUANTITY_APPLICABLE: str(self.quantity_not_applicable),
             constants.ITEMS_CREATED: self.created_date,
             constants.ITEMS_MODIFIED: self.updated_date,
         }

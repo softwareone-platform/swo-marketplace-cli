@@ -1,10 +1,11 @@
 from datetime import date
 
-from swo.mpt.cli.core.products.models.parameter_group import ParameterGroupData
+from swo.mpt.cli.core.products.models import ParameterGroupData
 
 
 def test_parameter_data_from_dict(parameter_group_file_data):
     result = ParameterGroupData.from_dict(parameter_group_file_data)
+
     assert result.id == "IGR-3114-5854-0002"
     assert result.coordinate == "A325"
     assert result.default is False
@@ -12,12 +13,11 @@ def test_parameter_data_from_dict(parameter_group_file_data):
     assert result.display_order == 232
     assert result.label == "Agreement details"
     assert result.name == "Details"
-    assert result.created_date == date(2024, 5, 23)
-    assert result.updated_date == date(2024, 8, 14)
 
 
 def test_parameter_data_from_json(mpt_parameter_group_data):
     data = ParameterGroupData.from_json(mpt_parameter_group_data)
+
     assert data.id == "PGR-0232-2541-0002"
     assert data.default is True
     assert data.description == (
