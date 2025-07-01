@@ -6,7 +6,7 @@ from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from swo.mpt.cli.core.products.api import ProductAPIService
 from swo.mpt.cli.core.products.constants import TAB_GENERAL
-from swo.mpt.cli.core.products.handlers import ProductExcelFileManager
+from swo.mpt.cli.core.products.handlers import ProductExcelFileManager, SettingsExcelFileManager
 from swo.mpt.cli.core.products.models import ProductData
 from swo.mpt.cli.core.products.services import ProductService
 from swo.mpt.cli.core.services.service_context import ServiceContext
@@ -99,6 +99,8 @@ def test_export(mocker, service_context, mpt_product_data):
     get_mock = mocker.patch.object(service_context.api, "get", return_value=mpt_product_data)
     create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     add_mock = mocker.patch.object(service_context.file_manager, "add")
+    settings_create_tab_mock = mocker.patch.object(SettingsExcelFileManager, "create_tab")
+    settings_file_manager_add_mock = mocker.patch.object(SettingsExcelFileManager, "add")
     service = ProductService(service_context)
 
     result = service.export({"product_id": "fake_id"})
@@ -107,6 +109,8 @@ def test_export(mocker, service_context, mpt_product_data):
     get_mock.assert_called()
     create_tab_mock.assert_called_once()
     add_mock.assert_called_once()
+    settings_create_tab_mock.assert_called_once()
+    settings_file_manager_add_mock.assert_called_once()
 
 
 def test_export_mpt_error(mocker, service_context):
@@ -260,7 +264,7 @@ def test_update(mocker, service_context, product_data_from_dict):
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = ProductService(service_context)
 
-    result = service.update(product_data_from_dict.id)
+    result = service.update()
 
     assert result.success is True
     assert result.model is not None
@@ -281,7 +285,7 @@ def test_update_error(mocker, service_context, product_data_from_dict):
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     service = ProductService(service_context)
 
-    result = service.update(product_data_from_dict.id)
+    result = service.update()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error updating product"]

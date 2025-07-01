@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 
 from swo.mpt.cli.core.services.service_context import ServiceContext
 from swo.mpt.cli.core.services.service_result import ServiceResult
@@ -13,6 +14,12 @@ class Service(ABC):
         self.data_model = service_context.data_model
         self.file_manager = service_context.file_manager
         self.stats = service_context.stats
+
+    @property
+    def export_params(self):
+        params = {"select": "audit", "limit": 100, "offset": 0}
+        params.update(self.set_export_params())
+        return params
 
     @abstractmethod
     def create(self) -> ServiceResult:  # pragma: no cover
@@ -48,17 +55,20 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self, resource_id: str) -> ServiceResult:  # pragma: no cover
+    def update(self) -> ServiceResult:  # pragma: no cover
         """
         Update an existing resource
-
-        Args:
-            resource_id: ID of the resource to update
 
         Returns:
             ServiceResult object with operation results
         """
         raise NotImplementedError
+
+    def set_export_params(self) -> dict[str, Any]:
+        """
+        Override this method to set the export parameters
+        """
+        return {}
 
     def _set_error(self, error: str, resource_id: str | None = None) -> None:
         self.file_manager.write_error(error, resource_id)
@@ -88,6 +98,10 @@ class BaseService(Service, ABC):
 
 
 class RelatedBaseService(Service, ABC):
+    @property
+    def resource_id(self):
+        return self.api.resource_id
+
     @abstractmethod
     def export(self) -> ServiceResult:  # pragma: no cover
         """

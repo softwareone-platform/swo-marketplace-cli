@@ -83,12 +83,10 @@ class APIService(ABC, Generic[APIModel]):
 
 
 class RelatedAPIService(APIService, ABC):
-    _resource_id: str
-
     def __init__(self, client, resource_id: str):
         super().__init__(client)
-        self._resource_id = resource_id
+        self.resource_id = resource_id
 
     @property
     def url(self) -> str:
-        return self._base_url.format(resource_id=self._resource_id)
+        return self._base_url.format(resource_id=self.resource_id)

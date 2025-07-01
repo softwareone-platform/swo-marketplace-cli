@@ -1,4 +1,6 @@
+import os
 from functools import partial
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -15,21 +17,19 @@ from swo.mpt.cli.core.products.api import (
     ItemGroupAPIService,
     ParameterGroupAPIService,
     ParametersAPIService,
+    ProductAPIService,
     TemplateAPIService,
 )
-from swo.mpt.cli.core.products.api.product_api_service import ProductAPIService
 from swo.mpt.cli.core.products.handlers import (
     AgreementParametersExcelFileManager,
     ItemExcelFileManager,
     ItemGroupExcelFileManager,
     ItemParametersExcelFileManager,
+    ParameterGroupExcelFileManager,
     ProductExcelFileManager,
     RequestParametersExcelFileManager,
     SubscriptionParametersExcelFileManager,
     TemplateExcelFileManager,
-)
-from swo.mpt.cli.core.products.handlers.parameter_group_excel_file_manager import (
-    ParameterGroupExcelFileManager,
 )
 from swo.mpt.cli.core.products.models import (
     AgreementParametersData,
@@ -58,6 +58,184 @@ app = typer.Typer()
 
 def _offset_by_page(page: int, limit: int) -> int:
     return page * limit
+
+
+@app.command("export")
+def export(
+    product_ids: Annotated[
+        list[str],
+        typer.Argument(help="List of product IDs to export"),
+    ],
+    out_path: Annotated[
+        str | None,
+        typer.Option(
+            "--out",
+            "-o",
+            help="Specify folder to export price lists to. Default filename is <product-id>.xlsx",
+        ),
+    ] = None,
+):
+    active_account = get_active_account()
+    if not active_account.is_operations():
+        console.print(
+            f"Current active account {active_account.id} ({active_account.name}) is not "
+            f"allowed for the export command. Please, activate an operation account."
+        )
+        raise typer.Exit(code=4)
+
+    out_path = out_path if out_path is not None else os.getcwd()
+    mpt_client = client_from_account(active_account)
+    stats = ProductStatsCollector()
+    has_error = False
+    for product_id in product_ids:
+        file_path = Path(out_path) / f"{product_id}.xlsx"
+        if file_path.exists():
+            overwrite = typer.confirm(
+                f"File {file_path} already exists. Do you want to overwrite it?",
+                abort=False,
+            )
+            if not overwrite:
+                console.print(f"Skipped export for {product_id}.")
+                continue
+
+            os.remove(file_path)
+        else:
+            _ = typer.confirm(
+                f"Do you want to export {product_id} in {out_path}?",
+                abort=True,
+            )
+
+        product_service_context = ServiceContext(
+            account=active_account,
+            api=ProductAPIService(mpt_client),
+            data_model=ProductData,
+            file_manager=ProductExcelFileManager(str(file_path)),
+            stats=stats,
+        )
+        console.print(
+            f"Starting export General and Settings info for product with id: {product_id}... "
+        )
+        result = ProductService(product_service_context).export(resource_id=product_id)
+        if not result.success:
+            console.print(f"Failed to export Product with id: {product_id}")
+            console.print(result.errors)
+            has_error = True
+            continue
+
+        console.print("General and Settings inf have been exported successfully")
+
+        PartialServiceContext = partial(ServiceContext, account=active_account, stats=stats)
+        item_service_context = PartialServiceContext(
+            api=ItemAPIService(mpt_client, product_id),
+            data_model=ItemData,
+            file_manager=ItemExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Items for product with id: {product_id}... ")
+        result = ItemService(item_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Items for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Items have been exported successfully")
+
+        item_group_service_context = PartialServiceContext(
+            api=ItemGroupAPIService(mpt_client, product_id),
+            data_model=ItemGroupData,
+            file_manager=ItemGroupExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Items groups for product with id: {product_id}... ")
+        result = ItemGroupService(item_group_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Item groups for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Item Groups have been exported successfully")
+
+        parameter_group_service_context = PartialServiceContext(
+            api=ParameterGroupAPIService(mpt_client, product_id),
+            data_model=ParameterGroupData,
+            file_manager=ParameterGroupExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Parameter Groups for product with id: {product_id}... ")
+        result = ParameterGroupService(parameter_group_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Parameter Groups for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Parameters Groups have been exported successfully")
+
+        agreement_parameters_service_context = PartialServiceContext(
+            api=ParametersAPIService(mpt_client, product_id),
+            data_model=AgreementParametersData,
+            file_manager=AgreementParametersExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Agreement Parameters for product with id: {product_id}... ")
+        result = ParametersService(agreement_parameters_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Agreement Parameters for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Agreement Parameters have been exported successfully")
+
+        item_parameters_service_context = PartialServiceContext(
+            api=ParametersAPIService(mpt_client, product_id),
+            data_model=ItemParametersData,
+            file_manager=ItemParametersExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Item Parameters for product with id: {product_id}... ")
+        result = ParametersService(item_parameters_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Item Parameters for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Item Parameters have been exported successfully")
+
+        request_parameters_service_context = PartialServiceContext(
+            api=ParametersAPIService(mpt_client, product_id),
+            data_model=RequestParametersData,
+            file_manager=RequestParametersExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Request Parameters for product with id: {product_id}... ")
+        result = ParametersService(request_parameters_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Request Parameters for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Request Parameters have been exported successfully")
+
+        subscription_parameters_service_context = PartialServiceContext(
+            api=ParametersAPIService(mpt_client, product_id),
+            data_model=SubscriptionParametersData,
+            file_manager=SubscriptionParametersExcelFileManager(str(file_path)),
+        )
+        console.print(
+            f"Starting export Subscription Parameters for product with id: {product_id}... "
+        )
+        result = ParametersService(subscription_parameters_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Subscription Parameters for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Subscription Parameters have been exported successfully")
+
+        template_service_context = PartialServiceContext(
+            api=TemplateAPIService(mpt_client, product_id),
+            data_model=TemplateData,
+            file_manager=TemplateExcelFileManager(str(file_path)),
+        )
+        console.print(f"Starting export Templates for product with id: {product_id}... ")
+        result = TemplateService(template_service_context).export()
+        if not result.success:
+            console.print(f"Failed to export Template for id: {product_id}")
+            has_error = True
+        else:
+            console.print("Template have been exported successfully")
+
+        console.print(f"Product with id: {product_id} has been exported into {file_path}")
+
+    if has_error:
+        console.print("Product export [red bold]FAILED")
+        raise typer.Exit(code=3)
 
 
 @app.command(name="list")
@@ -147,13 +325,13 @@ def sync_product(
     if product is None or force_create:
         if product is None:
             msg = (
-                "Do you want to create new product for account {active_account.id} "
-                "({active_account.name})"
+                f"Do you want to create new product for account {active_account.id} "
+                f"({active_account.name})"
             )
         else:
             msg = (
-                "Do you want to create new product for account {active_account.id} "
-                "({active_account.name}) because the product ID exists in the SWO Platform?"
+                f"Do you want to create new product for account {active_account.id} "
+                f"({active_account.name}) because the product ID exists in the SWO Platform?"
             )
 
         _ = typer.confirm(msg, abort=True)
@@ -286,7 +464,7 @@ def create_product(active_account, mpt_client, product_path, product_stats, stat
 
     item_service = ItemService(
         PartialServiceContext(
-            api=ItemAPIService(mpt_client),
+            api=ItemAPIService(mpt_client, product.id),
             data_model=ItemData,
             file_manager=ItemExcelFileManager(product_path),
         )
@@ -304,13 +482,13 @@ def update_product(active_account, mpt_client, product_path, product_stats, prod
     PartialServiceContext = partial(ServiceContext, account=active_account, stats=product_stats)
     item_service = ItemService(
         PartialServiceContext(
-            api=ItemAPIService(mpt_client),
+            api=ItemAPIService(mpt_client, product.id),
             data_model=ItemData,
             file_manager=ItemExcelFileManager(product_path),
         )
     )
     status.update(f"Update item for {product.id}...")
-    item_service.update(product.id)
+    item_service.update()
 
     return product_stats, product
 

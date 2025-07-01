@@ -33,7 +33,7 @@ class ParameterGroup(BaseModel):
     id: str
     default: bool
     description: str
-    display_order: int
+    display_order: int = Field(alias="displayOrder")
     label: str
     name: str
 

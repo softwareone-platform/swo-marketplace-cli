@@ -113,7 +113,7 @@ def test_sync_price_lists_update(
 
     assert result.exit_code == 0, result.stdout
     price_list_service_retrieve_mock.assert_called_once()
-    price_list_service_update_mock.assert_called_once_with(price_list_data_from_json.id)
+    price_list_service_update_mock.assert_called_once_with()
     item_service_update_mock.assert_called_once()
     price_list_service_create_spy.assert_not_called()
 

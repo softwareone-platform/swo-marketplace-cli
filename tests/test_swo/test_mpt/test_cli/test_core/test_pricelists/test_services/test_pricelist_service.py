@@ -169,7 +169,7 @@ def test_update_price_list(mocker, service_context, price_list_data_from_dict):
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = PriceListService(service_context)
 
-    result = service.update(price_list_data_from_dict.id)
+    result = service.update()
 
     assert result.success is True
     assert result.model is not None
@@ -190,7 +190,7 @@ def test_update_price_list_error(mocker, service_context, price_list_data_from_d
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     service = PriceListService(service_context)
 
-    result = service.update(price_list_data_from_dict.id)
+    result = service.update()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error updating price list"]

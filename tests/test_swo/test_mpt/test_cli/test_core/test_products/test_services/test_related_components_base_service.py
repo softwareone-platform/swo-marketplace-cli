@@ -1,3 +1,5 @@
+from dataclasses import dataclass
+from typing import Any, Self
 from unittest.mock import Mock
 
 import pytest
@@ -7,22 +9,28 @@ from swo.mpt.cli.core.products.services.related_components_base_service import (
     RelatedComponentsBaseService,
 )
 from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.services.service_result import ServiceResult
 from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
 class FakeRelatedComponentsService(RelatedComponentsBaseService):
-    def export(self) -> ServiceResult:
-        pass
+    pass
 
-    def retrieve(self) -> ServiceResult:
-        pass
 
-    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
-        pass
+@dataclass
+class FakeDataModel(BaseDataModel):
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+        return cls()
 
-    def update(self, resource_id: str) -> ServiceResult:
-        pass
+    @classmethod
+    def from_json(cls, data: dict[str, Any]) -> Self:
+        return cls()
+
+    def to_json(self) -> dict[str, Any]:
+        return {}
+
+    def to_xlsx(self) -> dict[str, Any]:
+        return {}
 
 
 @pytest.fixture
@@ -30,7 +38,7 @@ def service_context(active_vendor_account):
     return ServiceContext(
         account=active_vendor_account,
         api=Mock(),
-        data_model=BaseDataModel,
+        data_model=FakeDataModel,
         file_manager=Mock(tab_name="fake_tab_name"),
         stats=ProductStatsCollector(),
     )
@@ -46,6 +54,7 @@ def test_create(mocker, service_context, mpt_parameters_data):
     file_handler_write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
     stats_mock = mocker.patch.object(service_context.stats, "add_synced")
     service = FakeRelatedComponentsService(service_context)
+    prepare_data_model_to_create_spy = mocker.spy(service, "prepare_data_model_to_create")
 
     result = service.create()
 
@@ -55,6 +64,7 @@ def test_create(mocker, service_context, mpt_parameters_data):
     file_handler_write_id_mock.assert_called_once_with("fake_coordinate", "new_fake_id")
     post_mock.assert_called_once_with(json={"id": "fake_id"})
     stats_mock.assert_called_once_with("fake_tab_name")
+    prepare_data_model_to_create_spy.assert_called_once()
 
 
 def test_create_api_error(mocker, service_context, parameters_data_from_dict):
@@ -75,3 +85,42 @@ def test_create_api_error(mocker, service_context, parameters_data_from_dict):
     post_mock.assert_called_once()
     write_error_mock.assert_called_once()
     add_error_mock.assert_called_once_with("fake_tab_name")
+
+
+def test_export(mocker, service_context, mpt_parameters_data):
+    create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
+    data = {"meta": {"offset": 0, "limit": 100, "total": 0}, "data": []}
+    api_list_mock = mocker.patch.object(service_context.api, "list", return_value=data)
+    add_mock = mocker.patch.object(service_context.file_manager, "add")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.export()
+
+    assert result.success is True
+    assert result.model is None
+    create_data_mock.assert_called_once()
+    api_list_mock.assert_called_once()
+    add_mock.assert_called_once()
+
+
+def test_export_error(mocker, service_context, mpt_parameters_data):
+    create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
+    api_list_mock = mocker.patch.object(
+        service_context.api,
+        "list",
+        side_effect=MPTAPIError("API Error", "Error getting parameters"),
+    )
+    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    add_error_mock = mocker.patch.object(service_context.stats, "add_error")
+    add_spy = mocker.spy(service_context.file_manager, "add")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.export()
+
+    assert result.success is False
+    assert result.errors == ["API Error with response body Error getting parameters"]
+    create_data_mock.assert_called_once()
+    api_list_mock.assert_called_once()
+    add_error_mock.assert_called_once_with("fake_tab_name")
+    write_error_mock.assert_called_once()
+    add_spy.assert_not_called()

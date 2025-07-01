@@ -74,12 +74,9 @@ class PriceListService(BaseService):
         price_list = self.data_model.from_json(price_list_data)
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
-    def update(self, resource_id: str) -> ServiceResult:
+    def update(self) -> ServiceResult:
         """
         Updates an existing price list by sending the modified general data to the API.
-
-        Args:
-            resource_id: The ID of the price list to update.
 
         Returns:
             ServiceResult: The result of the update operation.

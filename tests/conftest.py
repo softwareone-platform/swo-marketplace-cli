@@ -137,6 +137,19 @@ def expected_account():
 
 
 @pytest.fixture
+def operations_account():
+    return CLIAccount(
+        id="ACC-12341",
+        name="Account 1",
+        type="Operations",
+        token="secret 1",
+        token_id="TKN-0000-0000-0001",
+        environment="https://example.com",
+        is_active=True,
+    )
+
+
+@pytest.fixture
 def another_expected_account():
     return CLIAccount(
         id="ACC-12342",

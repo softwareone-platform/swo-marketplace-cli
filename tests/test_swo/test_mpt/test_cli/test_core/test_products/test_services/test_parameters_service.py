@@ -52,3 +52,11 @@ def test_set_new_parameter_groups_error(
 
     read_data_mock.assert_called_once()
     write_id_mock.assert_not_called()
+
+
+def test_set_export_params(service_context, parameters_data_from_dict):
+    service = ParametersService(service_context)
+
+    params = service.set_export_params()
+
+    assert params == {"scope": parameters_data_from_dict.scope}
