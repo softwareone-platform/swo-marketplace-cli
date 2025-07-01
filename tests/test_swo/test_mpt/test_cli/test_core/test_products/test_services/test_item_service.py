@@ -1,4 +1,4 @@
-from unittest.mock import Mock, call
+from unittest.mock import Mock
 
 import pytest
 from swo.mpt.cli.core.errors import MPTAPIError
@@ -22,63 +22,6 @@ def service_context(mpt_client, product_file_path, active_vendor_account, item_d
         file_manager=ItemExcelFileManager(product_file_path),
         stats=ProductStatsCollector(),
     )
-
-
-def test_create(mocker, service_context, mpt_item_data, item_data_from_dict):
-    read_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
-    )
-    search_uom_by_name_mock = mocker.patch(
-        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
-        return_value=Mock(id="fake_unit_id"),
-    )
-    api_post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
-    stats_mock = mocker.patch.object(service_context.stats, "add_synced")
-    service = ItemService(service_context)
-
-    result = service.create(product_id="fake_product_id")
-
-    assert result.success is True
-    read_data_mock.assert_called_once()
-    search_uom_by_name_mock.assert_called_once()
-    stats_mock.assert_called_once()
-    file_handler_write_mock.assert_has_calls(
-        [
-            call("A38272", "ITM-0232-2541-0001"),
-            call("J38272", "fake_unit_id"),
-        ]
-    )
-    api_post_mock.assert_called_once()
-
-
-def test_create_post_error(mocker, service_context, item_data_from_dict):
-    read_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
-    )
-    search_uom_by_name_mock = mocker.patch(
-        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
-        return_value=Mock(id="fake_unit_id"),
-    )
-    api_post_mock = mocker.patch.object(
-        service_context.api,
-        "post",
-        side_effect=MPTAPIError("API Error", "Error creating item"),
-    )
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
-    stats_mock = mocker.patch.object(service_context.stats, "add_error")
-    service = ItemService(service_context)
-
-    result = service.create(product_id="fake_product_id")
-
-    assert result.success is False
-    assert result.errors == ["API Error with response body Error creating item"]
-    assert result.model is None
-    search_uom_by_name_mock.assert_called_once()
-    stats_mock.assert_called_once()
-    read_data_mock.assert_called_once()
-    api_post_mock.assert_called_once()
-    file_handler_write_mock.assert_called_once()
 
 
 def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_item_data):
@@ -285,9 +228,26 @@ def test_set_new_item_groups_error(
     write_id_mock.assert_not_called()
 
 
-def test_set_export_params(mocker, service_context, item_data_from_dict):
+def test_set_export_params(service_context, item_data_from_dict):
     service = ItemService(service_context)
 
     params = service.set_export_params()
 
     assert params["product.id"] is not None
+
+
+def test_prepare_data_model_to_create(mocker, service_context, item_data_from_dict):
+    search_uom_by_name_mock = mocker.patch(
+        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Mock(id="fake_unit_id"),
+    )
+    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    service = ItemService(service_context)
+
+    data_model = service.prepare_data_model_to_create(item_data_from_dict)
+
+    assert data_model.unit_id == "fake_unit_id"
+    assert data_model.item_type == "vendor"
+    assert data_model.product_id == "test-product-id"
+    search_uom_by_name_mock.assert_called_once()
+    write_id_mock.assert_called_once_with(item_data_from_dict.unit_coordinate, "fake_unit_id")
