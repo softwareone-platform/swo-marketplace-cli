@@ -3,6 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
+from freezegun import freeze_time
 from swo.mpt.cli.core.products.constants import (
     GENERAL_ACCOUNT_ID,
     GENERAL_ACCOUNT_NAME,
@@ -23,6 +24,17 @@ from swo.mpt.cli.core.products.constants import (
     ITEMS_ERP_ITEM_ID,
     ITEMS_GROUP_ID,
     ITEMS_GROUP_NAME,
+    ITEMS_GROUPS_ACTION,
+    ITEMS_GROUPS_CREATED,
+    ITEMS_GROUPS_DEFAULT,
+    ITEMS_GROUPS_DESCRIPTION,
+    ITEMS_GROUPS_DISPLAY_ORDER,
+    ITEMS_GROUPS_ID,
+    ITEMS_GROUPS_LABEL,
+    ITEMS_GROUPS_MODIFIED,
+    ITEMS_GROUPS_MULTIPLE_CHOICES,
+    ITEMS_GROUPS_NAME,
+    ITEMS_GROUPS_REQUIRED,
     ITEMS_ID,
     ITEMS_MODIFIED,
     ITEMS_NAME,
@@ -32,6 +44,13 @@ from swo.mpt.cli.core.products.constants import (
     ITEMS_UNIT_NAME,
     ITEMS_VENDOR_ITEM_ID,
     PARAMETERS_ACTION,
+    PARAMETERS_CONSTRAINTS,
+    PARAMETERS_CREATED,
+    PARAMETERS_DESCRIPTION,
+    PARAMETERS_DISPLAY_ORDER,
+    PARAMETERS_EXTERNALID,
+    PARAMETERS_GROUP_ID,
+    PARAMETERS_GROUP_NAME,
     PARAMETERS_GROUPS_CREATED,
     PARAMETERS_GROUPS_DEFAULT,
     PARAMETERS_GROUPS_DESCRIPTION,
@@ -40,6 +59,20 @@ from swo.mpt.cli.core.products.constants import (
     PARAMETERS_GROUPS_LABEL,
     PARAMETERS_GROUPS_MODIFIED,
     PARAMETERS_GROUPS_NAME,
+    PARAMETERS_ID,
+    PARAMETERS_MODIFIED,
+    PARAMETERS_NAME,
+    PARAMETERS_OPTIONS,
+    PARAMETERS_PHASE,
+    PARAMETERS_TYPE,
+    TEMPLATES_ACTION,
+    TEMPLATES_CONTENT,
+    TEMPLATES_CREATED,
+    TEMPLATES_DEFAULT,
+    TEMPLATES_ID,
+    TEMPLATES_MODIFIED,
+    TEMPLATES_NAME,
+    TEMPLATES_TYPE,
 )
 from swo.mpt.cli.core.products.models import (
     AgreementParametersData,
@@ -51,112 +84,7 @@ from swo.mpt.cli.core.products.models import (
     TemplateData,
 )
 from swo.mpt.cli.core.products.models.items import ItemAction
-
-
-@pytest.fixture
-def parameters_data_from_dict():
-    return AgreementParametersData(
-        id="PAR-9939-6700-0001",
-        coordinate="K234",
-        name="Agreement type",
-        external_id="agreementType",
-        phase="Order",
-        type="Choice",
-        description="When you are creating a new agreement with SoftwareOne, you have the option "
-        "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
-        "VIP account to Adobe VIP Marketplace.",
-        display_order=101,
-        group_id="PGR-9939-6700-0001",
-        options={
-            "optionsList": [
-                {
-                    "label": "Create account",
-                    "value": "New",
-                    "description": """
-                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
-       products before, or if you wish to set up a new account in addition to an account you may
-       already have. You will need to provide details such as your company address and contacts,
-       and you will be required to accept both the Adobe Terms and Conditions as well as
-       SoftwareOne\u0027s terms and conditions.""",
-                },
-                {
-                    "label": "Migrate account",
-                    "value": "Migrate",
-                    "description": """Migrate from Adobe VIP if you are currently purchasing
-                    products under the Adobe VIP licensing program. This comes with several
-                    advantages including the ability to self-service manage your subscriptions
-                    within the SoftwareOne Marketplace. You will need to provide details such as
-                    your company address and contacts, and you will be required to accept  both the
-                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
-                    conditions.\n\n Note: If you are purchasing Adobe products under a different
-                    licensing program such as CLP or TLP, you cannot use this option.""",
-                },
-            ],
-            "defaultValue": None,
-            "hintText": "Please select one option to continue",
-            "label": "Agreement type",
-        },
-        constraints={"hidden": False, "readonly": False, "optional": True, "required": False},
-        group_id_coordinate="I22",
-    )
-
-
-@pytest.fixture
-def mpt_parameters_data():
-    return {
-        "id": "PAR-0232-2541-0001",
-        "name": "Agreement type",
-        "description": "When you are creating a new agreement with SoftwareOne, you have the option"
-        " to create a new Adobe VIP Marketplace account or migrate your existing "
-        "Adobe VIP account to Adobe VIP Marketplace.",
-        "group": {"id": "PGR-0232-2541-0002", "name": "Create agreement"},
-        "scope": "Agreement",
-        "phase": "Order",
-        "context": "None",
-        "externalId": "agreementType",
-        "displayOrder": 101,
-        "constraints": {"hidden": False, "readonly": False, "required": True},
-        "product": {
-            "id": "PRD-0232-2541",
-            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
-            "externalIds": {"operations": ""},
-            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
-            "status": "Unpublished",
-        },
-        "options": {
-            "optionsList": [
-                {
-                    "label": "Create account",
-                    "value": "New",
-                    "description": "Create a new Adobe VIP Marketplace account if you have never "
-                    "purchased Adobe products before, or if you wish to set up an "
-                    "new account in addition to an account you may already have. "
-                    "You will need to provide details such as your company address "
-                    "and contacts, and you will be required to accept both the Adobe"
-                    " Terms and Conditions as well as SoftwareOne's terms and "
-                    "conditions.",
-                },
-                {
-                    "label": "Migrate account",
-                    "value": "Migrate",
-                    "description": "Migrate from Adobe VIP if you are currently purchasing products"
-                    " under the Adobe VIP licensing program. This comes with several"
-                    " advantages including the ability to self-service manage your"
-                    " subscriptions within the SoftwareOne Marketplace. You will"
-                    " need to provide details such as your company address and"
-                    " contacts, and you will be required to accept both the Adobe"
-                    " Terms and Conditions as well as SoftwareOne's terms and"
-                    " conditions.\n\nNote: If you are purchasing Adobe products"
-                    " under a different licensing program such as CLP or TLP, you"
-                    " cannot use this option.",
-                },
-            ],
-            "defaultValue": "New",
-            "hintText": "Some hint text",
-        },
-        "type": "Choice",
-        "status": "Active",
-    }
+from swo.mpt.cli.core.products.models.product import SettingsItem
 
 
 @pytest.fixture
@@ -212,11 +140,12 @@ def product_data_from_dict():
         created_date=datetime(2024, 1, 1, 0, 0),
         updated_date=datetime(2024, 1, 1, 0, 0),
         coordinate="B3",
-        settings=SettingsData(),
+        settings=SettingsData(items=[SettingsItem(name="Item selection validation", value="Off")]),
     )
 
 
 @pytest.fixture
+@freeze_time("2025-05-30")
 def product_data_from_json(mpt_product_data):
     return ProductData.from_json(mpt_product_data)
 
@@ -378,6 +307,28 @@ def mpt_item_data():
 
 
 @pytest.fixture
+def item_group_file_data():
+    return {
+        ITEMS_GROUPS_ID: {"value": "IGR-0232-2541-0001", "coordinate": "A10234"},
+        ITEMS_GROUPS_NAME: {"value": "Items", "coordinate": "B10234"},
+        ITEMS_GROUPS_ACTION: {"value": "-", "coordinate": "C10234"},
+        ITEMS_GROUPS_LABEL: {"value": "Items", "coordinate": "D10234"},
+        ITEMS_GROUPS_DISPLAY_ORDER: {"value": 100, "coordinate": "E10234"},
+        ITEMS_GROUPS_DESCRIPTION: {"value": "Default item group", "coordinate": "F10234"},
+        ITEMS_GROUPS_DEFAULT: {"value": "True", "coordinate": "G10234"},
+        ITEMS_GROUPS_MULTIPLE_CHOICES: {"value": "True", "coordinate": "H10234"},
+        ITEMS_GROUPS_REQUIRED: {"value": "True", "coordinate": "I10234"},
+        ITEMS_GROUPS_CREATED: {"value": datetime(2025, 6, 23, 0, 0), "coordinate": "J10234"},
+        ITEMS_GROUPS_MODIFIED: {"value": datetime(2025, 6, 23, 0, 0), "coordinate": "K10234"},
+    }
+
+
+@pytest.fixture
+def item_group_data_from_json(mpt_item_group_data):
+    return ItemGroupData.from_json(mpt_item_group_data)
+
+
+@pytest.fixture
 def item_group_data_from_dict():
     return ItemGroupData(
         id="IGR-0400-9557-0002",
@@ -418,6 +369,178 @@ def mpt_item_group_data():
             "externalIds": {"operations": ""},
             "icon": "/v1/catalog/products/PRD-0232-2541/icon",
             "status": "Unpublished",
+        },
+        "audit": {
+            "created": {
+                "at": "2024-03-19T11:16:57.932Z",
+                "by": {
+                    "id": "USR-0000-0022",
+                    "name": "User22",
+                    "icon": "/v1/accounts/users/USR-0000-0022/icon",
+                },
+            }
+        },
+    }
+
+
+@pytest.fixture
+def parameters_file_data():
+    return {
+        PARAMETERS_ID: {"value": "PAR-5159-0756-0001", "coordinate": "A325"},
+        PARAMETERS_NAME: {"value": "Agreement type", "coordinate": "B325"},
+        PARAMETERS_EXTERNALID: {"value": "agreementType", "coordinate": "C325"},
+        PARAMETERS_ACTION: {"value": "-", "coordinate": "D325"},
+        PARAMETERS_PHASE: {"value": "Order", "coordinate": "E325"},
+        PARAMETERS_TYPE: {"value": "Choice", "coordinate": "F325"},
+        PARAMETERS_DESCRIPTION: {
+            "value": "When you are creating a new agreement with SoftwareOne, you have the option "
+            "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
+            "VIP account to Adobe VIP Marketplace.",
+            "coordinate": "G325",
+        },
+        PARAMETERS_DISPLAY_ORDER: {"value": 101, "coordinate": "H325"},
+        PARAMETERS_GROUP_ID: {"value": "PGR-5159-0756-0002", "coordinate": "I325"},
+        PARAMETERS_GROUP_NAME: {"value": "Agreement", "coordinate": "J325"},
+        PARAMETERS_OPTIONS: {
+            "value": """{"defaultValue": "Buyer","hintText": "Address.","label": "Address"}""",
+            "coordinate": "K325",
+        },
+        PARAMETERS_CONSTRAINTS: {
+            "value": (
+                """{"hidden": false, "readonly": false, "optional": false, "required": true}"""
+            ),
+            "coordinate": "L325",
+        },
+        PARAMETERS_CREATED: {"value": datetime(2024, 5, 23, 0, 0), "coordinate": "M325"},
+        PARAMETERS_MODIFIED: {"value": datetime(2024, 8, 14, 0, 0), "coordinate": "N325"},
+    }
+
+
+@pytest.fixture
+def parameters_data_from_json(mpt_parameters_data):
+    return AgreementParametersData.from_json(mpt_parameters_data)
+
+
+@pytest.fixture
+def parameters_data_from_dict():
+    return AgreementParametersData(
+        id="PAR-9939-6700-0001",
+        coordinate="K234",
+        name="Agreement type",
+        external_id="agreementType",
+        phase="Order",
+        type="Choice",
+        description="When you are creating a new agreement with SoftwareOne, you have the option "
+        "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
+        "VIP account to Adobe VIP Marketplace.",
+        display_order=101,
+        group_id="PGR-9939-6700-0001",
+        options={
+            "optionsList": [
+                {
+                    "label": "Create account",
+                    "value": "New",
+                    "description": """
+                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
+       products before, or if you wish to set up a new account in addition to an account you may
+       already have. You will need to provide details such as your company address and contacts,
+       and you will be required to accept both the Adobe Terms and Conditions as well as
+       SoftwareOne\u0027s terms and conditions.""",
+                },
+                {
+                    "label": "Migrate account",
+                    "value": "Migrate",
+                    "description": """Migrate from Adobe VIP if you are currently purchasing
+                    products under the Adobe VIP licensing program. This comes with several
+                    advantages including the ability to self-service manage your subscriptions
+                    within the SoftwareOne Marketplace. You will need to provide details such as
+                    your company address and contacts, and you will be required to accept  both the
+                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
+                    conditions.\n\n Note: If you are purchasing Adobe products under a different
+                    licensing program such as CLP or TLP, you cannot use this option.""",
+                },
+            ],
+            "defaultValue": None,
+            "hintText": "Please select one option to continue",
+            "label": "Agreement type",
+        },
+        constraints={"hidden": False, "readonly": False, "optional": True, "required": False},
+        group_id_coordinate="I22",
+    )
+
+
+@pytest.fixture
+def mpt_parameters_data():
+    return {
+        "id": "PAR-0232-2541-0001",
+        "name": "Agreement type",
+        "description": "When you are creating a new agreement with SoftwareOne, you have the option"
+        " to create a new Adobe VIP Marketplace account or migrate your existing "
+        "Adobe VIP account to Adobe VIP Marketplace.",
+        "group": {"id": "PGR-0232-2541-0002", "name": "Create agreement"},
+        "scope": "Agreement",
+        "phase": "Order",
+        "context": "None",
+        "externalId": "agreementType",
+        "displayOrder": 101,
+        "constraints": {"hidden": False, "readonly": False, "required": True},
+        "product": {
+            "id": "PRD-0232-2541",
+            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
+            "externalIds": {"operations": ""},
+            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
+            "status": "Unpublished",
+        },
+        "options": {
+            "optionsList": [
+                {
+                    "label": "Create account",
+                    "value": "New",
+                    "description": "Create a new Adobe VIP Marketplace account if you have never "
+                    "purchased Adobe products before, or if you wish to set up an "
+                    "new account in addition to an account you may already have. "
+                    "You will need to provide details such as your company address "
+                    "and contacts, and you will be required to accept both the Adobe"
+                    " Terms and Conditions as well as SoftwareOne's terms and "
+                    "conditions.",
+                },
+                {
+                    "label": "Migrate account",
+                    "value": "Migrate",
+                    "description": "Migrate from Adobe VIP if you are currently purchasing products"
+                    " under the Adobe VIP licensing program. This comes with several"
+                    " advantages including the ability to self-service manage your"
+                    " subscriptions within the SoftwareOne Marketplace. You will"
+                    " need to provide details such as your company address and"
+                    " contacts, and you will be required to accept both the Adobe"
+                    " Terms and Conditions as well as SoftwareOne's terms and"
+                    " conditions.\n\nNote: If you are purchasing Adobe products"
+                    " under a different licensing program such as CLP or TLP, you"
+                    " cannot use this option.",
+                },
+            ],
+            "defaultValue": "New",
+            "hintText": "Some hint text",
+        },
+        "type": "Choice",
+        "status": "Active",
+        "audit": {
+            "created": {
+                "at": "2024-03-19T11:40:12.347Z",
+                "by": {
+                    "id": "USR-0000-0022",
+                    "name": "User22",
+                    "icon": "/v1/accounts/users/USR-0000-0022/icon",
+                },
+            },
+            "updated": {
+                "at": "2024-03-19T12:03:49.878Z",
+                "by": {
+                    "id": "USR-0000-0022",
+                    "name": "User22",
+                    "icon": "/v1/accounts/users/USR-0000-0022/icon",
+                },
+            },
         },
     }
 
@@ -491,6 +614,28 @@ def mpt_parameter_group_data():
 
 
 @pytest.fixture
+def template_file_data():
+    return {
+        TEMPLATES_ID: {"value": "TPL-0400-9557-0005", "coordinate": "A3"},
+        TEMPLATES_NAME: {"value": "BulkMigrate", "coordinate": "B3"},
+        TEMPLATES_ACTION: {"value": "-", "coordinate": "C3"},
+        TEMPLATES_TYPE: {"value": "OrderCompleted", "coordinate": "D3"},
+        TEMPLATES_DEFAULT: {"value": "False", "coordinate": "E3"},
+        TEMPLATES_CONTENT: {
+            "value": "Querying template for Adobe VIP Marketplace",
+            "coordinate": "F3",
+        },
+        TEMPLATES_CREATED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "G3"},
+        TEMPLATES_MODIFIED: {"value": None, "coordinate": "H3"},
+    }
+
+
+@pytest.fixture
+def template_data_from_json(mpt_template_data):
+    return TemplateData.from_json(mpt_template_data)
+
+
+@pytest.fixture
 def template_data_from_dict():
     return TemplateData(
         id="TPL-0400-9557-0005",
@@ -540,4 +685,31 @@ def mpt_template_data():
         "we are working on your order.",
         "type": "OrderProcessing",
         "default": False,
+        "audit": {
+            "created": {
+                "at": "2024-04-08T14:56:47.271Z",
+                "by": {"id": "USR-6248-5083", "name": "User5083"},
+            },
+            "updated": {
+                "at": "2024-05-03T11:20:41.007Z",
+                "by": {"id": "USR-0081-7601", "name": "User7601"},
+            },
+        },
+    }
+
+
+@pytest.fixture
+def settings_file_data():
+    return {
+        "Change order validation (draft)": {"value": "Enabled", "coordinate": "C2"},
+        "Item selection validation": {"value": "Off", "coordinate": "C3"},
+        "Order queue changes notification": {"value": "Off", "coordinate": "C4"},
+        "Product ordering": {"value": "Enabled", "coordinate": "C5"},
+        "Product requests": {"value": "Off", "coordinate": "C6"},
+        "Product requests. Request title": {"value": "Off", "coordinate": "C7"},
+        "Product requests. Call to action label": {"value": None, "coordinate": "C8"},
+        "Product request validation (draft)": {"value": None, "coordinate": "C9"},
+        "Purchase order validation (draft)": {"value": "Enabled", "coordinate": "C10"},
+        "Purchase order validation (query)": {"value": "Off", "coordinate": "C11"},
+        "Termination order validation (draft)": {"value": "Off", "coordinate": "C12"},
     }

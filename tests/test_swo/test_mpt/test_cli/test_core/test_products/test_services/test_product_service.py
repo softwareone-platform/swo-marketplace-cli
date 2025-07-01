@@ -1,6 +1,7 @@
 from unittest.mock import Mock, call
 
 import pytest
+from freezegun import freeze_time
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from swo.mpt.cli.core.products.api import ProductAPIService
@@ -220,6 +221,7 @@ def test_retrieve_not_found(mocker, service_context):
     file_handler_write_mock.assert_called_once()
 
 
+@freeze_time("2025-05-30")
 def test_retrieve_from_mpt(mocker, service_context, mpt_product_data, product_data_from_json):
     api_get_mock = mocker.patch.object(
         service_context.api,

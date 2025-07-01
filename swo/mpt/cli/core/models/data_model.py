@@ -14,8 +14,7 @@ class BaseDataModel(ABC):
         raise NotImplementedError
 
     @classmethod
-    # TODO: uncomment when the method is implemented for all subclasses
-    # @abstractmethod
+    @abstractmethod
     def from_json(cls, data: dict[str, Any]) -> Self:  # pragma: no cover
         raise NotImplementedError
 
@@ -23,8 +22,7 @@ class BaseDataModel(ABC):
     def to_json(self) -> dict[str, Any]:  # pragma: no cover
         raise NotImplementedError
 
-    # TODO: uncomment when the method is implemented for all subclasses
-    # @abstractmethod
+    @abstractmethod
     def to_xlsx(self) -> dict[str, Any]:  # pragma: no cover
         raise NotImplementedError
 

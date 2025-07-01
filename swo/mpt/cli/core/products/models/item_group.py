@@ -40,18 +40,18 @@ class ItemGroupData(BaseDataModel):
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> Self:
+        updated = data["audit"].get("updated", {}).get("at")
         return cls(
             id=data["id"],
-            coordinate=data[constants.ITEMS_GROUPS_ID]["coordinate"],
-            name=data[constants.ITEMS_GROUPS_NAME]["value"],
-            label=data[constants.ITEMS_GROUPS_LABEL]["value"],
-            description=data[constants.ITEMS_GROUPS_DESCRIPTION]["value"],
-            display_order=data[constants.ITEMS_GROUPS_DISPLAY_ORDER]["value"],
-            default=data[constants.ITEMS_GROUPS_DEFAULT]["value"] == "True",
-            multiple=data[constants.ITEMS_GROUPS_MULTIPLE_CHOICES]["value"] == "True",
-            required=data[constants.ITEMS_GROUPS_REQUIRED]["value"] == "True",
+            name=data["name"],
+            label=data["label"],
+            description=data["description"],
+            display_order=data["displayOrder"],
+            default=data["default"],
+            multiple=data["multiple"],
+            required=data["required"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=parser.parse(data["audit"]["updated"]["at"]).date(),
+            updated_date=updated and parser.parse(updated).date() or None,
         )
 
     def to_json(self) -> dict[str, Any]:
@@ -73,9 +73,9 @@ class ItemGroupData(BaseDataModel):
             constants.ITEMS_GROUPS_LABEL: self.label,
             constants.ITEMS_GROUPS_DISPLAY_ORDER: self.display_order,
             constants.ITEMS_GROUPS_DESCRIPTION: self.description,
-            constants.ITEMS_GROUPS_DEFAULT: self.default,
-            constants.ITEMS_GROUPS_MULTIPLE_CHOICES: self.multiple,
-            constants.ITEMS_GROUPS_REQUIRED: self.required,
+            constants.ITEMS_GROUPS_DEFAULT: str(self.default),
+            constants.ITEMS_GROUPS_MULTIPLE_CHOICES: str(self.multiple),
+            constants.ITEMS_GROUPS_REQUIRED: str(self.required),
             constants.ITEMS_GROUPS_CREATED: self.created_date,
             constants.ITEMS_GROUPS_MODIFIED: self.updated_date,
         }

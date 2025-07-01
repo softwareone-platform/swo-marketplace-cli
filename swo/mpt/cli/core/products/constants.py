@@ -260,6 +260,7 @@ TEMPLATES_FIELDS = [
 
 # Settings tab definition
 SETTINGS_SETTING = "Setting"
+SETTINGS_ACTION = ACTION_COLUMN_NAME
 SETTINGS_VALUE = "Value"
 SETTINGS_REQUIRED_FIELDS = [
     SETTINGS_SETTING,
@@ -278,7 +279,11 @@ SETTINGS_API_MAPPING = {
     "Purchase order validation (query)": "preValidation.purchaseOrderQuery",
     "Termination order validation (draft)": "preValidation.terminationOrder",
 }
-SETTINGS_FIELDS = SETTINGS_REQUIRED_FIELDS
+SETTINGS_FIELDS = [
+    SETTINGS_SETTING,
+    SETTINGS_ACTION,
+    SETTINGS_VALUE,
+]
 
 
 REQUIRED_FIELDS_BY_TAB = {
