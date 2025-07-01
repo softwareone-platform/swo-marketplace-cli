@@ -300,91 +300,13 @@ def mpt_item_data():
             "id": "PRC-0232-2541-0002",
             "currency": "USD",
             "precision": 2,
-            "defaultMarkup": 42.0000000000,
-            "notes": "another price list",
-            "externalIds": {},
-            "statistics": {
-                "sellers": 0,
-                "listings": 0,
-                "priceListItems": 609,
-                "purchasePriceItems": 609,
-                "purchasePriceCompleteness": 100,
-                "salesPriceItems": 609,
-                "salesPriceCompleteness": 100,
-                "averageMarkup": 0.4128078817,
-                "averageMargin": 0.0000000000,
-            },
-            "product": {
-                "id": "PRD-0232-2541",
-                "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
-                "externalIds": {},
-                "icon": "/v1/catalog/products/PRD-0232-2541/icon",
-                "status": "Unpublished",
-            },
-            "vendor": {
-                "id": "ACC-9226-9856",
-                "type": "Vendor",
-                "status": "Active",
-                "name": "Adobe",
-            },
-            "audit": {
-                "created": {
-                    "at": "2024-04-04T16:26:50.982Z",
-                    "by": {"id": "USR-0000-0022", "name": "User22"},
-                }
-            },
         },
         "item": {
             "id": "ITM-0232-2541-0002",
             "name": "Creative Cloud All Apps with Adobe Stock (10 assets per month)",
-            "description": "ITM-8351-9764 | AO03.15428.EN",
             "externalIds": {"vendor": "65322587CA", "operations": "1234567"},
-            "group": {"id": "IGR-0232-2541-0001", "name": "Items"},
-            "unit": {
-                "id": "UNT-1916",
-                "description": "When you purchase a product, a license represents your right to "
-                "use software and services. Licenses are used to authenticate and "
-                "activate the products on the end user's computers.",
-                "name": "user",
-            },
             "terms": {"period": "1y", "commitment": "1y"},
-            "quantityNotApplicable": False,
-            "status": "Published",
-            "product": {
-                "id": "PRD-0232-2541",
-                "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
-                "externalIds": {},
-                "icon": "/v1/catalog/products/PRD-0232-2541/icon",
-                "status": "Unpublished",
-            },
-            "parameters": [
-                {
-                    "id": "PAR-0232-2541-0004",
-                    "externalId": "type",
-                    "type": "DropDown",
-                    "name": "Type",
-                    "value": "Teams",
-                    "displayValue": "Teams",
-                },
-                {
-                    "id": "PAR-0232-2541-0005",
-                    "externalId": "language",
-                    "type": "SingleLineText",
-                    "name": "Language",
-                    "value": "English - Europe",
-                    "displayValue": "English - Europe",
-                },
-            ],
-            "audit": {
-                "created": {
-                    "at": "2024-03-19T12:03:51.504Z",
-                    "by": {"id": "USR-0000-0022", "name": "User22"},
-                },
-                "updated": {
-                    "at": "2024-04-23T11:03:24.411Z",
-                    "by": {"id": "USR-0081-7601", "name": "User7601"},
-                },
-            },
+            "status": "ForSale",
         },
         "audit": {
             "created": {

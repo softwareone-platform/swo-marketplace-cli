@@ -2,6 +2,7 @@ from abc import abstractmethod
 from collections.abc import Generator
 from typing import Any, Generic, TypeVar
 
+from openpyxl.styles import NamedStyle
 from swo.mpt.cli.core.handlers.constants import ERROR_COLUMN_NAME
 from swo.mpt.cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
 from swo.mpt.cli.core.handlers.file_manager import ExcelFileManager
@@ -18,24 +19,18 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
     _required_fields_by_tab: dict[str, Any]
     _sheet_name: str
 
-    def add(self, items: list[DataModel], precision: int, currency: str) -> None:
+    def add(self, items: list[DataModel]) -> None:
         """
         Add a row for each item to the tab.
 
         Args:
             items: The items to add.
-            precision: The number of decimal places to round to.
-            currency: The currency to round to.
         """
         for row, item in enumerate(items, self.file_handler.get_sheet_next_row(self._sheet_name)):
             item_xlsx = item.to_xlsx()
             for col, field in enumerate(self._fields, 1):
                 value = item_xlsx.get(field, "")
-                style = (
-                    get_number_format_style(currency, precision)
-                    if isinstance(value, float)
-                    else None
-                )
+                style = self._get_style(item, value)
                 self.file_handler.write_cell(
                     self._sheet_name,
                     col=col,
@@ -99,6 +94,21 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
             self.file_handler.write([{self._sheet_name: {f"{column_letter}1": ERROR_COLUMN_NAME}}])
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
+
+    def _get_style(self, item: DataModel, value: Any) -> NamedStyle | None:
+        if not isinstance(value, float):
+            return None
+
+        try:
+            currency = item.currency  # type: ignore
+            precision = item.precision  # type: ignore
+        except AttributeError:
+            return None
+
+        if currency is None or precision is None:
+            return None
+
+        return get_number_format_style(currency, precision)
 
     @abstractmethod
     def _read_data(self) -> Generator[dict[str, Any], None, None]:

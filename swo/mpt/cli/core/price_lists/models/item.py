@@ -43,10 +43,12 @@ class ItemData(BaseDataModel):
 
     action: ItemAction = ItemAction.SKIP
     coordinate: str | None = None
+    currency: str | None = None
     lp_x1: float | None = None
     lp_xm: float | None = None
     lp_xy: float | None = None
     modified_date: date | None = None
+    precision: int | None = None
     pp_x1: float | None = None
     pp_xm: float | None = None
     pp_xy: float | None = None
@@ -90,6 +92,7 @@ class ItemData(BaseDataModel):
         return cls(
             id=data.get("id", ""),
             billing_frequency=data["item"]["terms"]["period"],
+            currency=data["priceList"]["currency"],
             commitment=data["item"]["terms"].get("commitment"),
             erp_id=data["item"]["externalIds"].get("operations"),
             item_id=data["item"]["id"],
@@ -98,6 +101,7 @@ class ItemData(BaseDataModel):
             lp_xm=data.get("LPxM"),
             lp_xy=data.get("LPxY"),
             markup=data.get("markup"),
+            precision=data["priceList"]["precision"],
             pp_x1=data.get("PPx1"),
             pp_xm=data.get("PPxM"),
             pp_xy=data.get("PPxY"),

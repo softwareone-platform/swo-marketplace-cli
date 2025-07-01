@@ -151,9 +151,7 @@ def export(
             file_manager=PriceListExcelFileManager(str(file_path)),
             stats=stats,
         )
-        result = PriceListService(price_list_service_context).export(
-            context={"price_list_id": price_list_id}
-        )
+        result = PriceListService(price_list_service_context).export(resource_id=price_list_id)
         if not result.success:
             console.print(f"Failed to export price list with id: {price_list_id}")
             console.print(result.errors)
@@ -167,7 +165,7 @@ def export(
             file_manager=PriceListItemExcelFileManager(str(file_path)),
             stats=stats,
         )
-        result = ItemService(item_service_context).export(context={"price_list": result.model})
+        result = ItemService(item_service_context).export()
         if not result.success:
             console.print(f"Failed to export price list items for id: {price_list_id}")
             has_error = True

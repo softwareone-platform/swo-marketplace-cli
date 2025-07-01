@@ -1,11 +1,10 @@
 from abc import ABC, abstractmethod
-from typing import Any
 
 from swo.mpt.cli.core.services.service_context import ServiceContext
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
-class BaseService(ABC):
+class Service(ABC):
     service_context: ServiceContext
 
     def __init__(self, service_context: ServiceContext):
@@ -19,16 +18,6 @@ class BaseService(ABC):
     def create(self) -> ServiceResult:  # pragma: no cover
         """
         Create a resource based on the definition file
-
-        Returns:
-            ServiceResult object with operation results
-        """
-        raise NotImplementedError
-
-    @abstractmethod
-    def export(self, context: dict[str, Any]) -> ServiceResult:  # pragma: no cover
-        """
-        Export a resource from mpt to the file
 
         Returns:
             ServiceResult object with operation results
@@ -81,3 +70,30 @@ class BaseService(ABC):
 
     def _set_skipped(self):
         self.stats.add_skipped(self.file_manager.tab_name)
+
+
+class BaseService(Service, ABC):
+    @abstractmethod
+    def export(self, resource_id: str) -> ServiceResult:  # pragma: no cover
+        """
+        Export a resource from mpt to the file
+
+        Args:
+            resource_id: The ID of the product to export.
+
+        Returns:
+            ServiceResult object with operation results
+        """
+        raise NotImplementedError
+
+
+class RelatedBaseService(Service, ABC):
+    @abstractmethod
+    def export(self) -> ServiceResult:  # pragma: no cover
+        """
+        Export a resource from mpt to the file
+
+        Returns:
+            ServiceResult object with operation results
+        """
+        raise NotImplementedError

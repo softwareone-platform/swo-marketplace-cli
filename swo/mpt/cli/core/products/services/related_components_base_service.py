@@ -1,13 +1,12 @@
 from abc import ABC
-from typing import Any
 
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.models import DataCollectionModel
-from swo.mpt.cli.core.services.base_service import BaseService
+from swo.mpt.cli.core.services import RelatedBaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
-class RelatedComponentsBaseService(BaseService, ABC):
+class RelatedComponentsBaseService(RelatedBaseService, ABC):
     def create(self) -> ServiceResult:
         errors = []
         collection = {}
@@ -32,7 +31,7 @@ class RelatedComponentsBaseService(BaseService, ABC):
             stats=self.stats,
         )
 
-    def export(self, context: dict[str, Any]) -> ServiceResult:  # pragma: no cover
+    def export(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Export method not implemented"], model=None, stats=self.stats
         )

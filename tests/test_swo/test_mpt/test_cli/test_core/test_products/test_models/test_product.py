@@ -68,7 +68,7 @@ def test_product_data_to_json(product_data_from_dict):
         "name": "Adobe Commerce (CLI Test)",
         "shortDescription": "Catalog description",
         "longDescription": "Product description",
-        "website": "https://example.com"
+        "website": "https://example.com",
     }
 
 
@@ -122,7 +122,7 @@ def test_settings_data_from_json(mpt_product_data):
 def test_settings_data_to_xlsx(product_data_from_dict):
     result = product_data_from_dict.settings.to_json()
 
-    assert result == {'itemSelection': False}
+    assert result == {"itemSelection": False}
 
 
 def test_setting_item_from_dict(settings_file_data):

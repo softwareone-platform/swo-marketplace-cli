@@ -1,4 +1,3 @@
-from typing import Any
 from unittest.mock import Mock
 
 import pytest
@@ -13,7 +12,7 @@ from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
 class FakeRelatedComponentsService(RelatedComponentsBaseService):
-    def export(self, context: dict[str, Any]) -> ServiceResult:
+    def export(self) -> ServiceResult:
         pass
 
     def retrieve(self) -> ServiceResult:
