@@ -1,11 +1,9 @@
-from typing import Any
-
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.models import DataCollectionModel
 from swo.mpt.cli.core.mpt.flows import search_uom_by_name
 from swo.mpt.cli.core.products.constants import TAB_ITEMS
 from swo.mpt.cli.core.products.models import ItemData
-from swo.mpt.cli.core.services.base_service import BaseService
+from swo.mpt.cli.core.services import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
@@ -30,7 +28,7 @@ class ItemService(BaseService):
 
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
 
-    def export(self, context: dict[str, Any]) -> ServiceResult:  # pragma: no cover
+    def export(self, resource_id: str) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Export method not implemented"], model=None, stats=self.stats
         )

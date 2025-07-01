@@ -2,7 +2,7 @@ from collections.abc import Generator
 from dataclasses import dataclass
 from typing import Any, Self
 from unittest import mock
-from unittest.mock import Mock, call
+from unittest.mock import MagicMock, Mock, call
 
 import pytest
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -16,6 +16,9 @@ from swo.mpt.cli.core.models.data_model import BaseDataModel
 
 @dataclass
 class FakeDataModel(BaseDataModel):
+    currency: str | None = None
+    precision: int | None = None
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls()
@@ -50,11 +53,18 @@ def fake_horizontal_tab_file_manager():
     return FakeHorizontalTabFileManager("fake_path")
 
 
-def test_add(mocker, fake_horizontal_tab_file_manager):
+@pytest.mark.parametrize(
+    ("currency", "precision", "expected_style"),
+    [
+        ("USD", 2, number_format_style),
+        (None, None, None),
+    ],
+)
+def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_file_manager):
     get_sheet_next_row_mock = mocker.patch.object(
         fake_horizontal_tab_file_manager.file_handler, "get_sheet_next_row", return_value=2
     )
-    item = FakeDataModel()
+    item = FakeDataModel(currency=currency, precision=precision)
     item_to_xlsx_mock = mocker.patch.object(
         item,
         "to_xlsx",
@@ -65,7 +75,7 @@ def test_add(mocker, fake_horizontal_tab_file_manager):
     )
     save_mock = mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
 
-    fake_horizontal_tab_file_manager.add([item], precision=2, currency="USD")
+    fake_horizontal_tab_file_manager.add([item])
 
     get_sheet_next_row_mock.assert_called_once_with("FakeSheet")
     item_to_xlsx_mock.assert_called_once()
@@ -78,7 +88,7 @@ def test_add(mocker, fake_horizontal_tab_file_manager):
                 row=2,
                 value=22.5,
                 data_validation=None,
-                style=number_format_style,
+                style=expected_style,
             ),
             call(
                 "FakeSheet",
@@ -91,6 +101,35 @@ def test_add(mocker, fake_horizontal_tab_file_manager):
         ]
     )
     save_mock.assert_called_once()
+
+
+def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
+    mocker.patch.object(
+        fake_horizontal_tab_file_manager.file_handler, "get_sheet_next_row", return_value=2
+    )
+    mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
+    item_mock = MagicMock(
+        spec=BaseDataModel, to_xlsx=Mock(return_value={"ID": "fake_id", "styled_field": 22.5})
+    )
+    write_cell_mock = mocker.patch.object(
+        fake_horizontal_tab_file_manager.file_handler, "write_cell"
+    )
+
+    fake_horizontal_tab_file_manager.add([item_mock])
+
+    write_cell_mock.assert_has_calls(
+        [
+            call("FakeSheet", col=1, row=2, value="fake_id", data_validation=None, style=None),
+            call(
+                "FakeSheet",
+                col=2,
+                row=2,
+                value=22.5,
+                data_validation=None,
+                style=None,
+            ),
+        ]
+    )
 
 
 def test_create_tab(mocker, fake_horizontal_tab_file_manager):

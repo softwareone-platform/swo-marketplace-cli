@@ -1,5 +1,4 @@
 import json
-from typing import Any
 
 from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError
@@ -40,19 +39,8 @@ class ProductService(BaseService):
         self._set_synced(product.id, product.coordinate)
         return ServiceResult(success=True, model=product, stats=self.stats)
 
-    def export(self, context: dict[str, Any]) -> ServiceResult:
-        """
-        Exports a product by retrieving it from the API and writing its data to a
-        new tab in a file.
-
-        Args:
-            context: A dictionary containing the product_id to export.
-
-        Returns:
-            ServiceResult: The result of the export operation.
-        """
-        product_id = context["product_id"]
-        result = self.retrieve_from_mpt(product_id)
+    def export(self, resource_id: str) -> ServiceResult:
+        result = self.retrieve_from_mpt(resource_id)
         product = result.model
         if not result.success or not product:
             return result

@@ -30,7 +30,7 @@ def test_export(mocker, service_context, mpt_item_data):
     response_data = {"data": [mpt_item_data], "meta": {"offset": 1, "limit": 100, "total": 1}}
     api_list_mock = mocker.patch.object(service_context.api, "list", side_effect=[response_data])
 
-    result = ItemService(service_context).export({"price_list": mocker.Mock(precision=2)})
+    result = ItemService(service_context).export()
 
     assert result.success is True
     create_tab_mock.assert_called_once()
@@ -45,7 +45,7 @@ def test_export_mpt_error(mocker, service_context):
     )
     add_spy = mocker.spy(service_context.file_manager, "add")
 
-    result = ItemService(service_context).export({"price_list": mocker.Mock(precision=2)})
+    result = ItemService(service_context).export()
 
     assert result.success is False
     create_tab_mock.assert_called_once()

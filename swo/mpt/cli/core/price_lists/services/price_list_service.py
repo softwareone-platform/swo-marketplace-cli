@@ -1,7 +1,5 @@
-from typing import Any
-
 from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.services.base_service import BaseService
+from swo.mpt.cli.core.services import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
@@ -27,19 +25,8 @@ class PriceListService(BaseService):
 
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
-    def export(self, context: dict[str, Any]) -> ServiceResult:
-        """
-        Exports a price list by retrieving it from the API and writing its data to a
-        new tab in a file.
-
-        Args:
-            context: A dictionary containing the price_list_id to export.
-
-        Returns:
-            ServiceResult: The result of the export operation.
-        """
-        price_list_id = context["price_list_id"]
-        result = self.retrieve_from_mpt(price_list_id)
+    def export(self, resource_id: str) -> ServiceResult:
+        result = self.retrieve_from_mpt(resource_id)
         price_list = result.model
         if not result.success or not price_list:
             return result

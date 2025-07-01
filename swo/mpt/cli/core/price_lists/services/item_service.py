@@ -1,34 +1,32 @@
-from typing import Any
-
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.price_lists.constants import (
     TAB_PRICE_ITEMS,
 )
-from swo.mpt.cli.core.services.base_service import BaseService
+from swo.mpt.cli.core.services import RelatedBaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
 
-class ItemService(BaseService):
+class ItemService(RelatedBaseService):
     def create(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Operation not implemented"], model=None, stats=self.stats
         )
 
-    def export(self, context: dict[str, Any]) -> ServiceResult:
+    def export(self) -> ServiceResult:
         self.file_manager.create_tab()
 
-        price_list = context["price_list"]
         offset = 0
         limit = 100
+        select = "audit,item.terms,priceList.precision,priceList.currency"
         while True:
             try:
-                response = self.api.list({"select": "item.terms", "offset": offset, "limit": limit})
+                response = self.api.list({"select": select, "offset": offset, "limit": limit})
             except MPTAPIError as e:
                 self.stats.add_error(TAB_PRICE_ITEMS)
                 return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
 
             data = [self.data_model.from_json(item) for item in response["data"]]
-            self.file_manager.add(data, price_list.precision, price_list.currency)
+            self.file_manager.add(data)
 
             meta_data = response["meta"]
             if meta_data["offset"] + meta_data["limit"] < meta_data["total"]:
