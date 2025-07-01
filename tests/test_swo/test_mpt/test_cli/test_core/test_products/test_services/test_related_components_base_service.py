@@ -54,6 +54,7 @@ def test_create(mocker, service_context, mpt_parameters_data):
     file_handler_write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
     stats_mock = mocker.patch.object(service_context.stats, "add_synced")
     service = FakeRelatedComponentsService(service_context)
+    prepare_data_model_to_create_spy = mocker.spy(service, "prepare_data_model_to_create")
 
     result = service.create()
 
@@ -63,6 +64,7 @@ def test_create(mocker, service_context, mpt_parameters_data):
     file_handler_write_id_mock.assert_called_once_with("fake_coordinate", "new_fake_id")
     post_mock.assert_called_once_with(json={"id": "fake_id"})
     stats_mock.assert_called_once_with("fake_tab_name")
+    prepare_data_model_to_create_spy.assert_called_once()
 
 
 def test_create_api_error(mocker, service_context, parameters_data_from_dict):
