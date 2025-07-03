@@ -38,3 +38,14 @@ def test_set_new_parameter_group(
     write_id_mock.assert_called_once_with(
         template_data_from_dict.content_coordinate, f"{parameter_group_data_from_dict.id}: bla"
     )
+
+
+def test_set_new_parameter_groups_empty(mocker, service_context):
+    read_data_spy = mocker.spy(service_context.file_manager, "read_data")
+    write_id_spy = mocker.spy(service_context.file_manager, "write_id")
+    service = TemplateService(service_context)
+
+    service.set_new_parameter_group(DataCollectionModel(collection={}))
+
+    read_data_spy.assert_not_called()
+    write_id_spy.assert_not_called()

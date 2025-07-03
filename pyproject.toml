@@ -24,6 +24,7 @@ classifiers = [
     "Topic :: Utilities",
 ]
 dependencies = [
+    "dependency-injector==4.48.*",
     "openpyxl==3.1.*",
     "pydantic==2.11.*",
     "pyfiglet==1.0.*",
