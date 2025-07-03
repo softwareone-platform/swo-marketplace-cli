@@ -1,6 +1,7 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
+from unittest.mock import MagicMock
 
 import pytest
 from freezegun import freeze_time
@@ -74,6 +75,7 @@ from swo.mpt.cli.core.products.constants import (
     TEMPLATES_NAME,
     TEMPLATES_TYPE,
 )
+from swo.mpt.cli.core.products.containers import ProductContainer
 from swo.mpt.cli.core.products.models import (
     AgreementParametersData,
     ItemData,
@@ -85,6 +87,33 @@ from swo.mpt.cli.core.products.models import (
 )
 from swo.mpt.cli.core.products.models.items import ItemAction
 from swo.mpt.cli.core.products.models.product import SettingsItem
+from swo.mpt.cli.core.products.services import (
+    ItemGroupService,
+    ItemService,
+    ParameterGroupService,
+    ParametersService,
+    ProductService,
+    TemplateService,
+)
+
+
+@pytest.fixture
+def product_container_mock(mocker, account_container_mock):
+    container = ProductContainer()
+    container.account_container.override(account_container_mock)
+    container.product_service.override(MagicMock(ProductService))
+    container.item_service.override(MagicMock(ItemService))
+    container.item_group_service.override(MagicMock(ItemGroupService))
+    container.parameter_group_service.override(MagicMock(ParameterGroupService))
+    container.agreement_parameters_service.override(MagicMock(ParametersService))
+    container.item_parameters_service.override(MagicMock(ParametersService))
+    container.request_parameters_service.override(MagicMock(ParametersService))
+    container.subscription_parameters_service.override(MagicMock(ParametersService))
+    container.template_service.override(MagicMock(TemplateService))
+    mock = mocker.patch("swo.mpt.cli.core.products.app.ProductContainer", autospec=True)
+    mock.return_value = container
+
+    return container
 
 
 @pytest.fixture

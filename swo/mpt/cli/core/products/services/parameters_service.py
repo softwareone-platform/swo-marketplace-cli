@@ -8,6 +8,16 @@ from swo.mpt.cli.core.products.services.related_components_base_service import (
 
 class ParametersService(RelatedComponentsBaseService):
     def set_new_parameter_group(self, parameter_groups: DataCollectionModel) -> None:
+        """
+        Update parameter group references in parameter content.
+
+        Args:
+            parameter_groups: A collection of parameter groups to update.
+
+        """
+        if not parameter_groups.collection or parameter_groups is None:
+            return None
+
         for data_model in self.file_manager.read_data():
             try:
                 new_group = parameter_groups.retrieve_by_id(data_model.group_id)
@@ -15,6 +25,8 @@ class ParametersService(RelatedComponentsBaseService):
                 continue
 
             self.file_manager.write_id(data_model.group_id_coordinate, new_group.id)
+
+        return None
 
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()

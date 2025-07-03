@@ -228,6 +228,17 @@ def test_set_new_item_groups_error(
     write_id_mock.assert_not_called()
 
 
+def test_set_new_parameter_groups_empty(mocker, service_context):
+    read_data_spy = mocker.spy(service_context.file_manager, "read_data")
+    write_id_spy = mocker.spy(service_context.file_manager, "write_id")
+    service = ItemService(service_context)
+
+    service.set_new_item_groups(DataCollectionModel(collection={}))
+
+    read_data_spy.assert_not_called()
+    write_id_spy.assert_not_called()
+
+
 def test_set_export_params(service_context, item_data_from_dict):
     service = ItemService(service_context)
 
