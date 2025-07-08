@@ -9,6 +9,7 @@ from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.models import DataActionEnum
+from swo.mpt.cli.core.products.models.mixins import ActionMixin
 
 BaseParametersData = TypeVar("BaseParametersData", bound="ParametersData")
 
@@ -21,7 +22,7 @@ class ParamScopeEnum(StrEnum):
 
 
 @dataclass
-class ParametersData(BaseDataModel, ABC):
+class ParametersData(BaseDataModel, ActionMixin, ABC):
     id: str
     description: str
     display_order: int
@@ -32,7 +33,6 @@ class ParametersData(BaseDataModel, ABC):
     constraints: dict[str, Any]
     options: dict[str, Any]
 
-    action: DataActionEnum = DataActionEnum.SKIP
     coordinate: str | None = None
     group_id: str | None = None
     group_id_coordinate: str | None = None

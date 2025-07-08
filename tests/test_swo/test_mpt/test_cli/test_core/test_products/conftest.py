@@ -78,6 +78,8 @@ from swo.mpt.cli.core.products.constants import (
 from swo.mpt.cli.core.products.containers import ProductContainer
 from swo.mpt.cli.core.products.models import (
     AgreementParametersData,
+    DataActionEnum,
+    ItemActionEnum,
     ItemData,
     ItemGroupData,
     ParameterGroupData,
@@ -85,7 +87,6 @@ from swo.mpt.cli.core.products.models import (
     SettingsData,
     TemplateData,
 )
-from swo.mpt.cli.core.products.models.items import ItemAction
 from swo.mpt.cli.core.products.models.product import SettingsItem
 from swo.mpt.cli.core.products.services import (
     ItemGroupService,
@@ -169,7 +170,16 @@ def product_data_from_dict():
         created_date=datetime(2024, 1, 1, 0, 0),
         updated_date=datetime(2024, 1, 1, 0, 0),
         coordinate="B3",
-        settings=SettingsData(items=[SettingsItem(name="Item selection validation", value="Off")]),
+        settings=SettingsData(
+            items=[
+                SettingsItem(name="Product ordering", action=DataActionEnum.SKIP, value="Off"),
+                SettingsItem(
+                    name="Change order validation (draft)",
+                    action=DataActionEnum.UPDATE,
+                    value="Enabled",
+                ),
+            ]
+        ),
     )
 
 
@@ -291,7 +301,7 @@ def item_data_from_dict():
         unit_coordinate="J38272",
         vendor_id="NAV12345",
         status="Published",
-        action=ItemAction.UPDATE,
+        action=ItemActionEnum.UPDATE,
         coordinate="A38272",
         item_type="vendor",
     )

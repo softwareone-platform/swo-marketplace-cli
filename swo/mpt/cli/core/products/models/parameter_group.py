@@ -5,11 +5,11 @@ from typing import Any, Self
 from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
-from swo.mpt.cli.core.products.models.data_actions import DataActionEnum
+from swo.mpt.cli.core.products.models.mixins import ActionMixin
 
 
 @dataclass
-class ParameterGroupData(BaseDataModel):
+class ParameterGroupData(BaseDataModel, ActionMixin):
     id: str
     default: bool
     description: str
@@ -17,7 +17,6 @@ class ParameterGroupData(BaseDataModel):
     label: str
     name: str
 
-    action: DataActionEnum = DataActionEnum.SKIP
     coordinate: str | None = None
     created_date: date | None = None
     updated_date: date | None = None

@@ -6,3 +6,14 @@ class DataActionEnum(StrEnum):
     DELETE = "delete"
     UPDATE = "update"
     SKIP = "-"
+    SKIPPED = ""
+
+
+class ItemActionEnum(StrEnum):
+    CREATE = "create"
+    UPDATE = "update"
+    REVIEW = "review"
+    PUBLISH = "publish"
+    UNPUBLISH = "unpublish"
+    SKIP = "-"
+    SKIPPED = ""
