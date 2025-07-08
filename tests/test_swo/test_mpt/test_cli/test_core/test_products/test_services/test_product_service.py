@@ -141,6 +141,16 @@ def test_validate_definition(mocker, service_context):
     assert result.model is None
 
 
+def test_validate_definition_file_doesnt_exist(mocker, service_context):
+    mocker.patch.object(service_context.file_manager.file_handler, "exists", return_value=False)
+
+    service = ProductService(service_context)
+    result = service.validate_definition()
+
+    assert result.success is False
+    assert result.errors == ["Provided file path doesn't exist"]
+
+
 def test_validate_definition_missing_tabs(mocker, service_context):
     mocker.patch.object(
         service_context.file_manager,

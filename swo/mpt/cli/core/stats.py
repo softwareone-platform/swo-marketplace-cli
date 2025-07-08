@@ -71,6 +71,22 @@ class StatsCollector(ABC):
         self.__has_error = False
         self.__tab_aliases = tabs
 
+    @property
+    def id(self) -> str | None:
+        return self.__id
+
+    @id.setter
+    def id(self, value: str) -> None:
+        self.__id = value
+
+    @property
+    def tabs(self) -> dict[str, Results]:
+        return self.__tab_aliases
+
+    @property
+    def has_errors(self) -> bool:
+        return self.__has_error
+
     def add_error(self, tab_name: str) -> None:
         self.__tab_aliases[tab_name]["error"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
@@ -83,14 +99,6 @@ class StatsCollector(ABC):
     def add_skipped(self, tab_name: str) -> None:
         self.__tab_aliases[tab_name]["skipped"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
-
-    @property
-    def tabs(self) -> dict[str, Results]:
-        return self.__tab_aliases
-
-    @property
-    def is_error(self) -> bool:
-        return self.__has_error
 
     @abstractmethod
     def _get_table_title(self) -> str:  # pragma: no cover
@@ -140,7 +148,7 @@ class ProductStatsCollector(StatsCollector):
         super().__init__(tabs)
 
     def _get_table_title(self) -> str:
-        status = "[red bold]FAILED" if self.is_error else "[green bold]SUCCEED"
+        status = "[red bold]FAILED" if self.has_errors else "[green bold]SUCCEED"
         return f"Product Sync {status}"
 
 
@@ -153,21 +161,12 @@ class PriceListStatsCollector(StatsCollector):
             "General": general,
             "Price Items": price_items,
         }
-
         super().__init__(tabs)
 
-    @property
-    def price_list_id(self) -> str | None:
-        return self.__id
-
-    @price_list_id.setter
-    def price_list_id(self, value: str) -> None:
-        self.__id = value
-
     def _get_table_title(self) -> str:
-        if self.is_error:
+        if self.has_errors:
             title = "Pricelist sync [red bold]FAILED"
         else:
-            title = f"Pricelist {self.price_list_id} sync [green bold]SUCCEED"
+            title = f"Pricelist {self.id} sync [green bold]SUCCEED"
 
         return title

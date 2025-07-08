@@ -67,7 +67,17 @@ class ItemService(RelatedComponentsBaseService):
 
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
 
-    def set_new_item_groups(self, item_groups: DataCollectionModel) -> None:
+    def set_new_item_groups(self, item_groups: DataCollectionModel | None) -> None:
+        """
+        Update item group references in item content.
+
+        Args:
+            item_groups: A collection of item groups to update.
+
+        """
+        if item_groups is None or not item_groups.collection:
+            return None
+
         for item in self.file_manager.read_data():
             try:
                 new_group = item_groups.retrieve_by_id(item.group_id)
@@ -75,6 +85,8 @@ class ItemService(RelatedComponentsBaseService):
                 continue
 
             self.file_manager.write_id(item.group_coordinate, new_group.id)
+
+        return None
 
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()

@@ -92,7 +92,7 @@ def sync_price_lists(
         with console.status("Sync Price list Items..."):
             result = price_list_item_service.update()
 
-        stats.price_list_id = price_list.id
+        stats.id = price_list.id
         console.print(stats.to_table())
 
     if has_error:
