@@ -110,7 +110,7 @@ def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict
 def test_update_item_error(mocker, service_context):
     mocker.patch.object(
         service_context.api,
-        "exists",
+        "list",
         side_effect=MPTAPIError("API Error", "Error retrieving item"),
     )
     file_handler_mock = mocker.patch.object(service_context.file_manager, "write_error")
@@ -129,7 +129,9 @@ def test_update_item_error(mocker, service_context):
 
 
 def test_update_item_not_found(mocker, service_context):
-    mocker.patch.object(service_context.api, "exists", return_value=False)
+    mocker.patch.object(
+        service_context.api, "list", side_effect=MPTAPIError("API Error", "Item not found")
+    )
     file_handler_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_spy = mocker.spy(service_context.stats, "add_error")
     service = ItemService(service_context)
@@ -139,6 +141,7 @@ def test_update_item_not_found(mocker, service_context):
     assert not result.success
     assert len(result.errors) > 0
     assert result.model is None
+
     file_handler_mock.assert_called()
     stats_spy.assert_called()
 
