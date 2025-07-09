@@ -3,6 +3,7 @@ from typing import Annotated
 import typer
 from rich import box
 from rich.table import Table
+from swo.mpt.cli.core.accounts.constants import FETCHING, READING, REMOVING, STATUS_MSG
 from swo.mpt.cli.core.console import console
 from swo.mpt.cli.core.errors import (
     AccountNotFoundError,
@@ -38,8 +39,8 @@ def add_account(
     """
     Add an account to work with the SoftwareOne Marketplace
     """
-    with console.status("Reading accounts from the configuration file") as status:
-        status.update(f"Fetching account information from environment {environment}")
+    with console.status(STATUS_MSG[READING]) as status:
+        status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
         mpt_client = MPTClient(environment, secret, debug=state.verbose)
         try:
             token = get_token(mpt_client, secret)
@@ -80,7 +81,7 @@ def activate_account(
     """
     Activate SoftwareOne Marketplace account
     """
-    with console.status("Reading accounts from the configuration file"):
+    with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
     try:
@@ -108,7 +109,7 @@ def extract_account(
     """
     Remove SoftwareOne Marketplace account
     """
-    with console.status("Reading accounts from the configuration file"):
+    with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
     try:
@@ -122,7 +123,7 @@ def extract_account(
         abort=True,
     )
 
-    with console.status(f"Removing account {account.id} ({account.name})"):
+    with console.status(f"{STATUS_MSG[REMOVING]} {account.id} ({account.name})"):
         accounts = remove_account(accounts, account)
         write_accounts(accounts)
 
@@ -140,7 +141,7 @@ def list_accounts(
     """
     List available SoftwareOne Marketplace accounts
     """
-    with console.status("Reading accounts from the configuration file"):
+    with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
         if active_only:
@@ -159,7 +160,7 @@ def get_active_account() -> Account:
     """
     Check for file and create current active account
     """
-    with console.status("Reading accounts from the configuration file"):
+    with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
     try:
