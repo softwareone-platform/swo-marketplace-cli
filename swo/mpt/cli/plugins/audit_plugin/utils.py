@@ -24,23 +24,56 @@ def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dic
 
 def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
     """Format JSON path with additional context from external IDs if available."""
-    if "[" in path and "]" in path:
-        array_path, rest = path.split("]", 1)
-        base_path, index_str = array_path.split("[")
-        index = int(index_str)
+    if not is_valid_path(path):
+        return path
 
-        for trail in [source_trail, target_trail]:
+    array_path, rest = path.split("]", 1)
+    base_path, index_str = array_path.split("[")
+    index = int(index_str)
+
+    for trail in [source_trail, target_trail]:
+        obj = trail
+        for part in base_path.split("."):
             try:
-                obj = trail
-                for part in base_path.split("."):
-                    obj = obj[part]
-                if isinstance(obj, list) and len(obj) > index:
-                    if "externalId" in obj[index]:
-                        return f"{path} (externalId: {obj[index]['externalId']})"
-            except (KeyError, IndexError, TypeError):
+                obj = obj[part]
+            except KeyError:
                 continue
 
+        if (external_id := get_external_id(obj, index)) is not None:
+            return f"{path} (externalId: {external_id})"
+
     return path
+
+
+def is_valid_path(path: str) -> bool:
+    """
+    Check if a path is valid.
+    Args:
+        path: The path to check.
+
+    Returns: True if the path is valid, False otherwise.
+
+    """
+    return "[" in path and "]" in path
+
+
+def get_external_id(obj: Any, index: int) -> str | None:
+    """
+    Get the external ID from an object.
+    Args:
+        obj: the object to get the external ID from.
+        index: the index of the object to get the external ID from.
+
+    Returns: the external ID or None.
+
+    """
+    if isinstance(obj, list) and len(obj) > index:
+        try:
+            return obj[index]["externalId"]
+        except (IndexError, KeyError):
+            return None
+
+    return None
 
 
 def display_audit_records(records: list) -> None:

@@ -1,7 +1,10 @@
+import pytest
 from swo.mpt.cli.plugins.audit_plugin.utils import (
     display_audit_records,
     flatten_dict,
     format_json_path,
+    get_external_id,
+    is_valid_path,
 )
 
 
@@ -46,8 +49,33 @@ class TestFormatJsonPath:
         path = "invalid.path[0]"
         source = {"different": "structure"}
         target = {"another": "structure"}
+
         result = format_json_path(path, source, target)
+
         assert result == path
+
+
+@pytest.mark.parametrize(("obj", "index", "expected_result"), [
+    ([{"externalId": "EXT123", "value": "old"}], 0, "EXT123"),
+    ([{"key": "error"}], 0, None),
+    ([{"index": "error"}], 2, None),
+])
+def test_get_external_id_path(obj, index, expected_result):
+    result = get_external_id(obj, index)
+
+    assert result == expected_result
+
+
+@pytest.mark.parametrize(("path", "expected_result"), [
+    ("[ foo ]", True),
+    ("[ foo ", False),
+    (" foo ]", False),
+    ("bla", False),
+])
+def test_is_valid_path(path, expected_result):
+    result = is_valid_path(path)
+
+    assert result == expected_result
 
 
 class TestDisplayAuditRecords:
