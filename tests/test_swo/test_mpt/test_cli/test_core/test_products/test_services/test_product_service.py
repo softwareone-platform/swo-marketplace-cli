@@ -221,6 +221,22 @@ def test_retrieve(mocker, service_context, product_data_from_dict):
     api_exists_mock.assert_called_once()
 
 
+def test_retrieve_empty(mocker, service_context):
+    read_data_mock = mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=Mock(ProductData, id=None)
+    )
+    api_exists_mock = mocker.spy(service_context.api, "exists")
+
+    service = ProductService(service_context)
+
+    result = service.retrieve()
+
+    assert result.success is True
+    assert result.model is None
+    read_data_mock.assert_called_once()
+    api_exists_mock.assert_not_called()
+
+
 def test_retrieve_not_found(mocker, service_context):
     mocker.patch.object(
         service_context.api, "exists", side_effect=MPTAPIError("Not Found", "Product not found")
@@ -271,6 +287,9 @@ def test_update(mocker, service_context, product_data_from_dict):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
+    read_settings_data_mock = mocker.patch.object(
+        SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
+    )
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = ProductService(service_context)
 
@@ -279,12 +298,21 @@ def test_update(mocker, service_context, product_data_from_dict):
     assert result.success is True
     assert result.model is not None
     read_data_mock.assert_called_once()
-    api_update_mock.assert_called_once()
+    read_settings_data_mock.assert_called_once()
+    expected_data = {
+        "settings": {
+            "preValidation": {"changeOrderDraft": True},
+        }
+    }
+    api_update_mock.assert_called_once_with(product_data_from_dict.id, expected_data)
 
 
 def test_update_error(mocker, service_context, product_data_from_dict):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=Mock(id=None)
+    )
+    read_settings_data_mock = mocker.patch.object(
+        SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
     )
     api_update_mock = mocker.patch.object(
         service_context.api,
@@ -301,6 +329,7 @@ def test_update_error(mocker, service_context, product_data_from_dict):
     assert result.errors == ["API Error with response body Error updating product"]
     assert result.model is None
     read_data_mock.assert_called_once()
+    read_settings_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
     file_handler_write_mock.assert_called_once()
     api_update_mock.assert_called_once()

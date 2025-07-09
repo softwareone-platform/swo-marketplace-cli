@@ -94,7 +94,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
         "retrieve",
         return_value=ServiceResult(success=True, model=product_data_from_dict, stats=Mock()),
     )
-    update_product = mocker.patch("swo.mpt.cli.core.products.app.update_product")
+    update_product_mock = mocker.patch("swo.mpt.cli.core.products.app.update_product")
 
     result = runner.invoke(
         app,
@@ -106,7 +106,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
     assert "Do you want to update product" in result.stdout
     validate_definition_mock.assert_called_once()
     retrieve_mock.assert_called_once()
-    update_product.assert_called_once()
+    update_product_mock.assert_called_once()
 
 
 def test_sync_product_update_error(mocker, product_container_mock, product_data_from_dict):
@@ -121,7 +121,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
         "retrieve",
         return_value=ServiceResult(success=True, model=product_data_from_dict, stats=Mock()),
     )
-    update_product = mocker.patch("swo.mpt.cli.core.products.app.update_product")
+    update_product_mock = mocker.patch("swo.mpt.cli.core.products.app.update_product")
 
     result = runner.invoke(
         app,
@@ -132,7 +132,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
     assert result.exit_code == 3, result.stdout
     validate_definition_mock.assert_called_once()
     retrieve_mock.assert_called_once()
-    update_product.assert_called_once()
+    update_product_mock.assert_called_once()
 
 
 def test_sync_product_force_create(
@@ -354,14 +354,13 @@ def test_export_product_overwrites_existing_files(
     product_container_mock.product_service().export.assert_called_once()
 
 
-def test_update_product(mocker, product_container_mock, item_data_from_dict):
-    stats = ProductStatsCollector()
-    update_item_service_mock = mocker.patch.object(
-        product_container_mock.item_service(),
-        "update",
-        return_value=ServiceResult(success=True, model=item_data_from_dict, stats=stats),
-    )
-
+def test_update_product(product_container_mock):
     update_product(product_container_mock, Mock())
 
-    update_item_service_mock.assert_called_once()
+    product_container_mock.item_service().update.assert_called_once()
+    product_container_mock.item_group_service().update.assert_called_once()
+    product_container_mock.template_service().update.assert_called_once()
+    product_container_mock.parameter_group_service().update.assert_called_once()
+    product_container_mock.agreement_parameters_service().update.assert_called_once()
+    product_container_mock.request_parameters_service().update.assert_called_once()
+    product_container_mock.subscription_parameters_service().update.assert_called_once()

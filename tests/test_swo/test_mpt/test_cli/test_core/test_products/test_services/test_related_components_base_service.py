@@ -5,6 +5,7 @@ from unittest.mock import Mock
 import pytest
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.models import BaseDataModel, DataCollectionModel
+from swo.mpt.cli.core.products.models import DataActionEnum
 from swo.mpt.cli.core.products.services.related_components_base_service import (
     RelatedComponentsBaseService,
 )
@@ -18,6 +19,14 @@ class FakeRelatedComponentsService(RelatedComponentsBaseService):
 
 @dataclass
 class FakeDataModel(BaseDataModel):
+    id: str = "fake_id"
+    coordinate: str = "fake_coordinate"
+    action: DataActionEnum = "fake_action"
+
+    @property
+    def to_skip(self):
+        return False
+
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls()
@@ -27,7 +36,7 @@ class FakeDataModel(BaseDataModel):
         return cls()
 
     def to_json(self) -> dict[str, Any]:
-        return {}
+        return {"id": self.id}
 
     def to_xlsx(self) -> dict[str, Any]:
         return {}
@@ -45,9 +54,7 @@ def service_context(active_vendor_account):
 
 
 def test_create(mocker, service_context, mpt_parameters_data):
-    data_model_mock = Mock(
-        id="fake_id", coordinate="fake_coordinate", to_json=Mock(return_value={"id": "fake_id"})
-    )
+    data_model_mock = FakeDataModel()
     new_item_mock = {"id": "new_fake_id"}
     mocker.patch.object(service_context.file_manager, "read_data", return_value=[data_model_mock])
     post_mock = mocker.patch.object(service_context.api, "post", return_value=new_item_mock)
@@ -124,3 +131,128 @@ def test_export_error(mocker, service_context, mpt_parameters_data):
     add_error_mock.assert_called_once_with("fake_tab_name")
     write_error_mock.assert_called_once()
     add_spy.assert_not_called()
+
+
+def test_update_action_skip(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="skip_item_id", action=DataActionEnum.SKIP)],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", True)
+    stats_skipped_mock = mocker.patch.object(service_context.stats, "add_skipped")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is True
+    assert result.model is None
+    stats_skipped_mock.assert_called_once_with("fake_tab_name")
+
+
+def test_update_action_create(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="create_id", action=DataActionEnum.CREATE)],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", False)
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
+    api_post_mock = mocker.patch.object(
+        service_context.api, "post", return_value={"id": "new_fake_id"}
+    )
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is True
+    assert result.model is None
+    file_handler_write_mock.assert_called_once_with("fake_coordinate", "new_fake_id")
+    stats_synced_mock.assert_called_once_with("fake_tab_name")
+    api_post_mock.assert_called_once_with({"id": "create_id"})
+
+
+def test_update_action_delete(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="delete_id", action=DataActionEnum.DELETE)],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", False)
+    file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is False
+    file_handler_error_mock.assert_called_once_with(
+        "Action type delete is not supported", "delete_id"
+    )
+    stats_error_mock.assert_called_once_with("fake_tab_name")
+
+
+def test_update_action_update(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="update_id", action=DataActionEnum.UPDATE)],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", False)
+
+    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
+    api_update_mock = mocker.patch.object(service_context.api, "update")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is True
+    assert result.model is None
+    file_handler_write_mock.assert_called_once_with("fake_coordinate", "update_id")
+    stats_synced_mock.assert_called_once_with("fake_tab_name")
+    api_update_mock.assert_called_once_with("update_id", {"id": "update_id"})
+
+
+def test_update_action_value_error(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="error_action_id", action="FakeAction")],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", False)
+
+    file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is False
+    file_handler_error_mock.assert_called_once_with("Invalid action: FakeAction", "error_action_id")
+    stats_error_mock.assert_called_once_with("fake_tab_name")
+
+
+def test_update_action_api_error(mocker, service_context):
+    mocker.patch.object(
+        service_context.file_manager,
+        "read_data",
+        return_value=[FakeDataModel(id="update_id", action=DataActionEnum.UPDATE)],
+    )
+    mocker.patch.object(FakeDataModel, "to_skip", False)
+    file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
+    api_update_mock = mocker.patch.object(
+        service_context.api, "update", side_effect=MPTAPIError("API Error", "Error updating item")
+    )
+    service = FakeRelatedComponentsService(service_context)
+
+    result = service.update()
+
+    assert result.success is False
+    file_handler_error_mock.assert_called_once_with(
+        "API Error with response body Error updating item", "update_id"
+    )
+    stats_error_mock.assert_called_once_with("fake_tab_name")
+    api_update_mock.assert_called_once_with("update_id", {"id": "update_id"})

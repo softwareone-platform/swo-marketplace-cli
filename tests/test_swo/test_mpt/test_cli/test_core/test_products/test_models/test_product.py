@@ -99,7 +99,11 @@ def test_product_to_xlsx(product_data_from_json):
 
 def test_settings_data_from_dict(settings_file_data):
     result = SettingsData.from_dict(
-        {"Change order validation (draft)": {"value": "Enabled", "coordinate": "C2"}}
+        {
+            SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
+            SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
+            SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
+        }
     )
 
     assert len(result.items) == 1
@@ -107,7 +111,7 @@ def test_settings_data_from_dict(settings_file_data):
     assert isinstance(item, SettingsItem)
     assert item.name == "Change order validation (draft)"
     assert item.value == "Enabled"
-    assert item.coordinate == "C2"
+    assert item.coordinate == "A2"
     assert result.json_path is None
 
 
@@ -122,18 +126,27 @@ def test_settings_data_from_json(mpt_product_data):
 def test_settings_data_to_xlsx(product_data_from_dict):
     result = product_data_from_dict.settings.to_json()
 
-    assert result == {"itemSelection": False}
+    assert result == {
+        "settings": {
+            "productOrdering": False,
+            "preValidation": {"changeOrderDraft": True},
+        }
+    }
 
 
 def test_setting_item_from_dict(settings_file_data):
     result = SettingsItem.from_dict(
-        {SETTINGS_SETTING: "Purchase order validation (query)", "value": "Off", "coordinate": "A10"}
+        {
+            SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
+            SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
+            SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
+        }
     )
 
     assert result.name == "Purchase order validation (query)"
     assert result.value == "Off"
     assert result.coordinate == "A10"
-    assert result.action == DataActionEnum.SKIP
+    assert result.action == DataActionEnum.DELETE
 
 
 def test_setting_item_from_json(mpt_product_data):

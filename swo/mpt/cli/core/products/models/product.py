@@ -7,24 +7,24 @@ from typing import Any, Self
 from dateutil import parser
 from swo.mpt.cli.core.models.data_model import BaseDataModel
 from swo.mpt.cli.core.products import constants
-from swo.mpt.cli.core.products.models import DataActionEnum
+from swo.mpt.cli.core.products.models.mixins import ActionMixin
 from swo.mpt.cli.core.utils import set_dict_value
 
 
 @dataclass
-class SettingsItem(BaseDataModel):
+class SettingsItem(BaseDataModel, ActionMixin):
     name: str
     value: str | bool
 
-    action: DataActionEnum = DataActionEnum.SKIP
     coordinate: str | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
-            name=data[constants.SETTINGS_SETTING],
-            value=data["value"],
-            coordinate=data["coordinate"],
+            action=data[constants.SETTINGS_ACTION]["value"],
+            name=data[constants.SETTINGS_SETTING]["value"],
+            coordinate=data[constants.SETTINGS_SETTING]["coordinate"],
+            value=data[constants.SETTINGS_VALUE]["value"],
         )
 
     @classmethod
@@ -59,12 +59,7 @@ class SettingsData(BaseDataModel):
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
-        items = []
-        for key, item in data.items():
-            item.update({constants.SETTINGS_SETTING: key})
-            items.append(SettingsItem.from_dict(item))
-
-        return cls(items=items)
+        return cls(items=[SettingsItem.from_dict(data)])
 
     @classmethod
     def from_json(cls, data: dict[str, Any]) -> Self:
@@ -88,7 +83,7 @@ class SettingsData(BaseDataModel):
 
             settings = set_dict_value(settings, json_path, settings_value)
 
-        return settings
+        return {"settings": settings}
 
     def to_xlsx(self) -> dict[str, Any]:
         return {}

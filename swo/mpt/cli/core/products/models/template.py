@@ -6,17 +6,17 @@ from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
 from swo.mpt.cli.core.products.models import DataActionEnum
+from swo.mpt.cli.core.products.models.mixins import ActionMixin
 
 
 @dataclass
-class TemplateData(BaseDataModel):
+class TemplateData(BaseDataModel, ActionMixin):
     id: str
     name: str
     type: str
     content: str
     default: bool
 
-    action: DataActionEnum = DataActionEnum.SKIP
     coordinate: str | None = None
     content_coordinate: str | None = None
     created_date: date | None = None

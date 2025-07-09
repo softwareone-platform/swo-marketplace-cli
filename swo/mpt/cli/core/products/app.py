@@ -4,6 +4,7 @@ from typing import Annotated
 
 import typer
 from rich import box
+from rich.status import Status
 from rich.table import Table
 from swo.mpt.cli.core.accounts.app import get_active_account
 from swo.mpt.cli.core.accounts.containers import AccountContainer
@@ -253,9 +254,42 @@ def create_product(container, status):
     return None
 
 
-def update_product(container, status):
+def update_product(container: ProductContainer, status: Status):
+    """
+    Update product definition.
+    Args:
+        container: The product container instance.
+        status: The status object used to display progress.
+
+    """
+    # NOTE: the order cannot be changed to ensure the related components are handled before
+    # its group.
+    status.update("Update product...")
+    container.product_service().update()
+
     status.update(f"Update item for {container.resource_id}...")
     container.item_service().update()
+
+    status.update(f"Update items groups for product {container.resource_id}...")
+    container.item_group_service().update()
+
+    status.update(f"Update subscription parameters for product {container.resource_id}...")
+    container.template_service().update()
+
+    status.update(f"Update parameters groups for product {container.resource_id}...")
+    container.parameter_group_service().update()
+
+    status.update(f"Update agreement parameters for product {container.resource_id}...")
+    container.agreement_parameters_service().update()
+
+    status.update(f"Update item parameters for product {container.resource_id}...")
+    container.item_parameters_service().update()
+
+    status.update(f"Update request parameters for product {container.resource_id}...")
+    container.request_parameters_service().update()
+
+    status.update(f"Update subscription parameters for product {container.resource_id}...")
+    container.subscription_parameters_service().update()
 
 
 # TODO: move to to_table()

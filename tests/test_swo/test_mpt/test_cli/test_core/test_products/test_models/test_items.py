@@ -1,6 +1,5 @@
 import pytest
-from swo.mpt.cli.core.products.models import ItemData
-from swo.mpt.cli.core.products.models.items import ItemAction
+from swo.mpt.cli.core.products.models import ItemActionEnum, ItemData
 
 
 def test_item_data_from_dict(item_file_data):
@@ -43,13 +42,13 @@ def test_item_data_to_json(item_data_from_dict):
 @pytest.mark.parametrize(
     ("action", "attr"),
     [
-        (ItemAction.CREATE, "to_create"),
-        (ItemAction.PUBLISH, "to_publish"),
-        (ItemAction.REVIEW, "to_review"),
-        (ItemAction.SKIP, "to_skip"),
-        (ItemAction.SKIPPED, "to_skip"),
-        (ItemAction.UNPUBLISH, "to_unpublish"),
-        (ItemAction.UPDATE, "to_update"),
+        (ItemActionEnum.CREATE, "to_create"),
+        (ItemActionEnum.PUBLISH, "to_publish"),
+        (ItemActionEnum.REVIEW, "to_review"),
+        (ItemActionEnum.SKIP, "to_skip"),
+        (ItemActionEnum.SKIPPED, "to_skip"),
+        (ItemActionEnum.UNPUBLISH, "to_unpublish"),
+        (ItemActionEnum.UPDATE, "to_update"),
     ],
 )
 def test_item_to_create(action, attr, item_data_from_dict):

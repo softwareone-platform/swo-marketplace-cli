@@ -4,6 +4,7 @@ from requests_toolbelt import MultipartEncoder  # type: ignore
 from swo.mpt.cli.core.errors import MPTAPIError
 from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from swo.mpt.cli.core.products.handlers import SettingsExcelFileManager
+from swo.mpt.cli.core.products.models import DataActionEnum, SettingsData
 from swo.mpt.cli.core.services.base_service import BaseService
 from swo.mpt.cli.core.services.service_result import ServiceResult
 
@@ -126,14 +127,24 @@ class ProductService(BaseService):
 
     def update(self) -> ServiceResult:
         """
-        Updates an existing product by sending the modified general data to the API.
+        Updates an existing product by sending the settings data to the API. For now, general
+        data cannot be updated.
 
         Returns:
             ServiceResult: The result of the update operation.
         """
         product = self.file_manager.read_data()
+        settings_excel_file_manager = SettingsExcelFileManager(
+            self.file_manager.file_handler.file_path
+        )
+        items = []
+        for setting_data in settings_excel_file_manager.read_data():
+            for item in setting_data.items:  # type: ignore[attr-defined]
+                if item.action == DataActionEnum.UPDATE:
+                    items.append(item)
+
         try:
-            self.api.update(product.id, product.to_json())
+            self.api.update(product.id, SettingsData(items=items).to_json())
         except MPTAPIError as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)

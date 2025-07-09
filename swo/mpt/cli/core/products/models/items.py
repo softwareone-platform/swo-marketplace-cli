@@ -1,25 +1,15 @@
 from dataclasses import dataclass, field
 from datetime import date
-from enum import StrEnum
 from typing import Any, Self
 
 from dateutil import parser
 from swo.mpt.cli.core.models import BaseDataModel
 from swo.mpt.cli.core.products import constants
-
-
-class ItemAction(StrEnum):
-    CREATE = "create"
-    UPDATE = "update"
-    REVIEW = "review"
-    PUBLISH = "publish"
-    UNPUBLISH = "unpublish"
-    SKIP = "-"
-    SKIPPED = ""
+from swo.mpt.cli.core.products.models.mixins import ItemActionMixin
 
 
 @dataclass
-class ItemData(BaseDataModel):
+class ItemData(BaseDataModel, ItemActionMixin):
     id: str
     description: str
     group_id: str
@@ -29,7 +19,6 @@ class ItemData(BaseDataModel):
     unit_id: str
     vendor_id: str
 
-    action: ItemAction = ItemAction.SKIP
     commitment: str | None = None
     coordinate: str | None = None
     group_coordinate: str | None = None
@@ -63,30 +52,6 @@ class ItemData(BaseDataModel):
             data["commitment"] = self.commitment  # type: ignore
 
         return data
-
-    @property
-    def to_create(self) -> bool:
-        return self.action == ItemAction.CREATE
-
-    @property
-    def to_publish(self) -> bool:
-        return self.action == ItemAction.PUBLISH
-
-    @property
-    def to_review(self) -> bool:
-        return self.action == ItemAction.REVIEW
-
-    @property
-    def to_skip(self) -> bool:
-        return self.action == ItemAction.SKIP or self.action == ItemAction.SKIPPED
-
-    @property
-    def to_unpublish(self) -> bool:
-        return self.action == ItemAction.UNPUBLISH
-
-    @property
-    def to_update(self) -> bool:
-        return self.action == ItemAction.UPDATE
 
     @property
     def unit(self) -> dict[str, Any]:
