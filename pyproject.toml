@@ -46,7 +46,6 @@ dev = [
     "ipdb==0.13.*",
     "ipython==9.*",
     "mypy==1.15.*",
-    "poetry-plugin-sort==0.3.*",
     "pre-commit==4.2.*",
     "pytest==8.3.*",
     "pytest-cov==6.1.*",
@@ -130,7 +129,7 @@ max-line-length = 100
 
 [tool.mypy]
 warn_no_return = false
-exclude = ['tests']
+exclude = ["tests"]
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
