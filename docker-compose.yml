@@ -7,7 +7,7 @@ services:
     working_dir: /swo
     stdin_open: true
     tty: true
-    volumes: 
+    volumes:
       - .:/swo
 
   app_test:
@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: dev.Dockerfile
     working_dir: /swo
-    command: bash -c "ruff check . && mypy . && pytest"
+    command: bash -c "ruff check . && mypy . && uv lock --check && pytest"
     volumes:
       - .:/swo
 
