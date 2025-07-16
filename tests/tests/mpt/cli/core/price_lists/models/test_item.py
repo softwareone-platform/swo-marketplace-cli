@@ -1,5 +1,3 @@
-from datetime import date
-
 from swo.mpt.cli.core.price_lists.models.item import ItemAction, ItemData, ItemStatus
 
 
@@ -26,7 +24,6 @@ def test_item_data_from_dict(item_file_data):
     assert result.unit_sp is None
     assert result.vendor_id == "AO03.25842.MN"
     assert result.action == ItemAction.UPDATE
-    assert result.modified_date == date(2025, 5, 23)
     assert result.type is None
 
 

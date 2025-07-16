@@ -82,7 +82,6 @@ class ItemData(BaseDataModel):
             unit_pp=data[constants.PRICELIST_ITEMS_UNIT_PP]["value"],
             unit_sp=data.get(constants.PRICELIST_ITEMS_UNIT_SP, {}).get("value"),
             vendor_id=data[constants.PRICELIST_ITEMS_ITEM_VENDOR_ID]["value"],
-            modified_date=data[constants.PRICELIST_ITEMS_MODIFIED]["value"].date(),
             action=ItemAction(data[constants.PRICELIST_ITEMS_ACTION]["value"]),
             type=data.get("type"),
         )
