@@ -18,9 +18,7 @@ class PriceListItemExcelFileManager(HorizontalTabFileManager):
     _id_field = PRICELIST_ITEMS_ID
     _sheet_name = TAB_PRICE_ITEMS
     _data_validation_map = {
-        PRICELIST_ITEMS_ACTION: DataValidation(
-            type="list", formula1='"-,Updated"', allow_blank=True
-        )
+        PRICELIST_ITEMS_ACTION: DataValidation(type="list", formula1='"-,update"', allow_blank=True)
     }
 
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
