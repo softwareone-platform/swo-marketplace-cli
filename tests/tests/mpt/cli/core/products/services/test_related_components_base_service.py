@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any, Self
 from unittest.mock import Mock
 
@@ -17,11 +18,15 @@ class FakeRelatedComponentsService(RelatedComponentsBaseService):
     pass
 
 
+class FakeActionEnum(StrEnum):
+    FAKE_ACTION = "fake_action"
+
+
 @dataclass
 class FakeDataModel(BaseDataModel):
     id: str = "fake_id"
     coordinate: str = "fake_coordinate"
-    action: DataActionEnum = "fake_action"
+    action: FakeActionEnum = FakeActionEnum.FAKE_ACTION
 
     @property
     def to_skip(self):
