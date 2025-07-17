@@ -98,7 +98,6 @@ def test_display_records(capsys):
     assert "object" in output
 
 
-
 def test_display_records_missing_fields(capsys):
     records = [{"id": "audit1", "timestamp": "2024-01-01T10:00:00Z"}]
     display_audit_records(records)

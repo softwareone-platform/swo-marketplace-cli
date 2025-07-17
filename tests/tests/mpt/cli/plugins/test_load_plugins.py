@@ -4,7 +4,7 @@ from swo.mpt.cli.core.plugins import load_plugins
 from swo.mpt.cli.swocli import app
 from typer.testing import CliRunner
 
-from tests.plugins.test_plugin import app as plugin_app
+from . import app as plugin_app
 
 runner = CliRunner()
 

@@ -16,6 +16,7 @@ from swo.mpt.cli.core.models.data_model import BaseDataModel
 
 @dataclass
 class FakeDataModel(BaseDataModel):
+    id: str | None = None
     currency: str | None = None
     precision: int | None = None
 
@@ -40,7 +41,7 @@ class FakeHorizontalTabFileManager(HorizontalTabFileManager):
     _fields = ["ID", "styled_field", "field2"]
     _id_field = "ID"
     _required_tabs = ["Required tab"]
-    _required_fields_by_tab = ["ID"]
+    _required_fields_by_tab = {"FakeTab": "ID"}
     _sheet_name = "FakeSheet"
     _data_validation_map = {"field2": Mock(spec=DataValidation)}
 
