@@ -206,6 +206,7 @@ def create_product(container, status):
         return None
 
     product = result.model
+    container.resource_id.override(product.id)
     status.update(f"Create items groups for product {product.id}...")
     item_group_data_collection = container.item_group_service().create().collection
 
@@ -222,24 +223,20 @@ def create_product(container, status):
     item_parameter_service = container.item_parameters_service()
     item_parameter_service.set_new_parameter_group(parameter_group_collection_data)
     item_parameter_data_collection = item_parameter_service.create().collection
-    if item_parameter_data_collection is not None:
-        parameters_data_collection.add(item_parameter_data_collection)
+    parameters_data_collection.add(item_parameter_data_collection.collection)
 
     status.update(f"Create request parameters for product {product.id}...")
     request_parameters_service = container.request_parameters_service()
     request_parameters_service.set_new_parameter_group(parameter_group_collection_data)
     request_parameter_data_collection = request_parameters_service.create().collection
-    if request_parameter_data_collection is not None:
-        parameters_data_collection.add(request_parameter_data_collection)
+    parameters_data_collection.add(request_parameter_data_collection.collection)
 
     status.update(f"Create subscription parameters for product {product.id}...")
     subscription_parameter_service = container.subscription_parameters_service()
-    if parameter_group_collection_data is not None:
-        subscription_parameter_service.set_new_parameter_group(parameter_group_collection_data)
+    subscription_parameter_service.set_new_parameter_group(parameter_group_collection_data)
 
     subscription_parameter_data_collection = subscription_parameter_service.create().collection
-    if subscription_parameter_data_collection is not None:
-        parameters_data_collection.add(subscription_parameter_data_collection)
+    parameters_data_collection.add(subscription_parameter_data_collection.collection)
 
     status.update(f"Create template parameters for product {product.id}...")
     template_service = container.template_service()
@@ -249,7 +246,7 @@ def create_product(container, status):
     status.update(f"Create items for product {product.id}...")
     item_service = container.item_service()
     item_service.set_new_item_groups(item_group_data_collection)
-    item_service.create(product_id=product.id)
+    item_service.create()
 
     return None
 
@@ -267,28 +264,29 @@ def update_product(container: ProductContainer, status: Status):
     status.update("Update product...")
     container.product_service().update()
 
-    status.update(f"Update item for {container.resource_id}...")
+    resource_id = container.resource_id()
+    status.update(f"Update item for {resource_id}...")
     container.item_service().update()
 
-    status.update(f"Update items groups for product {container.resource_id}...")
+    status.update(f"Update items groups for product {resource_id}...")
     container.item_group_service().update()
 
-    status.update(f"Update subscription parameters for product {container.resource_id}...")
+    status.update(f"Update subscription parameters for product {resource_id}...")
     container.template_service().update()
 
-    status.update(f"Update parameters groups for product {container.resource_id}...")
+    status.update(f"Update parameters groups for product {resource_id}...")
     container.parameter_group_service().update()
 
-    status.update(f"Update agreement parameters for product {container.resource_id}...")
+    status.update(f"Update agreement parameters for product {resource_id}...")
     container.agreement_parameters_service().update()
 
-    status.update(f"Update item parameters for product {container.resource_id}...")
+    status.update(f"Update item parameters for product {resource_id}...")
     container.item_parameters_service().update()
 
-    status.update(f"Update request parameters for product {container.resource_id}...")
+    status.update(f"Update request parameters for product {resource_id}...")
     container.request_parameters_service().update()
 
-    status.update(f"Update subscription parameters for product {container.resource_id}...")
+    status.update(f"Update subscription parameters for product {resource_id}...")
     container.subscription_parameters_service().update()
 
 
