@@ -270,6 +270,7 @@ def test_create_product(
     create_product(product_container_mock, Mock())
 
     create_product_mock.assert_called_once()
+    assert product_container_mock.resource_id() == product_data_from_dict.id
     create_item_group_mock.assert_called_once()
     create_parameter_group_mock.assert_called_once()
     create_parameter_service_mock.assert_called_once()
