@@ -48,8 +48,8 @@ def test_parameters_data_from_dict(parameters_file_data):
     assert result.group_id_coordinate == "I325"
 
 
-def test_parameters_data_from_json(mpt_parameters_data):
-    result = AgreementParametersData.from_json(mpt_parameters_data)
+def test_parameters_data_from_json(mpt_agreement_parameter_data):
+    result = AgreementParametersData.from_json(mpt_agreement_parameter_data)
 
     assert result.id == "PAR-0232-2541-0001"
     assert (
@@ -146,7 +146,7 @@ def test_parameters_data_to_json(parameters_data_from_dict):
         "constraints": {"hidden": False, "readonly": False, "optional": True, "required": False},
         "externalId": "agreementType",
         "displayOrder": 101,
-        "group": {"id": "PGR-9939-6700-0001"},
+        "group": {"id": "PGR-0232-2541-0001"},
     }
     assert result["options"].get("label") is None
 
@@ -193,7 +193,7 @@ def test_parameters_data_to_xlsx(parameters_data_from_json):
 
 
 @pytest.mark.parametrize(
-    ("is_order_request", "expected_result"), [(True, {"id": "PGR-9939-6700-0001"}), (False, None)]
+    ("is_order_request", "expected_result"), [(True, {"id": "PGR-0232-2541-0001"}), (False, None)]
 )
 def test_group_property(is_order_request, expected_result, mocker, parameters_data_from_dict):
     mocker.patch.object(

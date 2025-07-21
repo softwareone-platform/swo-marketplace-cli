@@ -58,7 +58,7 @@ def service_context(active_vendor_account):
     )
 
 
-def test_create(mocker, service_context, mpt_parameters_data):
+def test_create(mocker, service_context, mpt_agreement_parameter_data):
     data_model_mock = FakeDataModel()
     new_item_mock = {"id": "new_fake_id"}
     mocker.patch.object(service_context.file_manager, "read_data", return_value=[data_model_mock])
@@ -99,7 +99,7 @@ def test_create_api_error(mocker, service_context, parameters_data_from_dict):
     add_error_mock.assert_called_once_with("fake_tab_name")
 
 
-def test_export(mocker, service_context, mpt_parameters_data):
+def test_export(mocker, service_context, mpt_agreement_parameter_data):
     create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     data = {"meta": {"offset": 0, "limit": 100, "total": 0}, "data": []}
     api_list_mock = mocker.patch.object(service_context.api, "list", return_value=data)
@@ -115,7 +115,7 @@ def test_export(mocker, service_context, mpt_parameters_data):
     add_mock.assert_called_once()
 
 
-def test_export_error(mocker, service_context, mpt_parameters_data):
+def test_export_error(mocker, service_context, mpt_agreement_parameter_data):
     create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     api_list_mock = mocker.patch.object(
         service_context.api,
