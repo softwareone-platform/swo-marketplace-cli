@@ -16,7 +16,7 @@ from swo.mpt.cli.core.products.models import DataActionEnum, TemplateData
 def test_template_data_from_dict(template_file_data):
     result = TemplateData.from_dict(template_file_data)
 
-    assert result.id == "TPL-0400-9557-0005"
+    assert result.id == "TPL-0232-2541-0005"
     assert result.coordinate == "A3"
     assert result.action == "-"
     assert result.name == "BulkMigrate"

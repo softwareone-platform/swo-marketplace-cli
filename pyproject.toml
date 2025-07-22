@@ -79,6 +79,9 @@ filterwarnings = [
     "ignore:Support for class-based `config` is deprecated:DeprecationWarning",
     "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
 ]
+markers = [
+  "integration: marks test as integration tests",
+]
 
 [tool.coverage.run]
 branch = true

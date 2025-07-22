@@ -1,10 +1,11 @@
 import shutil
 from datetime import datetime
 from pathlib import Path
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, Mock
 
 import pytest
 from freezegun import freeze_time
+from requests import Response
 from swo.mpt.cli.core.products.constants import (
     GENERAL_ACCOUNT_ID,
     GENERAL_ACCOUNT_NAME,
@@ -370,7 +371,7 @@ def item_group_data_from_json(mpt_item_group_data):
 @pytest.fixture
 def item_group_data_from_dict():
     return ItemGroupData(
-        id="IGR-0400-9557-0002",
+        id="IGR-0232-2541-0002",
         coordinate="J2",
         name="Items",
         label="Select items",
@@ -456,14 +457,14 @@ def parameters_file_data():
 
 
 @pytest.fixture
-def parameters_data_from_json(mpt_parameters_data):
-    return AgreementParametersData.from_json(mpt_parameters_data)
+def parameters_data_from_json(mpt_agreement_parameter_data):
+    return AgreementParametersData.from_json(mpt_agreement_parameter_data)
 
 
 @pytest.fixture
 def parameters_data_from_dict():
     return AgreementParametersData(
-        id="PAR-9939-6700-0001",
+        id="PAR-0232-2541-0001",
         coordinate="K234",
         name="Agreement type",
         external_id="agreementType",
@@ -473,7 +474,7 @@ def parameters_data_from_dict():
         "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
         "VIP account to Adobe VIP Marketplace.",
         display_order=101,
-        group_id="PGR-9939-6700-0001",
+        group_id="PGR-0232-2541-0001",
         options={
             "optionsList": [
                 {
@@ -509,7 +510,7 @@ def parameters_data_from_dict():
 
 
 @pytest.fixture
-def mpt_parameters_data():
+def mpt_agreement_parameter_data():
     return {
         "id": "PAR-0232-2541-0001",
         "name": "Agreement type",
@@ -585,6 +586,102 @@ def mpt_parameters_data():
 
 
 @pytest.fixture
+def mpt_item_parameter_data():
+    return {
+        "id": "PAR-0232-2541-0022",
+        "constraints": {"required": False},
+        "context": "None",
+        "description": "offer type",
+        "displayOrder": 100,
+        "externalId": "offer_type",
+        "name": "OFFER_TYPE",
+        "options": {"hintText": "OFFER_TYPE", "pattern": "", "placeholderText": "OFFER_TYPE"},
+        "phase": "Configuration",
+        "product": {
+            "externalIds": {},
+            "icon": "/v1/catalog/products/PRD-5516-5707/icon",
+            "id": "PRD-5516-5707",
+            "name": "SV Adobe VIP Marketplace for Commercial",
+            "status": "Published",
+        },
+        "scope": "Item",
+        "status": "Active",
+        "type": "SingleLineText",
+        "audit": {
+            "created": {
+                "at": "2025-04-17T15:16:42.098Z",
+                "by": {"id": "TKN-9352-9507", "name": "User9352-9507"},
+            }
+        },
+    }
+
+
+@pytest.fixture
+def mpt_request_parameter_data():
+    return {
+        "id": "PAR-0232-2541-0012",
+        "name": "Contact Parameter",
+        "description": "Contact parameter",
+        "scope": "Request",
+        "phase": "Order",
+        "context": "None",
+        "displayOrder": 200,
+        "constraints": {"readonly": False, "required": False},
+        "product": {
+            "externalIds": {},
+            "icon": "/v1/catalog/products/PRD-5516-5707/icon",
+            "id": "PRD-5516-5707",
+            "name": "SV Adobe VIP Marketplace for Commercial",
+            "status": "Published",
+        },
+        "options": {"phoneMandatory": False, "defaultValue": "None", "hintText": "Contact details"},
+        "type": "Contact",
+        "status": "Active",
+        "audit": {
+            "created": {
+                "at": "2025-04-17T15:16:42.098Z",
+                "by": {"id": "TKN-9352-9507", "name": "User9352-9507"},
+            }
+        },
+    }
+
+
+@pytest.fixture
+def mpt_subscription_parameter_data():
+    return {
+        "id": "PAR-0232-2541-0023",
+        "constraints": {"required": True},
+        "context": "None",
+        "description": "Store the full Adobe SKU (with discount level) of the item included in a "
+        "subscription.",
+        "displayOrder": 2001,
+        "externalId": "adobeSKU",
+        "name": "Subscription SKU",
+        "options": {
+            "hintText": "Subscription SKU",
+            "placeholderText": "Store the full Adobe SKU (with discount level)",
+        },
+        "phase": "Fulfillment",
+        "product": {
+            "externalIds": {},
+            "icon": "/v1/catalog/products/PRD-5516-5707/icon",
+            "id": "PRD-5516-5707",
+            "name": "SV Adobe VIP Marketplace for Commercial",
+            "status": "Published",
+        },
+        "scope": "Subscription",
+        "status": "Active",
+        "type": "SingleLineText",
+        "audit": {
+            "created": {
+                "at": "2025-04-17T15:16:42.098Z",
+                "by": {"id": "TKN-9352-9507", "name": "User9352-9507"},
+            }
+        },
+    }
+
+
+@pytest.fixture
 def parameter_group_file_data():
     return {
         PARAMETERS_GROUPS_ID: {"value": "IGR-3114-5854-0002", "coordinate": "A325"},
@@ -602,7 +699,7 @@ def parameter_group_file_data():
 @pytest.fixture
 def parameter_group_data_from_dict():
     return ParameterGroupData(
-        id="PGR-9939-6700-0001",
+        id="PGR-0232-2541-0001",
         coordinate="A2",
         name="Agreement",
         label="Create agreement",
@@ -655,7 +752,7 @@ def mpt_parameter_group_data():
 @pytest.fixture
 def template_file_data():
     return {
-        TEMPLATES_ID: {"value": "TPL-0400-9557-0005", "coordinate": "A3"},
+        TEMPLATES_ID: {"value": "TPL-0232-2541-0005", "coordinate": "A3"},
         TEMPLATES_NAME: {"value": "BulkMigrate", "coordinate": "B3"},
         TEMPLATES_ACTION: {"value": "-", "coordinate": "C3"},
         TEMPLATES_TYPE: {"value": "OrderCompleted", "coordinate": "D3"},
@@ -677,7 +774,7 @@ def template_data_from_json(mpt_template_data):
 @pytest.fixture
 def template_data_from_dict():
     return TemplateData(
-        id="TPL-0400-9557-0005",
+        id="TPL-0232-2541-0005",
         coordinate="A2",
         name="Change",
         type="OrderCompleted",
@@ -752,3 +849,12 @@ def settings_file_data():
         "Purchase order validation (query)": {"value": "Off", "coordinate": "C11"},
         "Termination order validation (draft)": {"value": "Off", "coordinate": "C12"},
     }
+
+
+@pytest.fixture
+def list_response_mock_data_factory():
+    def _create_data_response(data):
+        response = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": data}
+        return Mock(spec=Response, json=Mock(return_value=response))
+
+    return _create_data_response

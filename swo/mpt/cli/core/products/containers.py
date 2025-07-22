@@ -26,8 +26,11 @@ from swo.mpt.cli.core.products.models import (
     AgreementParametersData,
     ItemData,
     ItemGroupData,
+    ItemParametersData,
     ParameterGroupData,
     ProductData,
+    RequestParametersData,
+    SubscriptionParametersData,
     TemplateData,
 )
 from swo.mpt.cli.core.products.services import (
@@ -117,17 +120,17 @@ class ProductContainer(containers.DeclarativeContainer):
         },
         "item_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": AgreementParametersData,
+            "data_model": ItemParametersData,
             "file_manager": _file_managers.provided["item_parameters"],
         },
         "request_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": AgreementParametersData,
+            "data_model": RequestParametersData,
             "file_manager": _file_managers.provided["request_parameters"],
         },
         "subscription_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": AgreementParametersData,
+            "data_model": SubscriptionParametersData,
             "file_manager": _file_managers.provided["subscription_parameters"],
         },
         "template": {
