@@ -43,3 +43,10 @@ jobs:
 
     - name: "Publish to PyPI"
       run: uv publish
+
+  dtrack:
+    uses: softwareone-platform/ops-template/.github/workflows/dependency-track-python-uv.yml@v1
+    with:
+      projectName: 'swo-marketplace-cli'
+    secrets:
+      DEPENDENCYTRACK_APIKEY: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
