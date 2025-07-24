@@ -1,7 +1,7 @@
-from swo.mpt.cli.core.price_lists import app
-from swo.mpt.cli.core.price_lists.services import ItemService, PriceListService
-from swo.mpt.cli.core.services.service_result import ServiceResult
-from swo.mpt.cli.core.stats import PriceListStatsCollector
+from cli.core.price_lists import app
+from cli.core.price_lists.services import ItemService, PriceListService
+from cli.core.services.service_result import ServiceResult
+from cli.core.stats import PriceListStatsCollector
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -17,11 +17,9 @@ def test_sync_price_lists_not_files_found(price_list_new_file):
 def test_sync_price_lists_multiple_files(
     mocker, price_list_data_from_json, price_list_new_file, expected_account
 ):
+    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=expected_account
-    )
-    mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_files_path",
+        "cli.core.price_lists.app.get_files_path",
         return_value=[price_list_new_file, price_list_new_file],
     )
     stats = PriceListStatsCollector()
@@ -55,9 +53,7 @@ def test_sync_price_lists_multiple_files(
 def test_sync_price_lists_create(
     mocker, mpt_price_list_data, price_list_data_from_json, price_list_file_path, expected_account
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=expected_account
-    )
+    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,
@@ -89,9 +85,7 @@ def test_sync_price_lists_update(
     mocker, price_list_data_from_json, price_list_file_path, expected_account
 ):
     stats = PriceListStatsCollector()
-    mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=expected_account
-    )
+    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,
         "retrieve",
@@ -122,7 +116,7 @@ def test_sync_price_lists_create_error(
     mocker, active_operations_account, price_list_data_from_json, price_list_file_path
 ):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
@@ -149,16 +143,16 @@ def test_sync_price_lists_create_error(
 
 def test_export_price_list(mocker, active_operations_account, price_list_data_from_json):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
     price_list_service_export_mock = mocker.patch(
-        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        "cli.core.price_lists.services.PriceListService.export",
         return_value=ServiceResult(success=True, model=price_list_data_from_json, stats=stats),
     )
     item_service_export_mock = mocker.patch(
-        "swo.mpt.cli.core.price_lists.services.ItemService.export",
+        "cli.core.price_lists.services.ItemService.export",
         return_value=ServiceResult(success=True, model=None, stats=stats),
     )
 
@@ -172,7 +166,7 @@ def test_export_price_list(mocker, active_operations_account, price_list_data_fr
 
 def test_export_file_exists(mocker, active_operations_account):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,
     )
     mocker.patch("pathlib.Path.exists", return_value=True)
@@ -190,9 +184,7 @@ def test_export_file_exists(mocker, active_operations_account):
 def test_export_price_list_no_operations_account(
     mocker, active_vendor_account, price_list_data_from_json
 ):
-    mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account", return_value=active_vendor_account
-    )
+    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=active_vendor_account)
     price_list_service_export_spy = mocker.spy(PriceListService, "export")
     item_service_export_spy = mocker.spy(ItemService, "export")
 
@@ -208,12 +200,12 @@ def test_export_price_list_export_price_list_no_success(
     mocker, active_operations_account, price_list_data_from_json
 ):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
     price_list_service_export_mock = mocker.patch(
-        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        "cli.core.price_lists.services.PriceListService.export",
         return_value=ServiceResult(success=False, model=None, stats=stats),
     )
     item_service_export_spy = mocker.spy(ItemService, "export")
@@ -230,16 +222,16 @@ def test_export_price_list_item_no_success(
     mocker, active_operations_account, price_list_data_from_json
 ):
     mocker.patch(
-        "swo.mpt.cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
     price_list_service_export_mock = mocker.patch(
-        "swo.mpt.cli.core.price_lists.services.PriceListService.export",
+        "cli.core.price_lists.services.PriceListService.export",
         return_value=ServiceResult(success=True, model=price_list_data_from_json, stats=stats),
     )
     item_service_export_mock = mocker.patch(
-        "swo.mpt.cli.core.price_lists.services.ItemService.export",
+        "cli.core.price_lists.services.ItemService.export",
         return_value=ServiceResult(success=False, model=None, stats=stats),
     )
 

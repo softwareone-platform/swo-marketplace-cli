@@ -3,13 +3,13 @@ from unittest.mock import Mock
 from urllib.parse import urljoin
 
 import pytest
+from cli.core.models import DataCollectionModel
+from cli.core.products import app
+from cli.core.products.app import create_product, update_product
+from cli.core.services.service_result import ServiceResult
+from cli.core.stats import ProductStatsCollector
 from openpyxl.reader.excel import load_workbook
 from requests import Response
-from swo.mpt.cli.core.models import DataCollectionModel
-from swo.mpt.cli.core.products import app
-from swo.mpt.cli.core.products.app import create_product, update_product
-from swo.mpt.cli.core.services.service_result import ServiceResult
-from swo.mpt.cli.core.stats import ProductStatsCollector
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -18,7 +18,7 @@ runner = CliRunner()
 def test_list_products(
     expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    mocker.patch("cli.core.products.app.get_active_account", return_value=expected_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -37,7 +37,7 @@ def test_list_products(
 def test_list_products_with_query_and_paging(
     expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch("swo.mpt.cli.core.products.app.get_active_account", return_value=expected_account)
+    mocker.patch("cli.core.products.app.get_active_account", return_value=expected_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -72,8 +72,8 @@ def test_sync_not_valid_definition(mocker, product_container_mock):
 
 
 def test_sync_with_dry_run(mocker, product_container_mock):
-    create_mock = mocker.patch("swo.mpt.cli.core.products.app.create_product")
-    update_mock = mocker.patch("swo.mpt.cli.core.products.app.update_product")
+    create_mock = mocker.patch("cli.core.products.app.create_product")
+    update_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
         app,
@@ -97,7 +97,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
         "retrieve",
         return_value=ServiceResult(success=True, model=product_data_from_dict, stats=Mock()),
     )
-    update_product_mock = mocker.patch("swo.mpt.cli.core.products.app.update_product")
+    update_product_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
         app,
@@ -124,7 +124,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
         "retrieve",
         return_value=ServiceResult(success=True, model=product_data_from_dict, stats=Mock()),
     )
-    update_product_mock = mocker.patch("swo.mpt.cli.core.products.app.update_product")
+    update_product_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
         app,
@@ -155,7 +155,7 @@ def test_sync_product_force_create(
         "retrieve",
         return_value=ServiceResult(success=True, model=product_data_from_dict, stats=Mock()),
     )
-    create_product_mock = mocker.patch("swo.mpt.cli.core.products.app.create_product")
+    create_product_mock = mocker.patch("cli.core.products.app.create_product")
 
     result = runner.invoke(
         app,
@@ -186,7 +186,7 @@ def test_sync_product_no_product(mocker, product_new_file, product_container_moc
         "retrieve",
         return_value=ServiceResult(success=True, model=None, stats=Mock()),
     )
-    create_mock = mocker.patch("swo.mpt.cli.core.products.app.create_product")
+    create_mock = mocker.patch("cli.core.products.app.create_product")
 
     result = runner.invoke(
         app,
@@ -322,7 +322,7 @@ def test_export_product_overwrites_existing_files(
     product_container_mock,
 ):
     exists_mock = mocker.patch.object(Path, "exists", return_value=True)
-    os_remove_mock = mocker.patch("swo.mpt.cli.core.products.app.os.remove")
+    os_remove_mock = mocker.patch("cli.core.products.app.os.remove")
     product_id = "PRD-1234"
     tmp_file = tmp_path / f"{product_id}.xlsx"
     tmp_file.touch()

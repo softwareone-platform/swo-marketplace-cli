@@ -1,5 +1,5 @@
 import typer
-from swo.mpt.cli.core.console import console
+from cli.core.console import console
 
 app = typer.Typer()
 

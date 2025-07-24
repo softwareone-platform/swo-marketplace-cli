@@ -1,6 +1,6 @@
 from datetime import date
 
-from swo.mpt.cli.core.products.models import ParameterGroupData
+from cli.core.products.models import ParameterGroupData
 
 
 def test_parameter_data_from_dict(parameter_group_file_data):

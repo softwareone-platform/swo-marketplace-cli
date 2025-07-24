@@ -2,7 +2,7 @@ import json
 import os
 
 import pytest
-from swo.mpt.cli.core.accounts.handlers.json_file_handler import JsonFileHandler
+from cli.core.accounts.handlers.json_file_handler import JsonFileHandler
 
 
 @pytest.fixture

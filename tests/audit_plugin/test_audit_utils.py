@@ -1,5 +1,5 @@
 import pytest
-from swo.mpt.cli.plugins.audit_plugin.utils import (
+from cli.plugins.audit_plugin.utils import (
     display_audit_records,
     flatten_dict,
     format_json_path,

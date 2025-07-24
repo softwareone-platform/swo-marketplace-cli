@@ -1,6 +1,6 @@
 import pytest
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.handlers.file_manager import ExcelFileManager
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.handlers.file_manager import ExcelFileManager
 
 
 class FakeExcelFileManager(ExcelFileManager):

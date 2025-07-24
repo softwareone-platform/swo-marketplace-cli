@@ -1,12 +1,12 @@
 import re
 
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.products.constants import (
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.products.constants import (
     ITEMS_FIELDS,
     TAB_ITEMS,
 )
-from swo.mpt.cli.core.products.handlers import ItemExcelFileManager
-from swo.mpt.cli.core.products.models import ItemData
+from cli.core.products.handlers import ItemExcelFileManager
+from cli.core.products.models import ItemData
 
 
 def test_read_data(mocker, item_data_from_dict):

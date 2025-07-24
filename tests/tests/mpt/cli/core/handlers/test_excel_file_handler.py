@@ -3,15 +3,15 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from openpyxl.styles import NamedStyle
-from openpyxl.workbook import Workbook
-from openpyxl.worksheet.datavalidation import DataValidation
-from swo.mpt.cli.core.handlers.errors import (
+from cli.core.handlers.errors import (
     RequiredFieldsError,
     RequiredFieldValuesError,
     RequiredSheetsError,
 )
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from openpyxl.styles import NamedStyle
+from openpyxl.workbook import Workbook
+from openpyxl.worksheet.datavalidation import DataValidation
 
 
 @pytest.fixture
@@ -46,7 +46,7 @@ def excel_file_handler(tmp_path, workbook):
     file_path = tmp_path / "fake_excel_file.xlsx"
     workbook.save(file_path)
 
-    with patch("swo.mpt.cli.core.handlers.excel_file_handler.load_workbook", return_value=workbook):
+    with patch("cli.core.handlers.excel_file_handler.load_workbook", return_value=workbook):
         handler = ExcelFileHandler(file_path)
 
     return handler

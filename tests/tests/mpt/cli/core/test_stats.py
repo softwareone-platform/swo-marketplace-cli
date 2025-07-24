@@ -1,4 +1,4 @@
-from swo.mpt.cli.core.stats import ErrorMessagesCollector
+from cli.core.stats import ErrorMessagesCollector
 
 
 def test_stats_add_msg():

@@ -1,7 +1,7 @@
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.products.constants import ITEMS_GROUPS_FIELDS, TAB_ITEMS_GROUPS
-from swo.mpt.cli.core.products.handlers import ItemGroupExcelFileManager
-from swo.mpt.cli.core.products.models import ItemGroupData
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.products.constants import ITEMS_GROUPS_FIELDS, TAB_ITEMS_GROUPS
+from cli.core.products.handlers import ItemGroupExcelFileManager
+from cli.core.products.models import ItemGroupData
 
 
 def test_read_data(mocker, item_group_data_from_dict):

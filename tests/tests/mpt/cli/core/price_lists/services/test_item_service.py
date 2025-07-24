@@ -1,15 +1,15 @@
 from unittest.mock import Mock
 
 import pytest
+from cli.core.errors import MPTAPIError
+from cli.core.price_lists.api import PriceListItemAPIService
+from cli.core.price_lists.constants import TAB_PRICE_ITEMS
+from cli.core.price_lists.handlers import PriceListItemExcelFileManager
+from cli.core.price_lists.models import ItemData
+from cli.core.price_lists.services import ItemService
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import PriceListStatsCollector
 from requests import Response
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.price_lists.api import PriceListItemAPIService
-from swo.mpt.cli.core.price_lists.constants import TAB_PRICE_ITEMS
-from swo.mpt.cli.core.price_lists.handlers import PriceListItemExcelFileManager
-from swo.mpt.cli.core.price_lists.models import ItemData
-from swo.mpt.cli.core.price_lists.services import ItemService
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import PriceListStatsCollector
 
 
 @pytest.fixture

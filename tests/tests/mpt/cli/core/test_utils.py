@@ -1,4 +1,4 @@
-from swo.mpt.cli.core.utils import get_files_path, set_dict_value
+from cli.core.utils import get_files_path, set_dict_value
 
 
 def test_set_dict_value():

@@ -1,7 +1,7 @@
 from urllib.parse import urljoin
 
 import pytest
-from swo.mpt.cli.core.mpt.client import MPTClient, client_from_account
+from cli.core.mpt.client import MPTClient, client_from_account
 
 
 def test_mpt_client_base_url():

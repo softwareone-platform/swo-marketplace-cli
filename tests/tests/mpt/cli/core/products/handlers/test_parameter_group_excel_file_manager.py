@@ -1,7 +1,7 @@
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.products.constants import PARAMETERS_GROUPS_FIELDS, TAB_PARAMETERS_GROUPS
-from swo.mpt.cli.core.products.handlers import ParameterGroupExcelFileManager
-from swo.mpt.cli.core.products.models import ParameterGroupData
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.products.constants import PARAMETERS_GROUPS_FIELDS, TAB_PARAMETERS_GROUPS
+from cli.core.products.handlers import ParameterGroupExcelFileManager
+from cli.core.products.models import ParameterGroupData
 
 
 def test_read_data(mocker, parameter_group_data_from_dict):

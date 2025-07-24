@@ -5,13 +5,13 @@ from unittest import mock
 from unittest.mock import MagicMock, Mock, call
 
 import pytest
-from openpyxl.worksheet.datavalidation import DataValidation
-from swo.mpt.cli.core.handlers.excel_styles import (
+from cli.core.handlers.excel_styles import (
     horizontal_tab_style,
     number_format_style,
 )
-from swo.mpt.cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
-from swo.mpt.cli.core.models.data_model import BaseDataModel
+from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
+from cli.core.models.data_model import BaseDataModel
+from openpyxl.worksheet.datavalidation import DataValidation
 
 
 @dataclass

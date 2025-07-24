@@ -1,10 +1,10 @@
 from unittest.mock import Mock
 
 import pytest
+from cli.core.mpt.api import APIService, RelatedAPIService
+from cli.core.mpt.client import MPTClient
 from pydantic import BaseModel
 from requests import Response
-from swo.mpt.cli.core.mpt.api import APIService, RelatedAPIService
-from swo.mpt.cli.core.mpt.client import MPTClient
 
 
 class FakeModel(BaseModel):

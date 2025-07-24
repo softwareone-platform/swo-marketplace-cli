@@ -2,7 +2,7 @@ import json
 from operator import itemgetter
 
 import pytest
-from swo.mpt.cli.core.accounts.flows import (
+from cli.core.accounts.flows import (
     disable_accounts_except,
     does_account_exist,
     find_account,
@@ -12,11 +12,11 @@ from swo.mpt.cli.core.accounts.flows import (
     remove_account,
     write_accounts,
 )
-from swo.mpt.cli.core.accounts.handlers import JsonFileHandler
-from swo.mpt.cli.core.accounts.models import Account
-from swo.mpt.cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
-from swo.mpt.cli.core.mpt.models import Account as MPTAccount
-from swo.mpt.cli.core.mpt.models import Token
+from cli.core.accounts.handlers import JsonFileHandler
+from cli.core.accounts.models import Account
+from cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
+from cli.core.mpt.models import Account as MPTAccount
+from cli.core.mpt.models import Token
 
 
 def test_from_token(expected_account):

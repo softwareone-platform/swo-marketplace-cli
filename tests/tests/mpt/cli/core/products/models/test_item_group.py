@@ -1,6 +1,6 @@
 from datetime import date
 
-from swo.mpt.cli.core.products.constants import (
+from cli.core.products.constants import (
     ITEMS_GROUPS_ACTION,
     ITEMS_GROUPS_CREATED,
     ITEMS_GROUPS_DEFAULT,
@@ -13,7 +13,7 @@ from swo.mpt.cli.core.products.constants import (
     ITEMS_GROUPS_NAME,
     ITEMS_GROUPS_REQUIRED,
 )
-from swo.mpt.cli.core.products.models import ItemGroupData
+from cli.core.products.models import ItemGroupData
 
 
 def test_item_group_data_from_dict(item_group_file_data):

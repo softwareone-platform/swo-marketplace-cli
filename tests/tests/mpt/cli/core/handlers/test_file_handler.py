@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from swo.mpt.cli.core.handlers import FileHandler
+from cli.core.handlers import FileHandler
 
 
 class FakeFileHandler(FileHandler):

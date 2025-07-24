@@ -4,21 +4,21 @@ services:
     build:
       context: .
       dockerfile: prod.Dockerfile
-    working_dir: /swo
+    working_dir: /cli
     stdin_open: true
     tty: true
     volumes:
-      - .:/swo
+      - .:/cli
 
   app_test:
     container_name: swo_cli_test
     build:
       context: .
       dockerfile: dev.Dockerfile
-    working_dir: /swo
+    working_dir: /cli
     command: bash -c "ruff check . && mypy . && uv lock --check && pytest"
     volumes:
-      - .:/swo
+      - .:/cli
 
   bash:
     container_name: swo_cli_bash
@@ -26,18 +26,18 @@ services:
       context: .
       dockerfile: dev.Dockerfile
     command: bash
-    working_dir: /swo
+    working_dir: /cli
     stdin_open: true
     tty: true
     volumes:
-      - .:/swo
+      - .:/cli
 
   format:
     container_name: swo_cli_format
     build:
       context: .
       dockerfile: dev.Dockerfile
-    working_dir: /swo
+    working_dir: /cli
     command: bash -c "ruff check . --select I --fix && ruff format ."
     volumes:
-      - .:/swo
+      - .:/cli

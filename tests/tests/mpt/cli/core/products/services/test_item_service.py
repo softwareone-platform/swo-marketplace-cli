@@ -1,15 +1,15 @@
 from unittest.mock import Mock
 
 import pytest
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.models import DataCollectionModel
-from swo.mpt.cli.core.products.api import ItemAPIService
-from swo.mpt.cli.core.products.constants import TAB_ITEMS
-from swo.mpt.cli.core.products.handlers import ItemExcelFileManager
-from swo.mpt.cli.core.products.models import ItemActionEnum, ItemData
-from swo.mpt.cli.core.products.services import ItemService
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import ProductStatsCollector
+from cli.core.errors import MPTAPIError
+from cli.core.models import DataCollectionModel
+from cli.core.products.api import ItemAPIService
+from cli.core.products.constants import TAB_ITEMS
+from cli.core.products.handlers import ItemExcelFileManager
+from cli.core.products.models import ItemActionEnum, ItemData
+from cli.core.products.services import ItemService
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture
@@ -30,7 +30,7 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     )
     post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
     search_uom_by_name_mock = mocker.patch(
-        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        "cli.core.products.services.item_service.search_uom_by_name",
         return_value=Mock(id="fake_unit_id"),
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
@@ -61,7 +61,7 @@ def test_update_item_create_error(mocker, service_context, item_data_from_dict):
         service_context.api, "post", side_effect=MPTAPIError("API Error", "Error updating item")
     )
     search_uom_by_name_mock = mocker.patch(
-        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        "cli.core.products.services.item_service.search_uom_by_name",
         return_value=Mock(id="fake_unit_id"),
     )
     write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
@@ -172,7 +172,7 @@ def test_set_export_params(service_context, item_data_from_dict):
 
 def test_prepare_data_model_to_create(mocker, service_context, item_data_from_dict):
     search_uom_by_name_mock = mocker.patch(
-        "swo.mpt.cli.core.products.services.item_service.search_uom_by_name",
+        "cli.core.products.services.item_service.search_uom_by_name",
         return_value=Mock(id="fake_unit_id"),
     )
     write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")

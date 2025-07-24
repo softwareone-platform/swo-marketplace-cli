@@ -1,10 +1,10 @@
 import pytest
-from swo.mpt.cli.core.products.constants import (
+from cli.core.products.constants import (
     GENERAL_FIELDS,
     TAB_GENERAL,
 )
-from swo.mpt.cli.core.products.handlers import ProductExcelFileManager
-from swo.mpt.cli.core.products.models import ProductData
+from cli.core.products.handlers import ProductExcelFileManager
+from cli.core.products.models import ProductData
 
 
 @pytest.fixture

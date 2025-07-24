@@ -1,7 +1,7 @@
 from datetime import date
 
 import pytest
-from swo.mpt.cli.core.products.constants import (
+from cli.core.products.constants import (
     PARAMETERS_ACTION,
     PARAMETERS_CONSTRAINTS,
     PARAMETERS_CREATED,
@@ -17,8 +17,8 @@ from swo.mpt.cli.core.products.constants import (
     PARAMETERS_PHASE,
     PARAMETERS_TYPE,
 )
-from swo.mpt.cli.core.products.models import AgreementParametersData, DataActionEnum
-from swo.mpt.cli.core.products.models.parameters import ParamScopeEnum
+from cli.core.products.models import AgreementParametersData, DataActionEnum
+from cli.core.products.models.parameters import ParamScopeEnum
 
 
 def test_parameters_data_from_dict(parameters_file_data):

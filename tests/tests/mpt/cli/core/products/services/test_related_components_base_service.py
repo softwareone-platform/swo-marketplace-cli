@@ -4,14 +4,14 @@ from typing import Any, Self
 from unittest.mock import Mock
 
 import pytest
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.models import BaseDataModel, DataCollectionModel
-from swo.mpt.cli.core.products.models import DataActionEnum
-from swo.mpt.cli.core.products.services.related_components_base_service import (
+from cli.core.errors import MPTAPIError
+from cli.core.models import BaseDataModel, DataCollectionModel
+from cli.core.products.models import DataActionEnum
+from cli.core.products.services.related_components_base_service import (
     RelatedComponentsBaseService,
 )
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import ProductStatsCollector
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import ProductStatsCollector
 
 
 class FakeRelatedComponentsService(RelatedComponentsBaseService):

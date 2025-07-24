@@ -1,7 +1,6 @@
 from datetime import date
 
-from freezegun import freeze_time
-from swo.mpt.cli.core.products.constants import (
+from cli.core.products.constants import (
     GENERAL_ACCOUNT_ID,
     GENERAL_ACCOUNT_NAME,
     GENERAL_CATALOG_DESCRIPTION,
@@ -17,8 +16,9 @@ from swo.mpt.cli.core.products.constants import (
     SETTINGS_SETTING,
     SETTINGS_VALUE,
 )
-from swo.mpt.cli.core.products.models import DataActionEnum
-from swo.mpt.cli.core.products.models.product import ProductData, SettingsData, SettingsItem
+from cli.core.products.models import DataActionEnum
+from cli.core.products.models.product import ProductData, SettingsData, SettingsItem
+from freezegun import freeze_time
 
 
 def test_product_data_from_dict(product_file_data):

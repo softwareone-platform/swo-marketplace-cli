@@ -35,10 +35,10 @@ dependencies = [
 ]
 
 [project.scripts]
-mpt-cli = "swo.mpt.cli.swocli:app"
+mpt-cli = "cli.swocli:app"
 
-[project.entry-points."swo.mpt.cli.plugins"]
-audit = "swo.mpt.cli.plugins.audit_plugin.app:app"
+[project.entry-points."cli.plugins"]
+audit = "cli.plugins.audit_plugin.app:app"
 
 [dependency-groups]
 dev = [
@@ -61,10 +61,10 @@ dev = [
 ]
 
 [tool.hatch.build.targets.sdist]
-include = ["swo"]
+include = ["cli"]
 
 [tool.hatch.build.targets.wheel]
-include = ["swo"]
+include = ["cli"]
 
 [build-system]
 requires = ["hatchling"]
@@ -73,7 +73,7 @@ build-backend = "hatchling.build"
 [tool.pytest.ini_options]
 testpaths = "tests"
 pythonpath = "."
-addopts = "--cov=swo/mpt/cli --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "--cov=cli --cov-report=term-missing --cov-report=html --cov-report=xml"
 log_cli = false
 filterwarnings = [
     "ignore:Support for class-based `config` is deprecated:DeprecationWarning",
@@ -86,15 +86,15 @@ markers = [
 [tool.coverage.run]
 branch = true
 relative_files = true
-source = ["swo"]
+source = ["cli"]
 
 [tool.coverage.report]
 exclude_also = [
     "if __name__ == \"__main__\":",
 ]
 include = [
-    "swo/mpt/cli/**",
-    "swo/mpt/cli/plugins/audit_plugin/**",
+    "cli/**",
+    "cli/plugins/audit_plugin/**",
 ]
 omit = [
     "*/__init__.py"
@@ -126,7 +126,7 @@ ignore = [
 ]
 
 [tool.ruff.lint.isort]
-known-third-party = ["swo"]
+known-third-party = ["cli"]
 
 [tool.ruff.lint.pycodestyle]
 max-line-length = 100

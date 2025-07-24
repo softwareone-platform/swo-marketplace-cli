@@ -3,7 +3,7 @@ from datetime import datetime
 from pathlib import Path
 
 import pytest
-from swo.mpt.cli.core.price_lists.constants import (
+from cli.core.price_lists.constants import (
     EXTERNAL_ID,
     GENERAL_CREATED,
     GENERAL_CURRENCY,
@@ -31,8 +31,8 @@ from swo.mpt.cli.core.price_lists.constants import (
     PRICELIST_ITEMS_UNIT_LP,
     PRICELIST_ITEMS_UNIT_PP,
 )
-from swo.mpt.cli.core.price_lists.models import ItemData, PriceListData
-from swo.mpt.cli.core.price_lists.models.item import ItemAction, ItemStatus
+from cli.core.price_lists.models import ItemData, PriceListData
+from cli.core.price_lists.models.item import ItemAction, ItemStatus
 
 
 @pytest.fixture

@@ -1,5 +1,5 @@
 import pytest
-from swo.mpt.cli.core.products.models import ItemActionEnum, ItemData
+from cli.core.products.models import ItemActionEnum, ItemData
 
 
 def test_item_data_from_dict(item_file_data):

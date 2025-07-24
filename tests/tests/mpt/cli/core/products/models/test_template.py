@@ -1,6 +1,6 @@
 from datetime import date
 
-from swo.mpt.cli.core.products.constants import (
+from cli.core.products.constants import (
     TEMPLATES_ACTION,
     TEMPLATES_CONTENT,
     TEMPLATES_CREATED,
@@ -10,7 +10,7 @@ from swo.mpt.cli.core.products.constants import (
     TEMPLATES_NAME,
     TEMPLATES_TYPE,
 )
-from swo.mpt.cli.core.products.models import DataActionEnum, TemplateData
+from cli.core.products.models import DataActionEnum, TemplateData
 
 
 def test_template_data_from_dict(template_file_data):

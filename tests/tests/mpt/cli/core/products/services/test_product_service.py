@@ -1,16 +1,16 @@
 from unittest.mock import Mock, call
 
 import pytest
+from cli.core.errors import MPTAPIError
+from cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
+from cli.core.products.api import ProductAPIService
+from cli.core.products.constants import TAB_GENERAL
+from cli.core.products.handlers import ProductExcelFileManager, SettingsExcelFileManager
+from cli.core.products.models import ProductData
+from cli.core.products.services import ProductService
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import ProductStatsCollector
 from freezegun import freeze_time
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
-from swo.mpt.cli.core.products.api import ProductAPIService
-from swo.mpt.cli.core.products.constants import TAB_GENERAL
-from swo.mpt.cli.core.products.handlers import ProductExcelFileManager, SettingsExcelFileManager
-from swo.mpt.cli.core.products.models import ProductData
-from swo.mpt.cli.core.products.services import ProductService
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture

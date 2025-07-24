@@ -1,13 +1,13 @@
 from urllib.parse import urljoin
 
 import pytest
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.mpt.flows import (
+from cli.core.errors import MPTAPIError
+from cli.core.mpt.flows import (
     get_products,
     get_token,
     search_uom_by_name,
 )
-from swo.mpt.cli.core.mpt.models import (
+from cli.core.mpt.models import (
     Product,
     Token,
     Uom,

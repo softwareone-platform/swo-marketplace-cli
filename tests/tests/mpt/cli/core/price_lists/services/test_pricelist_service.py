@@ -1,12 +1,12 @@
 import pytest
-from swo.mpt.cli.core.errors import MPTAPIError
-from swo.mpt.cli.core.price_lists.api import PriceListAPIService
-from swo.mpt.cli.core.price_lists.constants import TAB_GENERAL
-from swo.mpt.cli.core.price_lists.handlers import PriceListExcelFileManager
-from swo.mpt.cli.core.price_lists.models import PriceListData
-from swo.mpt.cli.core.price_lists.services import PriceListService
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import PriceListStatsCollector
+from cli.core.errors import MPTAPIError
+from cli.core.price_lists.api import PriceListAPIService
+from cli.core.price_lists.constants import TAB_GENERAL
+from cli.core.price_lists.handlers import PriceListExcelFileManager
+from cli.core.price_lists.models import PriceListData
+from cli.core.price_lists.services import PriceListService
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import PriceListStatsCollector
 
 
 @pytest.fixture

@@ -1,10 +1,10 @@
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.price_lists.constants import (
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.price_lists.constants import (
     GENERAL_FIELDS,
     TAB_GENERAL,
 )
-from swo.mpt.cli.core.price_lists.handlers import PriceListExcelFileManager
-from swo.mpt.cli.core.price_lists.models import PriceListData
+from cli.core.price_lists.handlers import PriceListExcelFileManager
+from cli.core.price_lists.models import PriceListData
 
 
 def test_read_data(mocker, price_list_data_from_dict):

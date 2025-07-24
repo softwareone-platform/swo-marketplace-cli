@@ -3,10 +3,10 @@ from typing import Any, Self
 from unittest.mock import Mock, call
 
 import pytest
-from swo.mpt.cli.core.handlers.excel_styles import general_tab_title_style
-from swo.mpt.cli.core.handlers.vertical_tab_file_manager import VerticalTabFileManager
-from swo.mpt.cli.core.models import BaseDataModel
-from swo.mpt.cli.core.products.constants import (
+from cli.core.handlers.excel_styles import general_tab_title_style
+from cli.core.handlers.vertical_tab_file_manager import VerticalTabFileManager
+from cli.core.models import BaseDataModel
+from cli.core.products.constants import (
     ERROR_COLUMN_NAME,
 )
 

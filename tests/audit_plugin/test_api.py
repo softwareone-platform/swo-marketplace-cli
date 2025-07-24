@@ -1,7 +1,7 @@
 from unittest.mock import Mock
 
 import pytest
-from swo.mpt.cli.plugins.audit_plugin.api import (
+from cli.plugins.audit_plugin.api import (
     get_audit_records_by_object,
     get_audit_trail,
 )

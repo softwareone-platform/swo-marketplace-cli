@@ -1,11 +1,11 @@
 import pytest
-from swo.mpt.cli.core.models import DataCollectionModel
-from swo.mpt.cli.core.products.api import ParametersAPIService
-from swo.mpt.cli.core.products.handlers import AgreementParametersExcelFileManager
-from swo.mpt.cli.core.products.models import AgreementParametersData
-from swo.mpt.cli.core.products.services import ParametersService
-from swo.mpt.cli.core.services.service_context import ServiceContext
-from swo.mpt.cli.core.stats import ProductStatsCollector
+from cli.core.models import DataCollectionModel
+from cli.core.products.api import ParametersAPIService
+from cli.core.products.handlers import AgreementParametersExcelFileManager
+from cli.core.products.models import AgreementParametersData
+from cli.core.products.services import ParametersService
+from cli.core.services.service_context import ServiceContext
+from cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture

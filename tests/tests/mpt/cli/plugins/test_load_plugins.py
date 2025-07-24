@@ -1,7 +1,7 @@
 from importlib.metadata import EntryPoint
 
-from swo.mpt.cli.core.plugins import load_plugins
-from swo.mpt.cli.swocli import app
+from cli.core.plugins import load_plugins
+from cli.swocli import app
 from typer.testing import CliRunner
 
 from . import app as plugin_app
@@ -16,7 +16,7 @@ def test_load_plugins(mocker):
         side_effect=lambda: plugin_app,
     )
     mocker.patch(
-        "swo.mpt.cli.core.plugins.list_entrypoints",
+        "cli.core.plugins.list_entrypoints",
         return_value=[EntryPoint("tests", "tests.plugins.test_plugin", None)],
     )
 

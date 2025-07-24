@@ -1,7 +1,7 @@
-from swo.mpt.cli.core.handlers.excel_file_handler import ExcelFileHandler
-from swo.mpt.cli.core.products.constants import TAB_TEMPLATES, TEMPLATES_FIELDS
-from swo.mpt.cli.core.products.handlers import TemplateExcelFileManager
-from swo.mpt.cli.core.products.models import TemplateData
+from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.products.constants import TAB_TEMPLATES, TEMPLATES_FIELDS
+from cli.core.products.handlers import TemplateExcelFileManager
+from cli.core.products.models import TemplateData
 
 
 def test_read_data(mocker, template_data_from_dict):

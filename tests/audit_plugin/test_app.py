@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from swo.mpt.cli.plugins.audit_plugin.app import app, compare_audit_trails
+from cli.plugins.audit_plugin.app import app, compare_audit_trails
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -34,9 +34,9 @@ def sample_audit_records():
 
 
 class TestDiffByObjectId:
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_records_by_object")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_records_by_object")
     def test_successful_comparison(
         self,
         mock_get_records,
@@ -59,9 +59,9 @@ class TestDiffByObjectId:
         assert "old_value" in result.stdout
         assert "new_value" in result.stdout
 
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_records_by_object")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_records_by_object")
     def test_with_custom_positions(
         self,
         mock_get_records,
@@ -81,9 +81,9 @@ class TestDiffByObjectId:
         assert "old_value" in result.stdout
         assert "new_value" in result.stdout
 
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_records_by_object")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_records_by_object")
     def test_insufficient_records(
         self,
         mock_get_records,
@@ -101,9 +101,9 @@ class TestDiffByObjectId:
         assert result.exit_code == 1
         assert "Need at least 2 audit records to compare" in result.stdout
 
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_records_by_object")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_records_by_object")
     def test_invalid_positions(
         self,
         mock_get_records,
@@ -123,9 +123,9 @@ class TestDiffByObjectId:
 
 
 class TestDiffByRecordsId:
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_trail")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_trail")
     def test_successful_comparison(
         self,
         mock_get_trail,
@@ -145,9 +145,9 @@ class TestDiffByRecordsId:
         assert "old_value" in result.stdout
         assert "new_value" in result.stdout
 
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_active_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.client_from_account")
-    @patch("swo.mpt.cli.plugins.audit_plugin.app.get_audit_trail")
+    @patch("cli.plugins.audit_plugin.app.get_active_account")
+    @patch("cli.plugins.audit_plugin.app.client_from_account")
+    @patch("cli.plugins.audit_plugin.app.get_audit_trail")
     def test_different_objects(
         self, mock_get_trail, mock_client_from_account, mock_get_active_account
     ):
@@ -173,7 +173,7 @@ def test_compare_audit_trails_no_differences():
     target = source.copy()
 
     # Execute
-    with patch("swo.mpt.cli.plugins.audit_plugin.app.console.print") as mock_print:
+    with patch("cli.plugins.audit_plugin.app.console.print") as mock_print:
         compare_audit_trails(source, target)
 
     # Assert

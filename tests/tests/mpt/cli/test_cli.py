@@ -1,5 +1,5 @@
 import pytest
-from swo.mpt.cli.swocli import app
+from cli.swocli import app
 from typer.testing import CliRunner
 
 runner = CliRunner()
