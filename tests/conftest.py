@@ -4,10 +4,10 @@ from unittest.mock import MagicMock
 
 import pytest
 import responses
-from swo.mpt.cli.core.accounts.containers import AccountContainer
-from swo.mpt.cli.core.accounts.models import Account as CLIAccount
-from swo.mpt.cli.core.mpt.client import MPTClient
-from swo.mpt.cli.core.mpt.models import Account, Product
+from cli.core.accounts.containers import AccountContainer
+from cli.core.accounts.models import Account as CLIAccount
+from cli.core.mpt.client import MPTClient
+from cli.core.mpt.models import Account, Product
 
 
 @pytest.fixture
@@ -15,7 +15,7 @@ def account_container_mock(mocker, operations_account):
     container = AccountContainer()
     container.account.override(MagicMock(return_value=operations_account))
     container.mpt_client.override(MagicMock(MPTClient))
-    mock = mocker.patch("swo.mpt.cli.core.products.app.AccountContainer", autospec=True)
+    mock = mocker.patch("cli.core.products.app.AccountContainer", autospec=True)
     mock.return_value = container
 
     return container
