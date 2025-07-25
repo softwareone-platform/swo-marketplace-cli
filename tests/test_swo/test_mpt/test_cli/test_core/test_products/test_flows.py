@@ -186,7 +186,8 @@ def test_check_product_definition_not_all_required_items(
     )
 
     assert not stats.is_empty()
-    assert str(stats) == "Items: Required field Billing Frequency is not provided\n"
+    assert str(stats) == ("Items: Required field Billing Model is not provided, "
+                          "Required field Billing Period is not provided\n")
 
 
 def test_check_product_definition_not_all_required_templates(
@@ -538,8 +539,8 @@ def test_sync_item(
         item.id,
     )
     assert (
-        ws["J2"].value,
-        ws["J3"].value,
+        ws["K2"].value,
+        ws["K3"].value,
     ) == (
         item_group.id,
         item_group.id,
@@ -560,6 +561,7 @@ def test_sync_item(
             },
             "quantityNotApplicable": True,
             "terms": {
+                "model": "quantity",
                 "commitment": "1y",
                 "period": "1m",
             },
@@ -594,8 +596,8 @@ def test_sync_item(
             },
             "quantityNotApplicable": False,
             "terms": {
-                "commitment": "1y",
-                "period": "1m",
+                "model": "one-time",
+                "period": "one-time",
             },
             "unit": {
                 "id": uom.id,
@@ -653,7 +655,7 @@ def test_sync_item_exception(
         console.status(""),
     )
 
-    assert ws["S2"].value == "Error with response body Error"
+    assert ws["T2"].value == "Error with response body Error"
 
 
 def test_sync_template(
@@ -1012,7 +1014,7 @@ def test_sync_product_update_product(
             "parameters": [],
             "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {"commitment": "1y", "period": "1m"},
+            "terms": {"model": "usage", "commitment": "1y", "period": "1m"},
             "unit": {"id": "UNT-1916"},
         },
     )
@@ -1024,7 +1026,7 @@ def test_sync_product_update_product(
             "group": {"id": "IGR-1213-3316-0002"},
             "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {"commitment": "1y", "period": "1m"},
+            "terms": {"model": "usage", "commitment": "1y", "period": "1m"},
             "unit": {"id": "UOM-1234-1234"},
             "parameters": [],
             "externalIds": {"vendor": "65AB123BASD2"},
@@ -1094,7 +1096,7 @@ def test_sync_product_update_product_operations(
             "parameters": [],
             "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {"commitment": "1y", "period": "1m"},
+            "terms": {"model": "usage", "commitment": "1y", "period": "1m"},
             "unit": {"id": "UNT-1916"},
         },
     )
@@ -1106,7 +1108,7 @@ def test_sync_product_update_product_operations(
             "group": {"id": "IGR-1213-3316-0002"},
             "product": {"id": "PRD-1213-3316"},
             "quantityNotApplicable": False,
-            "terms": {"commitment": "1y", "period": "1m"},
+            "terms": {"model": "usage", "commitment": "1y", "period": "1m"},
             "unit": {"id": "UOM-1234-1234"},
             "parameters": [],
             "externalIds": {"operations": "NAV123456"},
