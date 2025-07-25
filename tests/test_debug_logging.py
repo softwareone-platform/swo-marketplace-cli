@@ -1,7 +1,7 @@
 import logging
 
-from swo.mpt.cli.core.accounts.models import Account
-from swo.mpt.cli.swocli import app
+from cli.core.accounts.models import Account
+from cli.swocli import app
 from typer.testing import CliRunner
 
 runner = CliRunner()
@@ -66,11 +66,11 @@ def test_verbose_flag_enables_logging(caplog, mocker, requests_mocker):
 def test_log_file_writes_to_file(tmp_path, mocker):
     """Test that --log-file writes logs to specified file"""
     # Mock the accounts list command to avoid API calls
-    mocker.patch("swo.mpt.cli.core.accounts.app.list_accounts", return_value=[])
+    mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
 
     # Mock client creation to ensure we get some logging
     mock_account = create_mock_account()
-    mocker.patch("swo.mpt.cli.core.mpt.client.client_from_account", return_value=mock_account)
+    mocker.patch("cli.core.mpt.client.client_from_account", return_value=mock_account)
 
     log_file = tmp_path / "test.log"
 
@@ -108,11 +108,11 @@ def test_verbose_and_log_file_are_exclusive():
 def test_log_file_creates_parent_directories(tmp_path, mocker):
     """Test that --log-file creates parent directories if they don't exist"""
     # Mock the accounts list command to avoid API calls
-    mocker.patch("swo.mpt.cli.core.accounts.app.list_accounts", return_value=[])
+    mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
 
     # Mock client creation to ensure we get some logging
     mock_account = create_mock_account()
-    mocker.patch("swo.mpt.cli.core.mpt.client.client_from_account", return_value=mock_account)
+    mocker.patch("cli.core.mpt.client.client_from_account", return_value=mock_account)
 
     # Mock logging.basicConfig to ensure we write to the file
     def mock_basic_config(**kwargs):
@@ -139,8 +139,8 @@ def test_log_file_creates_parent_directories(tmp_path, mocker):
 def test_verbose_mode_propagates_to_client(mocker):
     """Test that verbose mode is properly propagated to the MPT client"""
     # Mock the accounts list command to avoid API calls
-    mocker.patch("swo.mpt.cli.core.accounts.app.list_accounts", return_value=[])
-    from swo.mpt.cli.core.state import state
+    mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
+    from cli.core.state import state
 
     result = runner.invoke(app, ["--verbose", "accounts", "list"])
 
@@ -151,7 +151,7 @@ def test_verbose_mode_propagates_to_client(mocker):
 def test_no_verbose_flags_means_no_debug(caplog, mocker):
     """Test that without verbose flags, no debug logging occurs"""
     # Mock the accounts list command to avoid API calls
-    mocker.patch("swo.mpt.cli.core.accounts.app.list_accounts", return_value=[])
+    mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
 
     with caplog.at_level(logging.DEBUG):
         result = runner.invoke(app, ["accounts", "list"])

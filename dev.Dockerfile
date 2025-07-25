@@ -1,7 +1,7 @@
 FROM ghcr.io/astral-sh/uv:python3.12-bookworm-slim
 
-COPY . /swo
-WORKDIR /swo
+COPY . /cli
+WORKDIR /cli
 
 RUN uv venv /opt/venv
 
