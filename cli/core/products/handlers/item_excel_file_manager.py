@@ -3,7 +3,14 @@ from collections.abc import Generator
 from typing import Any
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
-from cli.core.products.constants import ITEMS_ACTION, ITEMS_FIELDS, ITEMS_ID, TAB_ITEMS
+from cli.core.products.constants import (
+    ITEMS_ACTION,
+    ITEMS_FIELDS,
+    ITEMS_ID,
+    ITEMS_TERMS_MODEL,
+    TAB_ITEMS,
+)
+from cli.core.products.handlers.data_validation import TERMS_MODEL_DATA_VALIDATION
 from cli.core.products.models import ItemData
 from openpyxl.worksheet.datavalidation import DataValidation
 
@@ -17,7 +24,10 @@ class ItemExcelFileManager(HorizontalTabFileManager):
     _fields = ITEMS_FIELDS
     _id_field = ITEMS_ID
     _sheet_name = TAB_ITEMS
-    _data_validation_map = {ITEMS_ACTION: ITEMS_ACTION_DATA_VALIDATION}
+    _data_validation_map = {
+        ITEMS_ACTION: ITEMS_ACTION_DATA_VALIDATION,
+        ITEMS_TERMS_MODEL: TERMS_MODEL_DATA_VALIDATION,
+    }
 
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         return self.file_handler.get_values_for_dynamic_sheet(

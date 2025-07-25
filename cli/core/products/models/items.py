@@ -4,6 +4,7 @@ from typing import Any, Self
 
 from cli.core.models import BaseDataModel
 from cli.core.products import constants
+from cli.core.products.models.enums import ItemTermsModelEnum
 from cli.core.products.models.mixins import ItemActionMixin
 from dateutil import parser
 
@@ -14,12 +15,13 @@ class ItemData(BaseDataModel, ItemActionMixin):
     description: str
     group_id: str
     name: str
-    period: str
     quantity_not_applicable: bool
+    terms_model: ItemTermsModelEnum
+    terms_period: str
+    terms_commitment: str | None
     unit_id: str
     vendor_id: str
 
-    commitment: str | None = None
     coordinate: str | None = None
     group_coordinate: str | None = None
     group_name: str | None = None
@@ -47,9 +49,13 @@ class ItemData(BaseDataModel, ItemActionMixin):
 
     @property
     def terms(self) -> dict[str, Any]:
-        data = {"period": self.period}
-        if self.period != "one-time":
-            data["commitment"] = self.commitment  # type: ignore
+        data: dict[str, Any] = {"model": self.terms_model.value}
+
+        if self.terms_model == ItemTermsModelEnum.ONE_TIME:
+            data["period"] = self.terms_model.value
+        else:
+            data["commitment"] = self.terms_commitment
+            data["period"] = self.terms_period
 
         return data
 
@@ -68,13 +74,14 @@ class ItemData(BaseDataModel, ItemActionMixin):
             id=data[constants.ITEMS_ID]["value"],
             action=data[constants.ITEMS_ACTION]["value"],
             coordinate=data[constants.ITEMS_ID]["coordinate"],
-            commitment=data[constants.ITEMS_COMMITMENT_TERM]["value"],
             description=data[constants.ITEMS_DESCRIPTION]["value"],
             group_id=group_id,
             group_coordinate=data[constants.ITEMS_GROUP_ID]["coordinate"],
             item_type="operations" if data.get("is_operations", False) else "vendor",
             name=data[constants.ITEMS_NAME]["value"],
-            period=data[constants.ITEMS_BILLING_FREQUENCY]["value"],
+            terms_commitment=data[constants.ITEMS_TERMS_COMMITMENT]["value"],
+            terms_model=ItemTermsModelEnum(data[constants.ITEMS_TERMS_MODEL]["value"]),
+            terms_period=data[constants.ITEMS_TERMS_PERIOD]["value"],
             quantity_not_applicable=data[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
             unit_name=data[constants.ITEMS_UNIT_NAME]["value"],
             unit_coordinate=data[constants.ITEMS_UNIT_ID]["coordinate"],
@@ -90,16 +97,17 @@ class ItemData(BaseDataModel, ItemActionMixin):
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
             id=data["id"],
-            commitment=data["terms"].get("commitment"),
             description=data["description"],
             group_id=data["group"]["id"],
+            group_name=data["group"]["name"],
             name=data["name"],
-            period=data["terms"]["period"],
             product_id=data["product"]["id"],
             quantity_not_applicable=data["quantityNotApplicable"],
+            terms_commitment=data["terms"].get("commitment"),
+            terms_model=ItemTermsModelEnum(data["terms"]["model"]),
+            terms_period=data["terms"]["period"],
             unit_id=data["unit"]["id"],
             vendor_id=data["externalIds"]["vendor"],
-            group_name=data["group"]["name"],
             operations_id=data["externalIds"].get("operations"),
             parameters=[],
             status=data["status"],
@@ -129,8 +137,9 @@ class ItemData(BaseDataModel, ItemActionMixin):
             constants.ITEMS_VENDOR_ITEM_ID: self.vendor_id,
             constants.ITEMS_ERP_ITEM_ID: self.operations_id,
             constants.ITEMS_DESCRIPTION: self.description,
-            constants.ITEMS_BILLING_FREQUENCY: self.period,
-            constants.ITEMS_COMMITMENT_TERM: self.commitment,
+            constants.ITEMS_TERMS_MODEL: self.terms_model,
+            constants.ITEMS_TERMS_PERIOD: self.terms_period,
+            constants.ITEMS_TERMS_COMMITMENT: self.terms_commitment,
             constants.ITEMS_STATUS: self.status,
             constants.ITEMS_GROUP_ID: self.group_id,
             constants.ITEMS_GROUP_NAME: self.group_name,
