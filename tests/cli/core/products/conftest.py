@@ -17,8 +17,6 @@ from cli.core.products.constants import (
     GENERAL_PRODUCT_WEBSITE,
     GENERAL_STATUS,
     ITEMS_ACTION,
-    ITEMS_BILLING_FREQUENCY,
-    ITEMS_COMMITMENT_TERM,
     ITEMS_CREATED,
     ITEMS_DESCRIPTION,
     ITEMS_ERP_ITEM_ID,
@@ -40,6 +38,9 @@ from cli.core.products.constants import (
     ITEMS_NAME,
     ITEMS_QUANTITY_APPLICABLE,
     ITEMS_STATUS,
+    ITEMS_TERMS_COMMITMENT,
+    ITEMS_TERMS_MODEL,
+    ITEMS_TERMS_PERIOD,
     ITEMS_UNIT_ID,
     ITEMS_UNIT_NAME,
     ITEMS_VENDOR_ITEM_ID,
@@ -86,6 +87,7 @@ from cli.core.products.models import (
     SettingsData,
     TemplateData,
 )
+from cli.core.products.models.enums import ItemTermsModelEnum
 from cli.core.products.models.product import SettingsItem
 from cli.core.products.services import (
     ItemGroupService,
@@ -269,16 +271,17 @@ def item_file_data():
         ITEMS_VENDOR_ITEM_ID: {"value": "30006419CB", "coordinate": "D325"},
         ITEMS_ERP_ITEM_ID: {"value": "NAV12345", "coordinate": "E325"},
         ITEMS_DESCRIPTION: {"value": "Description", "coordinate": "F325"},
-        ITEMS_BILLING_FREQUENCY: {"value": "1m", "coordinate": "G325"},
-        ITEMS_COMMITMENT_TERM: {"value": "1y", "coordinate": "H325"},
-        ITEMS_STATUS: {"value": "Published", "coordinate": "I325"},
-        ITEMS_GROUP_ID: {"value": "IGR-4944-4118-0002", "coordinate": "J325"},
-        ITEMS_GROUP_NAME: {"value": "Default Group", "coordinate": "K325"},
-        ITEMS_UNIT_ID: {"value": "UNT-1916", "coordinate": "L325"},
-        ITEMS_UNIT_NAME: {"value": "User", "coordinate": "M325"},
-        ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "N325"},
-        ITEMS_CREATED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "Q325"},
-        ITEMS_MODIFIED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "R325"},
+        ITEMS_TERMS_MODEL: {"value": "usage", "coordinate": "G325"},
+        ITEMS_TERMS_PERIOD: {"value": "1m", "coordinate": "H325"},
+        ITEMS_TERMS_COMMITMENT: {"value": "1y", "coordinate": "I325"},
+        ITEMS_STATUS: {"value": "Published", "coordinate": "J325"},
+        ITEMS_GROUP_ID: {"value": "IGR-4944-4118-0002", "coordinate": "K325"},
+        ITEMS_GROUP_NAME: {"value": "Default Group", "coordinate": "L325"},
+        ITEMS_UNIT_ID: {"value": "UNT-1916", "coordinate": "M325"},
+        ITEMS_UNIT_NAME: {"value": "User", "coordinate": "N325"},
+        ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "O325"},
+        ITEMS_CREATED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "P325"},
+        ITEMS_MODIFIED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "Q325"},
     }
 
 
@@ -291,11 +294,12 @@ def item_data_from_json(mpt_item_data):
 def item_data_from_dict():
     return ItemData(
         id="PRI-3969-9403-0001-0035",
-        commitment="1y",
         description="Description",
         group_id="IGR-4944-4118-0002",
         name="XD for Teams; existing XD customers only.;",
-        period="1m",
+        terms_commitment="1y",
+        terms_model=ItemTermsModelEnum.USAGE,
+        terms_period="1m",
         product_id="PRD-0232-2541",
         quantity_not_applicable=True,
         unit_id="UNT-1916",
@@ -323,7 +327,7 @@ def mpt_item_data():
             "activate the products on the end user's computers.",
             "name": "user",
         },
-        "terms": {"period": "one-time"},
+        "terms": {"model": "one-time", "period": "one-time"},
         "quantityNotApplicable": False,
         "status": "Draft",
         "product": {
