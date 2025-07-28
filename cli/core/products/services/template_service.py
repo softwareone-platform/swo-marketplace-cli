@@ -16,6 +16,7 @@ class TemplateService(RelatedComponentsBaseService):
         if param_groups is None or not param_groups.collection:
             return None
 
+        new_ids = {}
         for data_model in self.file_manager.read_data():
             content = data_model.content
 
@@ -24,6 +25,9 @@ class TemplateService(RelatedComponentsBaseService):
                     continue
 
                 content = content.replace(id, item.id)
-                self.file_manager.write_id(data_model.content_coordinate, content)
+                new_ids[data_model.content_coordinate] = content
+
+        if new_ids:
+            self.file_manager.write_ids(new_ids)
 
         return None

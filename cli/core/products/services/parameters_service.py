@@ -18,13 +18,17 @@ class ParametersService(RelatedComponentsBaseService):
         if parameter_groups is None or not parameter_groups.collection:
             return None
 
+        new_ids = {}
         for data_model in self.file_manager.read_data():
             try:
                 new_group = parameter_groups.retrieve_by_id(data_model.group_id)
             except KeyError:
                 continue
 
-            self.file_manager.write_id(data_model.group_id_coordinate, new_group.id)
+            new_ids[data_model.group_id_coordinate] = new_group.id
+
+        if new_ids:
+            self.file_manager.write_ids(new_ids)
 
         return None
 

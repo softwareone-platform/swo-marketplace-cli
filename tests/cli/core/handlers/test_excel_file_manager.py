@@ -25,10 +25,10 @@ def test_get_row_and_column_from_coordinate_invalid():
         FakeExcelFileManager._get_row_and_column_from_coordinate("")
 
 
-def test_write_id(mocker):
+def test_write_ids(mocker):
     file_handler_spy = mocker.patch.object(ExcelFileHandler, "write")
     file_manager = FakeExcelFileManager("/tmp/fake.xlsx")
 
-    file_manager.write_id("A1", "12345")
+    file_manager.write_ids({"A1": "12345"})
 
     file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])

@@ -16,7 +16,7 @@ class ItemService(RelatedComponentsBaseService):
 
         item = cast(ItemData, data_model)
         item.unit_id = search_uom_by_name(self.api.client, item.unit_name).id
-        self.file_manager.write_id(item.unit_coordinate, item.unit_id)
+        self.file_manager.write_ids({item.unit_coordinate: item.unit_id})
 
         item.item_type = "operations" if self.account.is_operations() else "vendor"
         item.product_id = self.resource_id
@@ -34,13 +34,17 @@ class ItemService(RelatedComponentsBaseService):
         if item_groups is None or not item_groups.collection:
             return None
 
+        new_ids = {}
         for item in self.file_manager.read_data():
             try:
                 new_group = item_groups.retrieve_by_id(item.group_id)
             except KeyError:
                 continue
 
-            self.file_manager.write_id(item.group_coordinate, new_group.id)
+            new_ids[item.group_coordinate] = new_group.id
+
+        if new_ids:
+            self.file_manager.write_ids(new_ids)
 
         return None
 

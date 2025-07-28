@@ -31,7 +31,7 @@ def test_create(mocker, service_context, mpt_product_data, product_data_from_dic
     )
     api_post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
     api_update_mock = mocker.patch.object(service_context.api, "update")
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_id_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = ProductService(service_context)
 
@@ -40,7 +40,7 @@ def test_create(mocker, service_context, mpt_product_data, product_data_from_dic
     assert result.success is True
     read_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
-    file_handler_write_mock.assert_called_once_with("B3", product_data_from_dict.id)
+    write_id_mock.assert_called_once_with({"B3": product_data_from_dict.id})
     api_post_mock.assert_called_once()
     api_update_mock.assert_called_once()
 
