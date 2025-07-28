@@ -63,7 +63,7 @@ def test_create(mocker, service_context, mpt_agreement_parameter_data):
     new_item_mock = {"id": "new_fake_id"}
     mocker.patch.object(service_context.file_manager, "read_data", return_value=[data_model_mock])
     post_mock = mocker.patch.object(service_context.api, "post", return_value=new_item_mock)
-    file_handler_write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_mock = mocker.patch.object(service_context.stats, "add_synced")
     service = FakeRelatedComponentsService(service_context)
     prepare_data_model_to_create_spy = mocker.spy(service, "prepare_data_model_to_create")
@@ -73,7 +73,7 @@ def test_create(mocker, service_context, mpt_agreement_parameter_data):
     assert result.success is True
     assert result.model is None
     assert isinstance(result.collection, DataCollectionModel)
-    file_handler_write_id_mock.assert_called_once_with("fake_coordinate", "new_fake_id")
+    write_ids_mock.assert_called_once_with({"fake_coordinate": "new_fake_id"})
     post_mock.assert_called_once_with(json={"id": "fake_id"})
     stats_mock.assert_called_once_with("fake_tab_name")
     prepare_data_model_to_create_spy.assert_called_once()
@@ -162,7 +162,7 @@ def test_update_action_create(mocker, service_context):
         return_value=[FakeDataModel(id="create_id", action=DataActionEnum.CREATE)],
     )
     mocker.patch.object(FakeDataModel, "to_skip", False)
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
     api_post_mock = mocker.patch.object(
         service_context.api, "post", return_value={"id": "new_fake_id"}
@@ -173,7 +173,7 @@ def test_update_action_create(mocker, service_context):
 
     assert result.success is True
     assert result.model is None
-    file_handler_write_mock.assert_called_once_with("fake_coordinate", "new_fake_id")
+    write_ids_mock.assert_called_once_with({"fake_coordinate": "new_fake_id"})
     stats_synced_mock.assert_called_once_with("fake_tab_name")
     api_post_mock.assert_called_once_with({"id": "create_id"})
 
@@ -206,7 +206,7 @@ def test_update_action_update(mocker, service_context):
     )
     mocker.patch.object(FakeDataModel, "to_skip", False)
 
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
     api_update_mock = mocker.patch.object(service_context.api, "update")
     service = FakeRelatedComponentsService(service_context)
@@ -215,7 +215,7 @@ def test_update_action_update(mocker, service_context):
 
     assert result.success is True
     assert result.model is None
-    file_handler_write_mock.assert_called_once_with("fake_coordinate", "update_id")
+    write_ids_mock.assert_called_once_with({"fake_coordinate": "update_id"})
     stats_synced_mock.assert_called_once_with("fake_tab_name")
     api_update_mock.assert_called_once_with("update_id", {"id": "update_id"})
 

@@ -90,7 +90,7 @@ def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
     mocker.patch.object(service_context.api, "list", return_value={"data": [mpt_item_data]})
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     update_mock = mocker.patch.object(service_context.api, "update", return_value=mpt_item_data)
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = ItemService(service_context)
@@ -101,9 +101,7 @@ def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict
     assert result.model is None
     assert service_context.stats.tabs["Price Items"]["synced"] == 1
     update_mock.assert_called_once()
-    file_handler_write_mock.assert_called_once_with(
-        item_data_from_dict.coordinate, item_data_from_dict.id
-    )
+    write_ids_mock.assert_called_once_with({item_data_from_dict.coordinate: item_data_from_dict.id})
     stats_spy.assert_called_once_with(TAB_PRICE_ITEMS)
 
 
@@ -151,7 +149,7 @@ def test_update_item_skip(mocker, service_context, mpt_item_data, item_data_from
         service_context.file_manager, "read_data", return_value=[item_data_from_json]
     )
     mocker.patch.object(item_data_from_json, "to_update", return_value=False)
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.spy(service_context.file_manager, "write_ids")
     api_update_spy = mocker.spy(service_context.api, "update")
     stats_spy = mocker.spy(service_context.stats, "add_skipped")
     service = ItemService(service_context)
@@ -159,6 +157,6 @@ def test_update_item_skip(mocker, service_context, mpt_item_data, item_data_from
     result = service.update()
 
     assert result.success is True
-    file_handler_write_mock.assert_not_called()
+    write_ids_mock.assert_not_called()
     api_update_spy.assert_not_called()
     stats_spy.assert_called_once_with(TAB_PRICE_ITEMS)

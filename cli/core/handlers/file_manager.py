@@ -1,6 +1,7 @@
 import re
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 from cli.core.handlers.excel_file_handler import ExcelFileHandler
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -35,15 +36,15 @@ class ExcelFileManager(ABC):
         """
         raise NotImplementedError
 
-    def write_id(self, coordinate: str, new_id: str) -> None:
+    def write_ids(self, data: dict[str, Any]) -> None:
         """
-        Writes a new ID value to the specified cell coordinate in the managed sheet.
+        Writes the IDs into the managed sheet.
 
         Args:
-            coordinate: The cell coordinate (e.g., 'A1') to write the ID to.
-            new_id: The ID value to write.
+            data: A dict where each key is a cell coordinate (e.g., 'A1') as each value is
+            the corresponding ID.
         """
-        self.file_handler.write([{self._sheet_name: {coordinate: new_id}}])
+        self.file_handler.write([{self._sheet_name: data}])
 
     @staticmethod
     def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:

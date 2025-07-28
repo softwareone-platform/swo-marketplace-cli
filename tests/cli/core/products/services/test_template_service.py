@@ -29,23 +29,23 @@ def test_set_new_parameter_group(
         collection={"old_param_id": parameter_group_data_from_dict, "no_id": None}
     )
     template_data_from_dict.content = "old_param_id: bla"
-    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = TemplateService(service_context)
 
     service.set_new_parameter_group(param_group)
 
     read_data_mock.assert_called_once()
-    write_id_mock.assert_called_once_with(
-        template_data_from_dict.content_coordinate, f"{parameter_group_data_from_dict.id}: bla"
+    write_ids_mock.assert_called_once_with(
+        {template_data_from_dict.content_coordinate: f"{parameter_group_data_from_dict.id}: bla"}
     )
 
 
 def test_set_new_parameter_groups_empty(mocker, service_context):
     read_data_spy = mocker.spy(service_context.file_manager, "read_data")
-    write_id_spy = mocker.spy(service_context.file_manager, "write_id")
+    write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = TemplateService(service_context)
 
     service.set_new_parameter_group(DataCollectionModel(collection={}))
 
     read_data_spy.assert_not_called()
-    write_id_spy.assert_not_called()
+    write_ids_spy.assert_not_called()
