@@ -71,7 +71,7 @@ def main(
             handler = logging.FileHandler(log_file)
             console.print(f"Debug logs will be written to: {log_file}")
         else:
-            handler = logging.StreamHandler()  # type: ignore
+            handler = logging.StreamHandler()  # type: ignore[assignment]
 
         # Configure logging
         logging.basicConfig(

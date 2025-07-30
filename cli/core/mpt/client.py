@@ -28,8 +28,8 @@ class MPTClient(Session):
 
         if self.debug:
             # Get caller info
-            caller_frame = inspect.currentframe().f_back  # type: ignore
-            caller_info = inspect.getframeinfo(caller_frame)  # type: ignore
+            caller_frame = inspect.currentframe().f_back  # type: ignore[union-attr]
+            caller_info = inspect.getframeinfo(caller_frame)  # type: ignore[arg-type]
 
             # Log request details
             logger.debug(

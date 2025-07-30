@@ -100,8 +100,8 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
             return None
 
         try:
-            currency = item.currency  # type: ignore
-            precision = item.precision  # type: ignore
+            currency = item.currency  # type: ignore[attr-defined]
+            precision = item.precision  # type: ignore[attr-defined]
         except AttributeError:
             return None
 
