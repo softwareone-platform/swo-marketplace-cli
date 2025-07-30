@@ -26,8 +26,11 @@ repos:
     rev: v1.17.0
     hooks:
       - id: mypy
+        args: [ "--config-file=pyproject.toml", "." ]
+        pass_filenames: false
         additional_dependencies:
           - pydantic==2.11.*
+          - types-openpyxl==3.1.*
           - types-python-dateutil==2.9.*
           - types-requests==2.31.*
           - typing-extensions==4.13.*

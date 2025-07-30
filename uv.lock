@@ -365,6 +365,7 @@ dev = [
     { name = "pytest-xdist" },
     { name = "responses" },
     { name = "ruff" },
+    { name = "types-openpyxl" },
     { name = "types-python-dateutil" },
     { name = "types-requests" },
     { name = "typing-extensions" },
@@ -397,6 +398,7 @@ dev = [
     { name = "pytest-xdist", specifier = "==3.6.*" },
     { name = "responses", specifier = "==0.25.*" },
     { name = "ruff", specifier = "==0.12.*" },
+    { name = "types-openpyxl", specifier = "==3.1.*" },
     { name = "types-python-dateutil", specifier = "==2.9.*" },
     { name = "types-requests", specifier = "==2.31.*" },
     { name = "typing-extensions", specifier = "==4.13.*" },
@@ -874,6 +876,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/6c/89/c527e6c848739be8ceb5c44eb8208c52ea3515c6cf6406aa61932887bf58/typer-0.15.4.tar.gz", hash = "sha256:89507b104f9b6a0730354f27c39fae5b63ccd0c95b1ce1f1a6ba0cfd329997c3", size = 101559, upload-time = "2025-05-14T16:34:57.704Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/c9/62/d4ba7afe2096d5659ec3db8b15d8665bdcb92a3c6ff0b95e99895b335a9c/typer-0.15.4-py3-none-any.whl", hash = "sha256:eb0651654dcdea706780c466cf06d8f174405a659ffff8f163cfbfee98c0e173", size = 45258, upload-time = "2025-05-14T16:34:55.583Z" },
+]
+
+[[package]]
+name = "types-openpyxl"
+version = "3.1.5.20250602"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/d4/33cc2f331cde82206aa4ec7d8db408beca65964785f438c6d2505d828178/types_openpyxl-3.1.5.20250602.tar.gz", hash = "sha256:d19831482022fc933780d6e9d6990464c18c2ec5f14786fea862f72c876980b5", size = 100608, upload-time = "2025-06-02T03:14:40.625Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2e/69/5b924a20a4d441ec2160e94085b9fa9358dc27edde10080d71209c59101d/types_openpyxl-3.1.5.20250602-py3-none-any.whl", hash = "sha256:1f82211e086902318f6a14b5d8d865102362fda7cb82f3d63ac4dff47a1f164b", size = 165922, upload-time = "2025-06-02T03:14:39.226Z" },
 ]
 
 [[package]]

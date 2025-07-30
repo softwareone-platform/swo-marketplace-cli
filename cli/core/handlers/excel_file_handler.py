@@ -200,7 +200,7 @@ class ExcelFileHandler(FileHandler):
         sheet = self._get_worksheet(sheet_name)
         sheet_iter = sheet.iter_rows(min_row=2)
         return {
-            row[0].value: {"value": row[1].value, "coordinate": row[1].coordinate}
+            str(row[0].value): {"value": row[1].value, "coordinate": row[1].coordinate}
             for row in sheet_iter
             if fields is None or row[0].value in fields
         }
@@ -241,7 +241,7 @@ class ExcelFileHandler(FileHandler):
             yield {
                 column_name: {
                     "value": row[index].value,
-                    "coordinate": f"{row[index].column_letter}{row[index].row}",
+                    "coordinate": f"{row[index].column_letter}{row[index].row}",  # type: ignore[union-attr]
                 }
                 for index, column_name in column_map.items()
             }
@@ -273,12 +273,12 @@ class ExcelFileHandler(FileHandler):
         for sheet in data:
             for sheet_name, cells in sheet.items():
                 try:
-                    sheet = self._get_worksheet(sheet_name)
+                    worksheet = self._get_worksheet(sheet_name)
                 except KeyError:
-                    sheet = self._workbook.create_sheet(title=sheet_name)
+                    worksheet = self._workbook.create_sheet(title=sheet_name)
 
                 for coordinate, value in cells.items():
-                    sheet[coordinate] = value
+                    worksheet[coordinate] = value
 
         self.save()
 
@@ -301,7 +301,7 @@ class ExcelFileHandler(FileHandler):
             sheet[coordinate].style = style
 
         if data_validation is not None:
-            if data_validation not in sheet.data_validations:
+            if data_validation not in list(sheet.data_validations):
                 sheet.add_data_validation(data_validation)
 
             data_validation.add(sheet[coordinate])
@@ -316,12 +316,12 @@ class ExcelFileHandler(FileHandler):
 
     def _get_fields_from_horizontal_worksheet(self, worksheet_name: str, max_row: int) -> list[str]:
         return list(
-            next(self._get_worksheet(worksheet_name).iter_rows(max_row=max_row, values_only=True))
+            next(self._get_worksheet(worksheet_name).iter_rows(max_row=max_row, values_only=True))  # type: ignore[arg-type]
         )
 
     def _get_fields_from_vertical_worksheet(self, worksheet_name: str, max_col: int) -> list[str]:
         return list(
-            next(self._get_worksheet(worksheet_name).iter_cols(max_col=max_col, values_only=True))
+            next(self._get_worksheet(worksheet_name).iter_cols(max_col=max_col, values_only=True))  # type: ignore[arg-type]
         )
 
     def _get_worksheet(self, sheet_name: str) -> Worksheet:
