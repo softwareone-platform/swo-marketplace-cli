@@ -76,6 +76,12 @@ class ItemAction(enum.Enum):
     SKIPPED = ""
 
 
+class ItemTermsModelEnum(enum.StrEnum):
+    ONE_TIME = "one-time"
+    QUANTITY = "quantity"
+    USAGE = "usage"
+
+
 def get_definition_file(path: str) -> Path:
     """
     Returns product definition file path. If only product id is passed assumed
@@ -339,17 +345,17 @@ def _to_item_json(
         "parameters": parameters,
     }
 
-    period = find_value_for(constants.ITEMS_BILLING_FREQUENCY, values)[2]
-
-    if period == "one-time":
-        item_json["terms"] = {
-            "period": period,
-        }
+    terms_model = find_value_for(constants.ITEMS_TERMS_MODEL, values)[2]
+    item_json["terms"] = {
+        "model": terms_model,
+    }
+    if terms_model == ItemTermsModelEnum.ONE_TIME:
+        item_json["terms"].update({"period": terms_model})
     else:
-        item_json["terms"] = {
-            "commitment": find_value_for(constants.ITEMS_COMMITMENT_TERM, values)[2],
-            "period": period,
-        }
+        item_json["terms"].update({
+            "commitment": find_value_for(constants.ITEMS_TERMS_COMMITMENT, values)[2],
+            "period": find_value_for(constants.ITEMS_TERMS_PERIOD, values)[2]
+        })
 
     if is_operations:
         item_json["externalIds"] = {
