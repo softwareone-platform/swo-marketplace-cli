@@ -17,3 +17,9 @@ class ItemActionEnum(StrEnum):
     UNPUBLISH = "unpublish"
     SKIP = "-"
     SKIPPED = ""
+
+
+class ItemTermsModelEnum(StrEnum):
+    ONE_TIME = "one-time"
+    QUANTITY = "quantity"
+    USAGE = "usage"

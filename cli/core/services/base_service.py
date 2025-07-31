@@ -75,7 +75,7 @@ class Service(ABC):
         self.stats.add_error(self.file_manager.tab_name)
 
     def _set_synced(self, resource_id: str, item_coordinate: str) -> None:
-        self.file_manager.write_id(item_coordinate, resource_id)
+        self.file_manager.write_ids({item_coordinate: resource_id})
         self.stats.add_synced(self.file_manager.tab_name)
 
     def _set_skipped(self):

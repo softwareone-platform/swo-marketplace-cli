@@ -30,7 +30,7 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
         "post",
         return_value=mpt_price_list_data,
     )
-    file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = PriceListService(service_context)
 
@@ -39,7 +39,7 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
     assert result.success is True
     read_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
-    file_handler_write_mock.assert_called_once_with("B3", price_list_data_from_dict.id)
+    write_ids_mock.assert_called_once_with({"B3": price_list_data_from_dict.id})
     api_post_mock.assert_called_once()
 
 

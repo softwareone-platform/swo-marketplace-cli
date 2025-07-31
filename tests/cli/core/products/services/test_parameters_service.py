@@ -27,14 +27,14 @@ def test_set_new_parameter_groups(
     )
     param_group = DataCollectionModel(collection={"old_group_id": parameter_group_data_from_dict})
     parameters_data_from_dict.group_id = "old_group_id"
-    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
     service.set_new_parameter_group(param_group)
 
     read_data_mock.assert_called_once()
-    write_id_mock.assert_called_once_with(
-        parameters_data_from_dict.group_id_coordinate, parameter_group_data_from_dict.id
+    write_ids_mock.assert_called_once_with(
+        {parameters_data_from_dict.group_id_coordinate: parameter_group_data_from_dict.id}
     )
 
 
@@ -45,24 +45,24 @@ def test_set_new_parameter_groups_error(
         service_context.file_manager, "read_data", return_value=[parameters_data_from_dict]
     )
     param_group = DataCollectionModel(collection={"not_found_key": parameter_group_data_from_dict})
-    write_id_mock = mocker.patch.object(service_context.file_manager, "write_id")
+    write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
     service.set_new_parameter_group(param_group)
 
     read_data_mock.assert_called_once()
-    write_id_mock.assert_not_called()
+    write_ids_spy.assert_not_called()
 
 
 def test_set_new_parameter_groups_empty(mocker, service_context):
     read_data_spy = mocker.spy(service_context.file_manager, "read_data")
-    write_id_spy = mocker.spy(service_context.file_manager, "write_id")
+    write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
     service.set_new_parameter_group(DataCollectionModel(collection={}))
 
     read_data_spy.assert_not_called()
-    write_id_spy.assert_not_called()
+    write_ids_spy.assert_not_called()
 
 
 def test_set_export_params(service_context, parameters_data_from_dict):
