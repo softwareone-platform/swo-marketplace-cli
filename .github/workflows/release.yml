@@ -44,7 +44,7 @@ jobs:
         if [ "$(curl -s -o /dev/null -w '%{http_code}' https://pypi.org/pypi/mpt-cli/${{ steps.tag.outputs.result }}/json)" = "404" ]; then poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD; fi
 
   dtrack:
-    uses: softwareone-platform/ops-template/.github/workflows/dependency-track-python-uv.yml@v1
+    uses: softwareone-platform/ops-template/.github/workflows/dependency-track-python-poetry.yml@v2
     with:
       projectName: 'swo-marketplace-cli'
     secrets:
