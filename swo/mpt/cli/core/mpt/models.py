@@ -1,4 +1,4 @@
-from typing import Annotated, TypeAlias, TypeVar
+from typing import TypeAlias, TypeVar
 
 from pydantic import BaseModel, Field
 
@@ -44,8 +44,8 @@ class ItemGroup(BaseModel):
 
 class Parameter(BaseModel):
     id: str
+    external_id: str | None = Field(default=None, alias="externalId")
     name: str
-    external_id: Annotated[str, Field(alias="externalId")]
 
 
 class Item(BaseModel):
