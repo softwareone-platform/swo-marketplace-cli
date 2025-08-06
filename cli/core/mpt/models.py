@@ -32,7 +32,7 @@ class Product(BaseModel):
 class ParameterGroup(BaseModel):
     id: str
     default: bool
-    description: str
+    description: str | None = None
     display_order: int = Field(alias="displayOrder")
     label: str
     name: str
@@ -45,8 +45,8 @@ class ItemGroup(BaseModel):
 
 class Parameter(BaseModel):
     id: str
+    external_id: str | None = Field(default=None, alias="externalId")
     name: str
-    external_id: str = Field(alias="externalId")
 
 
 class Item(BaseModel):
