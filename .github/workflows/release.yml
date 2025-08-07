@@ -23,7 +23,8 @@ jobs:
     - name: Set up Python 3.12
       uses: actions/setup-python@v4
       with:
-        python-version: '3.12'
+        python-version-file: ".python-version"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -41,3 +42,10 @@ jobs:
         poetry version ${{ steps.get_version.outputs.VERSION }}
         poetry build
         if [ "$(curl -s -o /dev/null -w '%{http_code}' https://pypi.org/pypi/mpt-cli/${{ steps.tag.outputs.result }}/json)" = "404" ]; then poetry publish -u $PYPI_USERNAME -p $PYPI_PASSWORD; fi
+
+  dtrack:
+    uses: softwareone-platform/ops-template/.github/workflows/dependency-track-python-poetry.yml@v2
+    with:
+      projectName: 'swo-marketplace-cli'
+    secrets:
+      DEPENDENCYTRACK_APIKEY: ${{ secrets.DEPENDENCYTRACK_APIKEY }}
