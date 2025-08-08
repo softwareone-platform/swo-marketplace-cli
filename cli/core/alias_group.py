@@ -3,7 +3,7 @@ from typer.core import TyperGroup
 
 
 class AliasTyperGroup(TyperGroup):
-    """Provides ability to make commands with s and without s at the end
+    """Provides ability to make commands with s and without s at the end.
 
     Examples:
         mpt-cli account add

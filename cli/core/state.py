@@ -1,5 +1,5 @@
 class State:
-    """Global state for the CLI"""
+    """Global state for the CLI."""
 
     def __init__(self):
         self.verbose = False

@@ -23,8 +23,7 @@ class Service(ABC):
 
     @abstractmethod
     def create(self) -> ServiceResult:
-        """
-        Create a resource based on the definition file
+        """Create a resource based on the definition file.
 
         Returns:
             ServiceResult object with operation results
@@ -33,8 +32,7 @@ class Service(ABC):
 
     @abstractmethod
     def retrieve(self) -> ServiceResult:
-        """
-        Retrieve an existing resource from the file
+        """Retrieve an existing resource from the file.
 
         Returns:
             ServiceResult object with operation results
@@ -43,8 +41,7 @@ class Service(ABC):
 
     @abstractmethod
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
-        """
-        Retrieve a resource from MPT by its ID
+        """Retrieve a resource from MPT by its ID.
 
         Args:
             resource_id: ID of the resource to retrieve
@@ -56,8 +53,7 @@ class Service(ABC):
 
     @abstractmethod
     def update(self) -> ServiceResult:
-        """
-        Update an existing resource
+        """Update an existing resource.
 
         Returns:
             ServiceResult object with operation results
@@ -65,9 +61,7 @@ class Service(ABC):
         raise NotImplementedError
 
     def set_export_params(self) -> dict[str, Any]:
-        """
-        Override this method to set the export parameters
-        """
+        """Override this method to set the export parameters."""
         return {}
 
     def _set_error(self, error: str, resource_id: str | None = None) -> None:
@@ -85,8 +79,7 @@ class Service(ABC):
 class BaseService(Service, ABC):
     @abstractmethod
     def export(self, resource_id: str) -> ServiceResult:
-        """
-        Export a resource from mpt to the file
+        """Export a resource from mpt to the file.
 
         Args:
             resource_id: The ID of the product to export.
@@ -104,8 +97,7 @@ class RelatedBaseService(Service, ABC):
 
     @abstractmethod
     def export(self) -> ServiceResult:
-        """
-        Export a resource from mpt to the file
+        """Export a resource from mpt to the file.
 
         Returns:
             ServiceResult object with operation results

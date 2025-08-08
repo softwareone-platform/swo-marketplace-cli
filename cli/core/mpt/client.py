@@ -61,7 +61,5 @@ class MPTClient(Session):
 
 
 def client_from_account(account: Account) -> MPTClient:
-    """
-    Creates MPT Client from the Account
-    """
+    """Creates MPT Client from the Account."""
     return MPTClient(api_token=account.token, base_url=account.environment, debug=state.verbose)

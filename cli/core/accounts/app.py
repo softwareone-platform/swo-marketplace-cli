@@ -78,9 +78,7 @@ def activate_account(
         typer.Argument(help="SoftwareOne Marketplace Account ID", metavar="ACCOUNT-ID"),
     ],
 ):
-    """
-    Activate SoftwareOne Marketplace account
-    """
+    """Activate SoftwareOne Marketplace account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -106,9 +104,7 @@ def extract_account(
         typer.Argument(help="SoftwareOne Marketplace Account ID", metavar="ACCOUNT-ID"),
     ],
 ):
-    """
-    Remove SoftwareOne Marketplace account
-    """
+    """Remove SoftwareOne Marketplace account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -138,9 +134,7 @@ def list_accounts(
         bool, typer.Option("--active", "-a", help="Show only current active account")
     ] = False,
 ):
-    """
-    List available SoftwareOne Marketplace accounts
-    """
+    """List available SoftwareOne Marketplace accounts."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -157,9 +151,7 @@ def list_accounts(
 
 
 def get_active_account() -> Account:
-    """
-    Check for file and create current active account
-    """
+    """Check for file and create current active account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 

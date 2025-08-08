@@ -102,9 +102,7 @@ def list_products(
         typer.Option("--query", "-q", help="RQL Query to filter products list"),
     ] = None,
 ):
-    """
-    List available products from SoftwareOne Marketplace
-    """
+    """List available products from SoftwareOne Marketplace."""
     active_account = get_active_account()
 
     has_pages = True
@@ -150,9 +148,7 @@ def sync_product(
         ),
     ] = False,
 ):
-    """
-    Sync product to the environment
-    """
+    """Sync product to the environment."""
     container = ProductContainer(file_path=str(product_path))
     product_service = container.product_service()
     result = product_service.validate_definition()

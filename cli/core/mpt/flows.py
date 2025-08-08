@@ -16,9 +16,7 @@ from .models import (
 
 @wrap_http_error
 def get_token(mpt_client: MPTClient, secret: str) -> Token:
-    """
-    Retrieves API Token from the MPT Platform
-    """
+    """Retrieves API Token from the MPT Platform."""
     response = mpt_client.get(f"/accounts/api-tokens?limit=2&token={secret}")
     response.raise_for_status()
 
@@ -37,9 +35,7 @@ def get_token(mpt_client: MPTClient, secret: str) -> Token:
 def get_products(
     mpt_client: MPTClient, limit: int, offset: int, query: str | None = None
 ) -> ListResponse[Product]:
-    """
-    Retrieves Products from the MPT Platform
-    """
+    """Retrieves Products from the MPT Platform."""
     url = f"/catalog/products?limit={quote_plus(str(limit))}&offset={quote_plus(str(offset))}"
 
     if query:

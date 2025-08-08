@@ -22,9 +22,7 @@ DEFAULT_RESULTS: Results = {
 
 
 class ErrorMessagesCollector:
-    """
-    Error messages collector
-    """
+    """Error messages collector."""
 
     def __init__(self) -> None:
         self._sections: dict[str, dict[str, list[str]]] = {}
