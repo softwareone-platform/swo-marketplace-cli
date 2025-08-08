@@ -94,9 +94,10 @@ def test_create_tab(mocker, file_manager):
         "FakeSheet", 1, 1, "General Information", style=general_tab_title_style
     )
     merge_cell_mock.assert_called_once_with("FakeSheet", "A1:B1")
-    write_mock.assert_has_calls(
-        [call([{"FakeSheet": {"A2": "ID"}}]), call([{"FakeSheet": {"A3": "field1"}}])]
-    )
+    write_mock.assert_has_calls([
+        call([{"FakeSheet": {"A2": "ID"}}]),
+        call([{"FakeSheet": {"A3": "field1"}}]),
+    ])
 
 
 def test_read_data(mocker, file_manager):
@@ -144,9 +145,7 @@ def test_write_error_missing_column(mocker, file_manager):
         "FakeSheet", ["ID", ERROR_COLUMN_NAME]
     )
     get_sheet_next_column_mock.assert_called_once_with("FakeSheet")
-    write_mock.assert_has_calls(
-        [
-            call([{"FakeSheet": {"AB1": ERROR_COLUMN_NAME}}]),
-            call([{"FakeSheet": {"AB125": "fake error message"}}]),
-        ]
-    )
+    write_mock.assert_has_calls([
+        call([{"FakeSheet": {"AB1": ERROR_COLUMN_NAME}}]),
+        call([{"FakeSheet": {"AB125": "fake error message"}}]),
+    ])

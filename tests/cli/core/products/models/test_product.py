@@ -98,13 +98,11 @@ def test_product_to_xlsx(product_data_from_json):
 
 
 def test_settings_data_from_dict(settings_file_data):
-    result = SettingsData.from_dict(
-        {
-            SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
-            SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
-            SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
-        }
-    )
+    result = SettingsData.from_dict({
+        SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
+        SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
+        SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
+    })
 
     assert len(result.items) == 1
     item = result.items[0]
@@ -135,13 +133,11 @@ def test_settings_data_to_xlsx(product_data_from_dict):
 
 
 def test_setting_item_from_dict(settings_file_data):
-    result = SettingsItem.from_dict(
-        {
-            SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
-            SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
-            SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
-        }
-    )
+    result = SettingsItem.from_dict({
+        SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
+        SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
+        SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
+    })
 
     assert result.name == "Purchase order validation (query)"
     assert result.value == "Off"

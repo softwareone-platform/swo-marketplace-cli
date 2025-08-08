@@ -167,12 +167,10 @@ def test_validate_definition_missing_tabs(mocker, service_context):
 
     assert result.success is False
     assert result.errors == ["('Required tabs missing', ['Tab1', 'Tab2'])"]
-    stats_spy.assert_has_calls(
-        [
-            call("Tab1", "", "Required tab doesn't exist"),
-            call("Tab2", "", "Required tab doesn't exist"),
-        ]
-    )
+    stats_spy.assert_has_calls([
+        call("Tab1", "", "Required tab doesn't exist"),
+        call("Tab2", "", "Required tab doesn't exist"),
+    ])
     check_required_fields_by_section_spy.assert_not_called()
 
 
@@ -192,12 +190,10 @@ def test_validate_definition_missing_fields(mocker, service_context):
 
     assert result.success is False
     assert result.errors == ["('Required fields missing', ['Field1', 'Field2'])"]
-    stats_spy.assert_has_calls(
-        [
-            call("Field1", "", "Required field doesn't exist"),
-            call("Field2", "", "Required field doesn't exist"),
-        ]
-    )
+    stats_spy.assert_has_calls([
+        call("Field1", "", "Required field doesn't exist"),
+        call("Field2", "", "Required field doesn't exist"),
+    ])
     check_required_tabs_mock.assert_called_once()
 
 
