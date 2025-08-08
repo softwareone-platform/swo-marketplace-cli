@@ -10,20 +10,20 @@ type CollectionModel[DataModel] = dict[str, DataModel]
 class BaseDataModel(ABC):
     @classmethod
     @abstractmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:  # pragma: no cover
+    def from_dict(cls, data: dict[str, Any]) -> Self:
         raise NotImplementedError
 
     @classmethod
     @abstractmethod
-    def from_json(cls, data: dict[str, Any]) -> Self:  # pragma: no cover
+    def from_json(cls, data: dict[str, Any]) -> Self:
         raise NotImplementedError
 
     @abstractmethod
-    def to_json(self) -> dict[str, Any]:  # pragma: no cover
+    def to_json(self) -> dict[str, Any]:
         raise NotImplementedError
 
     @abstractmethod
-    def to_xlsx(self) -> dict[str, Any]:  # pragma: no cover
+    def to_xlsx(self) -> dict[str, Any]:
         raise NotImplementedError
 
 

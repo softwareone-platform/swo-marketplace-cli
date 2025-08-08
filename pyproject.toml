@@ -93,6 +93,7 @@ source = ["cli"]
 [tool.coverage.report]
 exclude_also = [
     "if __name__ == \"__main__\":",
+    "raise NotImplementedError",
 ]
 include = [
     "cli/**",

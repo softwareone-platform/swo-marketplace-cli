@@ -25,7 +25,7 @@ class FileHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def read(self) -> list[dict[str, Any]]:  # pragma: no cover
+    def read(self) -> list[dict[str, Any]]:
         """
         Reads and returns the content of the file.
 
@@ -35,7 +35,7 @@ class FileHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def write(self, data: list[dict[str, Any]]) -> None:  # pragma: no cover
+    def write(self, data: list[dict[str, Any]]) -> None:
         """
         Writes data to the file.
 

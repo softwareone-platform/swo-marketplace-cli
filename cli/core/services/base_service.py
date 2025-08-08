@@ -22,7 +22,7 @@ class Service(ABC):
         return params
 
     @abstractmethod
-    def create(self) -> ServiceResult:  # pragma: no cover
+    def create(self) -> ServiceResult:
         """
         Create a resource based on the definition file
 
@@ -32,7 +32,7 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve(self) -> ServiceResult:  # pragma: no cover
+    def retrieve(self) -> ServiceResult:
         """
         Retrieve an existing resource from the file
 
@@ -42,7 +42,7 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:  # pragma: no cover
+    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
         """
         Retrieve a resource from MPT by its ID
 
@@ -55,7 +55,7 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self) -> ServiceResult:  # pragma: no cover
+    def update(self) -> ServiceResult:
         """
         Update an existing resource
 
@@ -84,7 +84,7 @@ class Service(ABC):
 
 class BaseService(Service, ABC):
     @abstractmethod
-    def export(self, resource_id: str) -> ServiceResult:  # pragma: no cover
+    def export(self, resource_id: str) -> ServiceResult:
         """
         Export a resource from mpt to the file
 
@@ -103,7 +103,7 @@ class RelatedBaseService(Service, ABC):
         return self.api.resource_id
 
     @abstractmethod
-    def export(self) -> ServiceResult:  # pragma: no cover
+    def export(self) -> ServiceResult:
         """
         Export a resource from mpt to the file
 

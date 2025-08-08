@@ -101,7 +101,7 @@ class StatsCollector(ABC):
         self.__tab_aliases[tab_name]["total"] += 1
 
     @abstractmethod
-    def _get_table_title(self) -> str:  # pragma: no cover
+    def _get_table_title(self) -> str:
         raise NotImplementedError
 
     def to_table(self):
