@@ -37,8 +37,8 @@ class PriceListService(BaseService):
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
     def retrieve(self) -> ServiceResult:
-        """
-        Retrieves a price list's existence from the API based on the ID from the general data.
+        """Retrieves a price list's existence from the API based on the ID from the general data.
+
         If the price list exists, returns it; otherwise, returns a success status with no model.
 
         Returns:

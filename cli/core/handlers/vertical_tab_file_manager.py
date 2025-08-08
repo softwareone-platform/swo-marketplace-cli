@@ -35,8 +35,8 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
                 )
 
     def create_tab(self):
-        """
-        Creates the general information tab in the Excel file.
+        """Creates the general information tab in the Excel file.
+
         If the file does not exist, it is created.
         """
         if not self.file_handler.exists():
@@ -61,8 +61,8 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
         return self._data_model.from_dict(data)
 
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the error column in the sheet.
+        """Writes an error message to the error column in the sheet.
+
         If the error column does not exist, it is created.
 
         Args:

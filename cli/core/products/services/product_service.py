@@ -11,8 +11,7 @@ from requests_toolbelt import MultipartEncoder  # type: ignore
 
 class ProductService(BaseService):
     def create(self) -> ServiceResult:
-        """
-        Creates a new product using the general data from the file manager.
+        """Creates a new product using the general data from the file manager.
 
         Returns:
             ServiceResult: The result of the creation operation.
@@ -63,8 +62,8 @@ class ProductService(BaseService):
         return ServiceResult(success=True, model=product, stats=self.stats)
 
     def retrieve(self) -> ServiceResult:
-        """
-        Retrieves a product's existence from the API based on the ID from the general data.
+        """Retrieves a product's existence from the API based on the ID from the general data.
+
         If the product exists, returns it; otherwise, returns a success status with no model.
 
         Returns:
@@ -83,8 +82,7 @@ class ProductService(BaseService):
         return ServiceResult(success=True, model=product if exists else None, stats=self.stats)
 
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
-        """
-        Retrieves a product from the API using its resource ID.
+        """Retrieves a product from the API using its resource ID.
 
         Args:
             resource_id (str): The ID of the product to retrieve.
@@ -126,9 +124,9 @@ class ProductService(BaseService):
         return ServiceResult(success=True, model=None, stats=self.stats)
 
     def update(self) -> ServiceResult:
-        """
-        Updates an existing product by sending the settings data to the API. For now, general
-        data cannot be updated.
+        """Updates an existing product by sending the settings data to the API.
+
+        For now, general data cannot be updated.
 
         Returns:
             ServiceResult: The result of the update operation.

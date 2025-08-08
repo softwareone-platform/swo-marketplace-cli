@@ -20,8 +20,7 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
     _sheet_name: str
 
     def add(self, items: list[DataModel]) -> None:
-        """
-        Add a row for each item to the tab.
+        """Add a row for each item to the tab.
 
         Args:
             items: The items to add.
@@ -43,8 +42,9 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
         self.file_handler.save()
 
     def create_tab(self) -> None:
-        """
-        Creates the tab in the Excel file. If the file does not exist, it is created.
+        """Creates the tab in the Excel file.
+
+        If the file does not exist, it is created.
         """
         if not self.file_handler.exists():
             self.file_handler.create()
@@ -59,8 +59,7 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
             )
 
     def read_data(self) -> Generator[BaseDataModel, None, None]:
-        """
-        Reads all item rows from the sheet and yields them as DataModel objects.
+        """Reads all item rows from the sheet and yields them as DataModel objects.
 
         Yields:
             DataModel: An object containing the data for each item row.
@@ -69,8 +68,8 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
             yield self._data_model.from_dict(item)
 
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the error column in the sheet.
+        """Writes an error message to the error column in the sheet.
+
         If the error column does not exist, it is created.
 
         Args:
@@ -112,4 +111,4 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
     @abstractmethod
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
-        raise NotImplementedError()
+        raise NotImplementedError

@@ -3,12 +3,11 @@ from typer.core import TyperGroup
 
 
 class AliasTyperGroup(TyperGroup):
-    """
-    Provides ability to make commands with s and without s at the end same
-    mpt-cli account add
-    mpt-cli accounts add
+    """Provides ability to make commands with s and without s at the end
 
-    are same commands
+    Examples:
+        mpt-cli account add
+        mpt-cli accounts add
     """
 
     def get_command(self, ctx, cmd_name):
@@ -19,7 +18,7 @@ class AliasTyperGroup(TyperGroup):
         matches = [name for name in self.list_commands(ctx) if name == f"{cmd_name}s"]
         if not matches:
             return None
-        elif len(matches) == 1:
+        if len(matches) == 1:
             return click.Group.get_command(self, ctx, matches[0])
 
         ctx.fail(f"Too many matches: {', '.join(sorted(matches))}")  # pragma: no cover

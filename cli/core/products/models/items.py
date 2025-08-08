@@ -77,7 +77,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             description=data[constants.ITEMS_DESCRIPTION]["value"],
             group_id=group_id,
             group_coordinate=data[constants.ITEMS_GROUP_ID]["coordinate"],
-            item_type="operations" if data.get("is_operations", False) else "vendor",
+            item_type="operations" if data.get("is_operations") else "vendor",
             name=data[constants.ITEMS_NAME]["value"],
             terms_commitment=data[constants.ITEMS_TERMS_COMMITMENT]["value"],
             terms_model=ItemTermsModelEnum(data[constants.ITEMS_TERMS_MODEL]["value"]),
@@ -113,7 +113,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             status=data["status"],
             unit_name=data["unit"]["name"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
     def to_json(self) -> dict[str, Any]:

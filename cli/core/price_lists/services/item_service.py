@@ -71,6 +71,6 @@ class ItemService(RelatedBaseService):
                 self.api.update(item_data["id"], item.to_json())
                 self._set_synced(item.id, item.coordinate)
             except MPTAPIError as e:
-                errors.append(f"Item {item.id}: {str(e)}")
+                errors.append(f"Item {item.id}: {e!s}")
                 self._set_error(str(e), item.id)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)

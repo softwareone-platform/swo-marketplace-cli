@@ -82,7 +82,7 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
             group_id=data.get("group", {}).get("id"),
             group_name=data.get("group", {}).get("name"),
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
     def is_order_request(self) -> bool:

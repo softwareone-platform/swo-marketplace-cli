@@ -62,7 +62,7 @@ def export(
                 console.print(f"Skipped export for {product_id}.")
                 continue
 
-            os.remove(file_path)
+            Path(file_path).unlink()
         else:
             _ = typer.confirm(
                 f"Do you want to export {product_id} in {out_path}?",
@@ -203,7 +203,7 @@ def create_product(container, status):
     status.update("Create product...")
     result = container.product_service().create()
     if not result.success or result.model is None:
-        return None
+        return
 
     product = result.model
     container.resource_id.override(product.id)
@@ -248,12 +248,13 @@ def create_product(container, status):
     item_service.set_new_item_groups(item_group_data_collection)
     item_service.create()
 
-    return None
+    return
 
 
 def update_product(container: ProductContainer, status: Status):
     """
     Update product definition.
+
     Args:
         container: The product container instance.
         status: The status object used to display progress.

@@ -137,7 +137,7 @@ def export(
             if not overwrite:
                 console.print(f"Skipped export for {price_list_id}.")
                 continue
-            os.remove(file_path)
+            Path(file_path).unlink()
         else:
             _ = typer.confirm(
                 f"Do you want to export {price_list_id} in {out_path}?",

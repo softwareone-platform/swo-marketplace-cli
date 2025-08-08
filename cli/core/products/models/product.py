@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
@@ -152,7 +151,7 @@ class ProductData(BaseDataModel):
             website=data["website"],
             status=data["status"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
             settings=SettingsData.from_json(data["settings"]),
         )
 
@@ -181,5 +180,5 @@ class ProductData(BaseDataModel):
 
     @staticmethod
     def _get_default_icon() -> bytes:
-        icon = Path(os.path.dirname(__file__)) / "icons/fake-icon.png"
+        icon = Path(Path(__file__).parent) / "icons/fake-icon.png"
         return open(icon, "rb").read()

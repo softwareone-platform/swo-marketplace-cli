@@ -14,7 +14,7 @@ class TemplateService(RelatedComponentsBaseService):
 
         """
         if param_groups is None or not param_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for data_model in self.file_manager.read_data():
@@ -30,4 +30,4 @@ class TemplateService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return None
+        return

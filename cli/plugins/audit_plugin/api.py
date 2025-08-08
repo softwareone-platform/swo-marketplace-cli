@@ -12,7 +12,7 @@ def get_audit_trail(client: Any, record_id: str) -> dict[str, Any]:
         response = client.get(endpoint + "?" + params)
         return response.json()
     except Exception as e:
-        console.print(f"[red]Failed to retrieve audit trail for record {record_id}: {str(e)}[/red]")
+        console.print(f"[red]Failed to retrieve audit trail for record {record_id}: {e!s}[/red]")
         raise typer.Exit(1)
 
 
@@ -34,6 +34,6 @@ def get_audit_records_by_object(
         return records
     except Exception as e:
         console.print(
-            f"[red]Failed to retrieve audit records for object {object_id}: {str(e)}[/red]"
+            f"[red]Failed to retrieve audit records for object {object_id}: {e!s}[/red]"
         )
         raise typer.Exit(1)

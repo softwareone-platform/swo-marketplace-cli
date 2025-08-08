@@ -48,6 +48,7 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
 def is_valid_path(path: str) -> bool:
     """
     Check if a path is valid.
+
     Args:
         path: The path to check.
 
@@ -60,6 +61,7 @@ def is_valid_path(path: str) -> bool:
 def get_external_id(obj: Any, index: int) -> str | None:
     """
     Get the external ID from an object.
+
     Args:
         obj: the object to get the external ID from.
         index: the index of the object to get the external ID from.

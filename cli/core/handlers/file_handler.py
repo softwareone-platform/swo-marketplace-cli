@@ -1,4 +1,3 @@
-import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
@@ -15,7 +14,7 @@ class FileHandler(ABC):
         Returns:
             True if the file path exists, False otherwise.
         """
-        return os.path.exists(self.file_path)
+        return Path(self.file_path).exists()
 
     @abstractmethod
     def create(self):

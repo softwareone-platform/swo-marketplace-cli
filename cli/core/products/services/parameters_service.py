@@ -16,7 +16,7 @@ class ParametersService(RelatedComponentsBaseService):
 
         """
         if parameter_groups is None or not parameter_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for data_model in self.file_manager.read_data():
@@ -30,7 +30,7 @@ class ParametersService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return None
+        return
 
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()

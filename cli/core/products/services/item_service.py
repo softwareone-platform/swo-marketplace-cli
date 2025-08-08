@@ -32,7 +32,7 @@ class ItemService(RelatedComponentsBaseService):
 
         """
         if item_groups is None or not item_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for item in self.file_manager.read_data():
@@ -46,7 +46,7 @@ class ItemService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return None
+        return
 
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()

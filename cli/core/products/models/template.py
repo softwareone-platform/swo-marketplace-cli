@@ -45,7 +45,7 @@ class TemplateData(BaseDataModel, ActionMixin):
             content=data["content"],
             default=data["default"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
     def to_json(self) -> dict[str, Any]:

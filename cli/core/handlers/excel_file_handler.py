@@ -42,8 +42,7 @@ class ExcelFileHandler(FileHandler):
 
     @classmethod
     def normalize_file_path(cls, file_path: str) -> Path:
-        """
-        Converts a file path string to a Path object with .xlsx extension.
+        """Converts a file path string to a Path object with .xlsx extension.
 
         Args:
             file_path: the file path to normalize.
@@ -65,8 +64,7 @@ class ExcelFileHandler(FileHandler):
         wb.close()
 
     def check_required_sheet(self, required_sheets: list[str]) -> None:
-        """
-        Checks if specified required sheets exist in the workbook.
+        """Checks if specified required sheets exist in the workbook.
 
         Args:
             required_sheets: List of required sheet names.
@@ -82,8 +80,7 @@ class ExcelFileHandler(FileHandler):
     def check_required_fields_in_vertical_sheet(
         self, sheet_name: str, required_fields: list[str]
     ) -> None:
-        """
-        Checks if all required fields are present in a vertical sheet.
+        """Checks if all required fields are present in a vertical sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -100,8 +97,7 @@ class ExcelFileHandler(FileHandler):
     def check_required_field_values_in_vertical_sheet(
         self, sheet_name: str, required_fields: list[str]
     ) -> None:
-        """
-        Checks if all required fields have values in a vertical sheet.
+        """Checks if all required fields have values in a vertical sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -127,8 +123,7 @@ class ExcelFileHandler(FileHandler):
     def check_required_fields_in_horizontal_sheet(
         self, sheet_name: str, required_fields: list[str]
     ) -> None:
-        """
-        Checks if all required fields are present in a horizontal sheet.
+        """Checks if all required fields are present in a horizontal sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -145,8 +140,7 @@ class ExcelFileHandler(FileHandler):
             raise RequiredFieldsError(details=missed_fields)
 
     def get_cell_value_by_coordinate(self, sheet_name: str, coordinate: str) -> str:
-        """
-        Retrieves the value of a specific cell in a sheet by its coordinate.
+        """Retrieves the value of a specific cell in a sheet by its coordinate.
 
         Args:
             sheet_name: The name of the sheet.
@@ -160,8 +154,7 @@ class ExcelFileHandler(FileHandler):
     def get_data_from_horizontal_sheet(
         self, sheet_name: str, fields: list[str] | None = None
     ) -> SheetDataGenerator:
-        """
-        Retrieves data from a horizontally oriented sheet.
+        """Retrieves data from a horizontally oriented sheet.
 
         Args:
             sheet_name: the name of the sheet.
@@ -186,8 +179,7 @@ class ExcelFileHandler(FileHandler):
     def get_data_from_vertical_sheet(
         self, sheet_name: str, fields: list[str] | None = None
     ) -> SheetData:
-        """
-        Extracts data from a vertical sheet where the first column contains field names.
+        """Extracts data from a vertical sheet where the first column contains field names.
 
         Args:
             sheet_name: The name of the sheet to extract data from.
@@ -214,9 +206,7 @@ class ExcelFileHandler(FileHandler):
     def get_values_for_dynamic_sheet(
         self, sheet_name: str, fields: list[str], patterns: list[Pattern[str]]
     ) -> SheetDataGenerator:
-        """
-        Extracts data from a sheet with a dynamic column structure based on field matches and regex
-        patterns.
+        """Extracts data from a sheet with a dynamic column structure.
 
         Args:
             sheet_name: The name of the sheet to extract data from.

@@ -47,7 +47,7 @@ def add_account(
         except MPTAPIError as e:
             console.print(
                 f"Cannot find account for token {secret} on "
-                f"environment {environment}. Exception: {str(e)}"
+                f"environment {environment}. Exception: {e!s}"
             )
             raise typer.Exit(code=3)
         account = from_token(token, environment)
@@ -200,8 +200,7 @@ def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = Tr
     def _wrap_active(is_active: bool) -> str:  # pragma: no cover
         if is_active:
             return "[red bold]\u2714"
-        else:
-            return ""
+        return ""
 
     def _wrap_token(account: Account, to_wrap_secret: bool) -> str:
         is_new_token = "idt:TKN-" in account.token
