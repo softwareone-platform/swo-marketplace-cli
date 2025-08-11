@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.price_lists import constants
@@ -33,9 +33,16 @@ class PriceListData(BaseDataModel):
         return {"id": self.product_id}
 
     def is_operations(self) -> bool:
+        """Check if the price list type is 'operations'.
+
+        Returns:
+            True if the type is 'operations', False otherwise.
+
+        """
         return self.type == "operations"
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.GENERAL_PRICELIST_ID]["value"],
@@ -54,6 +61,7 @@ class PriceListData(BaseDataModel):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -71,6 +79,7 @@ class PriceListData(BaseDataModel):
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         data = {
             "currency": self.currency,
@@ -85,6 +94,7 @@ class PriceListData(BaseDataModel):
 
         return data
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.GENERAL_PRICELIST_ID: self.id,

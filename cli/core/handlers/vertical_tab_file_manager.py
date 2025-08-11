@@ -15,14 +15,22 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
     _sheet_name: str
 
     def add(self, data_model: DataModel) -> None:
+        """Adds a data model to the Excel sheet.
+
+        Args:
+            data_model: The data model to add.
+
+        """
         data_xlsx = data_model.to_xlsx()
         data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
         self.file_handler.write([{self._sheet_name: data}])
 
     def check_required_tabs(self) -> None:
+        """Checks that all required tabs exist in the Excel file."""
         self.file_handler.check_required_sheet(self._required_tabs)
 
     def check_required_fields_by_section(self) -> None:
+        """Checks required fields for each section in the Excel file."""
         for section, required_fields in self._required_fields_by_tab.items():
             if section == self._sheet_name:
                 self.file_handler.check_required_fields_in_vertical_sheet(section, required_fields)

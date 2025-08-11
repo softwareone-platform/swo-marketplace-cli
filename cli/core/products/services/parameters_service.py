@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 
 from cli.core.models import DataCollectionModel
 from cli.core.products.services.related_components_base_service import (
@@ -32,6 +32,7 @@ class ParametersService(RelatedComponentsBaseService):
 
         return
 
+    @override
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()
         params.update({"scope": self.data_model.scope})

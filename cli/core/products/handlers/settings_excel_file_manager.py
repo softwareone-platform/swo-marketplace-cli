@@ -1,5 +1,5 @@
 from collections.abc import Generator
-from typing import Any
+from typing import Any, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
 from cli.core.products.constants import (
@@ -19,5 +19,6 @@ class SettingsExcelFileManager(HorizontalTabFileManager):
     _sheet_name = TAB_SETTINGS
     _data_validation_map = {SETTINGS_ACTION: ACTION_DATA_VALIDATION}
 
+    @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         return self.file_handler.get_data_from_horizontal_sheet(self._sheet_name, self._fields)

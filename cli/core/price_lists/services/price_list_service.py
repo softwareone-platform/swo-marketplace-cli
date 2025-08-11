@@ -1,16 +1,13 @@
+from typing import override
+
 from cli.core.errors import MPTAPIError
 from cli.core.services import BaseService
 from cli.core.services.service_result import ServiceResult
 
 
 class PriceListService(BaseService):
+    @override
     def create(self) -> ServiceResult:
-        """
-        Creates a new price list using the general data from the file manager.
-
-        Returns:
-            ServiceResult: The result of the creation operation.
-        """
         price_list = self.file_manager.read_data()
         # TODO: this logic should be moved to the price list data model creation
         price_list.type = "operations" if self.account.is_operations() else "vendor"
@@ -25,6 +22,7 @@ class PriceListService(BaseService):
 
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
+    @override
     def export(self, resource_id: str) -> ServiceResult:
         result = self.retrieve_from_mpt(resource_id)
         price_list = result.model
@@ -36,14 +34,8 @@ class PriceListService(BaseService):
 
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
+    @override
     def retrieve(self) -> ServiceResult:
-        """Retrieves a price list's existence from the API based on the ID from the general data.
-
-        If the price list exists, returns it; otherwise, returns a success status with no model.
-
-        Returns:
-            ServiceResult: The result of the retrieval operation.
-        """
         price_list = self.file_manager.read_data()
         if price_list.id is None:
             return ServiceResult(success=True, model=None, stats=self.stats)
@@ -56,16 +48,8 @@ class PriceListService(BaseService):
 
         return ServiceResult(success=True, model=price_list if exists else None, stats=self.stats)
 
+    @override
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
-        """
-        Retrieves a price list from the API using its resource ID.
-
-        Args:
-            resource_id: The ID of the price list to retrieve.
-
-        Returns:
-            ServiceResult: The result of the retrieval operation.
-        """
         try:
             price_list_data = self.api.get(resource_id)
         except MPTAPIError as e:
@@ -74,13 +58,8 @@ class PriceListService(BaseService):
         price_list = self.data_model.from_json(price_list_data)
         return ServiceResult(success=True, model=price_list, stats=self.stats)
 
+    @override
     def update(self) -> ServiceResult:
-        """
-        Updates an existing price list by sending the modified general data to the API.
-
-        Returns:
-            ServiceResult: The result of the update operation.
-        """
         price_list = self.file_manager.read_data()
         # TODO: this logic should be moved to the price list data model creation
         price_list.type = "operations" if self.account.is_operations() else "vendor"

@@ -1,5 +1,7 @@
 import json
 
+from typing_extensions import override
+
 from cli.core.errors import MPTAPIError
 from cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from cli.core.products.handlers import SettingsExcelFileManager
@@ -10,12 +12,8 @@ from requests_toolbelt import MultipartEncoder  # type: ignore
 
 
 class ProductService(BaseService):
+    @override
     def create(self) -> ServiceResult:
-        """Creates a new product using the general data from the file manager.
-
-        Returns:
-            ServiceResult: The result of the creation operation.
-        """
         product = self.file_manager.read_data()
         data = MultipartEncoder(
             fields={
@@ -40,6 +38,7 @@ class ProductService(BaseService):
         self._set_synced(product.id, product.coordinate)
         return ServiceResult(success=True, model=product, stats=self.stats)
 
+    @override
     def export(self, resource_id: str) -> ServiceResult:
         result = self.retrieve_from_mpt(resource_id)
         product = result.model
@@ -61,14 +60,8 @@ class ProductService(BaseService):
 
         return ServiceResult(success=True, model=product, stats=self.stats)
 
+    @override
     def retrieve(self) -> ServiceResult:
-        """Retrieves a product's existence from the API based on the ID from the general data.
-
-        If the product exists, returns it; otherwise, returns a success status with no model.
-
-        Returns:
-            ServiceResult: The result of the retrieval operation.
-        """
         product = self.file_manager.read_data()
         if product.id is None:
             return ServiceResult(success=True, model=None, stats=self.stats)
@@ -81,15 +74,8 @@ class ProductService(BaseService):
 
         return ServiceResult(success=True, model=product if exists else None, stats=self.stats)
 
+    @override
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
-        """Retrieves a product from the API using its resource ID.
-
-        Args:
-            resource_id (str): The ID of the product to retrieve.
-
-        Returns:
-            ServiceResult: The result of the retrieval operation.
-        """
         try:
             product_data = self.api.get(resource_id)
         except Exception as e:
@@ -99,6 +85,12 @@ class ProductService(BaseService):
         return ServiceResult(success=True, model=product, stats=self.stats)
 
     def validate_definition(self) -> ServiceResult:
+        """Validates the definition of the product file.
+
+        Returns:
+            ServiceResult: The result of the validation, including errors if any.
+
+        """
         # TODO: Review this logic. It should be implemented in the file_manager
         if not self.file_manager.file_handler.exists():
             msg = "Provided file path doesn't exist"
@@ -123,14 +115,8 @@ class ProductService(BaseService):
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
+    @override
     def update(self) -> ServiceResult:
-        """Updates an existing product by sending the settings data to the API.
-
-        For now, general data cannot be updated.
-
-        Returns:
-            ServiceResult: The result of the update operation.
-        """
         product = self.file_manager.read_data()
         settings_excel_file_manager = SettingsExcelFileManager(
             self.file_manager.file_handler.file_path

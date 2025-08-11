@@ -186,6 +186,7 @@ flake8-import-conventions.aliases = { datetime = "dt" }
 flake8-quotes.inline-quotes = "double"
 mccabe.max-complexity = 6
 pydocstyle.convention = "google"
+pydocstyle.ignore-decorators = ["property"]
 
 
 [tool.ruff.lint.per-file-ignores]

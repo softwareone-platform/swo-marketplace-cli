@@ -28,7 +28,18 @@ class ErrorMessagesCollector:
         self._sections: dict[str, dict[str, list[str]]] = {}
         self._is_empty: bool = True
 
-    def add_msg(self, section_name: str, item_name: str, msg: str):
+    def add_msg(self, section_name: str, item_name: str, msg: str) -> None:
+        """Add an error message to a specific section and item.
+
+        Args:
+            section_name: The name of the section to add the message to.
+            item_name: The name of the item within the section.
+            msg: The error message to add.
+
+        Returns:
+            None
+
+        """
         self._is_empty = False
 
         if section_name not in self._sections:
@@ -40,6 +51,12 @@ class ErrorMessagesCollector:
         self._sections[section_name][item_name].append(msg)
 
     def is_empty(self) -> bool:
+        """Check if the collector has no error messages.
+
+        Returns:
+            True if no error messages have been added, False otherwise.
+
+        """
         return self._is_empty
 
     def __str__(self) -> str:
@@ -71,6 +88,12 @@ class StatsCollector(ABC):
 
     @property
     def id(self) -> str | None:
+        """Get the identifier of the stats collector.
+
+        Returns:
+            The identifier as a string, or None if not set.
+
+        """
         return self.__id
 
     @id.setter
@@ -79,22 +102,52 @@ class StatsCollector(ABC):
 
     @property
     def tabs(self) -> dict[str, Results]:
+        """Get the tab aliases with their results.
+
+        Returns:
+            A dictionary mapping tab names to their corresponding results.
+
+        """
         return self.__tab_aliases
 
     @property
     def has_errors(self) -> bool:
+        """Check if any errors have been recorded.
+
+        Returns:
+            True if errors exist, False otherwise.
+
+        """
         return self.__has_error
 
     def add_error(self, tab_name: str) -> None:
+        """Increment error and total counters for a tab and mark errors as present.
+
+        Args:
+            tab_name: The name of the tab to update.
+
+        """
         self.__tab_aliases[tab_name]["error"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
         self.__has_error = True
 
     def add_synced(self, tab_name: str) -> None:
+        """Increment synced and total counters for a tab.
+
+        Args:
+            tab_name: The name of the tab to update.
+
+        """
         self.__tab_aliases[tab_name]["synced"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
 
     def add_skipped(self, tab_name: str) -> None:
+        """Increment skipped and total counters for a tab.
+
+        Args:
+            tab_name: The name of the tab to update.
+
+        """
         self.__tab_aliases[tab_name]["skipped"] += 1
         self.__tab_aliases[tab_name]["total"] += 1
 
@@ -102,7 +155,13 @@ class StatsCollector(ABC):
     def _get_table_title(self) -> str:
         raise NotImplementedError
 
-    def to_table(self):
+    def to_table(self) -> Table:
+        """Generate a rich Table representation of the collected stats.
+
+        Returns:
+            A Table object displaying the statistics for each tab.
+
+        """
         table = Table(self._get_table_title(), box=box.ROUNDED)
         columns = ["Total", "Synced", "Errors", "Skipped"]
         for column in columns:

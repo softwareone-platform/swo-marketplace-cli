@@ -3,7 +3,7 @@ from abc import ABC
 from dataclasses import dataclass
 from datetime import date
 from enum import StrEnum
-from typing import Any, Self, TypeVar
+from typing import Any, Self, TypeVar, override
 
 from cli.core.models import BaseDataModel
 from cli.core.products import constants
@@ -49,6 +49,7 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
         return None
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.PARAMETERS_ID]["value"],
@@ -67,6 +68,7 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -86,11 +88,18 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
         )
 
     def is_order_request(self) -> bool:
+        """Determine if the parameter is for an order request.
+
+        Returns:
+            True if the phase is 'Order' and the scope is not ITEM or REQUEST, False otherwise.
+
+        """
         return self.phase == "Order" and self.scope not in (
             ParamScopeEnum.ITEM,
             ParamScopeEnum.REQUEST,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         data: dict[str, Any] = {
             "name": self.name,
@@ -108,6 +117,7 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
 
         return data
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.PARAMETERS_ID: self.id,

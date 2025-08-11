@@ -1,6 +1,6 @@
 import re
 from collections.abc import Generator
-from typing import Any
+from typing import Any, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
 from cli.core.products.constants import (
@@ -29,6 +29,7 @@ class ItemExcelFileManager(HorizontalTabFileManager):
         ITEMS_TERMS_MODEL: TERMS_MODEL_DATA_VALIDATION,
     }
 
+    @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         return self.file_handler.get_values_for_dynamic_sheet(
             self._sheet_name, ITEMS_FIELDS, [re.compile(r"Parameter\.*")]

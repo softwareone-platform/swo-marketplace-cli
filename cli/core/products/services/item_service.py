@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, cast, override
 
 from cli.core.models import DataCollectionModel
 from cli.core.models.data_model import DataModel
@@ -11,6 +11,7 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class ItemService(RelatedComponentsBaseService):
+    @override
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
         data_model = super().prepare_data_model_to_create(data_model)
 
@@ -24,8 +25,7 @@ class ItemService(RelatedComponentsBaseService):
         return data_model
 
     def set_new_item_groups(self, item_groups: DataCollectionModel | None) -> None:
-        """
-        Update item group references in item content.
+        """Update item group references in item content.
 
         Args:
             item_groups: A collection of item groups to update.
@@ -48,6 +48,7 @@ class ItemService(RelatedComponentsBaseService):
 
         return
 
+    @override
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()
         params.update({"product.id": self.resource_id})

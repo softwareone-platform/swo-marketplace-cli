@@ -1,6 +1,6 @@
 from abc import ABC
 from collections.abc import Generator
-from typing import Any, Generic
+from typing import Any, Generic, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
 from cli.core.models.data_model import DataModel
@@ -29,6 +29,7 @@ class ParametersExcelFileManager(HorizontalTabFileManager, ABC, Generic[DataMode
     _id_field = PARAMETERS_ID
     _data_validation_map = {PARAMETERS_ACTION: ACTION_DATA_VALIDATION}
 
+    @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         return self.file_handler.get_data_from_horizontal_sheet(self._sheet_name, self._fields)
 

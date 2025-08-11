@@ -1,6 +1,7 @@
 import logging
 from abc import ABC
 from collections.abc import Callable
+from typing import override
 
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
@@ -13,6 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class RelatedComponentsBaseService(RelatedBaseService, ABC):
+    @override
     def create(self) -> ServiceResult:
         errors = []
         collection = {}
@@ -39,6 +41,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             stats=self.stats,
         )
 
+    @override
     def export(self) -> ServiceResult:
         self.file_manager.create_tab()
         params = self.export_params
@@ -59,11 +62,13 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
+    @override
     def retrieve(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Retrieve not implemented"], model=None, stats=self.stats
         )
 
+    @override
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False,
@@ -72,6 +77,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             stats=self.stats,
         )
 
+    @override
     def update(self) -> ServiceResult:
         errors = []
         for data_model in self.file_manager.read_data():

@@ -1,3 +1,5 @@
+from typing import override
+
 from cli.core.errors import MPTAPIError
 from cli.core.price_lists.constants import (
     TAB_PRICE_ITEMS,
@@ -7,11 +9,13 @@ from cli.core.services.service_result import ServiceResult
 
 
 class ItemService(RelatedBaseService):
+    @override
     def create(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Operation not implemented"], model=None, stats=self.stats
         )
 
+    @override
     def export(self) -> ServiceResult:
         self.file_manager.create_tab()
 
@@ -36,11 +40,13 @@ class ItemService(RelatedBaseService):
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
+    @override
     def retrieve(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(
             success=False, errors=["Operation not implemented"], model=None, stats=self.stats
         )
 
+    @override
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
         try:
             response = self.api.get(resource_id)
@@ -50,6 +56,7 @@ class ItemService(RelatedBaseService):
         item_model = self.data_model.from_json(response.json())
         return ServiceResult(success=True, model=item_model, stats=self.stats)
 
+    @override
     def update(self) -> ServiceResult:
         errors = []
         for item in self.file_manager.read_data():

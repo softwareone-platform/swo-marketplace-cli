@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from datetime import date
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.products import constants
@@ -64,6 +64,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
         return {"id": self.unit_id}
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         try:
             group_id = data["group_id"]
@@ -93,6 +94,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -116,6 +118,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         return {
             "name": self.name,
@@ -129,6 +132,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             "parameters": self.parameters,
         }
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.ITEMS_ID: self.id,

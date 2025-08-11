@@ -198,9 +198,27 @@ class ExcelFileHandler(FileHandler):
         }
 
     def get_sheet_next_column(self, sheet_name: str) -> str:
+        """Get the next available column letter in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+
+        Returns:
+            The next available column letter as a string.
+
+        """
         return get_column_letter(self._get_worksheet(sheet_name).max_column + 1)
 
     def get_sheet_next_row(self, sheet_name: str) -> int:
+        """Get the next available row number in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+
+        Returns:
+            The next available row number (1-based index).
+
+        """
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
@@ -237,6 +255,13 @@ class ExcelFileHandler(FileHandler):
             }
 
     def merge_cells(self, sheet_name: str, range_string: str) -> None:
+        """Merges a range of cells in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+            range_string: The cell range to merge (e.g., "A1:B2").
+
+        """
         self._workbook[sheet_name].merge_cells(range_string)
 
     def read(self) -> list[Any]:
@@ -249,6 +274,7 @@ class ExcelFileHandler(FileHandler):
         return []
 
     def save(self) -> None:
+        """Saves the current workbook to the file path and cleans worksheet cache."""
         self._workbook.save(self.file_path)
         self._clean_worksheets()
 
@@ -273,30 +299,40 @@ class ExcelFileHandler(FileHandler):
         self.save()
 
     def write_cell(
-        self,
-        sheet_name: str,
-        col: int,
-        row: int,
-        value: str,
-        data_validation: DataValidation | None = None,
-        style: NamedStyle | None = None,
-    ) -> None:
-        try:
-            sheet = self._get_worksheet(sheet_name)
-        except KeyError:
-            sheet = self._workbook.create_sheet(title=sheet_name)
+            self,
+            sheet_name: str,
+            col: int,
+            row: int,
+            value: str,
+            data_validation: DataValidation | None = None,
+            style: NamedStyle | None = None,
+        ) -> None:
+            """Writes a value to a cell, applying style and data validation if provided.
 
-        coordinate = f"{get_column_letter(col)}{row}"
-        if style is not None:
-            sheet[coordinate].style = style
+            Args:
+                sheet_name: The name of the sheet.
+                col: The column number (1-based).
+                row: The row number (1-based).
+                value: The value to write to the cell.
+                data_validation: Optional data validation to apply.
+                style: Optional cell style to apply.
 
-        if data_validation is not None:
-            if data_validation not in list(sheet.data_validations):
-                sheet.add_data_validation(data_validation)
+            """
+            try:
+                sheet = self._get_worksheet(sheet_name)
+            except KeyError:
+                sheet = self._workbook.create_sheet(title=sheet_name)
 
-            data_validation.add(sheet[coordinate])
+            coordinate = f"{get_column_letter(col)}{row}"
+            if style is not None:
+                sheet[coordinate].style = style
 
-        sheet[coordinate] = value
+            if data_validation is not None:
+                if data_validation not in list(sheet.data_validations):
+                    sheet.add_data_validation(data_validation)
+                data_validation.add(sheet[coordinate])
+
+            sheet[coordinate] = value
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
         if sheet_name is not None:

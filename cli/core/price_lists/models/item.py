@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from enum import StrEnum
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.price_lists import constants
@@ -58,15 +58,34 @@ class ItemData(BaseDataModel):
     type: str | None = None
 
     def is_operations(self) -> bool:
+        """Check if the item type is 'operations'.
+
+        Returns:
+            True if the item type is 'operations', False otherwise.
+
+        """
         return self.type == "operations"
 
     def is_vendor(self) -> bool:
+        """Check if the item type is 'vendor'.
+
+        Returns:
+            True if the item type is 'vendor', False otherwise.
+
+        """
         return self.type == "vendor"
 
     def to_update(self) -> bool:
+        """Check if the item action is 'UPDATE'.
+
+        Returns:
+            True if the item action is 'UPDATE', False otherwise.
+
+        """
         return self.action == ItemAction.UPDATE
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.PRICELIST_ITEMS_ID]["value"],
@@ -87,6 +106,7 @@ class ItemData(BaseDataModel):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data.get("id", ""),
@@ -115,6 +135,7 @@ class ItemData(BaseDataModel):
             action=ItemAction.SKIP,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         data: dict[str, Any] = {
             "unitLP": self.unit_lp,
@@ -133,6 +154,7 @@ class ItemData(BaseDataModel):
 
         return data
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.PRICELIST_ITEMS_ID: self.id,
