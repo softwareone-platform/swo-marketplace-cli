@@ -28,7 +28,7 @@ def test_from_token(expected_account):
             name="Account 1",
             type="Vendor",
         ),
-        token="secret 1",
+        token="secret 1",  # noqa: S106
     )
     account = from_token(token, "https://example.com")
 
@@ -63,8 +63,8 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
             id="ACC-4321",
             name="Not exists account",
             type="Vendor",
-            token="secret",
-            token_id="TKN-0000-0000-0001",
+            token="secret",  # noqa: S106
+            token_id="TKN-0000-0000-0001",  # noqa: S106
             environment="https://example.com",
             is_active=False,
         ),

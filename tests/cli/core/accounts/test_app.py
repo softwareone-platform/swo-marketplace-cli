@@ -22,7 +22,7 @@ def new_token():
             name="New Account",
             type="Vendor",
         ),
-        token="new-secret",
+        token="new-secret",  # noqa: S106
     )
 
 

@@ -13,12 +13,12 @@ def create_mock_account():
         name="test-account",
         type="test-type",
         environment="test",
-        token="test-token",
-        token_id="test-token-id",
+        token="test-token",  # noqa: S106
+        token_id="test-token-id",  # noqa: S106
     )
 
 
-def test_verbose_flag_enables_logging(caplog, mocker, requests_mocker):
+def test_verbose_flag_enables_logging(caplog, requests_mocker):
     data = {
         "$meta": {
             "pagination": {"offset": 0, "limit": 10, "total": 1},
@@ -33,7 +33,7 @@ def test_verbose_flag_enables_logging(caplog, mocker, requests_mocker):
                 "description": "Token for testing purposes",
                 "icon": "",
                 "lastAccessAt": "2024-03-15T10:00:00.000Z",
-                "token": "idt:TKN-1234-5678:abc123",
+                "token": "idt:TKN-1234-5678:abc123",  # noqa: S106
                 "account": {
                     "id": "ACC-8765-4321",
                     "href": "/accounts/accounts/ACC-8765-4321",
