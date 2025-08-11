@@ -1,5 +1,5 @@
 import shutil
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
@@ -148,13 +148,13 @@ def product_file_data():
         GENERAL_PRODUCT_NAME: {"value": "Test Product Name", "coordinate": "B4"},
         GENERAL_ACCOUNT_ID: {"value": "ACC-1234-1234", "coordinate": "B5"},
         GENERAL_ACCOUNT_NAME: {"value": "Test Account Name", "coordinate": "B6"},
-        GENERAL_EXPORT_DATE: {"value": datetime(2024, 1, 1, 0, 0), "coordinate": "B7"},
+        GENERAL_EXPORT_DATE: {"value": datetime(2024, 1, 1, 0, 0, tzinfo=UTC), "coordinate": "B7"},
         GENERAL_PRODUCT_WEBSITE: {"value": "https://example.com", "coordinate": "B8"},
         GENERAL_CATALOG_DESCRIPTION: {"value": "Catalog description", "coordinate": "B9"},
         GENERAL_PRODUCT_DESCRIPTION: {"value": "Product description", "coordinate": "B10"},
         GENERAL_STATUS: {"value": "Draft", "coordinate": "B11"},
-        GENERAL_CREATED: {"value": datetime(2024, 1, 1, 0, 0), "coordinate": "B12"},
-        GENERAL_MODIFIED: {"value": datetime(2024, 1, 1, 0, 0), "coordinate": "B13"},
+        GENERAL_CREATED: {"value": datetime(2024, 1, 1, 0, 0, tzinfo=UTC), "coordinate": "B12"},
+        GENERAL_MODIFIED: {"value": datetime(2024, 1, 1, 0, 0, tzinfo=UTC), "coordinate": "B13"},
     }
 
 
@@ -165,13 +165,13 @@ def product_data_from_dict():
         name="Adobe Commerce (CLI Test)",
         account_id="ACC-1234-1234",
         account_name="Adobe",
-        export_date=datetime(2024, 1, 1, 0, 0),
+        export_date=datetime(2024, 1, 1, 0, 0, tzinfo=UTC),
         website="https://example.com",
         short_description="Catalog description",
         long_description="Product description",
         status="Draft",
-        created_date=datetime(2024, 1, 1, 0, 0),
-        updated_date=datetime(2024, 1, 1, 0, 0),
+        created_date=datetime(2024, 1, 1, 0, 0, tzinfo=UTC),
+        updated_date=datetime(2024, 1, 1, 0, 0, tzinfo=UTC),
         coordinate="B3",
         settings=SettingsData(
             items=[
@@ -280,8 +280,8 @@ def item_file_data():
         ITEMS_UNIT_ID: {"value": "UNT-1916", "coordinate": "M325"},
         ITEMS_UNIT_NAME: {"value": "User", "coordinate": "N325"},
         ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "O325"},
-        ITEMS_CREATED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "P325"},
-        ITEMS_MODIFIED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "Q325"},
+        ITEMS_CREATED: {"value": datetime(2025, 5, 23, 0, 0, tzinfo=UTC), "coordinate": "P325"},
+        ITEMS_MODIFIED: {"value": datetime(2025, 5, 23, 0, 0, tzinfo=UTC), "coordinate": "Q325"},
     }
 
 
@@ -362,8 +362,14 @@ def item_group_file_data():
         ITEMS_GROUPS_DEFAULT: {"value": "True", "coordinate": "G10234"},
         ITEMS_GROUPS_MULTIPLE_CHOICES: {"value": "True", "coordinate": "H10234"},
         ITEMS_GROUPS_REQUIRED: {"value": "True", "coordinate": "I10234"},
-        ITEMS_GROUPS_CREATED: {"value": datetime(2025, 6, 23, 0, 0), "coordinate": "J10234"},
-        ITEMS_GROUPS_MODIFIED: {"value": datetime(2025, 6, 23, 0, 0), "coordinate": "K10234"},
+        ITEMS_GROUPS_CREATED: {
+            "value": datetime(2025, 6, 23, 0, 0, tzinfo=UTC),
+            "coordinate": "J10234",
+        },
+        ITEMS_GROUPS_MODIFIED: {
+            "value": datetime(2025, 6, 23, 0, 0, tzinfo=UTC),
+            "coordinate": "K10234",
+        },
     }
 
 
@@ -455,8 +461,14 @@ def parameters_file_data():
             ),
             "coordinate": "L325",
         },
-        PARAMETERS_CREATED: {"value": datetime(2024, 5, 23, 0, 0), "coordinate": "M325"},
-        PARAMETERS_MODIFIED: {"value": datetime(2024, 8, 14, 0, 0), "coordinate": "N325"},
+        PARAMETERS_CREATED: {
+            "value": datetime(2024, 5, 23, 0, 0, tzinfo=UTC),
+            "coordinate": "M325",
+        },
+        PARAMETERS_MODIFIED: {
+            "value": datetime(2024, 8, 14, 0, 0, tzinfo=UTC),
+            "coordinate": "N325",
+        },
     }
 
 
@@ -695,8 +707,14 @@ def parameter_group_file_data():
         PARAMETERS_GROUPS_DISPLAY_ORDER: {"value": "232", "coordinate": "E325"},
         PARAMETERS_GROUPS_DESCRIPTION: {"value": "Fake Description", "coordinate": "F325"},
         PARAMETERS_GROUPS_DEFAULT: {"value": "False", "coordinate": "G325"},
-        PARAMETERS_GROUPS_CREATED: {"value": datetime(2024, 5, 23, 0, 0), "coordinate": "H325"},
-        PARAMETERS_GROUPS_MODIFIED: {"value": datetime(2024, 8, 14, 0, 0), "coordinate": "I325"},
+        PARAMETERS_GROUPS_CREATED: {
+            "value": datetime(2024, 5, 23, 0, 0, tzinfo=UTC),
+            "coordinate": "H325",
+        },
+        PARAMETERS_GROUPS_MODIFIED: {
+            "value": datetime(2024, 8, 14, 0, 0, tzinfo=UTC),
+            "coordinate": "I325",
+        },
     }
 
 
@@ -712,8 +730,8 @@ def parameter_group_data_from_dict():
         "VIP account to Adobe VIP Marketplace.",
         display_order=10,
         default=True,
-        created_date=datetime(2024, 5, 6, 0, 0),
-        updated_date=datetime(2024, 5, 18, 0, 0),
+        created_date=datetime(2024, 5, 6, 0, 0, tzinfo=UTC),
+        updated_date=datetime(2024, 5, 18, 0, 0, tzinfo=UTC),
     )
 
 
@@ -765,7 +783,7 @@ def template_file_data():
             "value": "Querying template for Adobe VIP Marketplace",
             "coordinate": "F3",
         },
-        TEMPLATES_CREATED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "G3"},
+        TEMPLATES_CREATED: {"value": datetime(2025, 5, 23, 0, 0, tzinfo=UTC), "coordinate": "G3"},
         TEMPLATES_MODIFIED: {"value": None, "coordinate": "H3"},
     }
 

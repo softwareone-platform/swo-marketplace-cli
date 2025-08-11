@@ -1,5 +1,5 @@
 import shutil
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -61,12 +61,12 @@ def price_list_file_data():
         GENERAL_PRODUCT_NAME: {"value": "Test Product Name", "coordinate": "B6"},
         GENERAL_VENDOR_ID: {"value": "fake_vendor_id", "coordinate": "B7"},
         GENERAL_VENDOR_NAME: {"value": "Test Vendor Name", "coordinate": "B8"},
-        GENERAL_EXPORT_DATE: {"value": datetime(2024, 6, 1, 0, 0), "coordinate": "B9"},
+        GENERAL_EXPORT_DATE: {"value": datetime(2024, 6, 1, 0, 0, tzinfo=UTC), "coordinate": "B9"},
         GENERAL_PRECISION: {"value": 2, "coordinate": "B10"},
         GENERAL_DEFAULT_MARKUP: {"value": 10, "coordinate": "B11"},
         GENERAL_NOTES: {"value": "Test notes", "coordinate": "B12"},
-        GENERAL_CREATED: {"value": datetime(2024, 6, 1, 0, 0), "coordinate": "B13"},
-        GENERAL_MODIFIED: {"value": datetime(2025, 2, 10, 0, 0), "coordinate": "B14"},
+        GENERAL_CREATED: {"value": datetime(2024, 6, 1, 0, 0, tzinfo=UTC), "coordinate": "B13"},
+        GENERAL_MODIFIED: {"value": datetime(2025, 2, 10, 0, 0, tzinfo=UTC), "coordinate": "B14"},
         "type": "operations",
         EXTERNAL_ID: {"value": "test_product_com_usd_global", "coordinate": "A1"},
     }
@@ -250,7 +250,10 @@ def item_file_data():
         PRICELIST_ITEMS_UNIT_PP: {"value": 107.88, "coordinate": "J325"},
         PRICELIST_ITEMS_MARKUP: {"value": 11.1111111111111, "coordinate": "K325"},
         PRICELIST_ITEMS_STATUS: {"value": "Draft", "coordinate": "L325"},
-        PRICELIST_ITEMS_MODIFIED: {"value": datetime(2025, 5, 23, 0, 0), "coordinate": "M325"},
+        PRICELIST_ITEMS_MODIFIED: {
+            "value": datetime(2025, 5, 23, 0, 0, tzinfo=UTC),
+            "coordinate": "M325",
+        },
     }
 
 
