@@ -10,6 +10,8 @@ from cli.core.price_lists.models import PriceListData
 
 
 class PriceListExcelFileManager(VerticalTabFileManager):
+    """Excel file manager for price list data operations."""
+
     _data_model = PriceListData
     _fields = GENERAL_FIELDS
     _id_field = GENERAL_PRICELIST_ID

@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 
 class RelatedComponentsBaseService(RelatedBaseService, ABC):
+    """Base service for managing related component operations."""
+
     @override
     def create(self) -> ServiceResult:
         errors = []

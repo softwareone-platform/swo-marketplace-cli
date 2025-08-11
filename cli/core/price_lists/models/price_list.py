@@ -9,6 +9,8 @@ from dateutil import parser
 
 @dataclass
 class PriceListData(BaseDataModel):
+    """Data model representing a price list."""
+
     id: str | None
     currency: str
     product_id: str

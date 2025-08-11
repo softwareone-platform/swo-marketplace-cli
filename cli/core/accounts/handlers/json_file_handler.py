@@ -7,6 +7,8 @@ from cli.core.handlers import FileHandler
 
 
 class JsonFileHandler(FileHandler):
+    """File handler for JSON file operations."""
+
     # TBD: should this be configurable by the user or moved to a constant?
     _default_file_path: Path = Path.home() / ".swocli" / "accounts.json"
 

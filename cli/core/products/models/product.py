@@ -12,6 +12,8 @@ from dateutil import parser
 
 @dataclass
 class SettingsItem(BaseDataModel, ActionMixin):
+    """Data model representing a product settings item."""
+
     name: str
     value: str | bool
 
@@ -57,6 +59,8 @@ class SettingsItem(BaseDataModel, ActionMixin):
 
 @dataclass
 class SettingsData(BaseDataModel):
+    """Data model representing product settings configuration."""
+
     items: list[SettingsItem] = field(default_factory=list)
     json_path: str | None = None
 
@@ -110,6 +114,8 @@ class SettingsData(BaseDataModel):
 
 @dataclass
 class ProductData(BaseDataModel):
+    """Data model representing a complete product."""
+
     id: str
     name: str
     short_description: str

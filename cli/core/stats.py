@@ -7,6 +7,16 @@ from rich.table import Table
 
 
 class Results(TypedDict):
+    """TypedDict representing the result statistics for synchronization operations.
+
+    Attributes:
+        synced: The number of successfully synchronized items.
+        error: The number of items that encountered errors.
+        total: The total number of processed items.
+        skipped: The number of items that were skipped.
+
+    """
+
     synced: int
     error: int
     total: int
@@ -79,6 +89,8 @@ class ErrorMessagesCollector:
 
 
 class StatsCollector(ABC):
+    """Abstract base class for collecting and managing operation statistics."""
+
     __id: str | None = None
     errors = ErrorMessagesCollector()
 
@@ -179,6 +191,8 @@ class StatsCollector(ABC):
 
 
 class ProductStatsCollector(StatsCollector):
+    """Statistics collector specifically for product synchronization operations."""
+
     def __init__(self) -> None:
         general: Results = copy.deepcopy(DEFAULT_RESULTS)
         parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
@@ -210,6 +224,12 @@ class ProductStatsCollector(StatsCollector):
 
 
 class PriceListStatsCollector(StatsCollector):
+    """Statistics collector specifically for price list synchronization operations.
+
+    This class tracks statistics for price list operations including
+    general information and price items.
+    """
+
     def __init__(self) -> None:
         general: Results = copy.deepcopy(DEFAULT_RESULTS)
         price_items: Results = copy.deepcopy(DEFAULT_RESULTS)

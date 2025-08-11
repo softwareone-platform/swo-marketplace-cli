@@ -4,6 +4,12 @@ from typing import Any
 
 
 class FileHandler(ABC):
+    """Abstract base class for handling file operations.
+
+    This class provides a common interface for file handlers that manage
+    different file types and formats.
+    """
+
     def __init__(self, file_path: Path):
         self.file_path = file_path
 

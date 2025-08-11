@@ -7,6 +7,13 @@ from cli.core.models.data_model import DataModel
 
 
 class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
+    """File manager for handling vertically-oriented Excel tabs.
+
+    This class manages Excel sheets where data is organized vertically,
+    with field names in the first column and corresponding values in
+    subsequent columns.
+    """
+
     _data_model: type[DataModel]
     _fields: list[str]
     _id_field: str

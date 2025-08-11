@@ -10,6 +10,17 @@ APIModel = TypeVar("APIModel", bound=BaseModel)
 
 
 class APIService(ABC, Generic[APIModel]):
+    """Abstract base class for API service operations.
+
+    This class provides common functionality for API services that interact
+    with MPT endpoints, including CRUD operations and error handling.
+
+    Attributes:
+        _base_url: Base URL for the API endpoint.
+        _api_model:  Model for API response validation.
+
+    """
+
     _base_url: str
     _api_model: APIModel
 
@@ -134,6 +145,8 @@ class APIService(ABC, Generic[APIModel]):
 
 
 class RelatedAPIService(APIService, ABC):
+    """Abstract base class for related API service operations."""
+
     def __init__(self, client, resource_id: str):
         super().__init__(client)
         self.resource_id = resource_id

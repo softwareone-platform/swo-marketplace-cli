@@ -12,6 +12,14 @@ logger = logging.getLogger(__name__)
 
 
 class MPTClient(Session):
+    """HTTP client for interacting with MPT API endpoints.
+
+    Attributes:
+        debug: Whether to enable debug logging for requests/responses.
+        base_url: Base URL for all API requests.
+        api_token: Authentication token for API access.
+    """
+
     def __init__(self, base_url: str, api_token: str, debug: bool = False):
         super().__init__()
         self.debug = debug

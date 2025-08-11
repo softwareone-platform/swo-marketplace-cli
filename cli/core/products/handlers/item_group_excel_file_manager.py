@@ -13,6 +13,8 @@ from cli.core.products.models import ItemGroupData
 
 
 class ItemGroupExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for item group data operations."""
+
     _data_model = ItemGroupData
     _fields = ITEMS_GROUPS_FIELDS
     _id_field = ITEMS_GROUPS_ID

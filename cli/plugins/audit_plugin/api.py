@@ -33,7 +33,5 @@ def get_audit_records_by_object(
             raise typer.Exit(1)
         return records
     except Exception as e:
-        console.print(
-            f"[red]Failed to retrieve audit records for object {object_id}: {e!s}[/red]"
-        )
+        console.print(f"[red]Failed to retrieve audit records for object {object_id}: {e!s}[/red]")
         raise typer.Exit(1)

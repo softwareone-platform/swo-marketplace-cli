@@ -11,6 +11,8 @@ from dateutil import parser
 
 @dataclass
 class TemplateData(BaseDataModel, ActionMixin):
+    """Data model representing a template resource."""
+
     id: str
     name: str
     type: str

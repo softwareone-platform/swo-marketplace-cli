@@ -20,6 +20,8 @@ ITEMS_ACTION_DATA_VALIDATION = DataValidation(
 
 
 class ItemExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for product item data operations."""
+
     _data_model = ItemData
     _fields = ITEMS_FIELDS
     _id_field = ITEMS_ID

@@ -9,6 +9,8 @@ from cli.core.services.service_result import ServiceResult
 
 
 class ItemService(RelatedBaseService):
+    """Service for managing price list item operations."""
+
     @override
     def create(self) -> ServiceResult:  # pragma: no cover
         return ServiceResult(

@@ -13,6 +13,8 @@ FileManager = TypeVar("FileManager", bound=BaseFileManager)
 
 @dataclass(frozen=True)
 class ServiceContext(Generic[APIService, DataModel, FileManager]):
+    """Context object that holds dependencies for service operations."""
+
     account: Account
     api: APIService
     data_model: type[DataModel]

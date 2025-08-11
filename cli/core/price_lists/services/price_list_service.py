@@ -6,6 +6,8 @@ from cli.core.services.service_result import ServiceResult
 
 
 class PriceListService(BaseService):
+    """Service for managing price list operations."""
+
     @override
     def create(self) -> ServiceResult:
         price_list = self.file_manager.read_data()

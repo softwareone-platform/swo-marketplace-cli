@@ -8,6 +8,12 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 class ExcelFileManager(ABC):
+    """Abstract base class for managing Excel file operations.
+
+    This class provides common functionality for Excel file managers,
+    including tab management, error handling, and data writing operations.
+    """
+
     _sheet_name: str
     _data_validation_map: dict[str, DataValidation] = {}
 

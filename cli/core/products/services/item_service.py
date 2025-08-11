@@ -11,6 +11,8 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class ItemService(RelatedComponentsBaseService):
+    """Service for managing item operations."""
+
     @override
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
         data_model = super().prepare_data_model_to_create(data_model)

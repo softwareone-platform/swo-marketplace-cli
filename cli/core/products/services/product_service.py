@@ -1,7 +1,5 @@
 import json
 
-from typing_extensions import override
-
 from cli.core.errors import MPTAPIError
 from cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from cli.core.products.handlers import SettingsExcelFileManager
@@ -9,9 +7,12 @@ from cli.core.products.models import DataActionEnum, SettingsData
 from cli.core.services.base_service import BaseService
 from cli.core.services.service_result import ServiceResult
 from requests_toolbelt import MultipartEncoder  # type: ignore
+from typing_extensions import override
 
 
 class ProductService(BaseService):
+    """Service for managing product operations."""
+
     @override
     def create(self) -> ServiceResult:
         product = self.file_manager.read_data()

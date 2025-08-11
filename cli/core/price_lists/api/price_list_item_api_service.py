@@ -3,6 +3,8 @@ from cli.core.mpt.models import PriceListItem
 
 
 class PriceListItemAPIService(APIService):
+    """API service for managing price list item operations."""
+
     _base_url = "/catalog/price-lists/{price_list_id}/items/"
     _api_model = PriceListItem
 

@@ -9,10 +9,14 @@ RetType = TypeVar("RetType")
 
 
 class CLIError(Exception):
+    """Base exception class for CLI-related errors."""
+
     pass
 
 
 class MPTAPIError(CLIError):
+    """Exception raised when MPT API operations fail."""
+
     def __init__(self, request_msg: str, response_body: str):
         self._response_body = response_body
         self._request_msg = request_msg
@@ -47,6 +51,8 @@ def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
 
 
 class AccountNotFoundError(CLIError):
+    """Exception raised when a specified account cannot be found."""
+
     def __init__(self, account_id: str):
         self._account_id = account_id
 
@@ -55,6 +61,8 @@ class AccountNotFoundError(CLIError):
 
 
 class NoActiveAccountFoundError(CLIError):
+    """Exception raised when no active account is configured."""
+
     def __str__(self) -> str:
         return (
             "No active account found. Activate any account first using "

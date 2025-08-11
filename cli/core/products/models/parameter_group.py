@@ -10,6 +10,8 @@ from dateutil import parser
 
 @dataclass
 class ParameterGroupData(BaseDataModel, ActionMixin):
+    """Data model representing a parameter group."""
+
     id: str
     default: bool
     description: str

@@ -12,6 +12,12 @@ DataModel = TypeVar("DataModel", bound=BaseDataModel)
 
 
 class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
+    """File manager for handling horizontally-oriented Excel tabs.
+
+    This class manages Excel sheets where data is organized horizontally,
+    with field names in the first row and corresponding data in subsequent rows.
+    """
+
     _data_model: type[DataModel]
     _fields: list[str]
     _id_field: str

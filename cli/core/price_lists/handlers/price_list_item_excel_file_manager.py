@@ -13,6 +13,8 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 class PriceListItemExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for price list item data operations."""
+
     _data_model = ItemData
     _fields = PRICELIST_ITEMS_FIELDS
     _id_field = PRICELIST_ITEMS_ID

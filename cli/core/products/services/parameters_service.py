@@ -7,6 +7,8 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class ParametersService(RelatedComponentsBaseService):
+    """Service for managing parameter operations."""
+
     def set_new_parameter_group(self, parameter_groups: DataCollectionModel | None) -> None:
         """
         Update parameter group references in parameter content.

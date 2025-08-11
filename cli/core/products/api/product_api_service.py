@@ -3,5 +3,7 @@ from cli.core.mpt.models import Product
 
 
 class ProductAPIService(APIService):
-    _base_url = "/catalog/products"
+    """Service for interacting with product-related API endpoints."""
+
+    _base_url: str = "/catalog/products"
     _api_model = Product

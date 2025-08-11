@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 
 class Account(BaseModel):
+    """Model representing a user account."""
+
     id: str
     name: str
     type: str

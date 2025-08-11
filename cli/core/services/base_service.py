@@ -6,6 +6,12 @@ from cli.core.services.service_result import ServiceResult
 
 
 class Service(ABC):
+    """Abstract base class for all service operations.
+
+    This class provides common functionality for service implementations
+    that handle CRUD operations on resources.
+    """
+
     service_context: ServiceContext
 
     def __init__(self, service_context: ServiceContext):
@@ -77,6 +83,8 @@ class Service(ABC):
 
 
 class BaseService(Service, ABC):
+    """Abstract base service class for standard resource operations."""
+
     @abstractmethod
     def export(self, resource_id: str) -> ServiceResult:
         """Export a resource from mpt to the file.
@@ -91,6 +99,12 @@ class BaseService(Service, ABC):
 
 
 class RelatedBaseService(Service, ABC):
+    """Abstract base service class for related resource operations.
+
+    Extends Service to handle operations on resources that are related
+    to other resources and have a specific resource_id context.
+    """
+
     @property
     def resource_id(self):
         return self.api.resource_id

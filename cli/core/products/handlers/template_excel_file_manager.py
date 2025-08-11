@@ -13,6 +13,8 @@ from cli.core.products.models import TemplateData
 
 
 class TemplateExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for template data operations."""
+
     _data_model = TemplateData
     _fields = TEMPLATES_FIELDS
     _id_field = TEMPLATES_ID

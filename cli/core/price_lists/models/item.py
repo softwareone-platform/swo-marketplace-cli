@@ -8,19 +8,22 @@ from cli.core.price_lists import constants
 
 
 class ItemAction(StrEnum):
+    """Enumeration of possible actions for a price list item."""
+
     SKIP = "-"
     SKIPPED = ""
     UPDATE = "update"
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "ItemAction":
         if value is None:
             return cls.SKIP
-
         return super()._missing_(value)
 
 
 class ItemStatus(StrEnum):
+    """Enumeration of possible statuses for a price list item."""
+
     DRAFT = "Draft"
     FOR_SALE = "ForSale"
     PRIVATE = "Private"
@@ -28,6 +31,8 @@ class ItemStatus(StrEnum):
 
 @dataclass
 class ItemData(BaseDataModel):
+    """Data model representing a price list item."""
+
     id: str
     billing_frequency: str
     commitment: str | None

@@ -11,6 +11,8 @@ from dateutil import parser
 
 @dataclass
 class ItemData(BaseDataModel, ItemActionMixin):
+    """Data model representing a product item."""
+
     id: str
     description: str
     group_id: str

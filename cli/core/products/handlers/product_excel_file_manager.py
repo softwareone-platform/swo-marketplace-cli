@@ -10,6 +10,8 @@ from cli.core.products.models import ProductData
 
 
 class ProductExcelFileManager(VerticalTabFileManager):
+    """Excel file manager for product data operations."""
+
     _data_model = ProductData
     _fields = GENERAL_FIELDS
     _id_field = GENERAL_PRODUCT_ID

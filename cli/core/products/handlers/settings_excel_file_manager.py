@@ -13,6 +13,8 @@ from cli.core.products.models import SettingsData
 
 
 class SettingsExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for product settings data operations."""
+
     _data_model = SettingsData
     _fields = SETTINGS_FIELDS
     _id_field = SETTINGS_SETTING

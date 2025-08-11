@@ -15,6 +15,8 @@ BaseParametersData = TypeVar("BaseParametersData", bound="ParametersData")
 
 
 class ParamScopeEnum(StrEnum):
+    """Enumeration for parameter scope."""
+
     AGREEMENT = "Agreement"
     ITEM = "Item"
     REQUEST = "Request"
@@ -23,6 +25,8 @@ class ParamScopeEnum(StrEnum):
 
 @dataclass
 class ParametersData(BaseDataModel, ActionMixin, ABC):
+    """Abstract data model representing parameters."""
+
     id: str
     description: str
     display_order: int
@@ -139,19 +143,27 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
 
 @dataclass
 class AgreementParametersData(ParametersData):
+    """Data model representing agreement parameters."""
+
     scope: ParamScopeEnum = ParamScopeEnum.AGREEMENT
 
 
 @dataclass
 class ItemParametersData(ParametersData):
+    """Data model representing item parameters."""
+
     scope: ParamScopeEnum = ParamScopeEnum.ITEM
 
 
 @dataclass
 class RequestParametersData(ParametersData):
+    """Data model representing request parameters."""
+
     scope: ParamScopeEnum = ParamScopeEnum.REQUEST
 
 
 @dataclass
 class SubscriptionParametersData(ParametersData):
+    """Data model representing subscription parameters."""
+
     scope: ParamScopeEnum = ParamScopeEnum.SUBSCRIPTION

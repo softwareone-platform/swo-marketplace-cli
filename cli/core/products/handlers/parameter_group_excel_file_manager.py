@@ -13,6 +13,8 @@ from cli.core.products.models import ParameterGroupData
 
 
 class ParameterGroupExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for parameter group data operations."""
+
     _data_model = ParameterGroupData
     _fields = PARAMETERS_GROUPS_FIELDS
     _id_field = PARAMETERS_GROUPS_ID

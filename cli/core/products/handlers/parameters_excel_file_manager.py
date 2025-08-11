@@ -23,6 +23,8 @@ from cli.core.products.models import (
 
 
 class ParametersExcelFileManager(HorizontalTabFileManager, ABC, Generic[DataModel]):
+    """Excel file manager for parameter data operations."""
+
     _data_model: type[DataModel]
     _sheet_name: str
     _fields = PARAMETERS_FIELDS
@@ -35,20 +37,28 @@ class ParametersExcelFileManager(HorizontalTabFileManager, ABC, Generic[DataMode
 
 
 class AgreementParametersExcelFileManager(ParametersExcelFileManager):
+    """Excel file manager for agreement parameter data operations."""
+
     _data_model = AgreementParametersData
     _sheet_name = TAB_AGREEMENT_PARAMETERS
 
 
 class ItemParametersExcelFileManager(ParametersExcelFileManager):
+    """Excel file manager for item parameter data operations."""
+
     _data_model = ItemParametersData
     _sheet_name = TAB_ITEM_PARAMETERS
 
 
 class RequestParametersExcelFileManager(ParametersExcelFileManager):
+    """Excel file manager for request parameter data operations."""
+
     _data_model = RequestParametersData
     _sheet_name = TAB_REQUEST_PARAMETERS
 
 
 class SubscriptionParametersExcelFileManager(ParametersExcelFileManager):
+    """Excel file manager for subscription parameter data operations."""
+
     _data_model = SubscriptionParametersData
     _sheet_name = TAB_SUBSCRIPTION_PARAMETERS

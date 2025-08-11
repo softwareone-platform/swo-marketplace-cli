@@ -8,6 +8,8 @@ type CollectionModel[DataModel] = dict[str, DataModel]
 
 @dataclass
 class BaseDataModel(ABC):
+    """Abstract base data model with serialization and deserialization methods."""
+
     @classmethod
     @abstractmethod
     def from_dict(cls, data: dict[str, Any]) -> Self:
@@ -59,6 +61,8 @@ class BaseDataModel(ABC):
 
 @dataclass
 class DataCollectionModel(Generic[DataModel]):
+    """Generic collection model for managing groups of data models."""
+
     collection: CollectionModel
 
     def add(self, collection: CollectionModel) -> None:

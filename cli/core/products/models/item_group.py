@@ -10,6 +10,8 @@ from dateutil import parser
 
 @dataclass
 class ItemGroupData(BaseDataModel, ActionMixin):
+    """Data model representing an item group."""
+
     id: str
     default: bool
     description: str

@@ -24,6 +24,8 @@ type StyleData = dict[str, dict[str, NamedStyle]]
 
 
 class ExcelFileHandler(FileHandler):
+    """Handler for Excel (.xlsx) file operations."""
+
     def __init__(self, file_path: Path):
         super().__init__(file_path)
         self.__workbook: Workbook | None = None
@@ -299,40 +301,40 @@ class ExcelFileHandler(FileHandler):
         self.save()
 
     def write_cell(
-            self,
-            sheet_name: str,
-            col: int,
-            row: int,
-            value: str,
-            data_validation: DataValidation | None = None,
-            style: NamedStyle | None = None,
-        ) -> None:
-            """Writes a value to a cell, applying style and data validation if provided.
+        self,
+        sheet_name: str,
+        col: int,
+        row: int,
+        value: str,
+        data_validation: DataValidation | None = None,
+        style: NamedStyle | None = None,
+    ) -> None:
+        """Writes a value to a cell, applying style and data validation if provided.
 
-            Args:
-                sheet_name: The name of the sheet.
-                col: The column number (1-based).
-                row: The row number (1-based).
-                value: The value to write to the cell.
-                data_validation: Optional data validation to apply.
-                style: Optional cell style to apply.
+        Args:
+            sheet_name: The name of the sheet.
+            col: The column number (1-based).
+            row: The row number (1-based).
+            value: The value to write to the cell.
+            data_validation: Optional data validation to apply.
+            style: Optional cell style to apply.
 
-            """
-            try:
-                sheet = self._get_worksheet(sheet_name)
-            except KeyError:
-                sheet = self._workbook.create_sheet(title=sheet_name)
+        """
+        try:
+            sheet = self._get_worksheet(sheet_name)
+        except KeyError:
+            sheet = self._workbook.create_sheet(title=sheet_name)
 
-            coordinate = f"{get_column_letter(col)}{row}"
-            if style is not None:
-                sheet[coordinate].style = style
+        coordinate = f"{get_column_letter(col)}{row}"
+        if style is not None:
+            sheet[coordinate].style = style
 
-            if data_validation is not None:
-                if data_validation not in list(sheet.data_validations):
-                    sheet.add_data_validation(data_validation)
-                data_validation.add(sheet[coordinate])
+        if data_validation is not None:
+            if data_validation not in list(sheet.data_validations):
+                sheet.add_data_validation(data_validation)
+            data_validation.add(sheet[coordinate])
 
-            sheet[coordinate] = value
+        sheet[coordinate] = value
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
         if sheet_name is not None:
