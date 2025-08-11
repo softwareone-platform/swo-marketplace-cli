@@ -35,7 +35,7 @@ class JsonFileHandler(FileHandler):
         if not self.exists():
             self.create()
 
-        with open(self.file_path) as f:
+        with Path(self.file_path).open() as f:
             data = json.load(f)
 
         return data
@@ -49,6 +49,6 @@ class JsonFileHandler(FileHandler):
             data: the data to be written to the file.
         """
         os.makedirs(Path(self.file_path).parent, exist_ok=True)
-        with open(self.file_path, "w+") as f:
+        with Path(self.file_path).open("w+") as f:
             json_data = json.dumps(data, indent=2)
             f.write(json_data)

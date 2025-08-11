@@ -198,5 +198,5 @@ class ProductData(BaseDataModel):
 
     @staticmethod
     def _get_default_icon() -> bytes:
-        icon = Path(Path(__file__).parent) / "icons/fake-icon.png"
-        return open(icon, "rb").read()
+        icon_path = Path(Path(__file__).parent) / "icons/fake-icon.png"
+        return Path(icon_path).open("rb").read()

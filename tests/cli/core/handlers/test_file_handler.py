@@ -1,5 +1,7 @@
 from pathlib import Path
 
+import pytest
+
 from cli.core.handlers import FileHandler
 
 
@@ -14,17 +16,16 @@ class FakeFileHandler(FileHandler):
         pass
 
 
-def test_exists_file_returns_true(mocker):
-    mocker.patch("os.path.exists", return_value=True)
+@pytest.mark.parametrize(
+    "exists, expected_response",
+    [
+        (True, True),
+        (False, False),
+    ],
+)
+def test_exists_file_returns_true(exists, expected_response, mocker):
+    mocker.patch.object(Path, "exists", return_value=exists)
 
     file_handler = FakeFileHandler(Path("test.txt"))
 
-    assert file_handler.exists() is True
-
-
-def test_exists_file_returns_false(mocker):
-    mocker.patch("os.path.exists", return_value=False)
-
-    file_handler = FakeFileHandler(Path("test.txt"))
-
-    assert file_handler.exists() is False
+    assert file_handler.exists() is expected_response

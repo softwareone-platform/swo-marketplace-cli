@@ -322,7 +322,7 @@ def test_export_product_overwrites_existing_files(
     product_container_mock,
 ):
     exists_mock = mocker.patch.object(Path, "exists", return_value=True)
-    os_remove_mock = mocker.patch("cli.core.products.app.os.remove")
+    unlink_mock = mocker.patch.object(Path, "unlink", return_value=True)
     product_id = "PRD-1234"
     tmp_file = tmp_path / f"{product_id}.xlsx"
     tmp_file.touch()
@@ -336,7 +336,7 @@ def test_export_product_overwrites_existing_files(
     assert result.exit_code == 0, result.stdout
     exists_mock.assert_called_once()
     assert tmp_file.exists()
-    os_remove_mock.assert_called_once()
+    unlink_mock.assert_called_once()
     product_container_mock.product_service().export.assert_called_once()
 
 
