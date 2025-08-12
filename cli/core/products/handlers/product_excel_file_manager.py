@@ -1,3 +1,5 @@
+from types import MappingProxyType
+
 from cli.core.handlers.vertical_tab_file_manager import VerticalTabFileManager
 from cli.core.products.constants import (
     GENERAL_FIELDS,
@@ -16,5 +18,5 @@ class ProductExcelFileManager(VerticalTabFileManager):
     _fields = GENERAL_FIELDS
     _id_field = GENERAL_PRODUCT_ID
     _required_tabs = REQUIRED_TABS
-    _required_fields_by_tab = REQUIRED_FIELDS_BY_TAB
+    _required_fields_by_tab = MappingProxyType(REQUIRED_FIELDS_BY_TAB)
     _sheet_name = TAB_GENERAL

@@ -2,8 +2,7 @@ import re
 from abc import ABC, abstractmethod
 from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Mapping
 
 from cli.core.handlers.excel_file_handler import ExcelFileHandler
 from openpyxl.worksheet.datavalidation import DataValidation

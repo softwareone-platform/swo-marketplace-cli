@@ -61,7 +61,7 @@ def test_check_required_tabs(mocker, file_manager):
 
     file_manager.check_required_tabs()
 
-    check_required_sheet_mock.assert_called_once_with(["Required tab"])
+    check_required_sheet_mock.assert_called_once_with(("Required tab",))
 
 
 def test_check_required_fields_by_section(mocker, file_manager):
@@ -125,7 +125,7 @@ def test_write_error_existing_column(mocker, file_manager):
     file_manager.write_error("fake error message")
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
-        "FakeSheet", ["ID", ERROR_COLUMN_NAME]
+        "FakeSheet", ("ID", ERROR_COLUMN_NAME)
     )
     write_mock.assert_called_with([{"FakeSheet": {"B2": "fake error message"}}])
 
@@ -143,7 +143,7 @@ def test_write_error_missing_column(mocker, file_manager):
     file_manager.write_error("fake error message")
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
-        "FakeSheet", ["ID", ERROR_COLUMN_NAME]
+        "FakeSheet", ("ID", ERROR_COLUMN_NAME)
     )
     get_sheet_next_column_mock.assert_called_once_with("FakeSheet")
     write_mock.assert_has_calls([

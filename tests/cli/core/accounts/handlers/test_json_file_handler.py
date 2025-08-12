@@ -56,7 +56,7 @@ def test_write_creates_directory_if_not_exists(mocker, tmp_path):
     makedirs_mock.assert_called_once_with(Path(file_path).parent, exist_ok=True)
     assert file_path.exists()
 
-    with Path(file_path).open() as f:
+    with open(file_path) as f:
         file_content = json.load(f)
     assert file_content == data
 
@@ -66,7 +66,7 @@ def test_write_writes_correct_data_to_file(json_file_handler, mock_file_path):
 
     json_file_handler.write(data)
 
-    with Path(mock_file_path).open() as f:
+    with open(mock_file_path) as f:
         file_content = json.load(f)
     assert file_content == data
 
@@ -74,12 +74,12 @@ def test_write_writes_correct_data_to_file(json_file_handler, mock_file_path):
 def test_write_add_data_to_existing_file(json_file_handler, mock_file_path):
     initial_data = [{"id": "initial_id", "name": "Initial Name"}]
     updated_data = [{"id": "updated_id", "name": "Updated Name"}]
-    with Path(mock_file_path).open("w") as f:
+    with open(mock_file_path, "w") as f:
         json.dump(initial_data, f)
 
     json_file_handler.write(updated_data)
 
-    with Path(mock_file_path).open() as f:
+    with open(mock_file_path) as f:
         file_content = json.load(f)
     assert file_content == updated_data
 
@@ -89,6 +89,6 @@ def test_write_empty_data(json_file_handler, mock_file_path):
 
     json_file_handler.write(empty_data)
 
-    with Path(mock_file_path).open() as f:
+    with open(mock_file_path) as f:
         file_content = json.load(f)
     assert file_content == empty_data

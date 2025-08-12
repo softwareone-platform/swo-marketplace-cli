@@ -65,7 +65,7 @@ class ExcelFileHandler(FileHandler):
         wb.save(self.file_path)
         wb.close()
 
-    def check_required_sheet(self, required_sheets: list[str]) -> None:
+    def check_required_sheet(self, required_sheets: tuple[str, ...]) -> None:
         """Checks if specified required sheets exist in the workbook.
 
         Args:
@@ -80,7 +80,7 @@ class ExcelFileHandler(FileHandler):
 
     # TODO: Extract the common logic with check_horizontal into a separate method.
     def check_required_fields_in_vertical_sheet(
-        self, sheet_name: str, required_fields: list[str]
+        self, sheet_name: str, required_fields: tuple[str, ...]
     ) -> None:
         """Checks if all required fields are present in a vertical sheet.
 
@@ -154,7 +154,7 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name)[coordinate].value
 
     def get_data_from_horizontal_sheet(
-        self, sheet_name: str, fields: list[str] | None = None
+        self, sheet_name: str, fields: tuple[str, ...] | None = None
     ) -> SheetDataGenerator:
         """Retrieves data from a horizontally oriented sheet.
 
@@ -179,7 +179,7 @@ class ExcelFileHandler(FileHandler):
             }
 
     def get_data_from_vertical_sheet(
-        self, sheet_name: str, fields: list[str] | None = None
+        self, sheet_name: str, fields: tuple[str, ...] | None = None
     ) -> SheetData:
         """Extracts data from a vertical sheet where the first column contains field names.
 
@@ -224,7 +224,7 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: list[str], patterns: list[Pattern[str]]
+        self, sheet_name: str, fields: tuple[str, ...], patterns: list[Pattern[str]]
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure.
 
