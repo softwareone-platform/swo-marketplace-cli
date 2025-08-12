@@ -11,8 +11,6 @@ RetType = TypeVar("RetType")
 class CLIError(Exception):
     """Base exception class for CLI-related errors."""
 
-    pass
-
 
 class MPTAPIError(CLIError):
     """Exception raised when MPT API operations fail."""
@@ -26,6 +24,16 @@ class MPTAPIError(CLIError):
 
 
 def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
+    """Decorator to wrap HTTP request functions and handle RequestException.
+
+    Args:
+        func: The function to be wrapped, which may raise a RequestException.
+
+    Returns:
+        The wrapped function that raises MPTAPIError on HTTP errors.
+
+    """
+
     @wraps(func)
     def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
         try:

@@ -5,5 +5,3 @@ from cli.core.products.services.related_components_base_service import (
 
 class ItemGroupService(RelatedComponentsBaseService):
     """Service for managing item group operations."""
-
-    pass

@@ -37,6 +37,16 @@ def export(
         ),
     ] = None,
 ):
+    """Export products to Excel files.
+
+    Args:
+        product_ids: List of product IDs to export.
+        out_path: Output directory path. Defaults to current working directory.
+
+    Raises:
+        typer.Exit: With code 4 if account is not operations, code 3 if export fails.
+
+    """
     account_container = AccountContainer()
     active_account = account_container.account()
     if not active_account.is_operations():
@@ -102,7 +112,13 @@ def list_products(
         typer.Option("--query", "-q", help="RQL Query to filter products list"),
     ] = None,
 ):
-    """List available products from SoftwareOne Marketplace."""
+    """List available products from SoftwareOne Marketplace.
+
+    Args:
+        page_size: Number of products to display per page.
+        rql_query: RQL query string to filter products.
+
+    """
     active_account = get_active_account()
 
     has_pages = True
@@ -148,7 +164,17 @@ def sync_product(
         ),
     ] = False,
 ):
-    """Sync product to the environment."""
+    """Sync product to the environment.
+
+    Args:
+        product_path: Path to the product definition file.
+        is_dry_run: Whether to only validate the file without syncing.
+        force_create: Whether to force create product even if it exists.
+
+    Raises:
+        typer.Exit: With code 3 if validation fails or sync errors occur.
+
+    """
     container = ProductContainer(file_path=str(product_path))
     product_service = container.product_service()
     result = product_service.validate_definition()
@@ -196,6 +222,13 @@ def sync_product(
 
 
 def create_product(container, status):
+    """Create a new product with all its components.
+
+    Args:
+        container: The product container instance.
+        status: The status object used to display progress updates.
+
+    """
     status.update("Create product...")
     result = container.product_service().create()
     if not result.success or result.model is None:

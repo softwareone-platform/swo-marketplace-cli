@@ -28,6 +28,15 @@ def sync_price_lists(
         typer.Argument(help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"),
     ],
 ):
+    """Sync price lists to the environment from Excel definition files.
+
+    Args:
+        pricelists_paths: List of paths to price list definition files to sync.
+
+    Raises:
+        typer.Exit: With code 3 if no files found, code 4 if sync fails.
+
+    """
     with console.status("Fetching price list files..."):
         file_paths = get_files_path(pricelists_paths)
 
@@ -115,6 +124,16 @@ def export(
         ),
     ] = None,
 ):
+    """Export price lists to Excel files.
+
+    Args:
+        price_list_ids: List of price list IDs to export.
+        out_path: Output directory path. Defaults to current working directory.
+
+    Raises:
+        typer.Exit: With code 4 if account is not operations or export fails.
+
+    """
     active_account = get_active_account()
     if not active_account.is_operations():
         console.print(

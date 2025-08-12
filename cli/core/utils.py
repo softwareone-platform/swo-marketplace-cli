@@ -4,8 +4,18 @@ from typing import Any
 
 
 def set_dict_value(original_dict: dict[str, Any], path: str, value: Any) -> dict[str, Any]:
-    path_list = path.split(".", 1)
+    """Set a value in a nested dictionary using a dot-separated path.
 
+    Args:
+        original_dict: The dictionary to update.
+        path: Dot-separated string representing the nested keys.
+        value: The value to set at the specified path.
+
+    Returns:
+        The updated dictionary with the value set at the given path.
+
+    """
+    path_list = path.split(".", 1)
     if len(path_list) == 1:
         original_dict[path_list[0]] = value
     else:
@@ -19,6 +29,15 @@ def set_dict_value(original_dict: dict[str, Any], path: str, value: Any) -> dict
 
 
 def get_files_path(files_path: list[str]) -> list[str]:
+    """Get all .xlsx file paths from a list of files or directories.
+
+    Args:
+        files_path: List of file or directory paths.
+
+    Returns:
+        List of .xlsx file paths found in the given paths.
+
+    """
     file_paths = []
 
     for file_path in files_path:

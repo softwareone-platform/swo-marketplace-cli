@@ -1,4 +1,5 @@
 import json
+from typing import override
 
 from cli.core.errors import MPTAPIError
 from cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
@@ -7,7 +8,6 @@ from cli.core.products.models import DataActionEnum, SettingsData
 from cli.core.services.base_service import BaseService
 from cli.core.services.service_result import ServiceResult
 from requests_toolbelt import MultipartEncoder  # type: ignore
-from typing_extensions import override
 
 
 class ProductService(BaseService):

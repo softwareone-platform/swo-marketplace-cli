@@ -27,11 +27,23 @@ except PackageNotFoundError:  # pragma: no cover
 __version__ = VERSION
 
 
-def get_version():
+def get_version() -> str:
+    """Get the current CLI version.
+
+    Returns:
+        The version string of the CLI.
+
+    """
     return __version__
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:
+    """Callback to display the CLI version and exit if requested.
+
+    Args:
+        value: If True, prints the version and exits.
+
+    """
     if value:
         console.print(f"version: {get_version()}")
         raise typer.Exit()
@@ -59,7 +71,15 @@ def main(
             dir_okay=False,
         ),
     ] = None,
-):
+) -> None:
+    """Main callback for the CLI application.
+
+    Args:
+        version: If True, displays the CLI version and exits.
+        verbose: Enables verbose mode with console output.
+        log_file: File path for debug logs, disables console output if set.
+
+    """
     if verbose and log_file:
         console.print("[red]Error: Cannot use both --verbose and --log-file together[/]")
         raise typer.Exit(1)
