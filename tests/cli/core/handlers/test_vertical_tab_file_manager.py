@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any, Self
 from unittest.mock import Mock, call
 
@@ -31,10 +32,10 @@ class FakeDataModel(BaseDataModel):
 class FakeVerticalTabFileManager(VerticalTabFileManager):
     _file_handler = Mock()
     _data_model = FakeDataModel
-    _fields = ["ID", "field1"]
+    _fields = ("ID", "field1")
     _id_field = "ID"
-    _required_tabs = ["Required tab"]
-    _required_fields_by_tab = {"FakeSheet": ["ID"]}
+    _required_tabs = ("Required tab",)
+    _required_fields_by_tab = MappingProxyType({"FakeSheet": ["ID"]})
     _sheet_name = "FakeSheet"
 
 

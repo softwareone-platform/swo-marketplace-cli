@@ -1,5 +1,5 @@
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
 from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
@@ -23,9 +23,9 @@ class PriceListData(BaseDataModel):
     coordinate: str | None = None
     default_markup: float | None = None
     external_id: str | None = None
-    export_date: date = field(default_factory=date.today)
-    created_date: date | None = None
-    updated_date: date | None = None
+    export_date: dt.date = field(default_factory=dt.date.today)
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
     # TODO: review this attr. Type depends on the account type, should we split into
     # operation and vendor model?
     type: str | None = None

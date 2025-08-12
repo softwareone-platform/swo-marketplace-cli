@@ -1,5 +1,5 @@
+import datetime as dt
 from dataclasses import dataclass
-from datetime import date
 from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
@@ -21,8 +21,8 @@ class TemplateData(BaseDataModel, ActionMixin):
 
     coordinate: str | None = None
     content_coordinate: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @classmethod
     @override

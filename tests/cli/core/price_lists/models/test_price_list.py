@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.price_lists.models import PriceListData
 from freezegun import freeze_time
@@ -13,7 +13,7 @@ def test_price_list_data_from_dict(price_list_file_data):
     assert result.product_name == "Test Product Name"
     assert result.vendor_id == "fake_vendor_id"
     assert result.vendor_name == "Test Vendor Name"
-    assert result.export_date == date(2024, 6, 1)
+    assert result.export_date == dt.date(2024, 6, 1)
     assert result.precision == 2
     assert result.notes == "Test notes"
     assert result.coordinate == "B3"
@@ -34,7 +34,7 @@ def test_price_list_data_from_json(mpt_price_list_data):
     assert result.product_name == "Adobe VIP Marketplace for Commercial"
     assert result.vendor_id == "ACC-9226-9856"
     assert result.vendor_name == "Adobe"
-    assert result.export_date == date(2025, 4, 23)
+    assert result.export_date == dt.date(2025, 4, 23)
     assert result.precision == 2
     assert result.notes == "another price list"
     assert result.coordinate is None

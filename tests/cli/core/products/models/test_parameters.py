@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 import pytest
 from cli.core.products.constants import (
@@ -100,8 +100,8 @@ def test_parameters_data_from_json(mpt_agreement_parameter_data):
     }
     assert result.group_id == "PGR-0232-2541-0002"
     assert result.group_id_coordinate is None
-    assert result.created_date == date(2024, 3, 19)
-    assert result.updated_date == date(2024, 3, 19)
+    assert result.created_date == dt.date(2024, 3, 19)
+    assert result.updated_date == dt.date(2024, 3, 19)
 
 
 def test_parameters_data_to_json(parameters_data_from_dict):
@@ -187,8 +187,8 @@ def test_parameters_data_to_xlsx(parameters_data_from_json):
         'this option."}], "defaultValue": "New", "hintText": "Some hint '
         'text"}',
         PARAMETERS_CONSTRAINTS: '{"hidden": false, "readonly": false, "required": true}',
-        PARAMETERS_CREATED: date(2024, 3, 19),
-        PARAMETERS_MODIFIED: date(2024, 3, 19),
+        PARAMETERS_CREATED: dt.date(2024, 3, 19),
+        PARAMETERS_MODIFIED: dt.date(2024, 3, 19),
     }
 
 

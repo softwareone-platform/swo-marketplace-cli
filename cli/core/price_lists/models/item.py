@@ -1,5 +1,5 @@
+import datetime as dt
 from dataclasses import dataclass
-from datetime import date
 from enum import StrEnum
 from typing import Any, Self, override
 
@@ -52,7 +52,7 @@ class ItemData(BaseDataModel):
     lp_x1: float | None = None
     lp_xm: float | None = None
     lp_xy: float | None = None
-    modified_date: date | None = None
+    modified_date: dt.date | None = None
     precision: int | None = None
     pp_x1: float | None = None
     pp_xm: float | None = None

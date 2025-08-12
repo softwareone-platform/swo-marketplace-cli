@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.products.constants import (
     GENERAL_ACCOUNT_ID,
@@ -54,10 +54,10 @@ def test_product_data_from_json(mpt_product_data):
         "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
     )
     assert result.website == "https://www.adobe.com/"
-    assert result.export_date == date(2025, 5, 30)
+    assert result.export_date == dt.date(2025, 5, 30)
     assert result.status == "Unpublished"
-    assert result.created_date == date(2024, 3, 19)
-    assert result.updated_date == date(2025, 6, 3)
+    assert result.created_date == dt.date(2024, 3, 19)
+    assert result.updated_date == dt.date(2025, 6, 3)
     assert result.settings is not None
 
 
@@ -90,10 +90,10 @@ def test_product_to_xlsx(product_data_from_json):
         GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
         GENERAL_ACCOUNT_ID: "ACC-9226-9856",
         GENERAL_ACCOUNT_NAME: "Adobe",
-        GENERAL_EXPORT_DATE: date(2025, 5, 30),
+        GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
         GENERAL_STATUS: "Unpublished",
-        GENERAL_CREATED: date(2024, 3, 19),
-        GENERAL_MODIFIED: date(2025, 6, 3),
+        GENERAL_CREATED: dt.date(2024, 3, 19),
+        GENERAL_MODIFIED: dt.date(2025, 6, 3),
     }
 
 

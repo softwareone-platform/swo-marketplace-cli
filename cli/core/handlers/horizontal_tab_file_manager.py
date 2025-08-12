@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from collections.abc import Generator
-from typing import Any, Generic, TypeVar
+from typing import Any, ClassVar, Generic, TypeVar, Mapping
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
@@ -19,10 +19,10 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
     """
 
     _data_model: type[DataModel]
-    _fields: list[str]
+    _fields: tuple[str, ...]
     _id_field: str
-    _required_tabs: list[str]
-    _required_fields_by_tab: dict[str, Any]
+    _required_tabs: tuple[str, ...]
+    _required_fields_by_tab: ClassVar[Mapping[str, Any]]
     _sheet_name: str
 
     def add(self, items: list[DataModel]) -> None:
@@ -85,7 +85,7 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
         item_row = [
             row
             for row in self.file_handler.get_data_from_horizontal_sheet(
-                self._sheet_name, [self._id_field, ERROR_COLUMN_NAME]
+                self._sheet_name, (self._id_field, ERROR_COLUMN_NAME)
             )
             if row[self._id_field]["value"] == resource_id
         ][0]

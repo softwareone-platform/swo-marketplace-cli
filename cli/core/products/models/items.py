@@ -1,5 +1,5 @@
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
 from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
@@ -34,8 +34,8 @@ class ItemData(BaseDataModel, ItemActionMixin):
     status: str | None = None
     unit_coordinate: str | None = None
     unit_name: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @property
     def external_ids(self):

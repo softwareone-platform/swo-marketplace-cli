@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.products.constants import (
     TEMPLATES_ACTION,
@@ -37,8 +37,8 @@ def test_template_data_from_json(mpt_template_data):
         "we are working on your order."
     )
     assert result.default is False
-    assert result.created_date == date(2024, 4, 8)
-    assert result.updated_date == date(2024, 5, 3)
+    assert result.created_date == dt.date(2024, 4, 8)
+    assert result.updated_date == dt.date(2024, 5, 3)
 
 
 def test_template_data_to_json(template_data_from_dict):
@@ -93,6 +93,6 @@ def test_template_to_xlsx(template_data_from_json):
             "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while we "
             "are working on your order."
         ),
-        TEMPLATES_CREATED: date(2024, 4, 8),
-        TEMPLATES_MODIFIED: date(2024, 5, 3),
+        TEMPLATES_CREATED: dt.date(2024, 4, 8),
+        TEMPLATES_MODIFIED: dt.date(2024, 5, 3),
     }

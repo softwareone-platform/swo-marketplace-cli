@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.products.constants import (
     ITEMS_GROUPS_ACTION,
@@ -41,7 +41,7 @@ def test_item_group_data_from_json(mpt_item_group_data):
     assert result.default is True
     assert result.multiple is True
     assert result.required is True
-    assert result.created_date == date(2024, 3, 19)
+    assert result.created_date == dt.date(2024, 3, 19)
     assert result.updated_date is None
 
 
@@ -80,6 +80,6 @@ def test_item_group_to_xlsx(item_group_data_from_json):
         ITEMS_GROUPS_DEFAULT: "True",
         ITEMS_GROUPS_MULTIPLE_CHOICES: "True",
         ITEMS_GROUPS_REQUIRED: "True",
-        ITEMS_GROUPS_CREATED: date(2024, 3, 19),
+        ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
         ITEMS_GROUPS_MODIFIED: None,
     }

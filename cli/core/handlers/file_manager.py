@@ -1,7 +1,9 @@
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from pathlib import Path
 from typing import Any
+from typing import Any, ClassVar
 
 from cli.core.handlers.excel_file_handler import ExcelFileHandler
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -15,7 +17,7 @@ class ExcelFileManager(ABC):
     """
 
     _sheet_name: str
-    _data_validation_map: dict[str, DataValidation] = {}
+    _data_validation_map: ClassVar[Mapping[str, DataValidation]] = {}
 
     @property
     def tab_name(self) -> str:

@@ -1,5 +1,5 @@
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
 from pathlib import Path
 from typing import Any, Self, override
 
@@ -126,11 +126,11 @@ class ProductData(BaseDataModel):
     account_id: str | None = None
     account_name: str | None = None
     coordinate: str | None = None
-    export_date: date = field(default_factory=date.today)
+    export_date: dt.date = field(default_factory=dt.date.today)
     icon: bytes | None = None
     status: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @classmethod
     @override

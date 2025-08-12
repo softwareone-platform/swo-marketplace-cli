@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from types import MappingProxyType
 from typing import Any, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
@@ -19,7 +20,7 @@ class SettingsExcelFileManager(HorizontalTabFileManager):
     _fields = SETTINGS_FIELDS
     _id_field = SETTINGS_SETTING
     _sheet_name = TAB_SETTINGS
-    _data_validation_map = {SETTINGS_ACTION: ACTION_DATA_VALIDATION}
+    _data_validation_map = MappingProxyType({SETTINGS_ACTION: ACTION_DATA_VALIDATION})
 
     @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:

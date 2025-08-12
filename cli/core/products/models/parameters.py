@@ -1,7 +1,7 @@
+import datetime as dt
 import json
 from abc import ABC
 from dataclasses import dataclass
-from datetime import date
 from enum import StrEnum
 from typing import Any, Self, TypeVar, override
 
@@ -42,8 +42,8 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
     group_id_coordinate: str | None = None
     group_name: str | None = None
     scope: ParamScopeEnum | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @property
     def group(self) -> dict[str, Any] | None:

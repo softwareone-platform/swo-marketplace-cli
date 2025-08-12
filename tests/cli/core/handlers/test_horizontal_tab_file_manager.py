@@ -1,6 +1,7 @@
 from collections.abc import Generator
 from dataclasses import dataclass
-from typing import Any, Self
+from types import MappingProxyType
+from typing import Any, ClassVar, Self, override
 from unittest import mock
 from unittest.mock import MagicMock, Mock, call
 
@@ -38,13 +39,14 @@ class FakeDataModel(BaseDataModel):
 class FakeHorizontalTabFileManager(HorizontalTabFileManager):
     _file_handler = Mock()
     _data_model = FakeDataModel
-    _fields = ["ID", "styled_field", "field2"]
+    _fields = ("ID", "styled_field", "field2")
     _id_field = "ID"
-    _required_tabs = ["Required tab"]
-    _required_fields_by_tab = {"FakeTab": "ID"}
+    _required_tabs = ("Required tab",)
+    _required_fields_by_tab: ClassVar[dict[str, Any]] = {"FakeTab": "ID"}
     _sheet_name = "FakeSheet"
-    _data_validation_map = {"field2": Mock(spec=DataValidation)}
+    _data_validation_map = MappingProxyType({"field2": Mock(spec=DataValidation)})
 
+    @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         yield {"ID": "fake_id", "styled_field": 22.5, "field2": "fake field value"}
 

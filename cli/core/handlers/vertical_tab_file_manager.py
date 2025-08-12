@@ -1,4 +1,5 @@
-from typing import Any, Generic
+from collections.abc import Mapping
+from typing import Any, ClassVar, Generic
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import general_tab_title_style
@@ -15,10 +16,10 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
     """
 
     _data_model: type[DataModel]
-    _fields: list[str]
+    _fields: tuple[str, ...]
     _id_field: str
-    _required_tabs: list[str]
-    _required_fields_by_tab: dict[str, Any]
+    _required_tabs: tuple[str, ...]
+    _required_fields_by_tab: ClassVar[Mapping[str, Any]]
     _sheet_name: str
 
     def add(self, data_model: DataModel) -> None:
@@ -84,7 +85,7 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
             error: The error message to write.
             resource_id: Resource id related to the error.
         """
-        data = self._read_data([self._id_field, ERROR_COLUMN_NAME])
+        data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
         try:
             coordinate = data[ERROR_COLUMN_NAME]["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
@@ -96,5 +97,5 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
 
-    def _read_data(self, fields: list[str]) -> dict[str, Any]:
+    def _read_data(self, fields: tuple[str, ...]) -> dict[str, Any]:
         return self.file_handler.get_data_from_vertical_sheet(self._sheet_name, fields)

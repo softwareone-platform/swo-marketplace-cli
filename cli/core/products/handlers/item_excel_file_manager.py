@@ -1,5 +1,6 @@
 import re
 from collections.abc import Generator
+from types import MappingProxyType
 from typing import Any, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
@@ -26,10 +27,10 @@ class ItemExcelFileManager(HorizontalTabFileManager):
     _fields = ITEMS_FIELDS
     _id_field = ITEMS_ID
     _sheet_name = TAB_ITEMS
-    _data_validation_map = {
+    _data_validation_map = MappingProxyType({
         ITEMS_ACTION: ITEMS_ACTION_DATA_VALIDATION,
         ITEMS_TERMS_MODEL: TERMS_MODEL_DATA_VALIDATION,
-    }
+    })
 
     @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
