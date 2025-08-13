@@ -27,7 +27,7 @@ def test_get_row_and_column_from_coordinate_invalid():
 
 def test_write_ids(mocker):
     file_handler_spy = mocker.patch.object(ExcelFileHandler, "write")
-    file_manager = FakeExcelFileManager("/tmp/fake.xlsx")
+    file_manager = FakeExcelFileManager("/tmp/fake.xlsx")  # noqa: S108
 
     file_manager.write_ids({"A1": "12345"})
 
