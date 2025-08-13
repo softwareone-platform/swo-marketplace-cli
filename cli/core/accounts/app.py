@@ -177,7 +177,7 @@ def _account_table(title: str) -> Table:
     return table
 
 
-def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = True) -> Table:
+def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = True) -> Table:  # noqa: C901
     def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
         match account_type:
             case "Vendor":

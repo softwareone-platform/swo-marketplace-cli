@@ -22,7 +22,7 @@ app = typer.Typer()
 
 
 @app.command(name="sync")
-def sync_price_lists(
+def sync_price_lists(  # noqa: C901
     pricelists_paths: Annotated[
         list[str],
         typer.Argument(help="Path to Price lists definition files", metavar="PRICELISTS-PATHS"),
@@ -110,7 +110,7 @@ def sync_price_lists(
 
 
 @app.command("export")
-def export(
+def export(  # noqa: C901
     price_list_ids: Annotated[
         list[str],
         typer.Argument(help="List of price lists IDs to export"),

@@ -23,7 +23,7 @@ def _offset_by_page(page: int, limit: int) -> int:
 
 
 @app.command("export")
-def export(
+def export(  # noqa: C901
     product_ids: Annotated[
         list[str],
         typer.Argument(help="List of product IDs to export"),
@@ -333,7 +333,7 @@ def _products_table(title: str) -> Table:
 
 
 # TODO: move to to_table()
-def _list_products(table: Table, products: list[MPTProduct]) -> Table:
+def _list_products(table: Table, products: list[MPTProduct]) -> Table:  # noqa: C901
     def _wrap_product_status(status: str) -> str:  # pragma: no cover
         match status:
             case "Draft":
