@@ -124,8 +124,9 @@ class ProductService(BaseService):
         )
         items = []
         for setting_data in settings_excel_file_manager.read_data():
-            # type: ignore[attr-defined]
-            items.extend(item for item in setting_data.items if item.action == DataActionEnum.UPDATE)
+            for item in setting_data.items:  # type: ignore[attr-defined]
+                if item.action == DataActionEnum.UPDATE:
+                    items.append(item)
 
         try:
             self.api.update(product.id, SettingsData(items=items).to_json())
