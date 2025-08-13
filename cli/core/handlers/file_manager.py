@@ -27,15 +27,12 @@ class ExcelFileManager(ABC):
 
     @abstractmethod
     def create_tab(self) -> None:
-        """
-        Creates a new tab (worksheet) in the Excel file.
-        """
+        """Creates a new tab (worksheet) in the Excel file."""
         raise NotImplementedError
 
     @abstractmethod
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the Excel file.
+        """Writes an error message to the Excel file.
 
         Args:
             error: The error message to write.
@@ -44,8 +41,7 @@ class ExcelFileManager(ABC):
         raise NotImplementedError
 
     def write_ids(self, data: dict[str, Any]) -> None:
-        """
-        Writes the IDs into the managed sheet.
+        """Writes the IDs into the managed sheet.
 
         Args:
             data: A dict where each key is a cell coordinate (e.g., 'A1') as each value is
@@ -55,8 +51,7 @@ class ExcelFileManager(ABC):
 
     @staticmethod
     def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:
-        """
-        Parses an Excel cell coordinate and returns its column letter and row number.
+        """Parses an Excel cell coordinate and returns its column letter and row number.
 
         Args:
             coordinate: The cell coordinate (e.g., 'A1').

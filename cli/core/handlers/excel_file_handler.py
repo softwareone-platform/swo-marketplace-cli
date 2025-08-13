@@ -55,9 +55,7 @@ class ExcelFileHandler(FileHandler):
         return Path(file_path).with_suffix(".xlsx")
 
     def create(self):
-        """
-        Creates a new Excel workbook and saves it to the file_path.
-        """
+        """Creates a new Excel workbook and saves it to the file_path."""
         wb = openpyxl.Workbook()
         # Change the default sheet name by General
         wb.active.title = "General"

@@ -36,9 +36,7 @@ def add_account(
         str, typer.Option("--environment", "-e", help="URL to the API for environment")
     ] = "https://api.platform.softwareone.com/public/v1",
 ):
-    """
-    Add an account to work with the SoftwareOne Marketplace
-    """
+    """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
         mpt_client = MPTClient(environment, secret, debug=state.verbose)

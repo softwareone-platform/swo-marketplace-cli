@@ -23,9 +23,7 @@ def account_container_mock(mocker, operations_account):
 
 @pytest.fixture
 def requests_mocker():
-    """
-    Allow mocking of http calls made with requests.
-    """
+    """Allow mocking of http calls made with requests."""
     with responses.RequestsMock() as rsps:
         yield rsps
 
