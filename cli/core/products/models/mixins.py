@@ -43,7 +43,7 @@ class ActionMixin:
         Returns:
             True if the object should be skipped, False otherwise.
         """
-        return self.action in (DataActionEnum.SKIP, DataActionEnum.SKIPPED)
+        return self.action in {DataActionEnum.SKIP, DataActionEnum.SKIPPED}
 
 
 @dataclass

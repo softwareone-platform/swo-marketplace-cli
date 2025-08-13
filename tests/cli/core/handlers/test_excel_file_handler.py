@@ -47,9 +47,7 @@ def excel_file_handler(tmp_path, workbook):
     workbook.save(file_path)
 
     with patch("cli.core.handlers.excel_file_handler.load_workbook", return_value=workbook):
-        handler = ExcelFileHandler(file_path)
-
-    return handler
+        return ExcelFileHandler(file_path)
 
 
 @pytest.mark.parametrize(

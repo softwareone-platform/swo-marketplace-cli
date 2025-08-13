@@ -3,7 +3,7 @@ from typing import Any
 
 from cli.core.errors import MPTAPIError, wrap_http_error
 from cli.core.mpt.client import MPTClient
-from cli.core.mpt.models import Meta, BaseModel
+from cli.core.mpt.models import BaseModel, Meta
 
 
 class APIService[APIModel: BaseModel](ABC):

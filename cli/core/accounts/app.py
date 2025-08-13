@@ -195,10 +195,7 @@ def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool =
     def _wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
         is_new_token = "idt:TKN-" in account.token
 
-        if is_new_token:
-            token = account.token
-        else:
-            token = f"{account.token_id}:{account.token}"
+        token = account.token if is_new_token else f"{account.token_id}:{account.token}"
 
         if to_wrap_secret:
             if is_new_token:

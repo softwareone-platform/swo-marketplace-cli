@@ -3,9 +3,8 @@ from collections.abc import Generator
 from types import MappingProxyType
 from typing import Any, override
 
-from cli.core.models import BaseDataModel
-
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
+from cli.core.models import BaseDataModel
 from cli.core.products.constants import (
     PARAMETERS_ACTION,
     PARAMETERS_FIELDS,

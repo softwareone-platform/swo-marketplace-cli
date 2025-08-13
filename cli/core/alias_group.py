@@ -32,6 +32,7 @@ class AliasTyperGroup(TyperGroup):
             return click.Group.get_command(self, ctx, matches[0])
 
         ctx.fail(f"Too many matches: {', '.join(sorted(matches))}")
+        return None
 
     def resolve_command(
         self, ctx: click.Context, args: list[str]

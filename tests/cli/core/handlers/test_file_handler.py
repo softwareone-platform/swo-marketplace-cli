@@ -1,7 +1,6 @@
 from pathlib import Path
 
 import pytest
-
 from cli.core.handlers import FileHandler
 
 
@@ -17,7 +16,7 @@ class FakeFileHandler(FileHandler):
 
 
 @pytest.mark.parametrize(
-    "exists, expected_response",
+    ("exists", "expected_response"),
     [
         (True, True),
         (False, False),

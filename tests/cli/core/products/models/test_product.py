@@ -41,7 +41,7 @@ def test_product_data_from_json(mpt_product_data):
     assert result.account_id == "ACC-9226-9856"
     assert result.account_name == "Adobe"
     assert result.short_description == (
-        "Adobe’s groundbreaking innovations empower everyone, everywhere to imagine, "
+        "Adobe's groundbreaking innovations empower everyone, everywhere to imagine, "
         "create, and bring any digital experience to life."
     )
     assert result.long_description == (
@@ -78,7 +78,7 @@ def test_product_to_xlsx(product_data_from_json):
     assert result == {
         GENERAL_PRODUCT_ID: "PRD-0232-2541",
         GENERAL_PRODUCT_NAME: "Adobe VIP Marketplace for Commercial",
-        GENERAL_CATALOG_DESCRIPTION: "Adobe’s groundbreaking innovations empower everyone, "
+        GENERAL_CATALOG_DESCRIPTION: "Adobe's groundbreaking innovations empower everyone, "
         "everywhere to imagine, create, and bring any digital experience to life.",
         GENERAL_PRODUCT_DESCRIPTION: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53M"
         "y5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"

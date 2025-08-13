@@ -1,6 +1,7 @@
 import logging
 
 from cli.core.accounts.models import Account
+from cli.core.state import state
 from cli.swocli import app
 from typer.testing import CliRunner
 
@@ -33,7 +34,7 @@ def test_verbose_flag_enables_logging(caplog, requests_mocker):
                 "description": "Token for testing purposes",
                 "icon": "",
                 "lastAccessAt": "2024-03-15T10:00:00.000Z",
-                "token": "idt:TKN-1234-5678:abc123",  # noqa: S106
+                "token": "idt:TKN-1234-5678:abc123",
                 "account": {
                     "id": "ACC-8765-4321",
                     "href": "/accounts/accounts/ACC-8765-4321",
@@ -121,7 +122,6 @@ def test_log_file_creates_parent_directories(tmp_path, mocker):
 
 def test_verbose_mode_propagates_to_client(mocker):
     mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
-    from cli.core.state import state
 
     result = runner.invoke(app, ["--verbose", "accounts", "list"])
 

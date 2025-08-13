@@ -1,5 +1,5 @@
 from functools import partial
-from typing import ClassVar, Any
+from typing import Any, ClassVar
 
 from cli.core.accounts.containers import AccountContainer
 from cli.core.products.api import (

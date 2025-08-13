@@ -34,9 +34,7 @@ class JsonFileHandler(FileHandler):
             self.create()
 
         with Path(self.file_path).open() as f:
-            data = json.load(f)
-
-        return data
+            return json.load(f)
 
     def write(self, data: list[dict[str, Any]]) -> None:
         """Writes data to a file in JSON format.

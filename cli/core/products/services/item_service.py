@@ -89,7 +89,7 @@ class ItemService(RelatedComponentsBaseService):
         super()._action_update_item(data_model)
 
     def _get_update_action_handler(self, model_action: DataActionEnum) -> Callable:
-        if model_action in (ItemActionEnum.REVIEW, ItemActionEnum.PUBLISH):
+        if model_action in {ItemActionEnum.REVIEW, ItemActionEnum.PUBLISH}:
             return self._action_post_action_item
 
         return super()._get_update_action_handler(model_action)

@@ -1,4 +1,3 @@
-from types import MappingProxyType
 from typing import Any
 
 ERROR_COLUMN_NAME = "Error"

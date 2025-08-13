@@ -98,10 +98,10 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
             True if the phase is 'Order' and the scope is not ITEM or REQUEST, False otherwise.
 
         """
-        return self.phase == "Order" and self.scope not in (
+        return self.phase == "Order" and self.scope not in {
             ParamScopeEnum.ITEM,
             ParamScopeEnum.REQUEST,
-        )
+        }
 
     @override
     def to_json(self) -> dict[str, Any]:

@@ -60,7 +60,7 @@ def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_pr
         json=mpt_products_response,
     )
 
-    meta, products = get_products(mpt_client, 10, 0)
+    _meta, products = get_products(mpt_client, 10, 0)
 
     assert products == [Product.model_validate(p) for p in mpt_products]
 

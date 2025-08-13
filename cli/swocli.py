@@ -46,7 +46,7 @@ def version_callback(value: bool) -> None:  # noqa: FBT001
     """
     if value:
         console.print(f"version: {get_version()}")
-        raise typer.Exit()
+        raise typer.Exit
 
 
 @app.callback()

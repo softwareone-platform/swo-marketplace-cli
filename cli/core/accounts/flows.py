@@ -66,6 +66,6 @@ def find_active_account(accounts: list[Account]) -> Account:
     """Return an active account."""
     account = next((a for a in accounts if a.is_active), None)
     if not account:
-        raise NoActiveAccountFoundError()
+        raise NoActiveAccountFoundError
 
     return account

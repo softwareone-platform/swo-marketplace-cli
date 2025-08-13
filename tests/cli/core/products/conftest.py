@@ -206,7 +206,7 @@ def mpt_product_data():
     return {
         "id": "PRD-0232-2541",
         "name": "Adobe VIP Marketplace for Commercial",
-        "shortDescription": "Adobe’s groundbreaking innovations empower everyone, everywhere "
+        "shortDescription": "Adobe's groundbreaking innovations empower everyone, everywhere "
         "to imagine, create, and bring any digital experience to life.",
         "longDescription": "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwM"
         "C9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"

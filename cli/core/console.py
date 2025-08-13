@@ -30,7 +30,7 @@ def show_banner() -> None:
     banner_text = figlet.renderText(program_name)
 
     banner_lines = [Text(line) for line in banner_text.splitlines()]
-    max_line_length = max([len(line) for line in banner_lines])
+    max_line_length = max(len(line) for line in banner_lines)
     half_length = max_line_length // 2
 
     colors = _gradient("#00C9CD", "#472AFF", half_length) + _gradient(

@@ -3,10 +3,9 @@ from abc import ABC
 from collections.abc import Callable
 from typing import override
 
-from cli.core.models.data_model import BaseDataModel as DataModel
-
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
+from cli.core.models.data_model import BaseDataModel as DataModel
 from cli.core.products.models import DataActionEnum
 from cli.core.services import RelatedBaseService
 from cli.core.services.service_result import ServiceResult

@@ -1,6 +1,6 @@
 from abc import abstractmethod
-from collections.abc import Generator
-from typing import Any, ClassVar, Mapping
+from collections.abc import Generator, Mapping
+from typing import Any, ClassVar
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
@@ -80,13 +80,13 @@ class HorizontalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
             error: The error message to write.
             resource_id: Resource id related to the error.
         """
-        item_row = [
+        item_row = next(
             row
             for row in self.file_handler.get_data_from_horizontal_sheet(
                 self._sheet_name, (self._id_field, ERROR_COLUMN_NAME)
             )
             if row[self._id_field]["value"] == resource_id
-        ][0]
+        )
         try:
             coordinate = item_row[ERROR_COLUMN_NAME]["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)

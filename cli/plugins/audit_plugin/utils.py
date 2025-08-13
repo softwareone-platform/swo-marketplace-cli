@@ -27,7 +27,7 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     if not is_valid_path(path):
         return path
 
-    array_path, rest = path.split("]", 1)
+    array_path, _rest = path.split("]", 1)
     base_path, index_str = array_path.split("[")
     index = int(index_str)
 
