@@ -1,14 +1,10 @@
 from dataclasses import dataclass, field
-from typing import Generic, TypeVar
 
-from cli.core.models.data_model import DataCollectionModel, DataModel
-from cli.core.stats import StatsCollector
-
-Stats = TypeVar("Stats", bound=StatsCollector)
+from cli.core.models.data_model import DataCollectionModel
 
 
 @dataclass(frozen=True)
-class ServiceResult(Generic[DataModel, Stats]):
+class ServiceResult[DataModel, StatsCollector]:
     """
     Represents the result of a service operation.
 
@@ -21,7 +17,7 @@ class ServiceResult(Generic[DataModel, Stats]):
     """
 
     success: bool
-    stats: Stats
+    stats: StatsCollector
     model: DataModel | None
 
     errors: list[str] = field(default_factory=list)

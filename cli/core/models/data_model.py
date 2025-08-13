@@ -1,9 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Generic, Self, TypeVar
-
-DataModel = TypeVar("DataModel", bound="BaseDataModel")
-type CollectionModel[DataModel] = dict[str, DataModel]
+from typing import Any, Self
 
 
 @dataclass
@@ -60,12 +57,12 @@ class BaseDataModel(ABC):
 
 
 @dataclass
-class DataCollectionModel(Generic[DataModel]):
+class DataCollectionModel[DataModel]:
     """Generic collection model for managing groups of data models."""
 
-    collection: CollectionModel
+    collection: dict[str, DataModel]
 
-    def add(self, collection: CollectionModel) -> None:
+    def add(self, collection: dict[str, DataModel]) -> None:
         """Add items from another collection to this collection.
 
         Args:

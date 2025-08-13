@@ -1,10 +1,11 @@
 from abc import ABC
 from collections.abc import Generator
 from types import MappingProxyType
-from typing import Any, Generic, override
+from typing import Any, override
+
+from cli.core.models import BaseDataModel
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
-from cli.core.models.data_model import DataModel
 from cli.core.products.constants import (
     PARAMETERS_ACTION,
     PARAMETERS_FIELDS,
@@ -23,7 +24,7 @@ from cli.core.products.models import (
 )
 
 
-class ParametersExcelFileManager(HorizontalTabFileManager, ABC, Generic[DataModel]):
+class ParametersExcelFileManager[DataModel: BaseDataModel](HorizontalTabFileManager, ABC):
     """Excel file manager for parameter data operations."""
 
     _data_model: type[DataModel]

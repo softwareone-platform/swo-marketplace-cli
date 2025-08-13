@@ -2,7 +2,7 @@ from collections.abc import Callable
 from typing import Any, cast, override
 
 from cli.core.models import DataCollectionModel
-from cli.core.models.data_model import DataModel
+from cli.core.models.data_model import BaseDataModel as DataModel
 from cli.core.mpt.flows import search_uom_by_name
 from cli.core.products.models import DataActionEnum, ItemActionEnum, ItemData
 from cli.core.products.services.related_components_base_service import (

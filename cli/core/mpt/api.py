@@ -1,15 +1,12 @@
 from abc import ABC
-from typing import Any, Generic, TypeVar
+from typing import Any
 
 from cli.core.errors import MPTAPIError, wrap_http_error
 from cli.core.mpt.client import MPTClient
-from cli.core.mpt.models import Meta
-from pydantic import BaseModel
-
-APIModel = TypeVar("APIModel", bound=BaseModel)
+from cli.core.mpt.models import Meta, BaseModel
 
 
-class APIService(ABC, Generic[APIModel]):
+class APIService[APIModel: BaseModel](ABC):
     """Abstract base class for API service operations.
 
     This class provides common functionality for API services that interact
