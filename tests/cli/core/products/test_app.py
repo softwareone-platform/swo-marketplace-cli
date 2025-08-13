@@ -113,7 +113,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
 
 
 def test_sync_product_update_error(mocker, product_container_mock, product_data_from_dict):
-    mocker.patch.object(ProductStatsCollector, "has_errors", True)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=True)
     validate_definition_mock = mocker.patch.object(
         product_container_mock.product_service(),
         "validate_definition",
@@ -141,7 +141,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
 def test_sync_product_force_create(
     mocker, product_container_mock, product_new_file, product_data_from_dict
 ):
-    mocker.patch.object(ProductStatsCollector, "has_errors", False)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     to_table_mock = mocker.patch.object(
         ProductStatsCollector, "to_table", return_value=Mock(return_value="")
     )
@@ -172,7 +172,7 @@ def test_sync_product_force_create(
 
 
 def test_sync_product_no_product(mocker, product_new_file, product_container_mock):
-    mocker.patch.object(ProductStatsCollector, "has_errors", False)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     to_table_mock = mocker.patch.object(
         ProductStatsCollector, "to_table", return_value=Mock(return_value="")
     )

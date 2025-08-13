@@ -144,7 +144,7 @@ def test_update_action_skip(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="skip_item_id", action=DataActionEnum.SKIP)],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", True)
+    mocker.patch.object(FakeDataModel, "to_skip", new=True)
     stats_skipped_mock = mocker.patch.object(service_context.stats, "add_skipped")
     service = FakeRelatedComponentsService(service_context)
 
@@ -161,7 +161,7 @@ def test_update_action_create(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="create_id", action=DataActionEnum.CREATE)],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", False)
+    mocker.patch.object(FakeDataModel, "to_skip", new=False)
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
     api_post_mock = mocker.patch.object(
@@ -184,7 +184,7 @@ def test_update_action_delete(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="delete_id", action=DataActionEnum.DELETE)],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", False)
+    mocker.patch.object(FakeDataModel, "to_skip", new=False)
     file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
     service = FakeRelatedComponentsService(service_context)
@@ -204,7 +204,7 @@ def test_update_action_update(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="update_id", action=DataActionEnum.UPDATE)],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", False)
+    mocker.patch.object(FakeDataModel, "to_skip", new=False)
 
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_synced_mock = mocker.patch.object(service_context.stats, "add_synced")
@@ -226,7 +226,7 @@ def test_update_action_value_error(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="error_action_id", action="FakeAction")],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", False)
+    mocker.patch.object(FakeDataModel, "to_skip", new=False)
 
     file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
@@ -245,7 +245,7 @@ def test_update_action_api_error(mocker, service_context):
         "read_data",
         return_value=[FakeDataModel(id="update_id", action=DataActionEnum.UPDATE)],
     )
-    mocker.patch.object(FakeDataModel, "to_skip", False)
+    mocker.patch.object(FakeDataModel, "to_skip", new=False)
     file_handler_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_error_mock = mocker.patch.object(service_context.stats, "add_error")
     api_update_mock = mocker.patch.object(
