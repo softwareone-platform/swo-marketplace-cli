@@ -45,8 +45,8 @@ def get_files_path(files_path: list[str]) -> list[str]:
         if path.is_file():
             file_paths.append(file_path)
         elif path.is_dir():
-            file_paths.extend(glob(str(path / "*")))
+            file_paths.extend(glob(str(path / "*")))  # noqa: PTH207
         else:
-            file_paths.extend(glob(file_path))
+            file_paths.extend(glob(file_path))  # noqa: PTH207
 
     return list(filter(lambda p: p.endswith(".xlsx"), file_paths))

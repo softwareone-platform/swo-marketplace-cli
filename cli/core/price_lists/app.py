@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Annotated
 
@@ -142,7 +141,7 @@ def export(  # noqa: C901
         )
         raise typer.Exit(code=4)
 
-    out_path = out_path if out_path is not None else os.getcwd()
+    out_path = out_path if out_path is not None else str(Path.cwd())
     mpt_client = client_from_account(active_account)
     stats = PriceListStatsCollector()
     has_error = False

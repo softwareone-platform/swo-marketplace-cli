@@ -5,7 +5,7 @@ from typing import override
 
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
-from cli.core.models.data_model import BaseDataModel as DataModel
+from cli.core.models.data_model import DataModel
 from cli.core.products.models import DataActionEnum
 from cli.core.services import RelatedBaseService
 from cli.core.services.service_result import ServiceResult
@@ -177,7 +177,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
         if model_action == DataActionEnum.DELETE:
             # TODO: uncomment once the delete action is supported
-            # return self._action_delete_item
+            # return self._action_delete_item   # noqa: ERA001
             raise ValueError(f"Action type {model_action} is not supported")
 
         if model_action == DataActionEnum.UPDATE:

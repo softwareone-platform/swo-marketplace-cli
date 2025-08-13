@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Annotated
 
@@ -18,7 +17,7 @@ from rich.table import Table
 app = typer.Typer()
 
 
-def _offset_by_page(page: int, limit: int) -> int:
+def _offset_by_page(page: int, limit: int) -> int:  # noqa: FURB118
     return page * limit
 
 
@@ -56,7 +55,7 @@ def export(  # noqa: C901
         )
         raise typer.Exit(code=4)
 
-    out_path = out_path if out_path is not None else os.getcwd()
+    out_path = out_path if out_path is not None else str(Path.cwd())
     has_error = False
     for product_id in product_ids:
         file_path = Path(out_path) / f"{product_id}.xlsx"

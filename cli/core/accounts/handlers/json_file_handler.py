@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +43,7 @@ class JsonFileHandler(FileHandler):
         Args:
             data: the data to be written to the file.
         """
-        os.makedirs(Path(self.file_path).parent, exist_ok=True)
+        Path(self.file_path).parent.mkdir(parents=True, exist_ok=True)
         with Path(self.file_path).open("w+") as f:
             json_data = json.dumps(data, indent=2)
             f.write(json_data)

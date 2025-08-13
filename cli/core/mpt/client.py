@@ -37,26 +37,24 @@ class MPTClient(Session):
         url = self.join_url(str(url))
 
         if self.debug:
-            # Get caller info
             caller_frame = inspect.currentframe().f_back  # type: ignore[union-attr]
             caller_info = inspect.getframeinfo(caller_frame)  # type: ignore[arg-type]
 
-            # Log request details
             logger.debug(
-                f"HTTP Request from {caller_info.filename}:{caller_info.lineno}\n"
-                f"Method: {method!r}\n"
-                f"URL: {url}"
+                "HTTP Request from %s:%s\nMethod: %r\nURL: %s",
+                caller_info.filename,
+                caller_info.lineno,
+                repr(method),
+                url,
             )
 
         response = super().request(method, url, *args, **kwargs)
 
         if self.debug:
-            # Log response details
             logger.debug(
-                f"Response Status: {response.status_code}\n"
-                f"Response Body: {
-                    json.dumps(response.json(), indent=2) if response.text else 'No body'
-                }"
+                "Response Status: %s\nResponse Body: %s",
+                response.status_code,
+                json.dumps(response.json(), indent=2) if response.text else "No body",
             )
 
         return response

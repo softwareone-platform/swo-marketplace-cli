@@ -1,5 +1,4 @@
 import json
-import os
 from pathlib import Path
 
 import pytest
@@ -47,13 +46,13 @@ def test_read_creates_empty_file_when_nonexistent(mocker, json_file_handler):
 
 def test_write_creates_directory_if_not_exists(mocker, tmp_path):
     data = [{"id": "test_id", "name": "Test Name"}]
-    file_path = tmp_path / "nonexistent_dir" / "accounts.json"
+    no_existing_dir = tmp_path / "nonexistent_dir"
+    file_path = no_existing_dir / "accounts.json"
     handler = JsonFileHandler(file_path=file_path)
-    makedirs_mock = mocker.spy(os, "makedirs")
 
     handler.write(data)
 
-    makedirs_mock.assert_called_once_with(Path(file_path).parent, exist_ok=True)
+    assert no_existing_dir.exists()
     assert file_path.exists()
 
     with Path(file_path).open() as f:
