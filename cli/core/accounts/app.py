@@ -128,7 +128,7 @@ def extract_account(
 
 @app.command(name="list")
 def list_accounts(
-    active_only: Annotated[
+    active_only: Annotated[  # noqa: FBT002
         bool, typer.Option("--active", "-a", help="Show only current active account")
     ] = False,
 ):

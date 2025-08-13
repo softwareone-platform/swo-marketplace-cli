@@ -55,7 +55,7 @@ def main(
         bool | None,
         typer.Option("--version", callback=version_callback, is_eager=True),
     ] = None,
-    verbose: Annotated[
+    verbose: Annotated[  # noqa: FBT002
         bool,
         typer.Option(
             "--verbose",
