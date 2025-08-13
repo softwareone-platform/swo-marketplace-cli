@@ -14,7 +14,7 @@ class FakeExcelFileManager(ExcelFileManager):
 
 
 def test_get_row_and_column_from_coordinate_valid():
-    col, row = FakeExcelFileManager._get_row_and_column_from_coordinate("B12")
+    col, row = FakeExcelFileManager._get_row_and_column_from_coordinate("B12")  # noqa: SLF001
 
     assert col == "B"
     assert row == 12
@@ -22,7 +22,7 @@ def test_get_row_and_column_from_coordinate_valid():
 
 def test_get_row_and_column_from_coordinate_invalid():
     with pytest.raises(ValueError):
-        FakeExcelFileManager._get_row_and_column_from_coordinate("")
+        FakeExcelFileManager._get_row_and_column_from_coordinate("")  # noqa: SLF001
 
 
 def test_write_ids(mocker):
@@ -31,4 +31,4 @@ def test_write_ids(mocker):
 
     file_manager.write_ids({"A1": "12345"})
 
-    file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])
+    file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])  # noqa: SLF001

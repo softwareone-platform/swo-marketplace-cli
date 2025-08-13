@@ -106,7 +106,7 @@ def test_read_data(mocker, file_manager):
     get_data_from_vertical_sheet_mock = mocker.patch.object(
         file_manager.file_handler, "get_data_from_vertical_sheet", return_value=mock_data
     )
-    data_model_spy = mocker.spy(file_manager._data_model, "from_dict")
+    data_model_spy = mocker.spy(file_manager._data_model, "from_dict")  # noqa: SLF001
 
     result = file_manager.read_data()
 

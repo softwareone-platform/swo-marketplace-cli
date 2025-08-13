@@ -197,15 +197,15 @@ def test_write(excel_file_handler):
 
     excel_file_handler.write(test_data)
 
-    assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"
-    assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"
-    assert excel_file_handler._get_worksheet("FakeSheet")["J23"].value == "ValueJ23"
+    assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"  # noqa: SLF001
+    assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"  # noqa: SLF001
+    assert excel_file_handler._get_worksheet("FakeSheet")["J23"].value == "ValueJ23"  # noqa: SLF001
 
 
 def test_write_cell(excel_file_handler):
     excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue")
 
-    cell = excel_file_handler._get_worksheet("Sheet1")["C2"]
+    cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # noqa: SLF001
     assert cell.value == "FakeValue"
     assert cell.style == "Normal"
 
@@ -214,7 +214,7 @@ def test_write_cell_with_style(excel_file_handler):
     fake_style = NamedStyle("fake_style")
     excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue", style=fake_style)
 
-    assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"
+    assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # noqa: SLF001
 
 
 def test_write_cell_with_data_validation(excel_file_handler):
