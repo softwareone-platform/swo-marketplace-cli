@@ -22,11 +22,11 @@ class TemplateService(RelatedComponentsBaseService):
         for data_model in self.file_manager.read_data():
             content = data_model.content
 
-            for id, item in param_groups.collection.items():
-                if id not in content:
+            for item_id, item in param_groups.collection.items():
+                if item_id not in content:
                     continue
 
-                content = content.replace(id, item.id)
+                content = content.replace(item_id, item.id)
                 new_ids[data_model.content_coordinate] = content
 
         if new_ids:

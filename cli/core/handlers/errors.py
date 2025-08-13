@@ -3,7 +3,7 @@ class ExcelFileHandlerError(Exception):
 
     _default_message = "Excel file handler error"
 
-    def __init__(self, message: None | str = None, details: None | list = None):
+    def __init__(self, message: str | None = None, details: list | None = None):
         self.message = message if message is not None else self._default_message
         self.details = details if details is not None else []
 

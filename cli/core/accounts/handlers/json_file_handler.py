@@ -19,7 +19,7 @@ class JsonFileHandler(FileHandler):
         super().__init__(file_path)
 
     def create(self):
-        """Creates a new empty JSON file at the specified file path"""
+        """Creates a new empty JSON file at the specified file path."""
         self.write([])
 
     def read(self) -> list[dict[str, Any]]:

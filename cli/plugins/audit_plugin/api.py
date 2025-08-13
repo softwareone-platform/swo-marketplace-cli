@@ -30,8 +30,9 @@ def get_audit_records_by_object(
         records = response.json().get("data", [])
         if not records:
             console.print(f"[red]No audit records found for object {object_id}[/red]")
-            raise typer.Exit(1)
-        return records
+            raise typer.Exit(1)  # noqa: TRY301
     except Exception as e:
         console.print(f"[red]Failed to retrieve audit records for object {object_id}: {e!s}[/red]")
         raise typer.Exit(1)
+
+    return records

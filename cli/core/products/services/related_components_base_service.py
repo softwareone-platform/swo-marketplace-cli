@@ -20,8 +20,8 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
     def create(self) -> ServiceResult:
         errors = []
         collection = {}
-        for data_model in self.file_manager.read_data():
-            data_model = self.prepare_data_model_to_create(data_model)
+        for raw_model_data in self.file_manager.read_data():
+            data_model = self.prepare_data_model_to_create(raw_model_data)
 
             try:
                 new_item = self.api.post(json=data_model.to_json())
@@ -153,8 +153,6 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
         Args:
             data_model: The data model to be updated
-
-        Returns:
 
         """
         self.api.update(data_model.id, data_model.to_json())  # type: ignore[attr-defined]

@@ -71,7 +71,6 @@ class ErrorMessagesCollector:
 
     def __str__(self) -> str:
         msg = ""
-
         for section_name, section in self._sections.items():
             msg = f"{msg}{section_name}:"
             if "" in section:
@@ -80,7 +79,7 @@ class ErrorMessagesCollector:
                 msg += "\n"
 
             for item_name, item_messages in section.items():
-                if item_name == "":
+                if not item_name:
                     continue
 
                 msg = f"{msg}\t\t{item_name}: {', '.join(item_messages)}"
