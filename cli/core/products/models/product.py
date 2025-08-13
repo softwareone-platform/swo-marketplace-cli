@@ -32,7 +32,7 @@ class SettingsItem(BaseDataModel, ActionMixin):
     @classmethod
     @override
     def from_json(cls, data: dict[str, Any]) -> Self:
-        return cls(name=data["name"], value=cls._parse_json_value(data["value"]))
+        return cls(name=data["name"], value=cls._parse_json_value(value=data["value"]))
 
     @override
     def to_json(self) -> dict[str, Any]:
@@ -47,7 +47,7 @@ class SettingsItem(BaseDataModel, ActionMixin):
         }
 
     @staticmethod
-    def _parse_json_value(value: str | bool) -> str | bool:
+    def _parse_json_value(*, value: str | bool) -> str | bool:
         match value:
             case True:
                 return "Enabled"

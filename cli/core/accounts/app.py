@@ -177,7 +177,7 @@ def _account_table(title: str) -> Table:
     return table
 
 
-def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = True) -> Table:  # noqa: C901
+def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:  # noqa: C901
     def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
         match account_type:
             case "Vendor":
@@ -189,12 +189,12 @@ def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = Tr
             case _:
                 return account_type
 
-    def _wrap_active(is_active: bool) -> str:  # pragma: no cover
+    def _wrap_active(*, is_active: bool) -> str:  # pragma: no cover
         if is_active:
             return "[red bold]\u2714"
         return ""
 
-    def _wrap_token(account: Account, to_wrap_secret: bool) -> str:
+    def _wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
         is_new_token = "idt:TKN-" in account.token
 
         if is_new_token:
@@ -215,9 +215,9 @@ def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = Tr
             account.id,
             account.name,
             _wrap_account_type(account.type),
-            _wrap_token(account, wrap_secret),
+            _wrap_token(account, to_wrap_secret=wrap_secret),
             account.environment,
-            _wrap_active(account.is_active),
+            _wrap_active(is_active=account.is_active),
         )
 
     return table

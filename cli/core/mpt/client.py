@@ -20,7 +20,7 @@ class MPTClient(Session):
         api_token: Authentication token for API access.
     """
 
-    def __init__(self, base_url: str, api_token: str, debug: bool = False):
+    def __init__(self, base_url: str, api_token: str, *, debug: bool = False):
         super().__init__()
         self.debug = debug
         self.headers.update(

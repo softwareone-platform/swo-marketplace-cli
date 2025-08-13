@@ -37,7 +37,7 @@ def get_version() -> str:
     return __version__
 
 
-def version_callback(value: bool) -> None:
+def version_callback(value: bool) -> None:  # noqa: FBT001
     """Callback to display the CLI version and exit if requested.
 
     Args:
