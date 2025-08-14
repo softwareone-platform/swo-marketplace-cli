@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import general_tab_title_style
@@ -50,11 +50,8 @@ class VerticalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
                     section, required_fields
                 )
 
+    @override
     def create_tab(self):
-        """Creates the general information tab in the Excel file.
-
-        If the file does not exist, it is created.
-        """
         if not self.file_handler.exists():
             self.file_handler.create()
 
@@ -76,15 +73,8 @@ class VerticalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
         data = self._read_data(self._fields)
         return self._data_model.from_dict(data)
 
+    @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """Writes an error message to the error column in the sheet.
-
-        If the error column does not exist, it is created.
-
-        Args:
-            error: The error message to write.
-            resource_id: Resource id related to the error.
-        """
         data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
         try:
             coordinate = data[ERROR_COLUMN_NAME]["coordinate"]

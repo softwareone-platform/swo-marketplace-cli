@@ -46,9 +46,6 @@ class ErrorMessagesCollector:
             item_name: The name of the item within the section.
             msg: The error message to add.
 
-        Returns:
-            None
-
         """
         self._is_empty = False
 
@@ -123,12 +120,7 @@ class StatsCollector(ABC):
 
     @property
     def has_errors(self) -> bool:
-        """Check if any errors have been recorded.
-
-        Returns:
-            True if errors exist, False otherwise.
-
-        """
+        """Check if any errors have been recorded."""
         return self.__has_error
 
     def add_error(self, tab_name: str) -> None:

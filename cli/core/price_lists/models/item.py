@@ -63,30 +63,15 @@ class ItemData(BaseDataModel):
     type: str | None = None
 
     def is_operations(self) -> bool:
-        """Check if the item type is 'operations'.
-
-        Returns:
-            True if the item type is 'operations', False otherwise.
-
-        """
+        """Check if the item type is 'operations'."""
         return self.type == "operations"
 
     def is_vendor(self) -> bool:
-        """Check if the item type is 'vendor'.
-
-        Returns:
-            True if the item type is 'vendor', False otherwise.
-
-        """
+        """Check if the item type is 'vendor'."""
         return self.type == "vendor"
 
     def to_update(self) -> bool:
-        """Check if the item action is 'UPDATE'.
-
-        Returns:
-            True if the item action is 'UPDATE', False otherwise.
-
-        """
+        """Check if the item action is 'UPDATE'."""
         return self.action == ItemAction.UPDATE
 
     @classmethod

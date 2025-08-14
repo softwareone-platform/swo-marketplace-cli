@@ -13,10 +13,5 @@ class Account(BaseModel):
     is_active: bool = False
 
     def is_operations(self) -> bool:
-        """Check if the account type is 'Operations'.
-
-        Returns:
-            True if the account type is 'Operations', False otherwise.
-
-        """
+        """Check if the account type is 'Operations'."""
         return self.type == "Operations"

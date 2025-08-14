@@ -35,12 +35,7 @@ class PriceListData(BaseDataModel):
         return {"id": self.product_id}
 
     def is_operations(self) -> bool:
-        """Check if the price list type is 'operations'.
-
-        Returns:
-            True if the type is 'operations', False otherwise.
-
-        """
+        """Check if the price list type is 'operations'."""
         return self.type == "operations"
 
     @classmethod

@@ -28,12 +28,7 @@ __version__ = VERSION
 
 
 def get_version() -> str:
-    """Get the current CLI version.
-
-    Returns:
-        The version string of the CLI.
-
-    """
+    """Get the current CLI version."""
     return __version__
 
 

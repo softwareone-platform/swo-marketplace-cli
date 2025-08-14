@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
-from typing import Any, ClassVar
+from typing import Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
@@ -45,11 +45,8 @@ class HorizontalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
 
         self.file_handler.save()
 
+    @override
     def create_tab(self) -> None:
-        """Creates the tab in the Excel file.
-
-        If the file does not exist, it is created.
-        """
         if not self.file_handler.exists():
             self.file_handler.create()
 
@@ -71,15 +68,8 @@ class HorizontalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
         for item in self._read_data():
             yield self._data_model.from_dict(item)
 
+    @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """Writes an error message to the error column in the sheet.
-
-        If the error column does not exist, it is created.
-
-        Args:
-            error: The error message to write.
-            resource_id: Resource id related to the error.
-        """
         item_row = next(
             row
             for row in self.file_handler.get_data_from_horizontal_sheet(
