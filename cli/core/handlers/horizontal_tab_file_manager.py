@@ -1,15 +1,17 @@
 from abc import abstractmethod
 from collections.abc import Generator, Mapping
-from typing import Any, ClassVar, override
+from typing import TYPE_CHECKING, Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
 from cli.core.handlers.file_manager import ExcelFileManager
-from cli.core.models import BaseDataModel
 from openpyxl.styles import NamedStyle
 
+if TYPE_CHECKING:
+    from cli.core.models import BaseDataModel
 
-class HorizontalTabFileManager[DataModel: BaseDataModel](ExcelFileManager):
+
+class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
     """File manager for handling horizontally-oriented Excel tabs.
 
     This class manages Excel sheets where data is organized horizontally,

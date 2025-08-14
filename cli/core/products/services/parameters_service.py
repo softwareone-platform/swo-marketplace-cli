@@ -32,8 +32,6 @@ class ParametersService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return
-
     @override
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()

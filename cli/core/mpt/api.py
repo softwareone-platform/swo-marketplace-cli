@@ -1,12 +1,15 @@
 from abc import ABC
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from cli.core.errors import MPTAPIError, wrap_http_error
 from cli.core.mpt.client import MPTClient
-from cli.core.mpt.models import BaseModel, Meta
+from cli.core.mpt.models import Meta
+
+if TYPE_CHECKING:
+    from cli.core.mpt.models import BaseModel
 
 
-class APIService[APIModel: BaseModel](ABC):
+class APIService[APIModel: "BaseModel"](ABC):
     """Abstract base class for API service operations.
 
     This class provides common functionality for API services that interact

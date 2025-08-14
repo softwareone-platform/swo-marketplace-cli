@@ -31,5 +31,3 @@ class TemplateService(RelatedComponentsBaseService):
 
         if new_ids:
             self.file_manager.write_ids(new_ids)
-
-        return

@@ -276,8 +276,6 @@ def create_product(container, status):
     item_service.set_new_item_groups(item_group_data_collection)
     item_service.create()
 
-    return
-
 
 def update_product(container: ProductContainer, status: Status):
     """

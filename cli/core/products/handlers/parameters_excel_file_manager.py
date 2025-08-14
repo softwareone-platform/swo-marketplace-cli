@@ -1,10 +1,9 @@
 from abc import ABC
 from collections.abc import Generator
 from types import MappingProxyType
-from typing import Any, override
+from typing import TYPE_CHECKING, Any, override
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
-from cli.core.models import BaseDataModel
 from cli.core.products.constants import (
     PARAMETERS_ACTION,
     PARAMETERS_FIELDS,
@@ -22,8 +21,11 @@ from cli.core.products.models import (
     SubscriptionParametersData,
 )
 
+if TYPE_CHECKING:
+    from cli.core.models import BaseDataModel
 
-class ParametersExcelFileManager[DataModel: BaseDataModel](HorizontalTabFileManager, ABC):
+
+class ParametersExcelFileManager[DataModel: "BaseDataModel"](HorizontalTabFileManager, ABC):
     """Excel file manager for parameter data operations."""
 
     _data_model: type[DataModel]
