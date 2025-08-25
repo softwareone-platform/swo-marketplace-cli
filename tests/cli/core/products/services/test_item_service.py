@@ -128,9 +128,9 @@ def test_set_new_item_groups(
     service.set_new_item_groups(param_group)
 
     read_data_mock.assert_called_once()
-    write_ids_mock.assert_called_once_with(
-        {item_data_from_dict.group_coordinate: item_group_data_from_dict.id}
-    )
+    write_ids_mock.assert_called_once_with({
+        item_data_from_dict.group_coordinate: item_group_data_from_dict.id
+    })
 
 
 def test_set_new_item_groups_error(

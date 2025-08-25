@@ -1,28 +1,46 @@
-from typing import Any, Generic
+from collections.abc import Mapping
+from typing import TYPE_CHECKING, Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import general_tab_title_style
 from cli.core.handlers.file_manager import ExcelFileManager
-from cli.core.models.data_model import DataModel
+
+if TYPE_CHECKING:
+    from cli.core.models import BaseDataModel
 
 
-class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
+class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
+    """File manager for handling vertically-oriented Excel tabs.
+
+    This class manages Excel sheets where data is organized vertically,
+    with field names in the first column and corresponding values in
+    subsequent columns.
+    """
+
     _data_model: type[DataModel]
-    _fields: list[str]
+    _fields: tuple[str, ...]
     _id_field: str
-    _required_tabs: list[str]
-    _required_fields_by_tab: dict[str, Any]
+    _required_tabs: tuple[str, ...]
+    _required_fields_by_tab: ClassVar[Mapping[str, Any]]
     _sheet_name: str
 
     def add(self, data_model: DataModel) -> None:
+        """Adds a data model to the Excel sheet.
+
+        Args:
+            data_model: The data model to add.
+
+        """
         data_xlsx = data_model.to_xlsx()
         data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
         self.file_handler.write([{self._sheet_name: data}])
 
     def check_required_tabs(self) -> None:
+        """Checks that all required tabs exist in the Excel file."""
         self.file_handler.check_required_sheet(self._required_tabs)
 
     def check_required_fields_by_section(self) -> None:
+        """Checks required fields for each section in the Excel file."""
         for section, required_fields in self._required_fields_by_tab.items():
             if section == self._sheet_name:
                 self.file_handler.check_required_fields_in_vertical_sheet(section, required_fields)
@@ -34,11 +52,8 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
                     section, required_fields
                 )
 
+    @override
     def create_tab(self):
-        """
-        Creates the general information tab in the Excel file.
-        If the file does not exist, it is created.
-        """
         if not self.file_handler.exists():
             self.file_handler.create()
 
@@ -60,16 +75,9 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
         data = self._read_data(self._fields)
         return self._data_model.from_dict(data)
 
+    @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the error column in the sheet.
-        If the error column does not exist, it is created.
-
-        Args:
-            error: The error message to write.
-            resource_id: Resource id related to the error.
-        """
-        data = self._read_data([self._id_field, ERROR_COLUMN_NAME])
+        data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
         try:
             coordinate = data[ERROR_COLUMN_NAME]["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
@@ -81,5 +89,5 @@ class VerticalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
 
-    def _read_data(self, fields: list[str]) -> dict[str, Any]:
+    def _read_data(self, fields: tuple[str, ...]) -> dict[str, Any]:
         return self.file_handler.get_data_from_vertical_sheet(self._sheet_name, fields)

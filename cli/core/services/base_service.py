@@ -6,6 +6,12 @@ from cli.core.services.service_result import ServiceResult
 
 
 class Service(ABC):
+    """Abstract base class for all service operations.
+
+    This class provides common functionality for service implementations
+    that handle CRUD operations on resources.
+    """
+
     service_context: ServiceContext
 
     def __init__(self, service_context: ServiceContext):
@@ -22,9 +28,8 @@ class Service(ABC):
         return params
 
     @abstractmethod
-    def create(self) -> ServiceResult:  # pragma: no cover
-        """
-        Create a resource based on the definition file
+    def create(self) -> ServiceResult:
+        """Create a resource based on the definition file.
 
         Returns:
             ServiceResult object with operation results
@@ -32,9 +37,8 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve(self) -> ServiceResult:  # pragma: no cover
-        """
-        Retrieve an existing resource from the file
+    def retrieve(self) -> ServiceResult:
+        """Retrieve an existing resource from the file.
 
         Returns:
             ServiceResult object with operation results
@@ -42,9 +46,8 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:  # pragma: no cover
-        """
-        Retrieve a resource from MPT by its ID
+    def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
+        """Retrieve a resource from MPT by its ID.
 
         Args:
             resource_id: ID of the resource to retrieve
@@ -55,9 +58,8 @@ class Service(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def update(self) -> ServiceResult:  # pragma: no cover
-        """
-        Update an existing resource
+    def update(self) -> ServiceResult:
+        """Update an existing resource.
 
         Returns:
             ServiceResult object with operation results
@@ -65,9 +67,7 @@ class Service(ABC):
         raise NotImplementedError
 
     def set_export_params(self) -> dict[str, Any]:
-        """
-        Override this method to set the export parameters
-        """
+        """Override this method to set the export parameters."""
         return {}
 
     def _set_error(self, error: str, resource_id: str | None = None) -> None:
@@ -83,10 +83,11 @@ class Service(ABC):
 
 
 class BaseService(Service, ABC):
+    """Abstract base service class for standard resource operations."""
+
     @abstractmethod
-    def export(self, resource_id: str) -> ServiceResult:  # pragma: no cover
-        """
-        Export a resource from mpt to the file
+    def export(self, resource_id: str) -> ServiceResult:
+        """Export a resource from mpt to the file.
 
         Args:
             resource_id: The ID of the product to export.
@@ -98,14 +99,19 @@ class BaseService(Service, ABC):
 
 
 class RelatedBaseService(Service, ABC):
+    """Abstract base service class for related resource operations.
+
+    Extends Service to handle operations on resources that are related
+    to other resources and have a specific resource_id context.
+    """
+
     @property
     def resource_id(self):
         return self.api.resource_id
 
     @abstractmethod
-    def export(self) -> ServiceResult:  # pragma: no cover
-        """
-        Export a resource from mpt to the file
+    def export(self) -> ServiceResult:
+        """Export a resource from mpt to the file.
 
         Returns:
             ServiceResult object with operation results

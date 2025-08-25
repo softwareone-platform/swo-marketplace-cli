@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from types import MappingProxyType
 from typing import Any, Self
 from unittest.mock import Mock, call
 
@@ -31,10 +32,10 @@ class FakeDataModel(BaseDataModel):
 class FakeVerticalTabFileManager(VerticalTabFileManager):
     _file_handler = Mock()
     _data_model = FakeDataModel
-    _fields = ["ID", "field1"]
+    _fields = ("ID", "field1")
     _id_field = "ID"
-    _required_tabs = ["Required tab"]
-    _required_fields_by_tab = {"FakeSheet": ["ID"]}
+    _required_tabs = ("Required tab",)
+    _required_fields_by_tab = MappingProxyType({"FakeSheet": ["ID"]})
     _sheet_name = "FakeSheet"
 
 
@@ -60,7 +61,7 @@ def test_check_required_tabs(mocker, file_manager):
 
     file_manager.check_required_tabs()
 
-    check_required_sheet_mock.assert_called_once_with(["Required tab"])
+    check_required_sheet_mock.assert_called_once_with(("Required tab",))
 
 
 def test_check_required_fields_by_section(mocker, file_manager):
@@ -94,9 +95,10 @@ def test_create_tab(mocker, file_manager):
         "FakeSheet", 1, 1, "General Information", style=general_tab_title_style
     )
     merge_cell_mock.assert_called_once_with("FakeSheet", "A1:B1")
-    write_mock.assert_has_calls(
-        [call([{"FakeSheet": {"A2": "ID"}}]), call([{"FakeSheet": {"A3": "field1"}}])]
-    )
+    write_mock.assert_has_calls([
+        call([{"FakeSheet": {"A2": "ID"}}]),
+        call([{"FakeSheet": {"A3": "field1"}}]),
+    ])
 
 
 def test_read_data(mocker, file_manager):
@@ -104,7 +106,7 @@ def test_read_data(mocker, file_manager):
     get_data_from_vertical_sheet_mock = mocker.patch.object(
         file_manager.file_handler, "get_data_from_vertical_sheet", return_value=mock_data
     )
-    data_model_spy = mocker.spy(file_manager._data_model, "from_dict")
+    data_model_spy = mocker.spy(file_manager._data_model, "from_dict")  # noqa: SLF001
 
     result = file_manager.read_data()
 
@@ -123,7 +125,7 @@ def test_write_error_existing_column(mocker, file_manager):
     file_manager.write_error("fake error message")
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
-        "FakeSheet", ["ID", ERROR_COLUMN_NAME]
+        "FakeSheet", ("ID", ERROR_COLUMN_NAME)
     )
     write_mock.assert_called_with([{"FakeSheet": {"B2": "fake error message"}}])
 
@@ -141,12 +143,10 @@ def test_write_error_missing_column(mocker, file_manager):
     file_manager.write_error("fake error message")
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
-        "FakeSheet", ["ID", ERROR_COLUMN_NAME]
+        "FakeSheet", ("ID", ERROR_COLUMN_NAME)
     )
     get_sheet_next_column_mock.assert_called_once_with("FakeSheet")
-    write_mock.assert_has_calls(
-        [
-            call([{"FakeSheet": {"AB1": ERROR_COLUMN_NAME}}]),
-            call([{"FakeSheet": {"AB125": "fake error message"}}]),
-        ]
-    )
+    write_mock.assert_has_calls([
+        call([{"FakeSheet": {"AB1": ERROR_COLUMN_NAME}}]),
+        call([{"FakeSheet": {"AB125": "fake error message"}}]),
+    ])

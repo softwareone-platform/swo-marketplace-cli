@@ -1,15 +1,22 @@
 import re
 from abc import ABC, abstractmethod
+from collections.abc import Mapping
 from pathlib import Path
-from typing import Any
+from typing import Any, ClassVar
 
 from cli.core.handlers.excel_file_handler import ExcelFileHandler
 from openpyxl.worksheet.datavalidation import DataValidation
 
 
 class ExcelFileManager(ABC):
+    """Abstract base class for managing Excel file operations.
+
+    This class provides common functionality for Excel file managers,
+    including tab management, error handling, and data writing operations.
+    """
+
     _sheet_name: str
-    _data_validation_map: dict[str, DataValidation] = {}
+    _data_validation_map: ClassVar[Mapping[str, DataValidation]] = {}
 
     @property
     def tab_name(self) -> str:
@@ -20,15 +27,12 @@ class ExcelFileManager(ABC):
 
     @abstractmethod
     def create_tab(self) -> None:
-        """
-        Creates a new tab (worksheet) in the Excel file.
-        """
+        """Creates a new tab (worksheet) in the Excel file."""
         raise NotImplementedError
 
     @abstractmethod
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the Excel file.
+        """Writes an error message to the Excel file.
 
         Args:
             error: The error message to write.
@@ -37,8 +41,7 @@ class ExcelFileManager(ABC):
         raise NotImplementedError
 
     def write_ids(self, data: dict[str, Any]) -> None:
-        """
-        Writes the IDs into the managed sheet.
+        """Writes the IDs into the managed sheet.
 
         Args:
             data: A dict where each key is a cell coordinate (e.g., 'A1') as each value is
@@ -48,8 +51,7 @@ class ExcelFileManager(ABC):
 
     @staticmethod
     def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:
-        """
-        Parses an Excel cell coordinate and returns its column letter and row number.
+        """Parses an Excel cell coordinate and returns its column letter and row number.
 
         Args:
             coordinate: The cell coordinate (e.g., 'A1').

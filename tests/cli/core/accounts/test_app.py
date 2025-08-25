@@ -1,4 +1,5 @@
 import json
+from pathlib import Path
 
 import pytest
 import typer
@@ -21,7 +22,7 @@ def new_token():
             name="New Account",
             type="Vendor",
         ),
-        token="new-secret",
+        token="new-secret",  # noqa: S106
     )
 
 
@@ -49,7 +50,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     result = runner.invoke(app, ["add", "new-secret"])
 
     assert result.exit_code == 0, result.stdout
-    with open(account_file_path) as f:
+    with Path(account_file_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -72,7 +73,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     result = runner.invoke(app, ["add", "new-secret"])
 
     assert result.exit_code == 0, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -121,7 +122,7 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
     )
 
     assert result.exit_code == 0, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -174,7 +175,7 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
     result = runner.invoke(app, ["add", "new-super-secret"], input="N\n")
 
     assert result.exit_code == 1, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -206,7 +207,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
     result = runner.invoke(app, ["add", "new-super-secret"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -254,7 +255,7 @@ def test_activate_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["activate", "ACC-12342"])
 
     assert result.exit_code == 0, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -310,7 +311,7 @@ def test_remove_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["remove", "ACC-12341"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     assert accounts == [
@@ -363,13 +364,13 @@ def test_get_active_account(new_accounts_path, mocker, expected_account):
 def test_get_active_account_no_active_account(new_accounts_path, mocker, expected_account):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
-    with open(new_accounts_path) as f:
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
         accounts = json.load(f)
 
     for account in accounts:
         account["is_active"] = False
 
-    with open(new_accounts_path, "w") as f:
+    with Path(new_accounts_path).open("w", encoding="utf-8") as f:
         json.dump(accounts, f)
 
     with pytest.raises(typer.Exit):

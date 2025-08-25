@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, override
 
 from cli.core.models import DataCollectionModel
 from cli.core.products.services.related_components_base_service import (
@@ -7,6 +7,8 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class ParametersService(RelatedComponentsBaseService):
+    """Service for managing parameter operations."""
+
     def set_new_parameter_group(self, parameter_groups: DataCollectionModel | None) -> None:
         """
         Update parameter group references in parameter content.
@@ -16,7 +18,7 @@ class ParametersService(RelatedComponentsBaseService):
 
         """
         if parameter_groups is None or not parameter_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for data_model in self.file_manager.read_data():
@@ -30,8 +32,7 @@ class ParametersService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return None
-
+    @override
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()
         params.update({"scope": self.data_model.scope})

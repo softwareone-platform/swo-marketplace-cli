@@ -1,6 +1,6 @@
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.products import constants
@@ -11,6 +11,8 @@ from dateutil import parser
 
 @dataclass
 class ItemData(BaseDataModel, ItemActionMixin):
+    """Data model representing a product item."""
+
     id: str
     description: str
     group_id: str
@@ -32,8 +34,8 @@ class ItemData(BaseDataModel, ItemActionMixin):
     status: str | None = None
     unit_coordinate: str | None = None
     unit_name: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @property
     def external_ids(self):
@@ -64,6 +66,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
         return {"id": self.unit_id}
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         try:
             group_id = data["group_id"]
@@ -77,7 +80,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             description=data[constants.ITEMS_DESCRIPTION]["value"],
             group_id=group_id,
             group_coordinate=data[constants.ITEMS_GROUP_ID]["coordinate"],
-            item_type="operations" if data.get("is_operations", False) else "vendor",
+            item_type="operations" if data.get("is_operations") else "vendor",
             name=data[constants.ITEMS_NAME]["value"],
             terms_commitment=data[constants.ITEMS_TERMS_COMMITMENT]["value"],
             terms_model=ItemTermsModelEnum(data[constants.ITEMS_TERMS_MODEL]["value"]),
@@ -93,6 +96,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -113,9 +117,10 @@ class ItemData(BaseDataModel, ItemActionMixin):
             status=data["status"],
             unit_name=data["unit"]["name"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         return {
             "name": self.name,
@@ -129,6 +134,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             "parameters": self.parameters,
         }
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.ITEMS_ID: self.id,

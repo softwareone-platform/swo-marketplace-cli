@@ -15,6 +15,16 @@ number_format_style = NamedStyle(name="number_format_style")
 
 
 def get_number_format_style(currency: str, precision: int) -> NamedStyle:
+    """Return a NamedStyle with a number format for the given currency and precision.
+
+    Args:
+        currency: The currency code (e.g., 'USD', 'EUR').
+        precision: The number of decimal places.
+
+    Returns:
+        A NamedStyle with the specified number format.
+
+    """
     currency_letter = {"USD": "$", "EUR": "€"}
     number_format_style.number_format = f"{currency_letter.get(currency, '')}#.{'0' * precision}"
     return number_format_style

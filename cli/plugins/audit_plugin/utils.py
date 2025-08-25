@@ -27,7 +27,7 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     if not is_valid_path(path):
         return path
 
-    array_path, rest = path.split("]", 1)
+    array_path, _rest = path.split("]", 1)
     base_path, index_str = array_path.split("[")
     index = int(index_str)
 
@@ -46,8 +46,8 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
 
 
 def is_valid_path(path: str) -> bool:
-    """
-    Check if a path is valid.
+    """Check if a path is valid.
+
     Args:
         path: The path to check.
 
@@ -58,8 +58,8 @@ def is_valid_path(path: str) -> bool:
 
 
 def get_external_id(obj: Any, index: int) -> str | None:
-    """
-    Get the external ID from an object.
+    """Get the external ID from an object.
+
     Args:
         obj: the object to get the external ID from.
         index: the index of the object to get the external ID from.

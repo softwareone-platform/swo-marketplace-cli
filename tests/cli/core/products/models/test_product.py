@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.products.constants import (
     GENERAL_ACCOUNT_ID,
@@ -41,7 +41,7 @@ def test_product_data_from_json(mpt_product_data):
     assert result.account_id == "ACC-9226-9856"
     assert result.account_name == "Adobe"
     assert result.short_description == (
-        "Adobe’s groundbreaking innovations empower everyone, everywhere to imagine, "
+        "Adobe's groundbreaking innovations empower everyone, everywhere to imagine, "
         "create, and bring any digital experience to life."
     )
     assert result.long_description == (
@@ -54,10 +54,10 @@ def test_product_data_from_json(mpt_product_data):
         "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
     )
     assert result.website == "https://www.adobe.com/"
-    assert result.export_date == date(2025, 5, 30)
+    assert result.export_date == dt.date(2025, 5, 30)
     assert result.status == "Unpublished"
-    assert result.created_date == date(2024, 3, 19)
-    assert result.updated_date == date(2025, 6, 3)
+    assert result.created_date == dt.date(2024, 3, 19)
+    assert result.updated_date == dt.date(2025, 6, 3)
     assert result.settings is not None
 
 
@@ -78,7 +78,7 @@ def test_product_to_xlsx(product_data_from_json):
     assert result == {
         GENERAL_PRODUCT_ID: "PRD-0232-2541",
         GENERAL_PRODUCT_NAME: "Adobe VIP Marketplace for Commercial",
-        GENERAL_CATALOG_DESCRIPTION: "Adobe’s groundbreaking innovations empower everyone, "
+        GENERAL_CATALOG_DESCRIPTION: "Adobe's groundbreaking innovations empower everyone, "
         "everywhere to imagine, create, and bring any digital experience to life.",
         GENERAL_PRODUCT_DESCRIPTION: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53M"
         "y5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"
@@ -90,21 +90,19 @@ def test_product_to_xlsx(product_data_from_json):
         GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
         GENERAL_ACCOUNT_ID: "ACC-9226-9856",
         GENERAL_ACCOUNT_NAME: "Adobe",
-        GENERAL_EXPORT_DATE: date(2025, 5, 30),
+        GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
         GENERAL_STATUS: "Unpublished",
-        GENERAL_CREATED: date(2024, 3, 19),
-        GENERAL_MODIFIED: date(2025, 6, 3),
+        GENERAL_CREATED: dt.date(2024, 3, 19),
+        GENERAL_MODIFIED: dt.date(2025, 6, 3),
     }
 
 
 def test_settings_data_from_dict(settings_file_data):
-    result = SettingsData.from_dict(
-        {
-            SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
-            SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
-            SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
-        }
-    )
+    result = SettingsData.from_dict({
+        SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
+        SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
+        SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
+    })
 
     assert len(result.items) == 1
     item = result.items[0]
@@ -135,13 +133,11 @@ def test_settings_data_to_xlsx(product_data_from_dict):
 
 
 def test_setting_item_from_dict(settings_file_data):
-    result = SettingsItem.from_dict(
-        {
-            SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
-            SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
-            SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
-        }
-    )
+    result = SettingsItem.from_dict({
+        SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
+        SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
+        SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
+    })
 
     assert result.name == "Purchase order validation (query)"
     assert result.value == "Off"

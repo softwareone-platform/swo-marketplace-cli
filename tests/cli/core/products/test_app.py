@@ -113,7 +113,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
 
 
 def test_sync_product_update_error(mocker, product_container_mock, product_data_from_dict):
-    mocker.patch.object(ProductStatsCollector, "has_errors", True)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=True)
     validate_definition_mock = mocker.patch.object(
         product_container_mock.product_service(),
         "validate_definition",
@@ -141,7 +141,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
 def test_sync_product_force_create(
     mocker, product_container_mock, product_new_file, product_data_from_dict
 ):
-    mocker.patch.object(ProductStatsCollector, "has_errors", False)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     to_table_mock = mocker.patch.object(
         ProductStatsCollector, "to_table", return_value=Mock(return_value="")
     )
@@ -172,7 +172,7 @@ def test_sync_product_force_create(
 
 
 def test_sync_product_no_product(mocker, product_new_file, product_container_mock):
-    mocker.patch.object(ProductStatsCollector, "has_errors", False)
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     to_table_mock = mocker.patch.object(
         ProductStatsCollector, "to_table", return_value=Mock(return_value="")
     )
@@ -322,7 +322,7 @@ def test_export_product_overwrites_existing_files(
     product_container_mock,
 ):
     exists_mock = mocker.patch.object(Path, "exists", return_value=True)
-    os_remove_mock = mocker.patch("cli.core.products.app.os.remove")
+    unlink_mock = mocker.patch.object(Path, "unlink", return_value=True)
     product_id = "PRD-1234"
     tmp_file = tmp_path / f"{product_id}.xlsx"
     tmp_file.touch()
@@ -336,7 +336,7 @@ def test_export_product_overwrites_existing_files(
     assert result.exit_code == 0, result.stdout
     exists_mock.assert_called_once()
     assert tmp_file.exists()
-    os_remove_mock.assert_called_once()
+    unlink_mock.assert_called_once()
     product_container_mock.product_service().export.assert_called_once()
 
 

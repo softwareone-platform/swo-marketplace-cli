@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from types import MappingProxyType
 from typing import Any
 
 from cli.core.handlers.horizontal_tab_file_manager import HorizontalTabFileManager
@@ -13,13 +14,15 @@ from openpyxl.worksheet.datavalidation import DataValidation
 
 
 class PriceListItemExcelFileManager(HorizontalTabFileManager):
+    """Excel file manager for price list item data operations."""
+
     _data_model = ItemData
     _fields = PRICELIST_ITEMS_FIELDS
     _id_field = PRICELIST_ITEMS_ID
     _sheet_name = TAB_PRICE_ITEMS
-    _data_validation_map = {
+    _data_validation_map = MappingProxyType({
         PRICELIST_ITEMS_ACTION: DataValidation(type="list", formula1='"-,update"', allow_blank=True)
-    }
+    })
 
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         return self.file_handler.get_data_from_horizontal_sheet(self._sheet_name, self._fields)

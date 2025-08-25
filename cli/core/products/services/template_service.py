@@ -5,6 +5,8 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class TemplateService(RelatedComponentsBaseService):
+    """Service for managing template-related operations."""
+
     def set_new_parameter_group(self, param_groups: DataCollectionModel | None) -> None:
         """
         Update parameter group references in template content.
@@ -14,20 +16,18 @@ class TemplateService(RelatedComponentsBaseService):
 
         """
         if param_groups is None or not param_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for data_model in self.file_manager.read_data():
             content = data_model.content
 
-            for id, item in param_groups.collection.items():
-                if id not in content:
+            for item_id, item in param_groups.collection.items():
+                if item_id not in content:
                     continue
 
-                content = content.replace(id, item.id)
+                content = content.replace(item_id, item.id)
                 new_ids[data_model.content_coordinate] = content
 
         if new_ids:
             self.file_manager.write_ids(new_ids)
-
-        return None

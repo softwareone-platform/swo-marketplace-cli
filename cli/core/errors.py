@@ -9,10 +9,12 @@ RetType = TypeVar("RetType")
 
 
 class CLIError(Exception):
-    pass
+    """Base exception class for CLI-related errors."""
 
 
 class MPTAPIError(CLIError):
+    """Exception raised when MPT API operations fail."""
+
     def __init__(self, request_msg: str, response_body: str):
         self._response_body = response_body
         self._request_msg = request_msg
@@ -21,7 +23,17 @@ class MPTAPIError(CLIError):
         return f"{self._request_msg} with response body {self._response_body}"
 
 
-def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
+def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:  # noqa: C901
+    """Decorator to wrap HTTP request functions and handle RequestException.
+
+    Args:
+        func: The function to be wrapped, which may raise a RequestException.
+
+    Returns:
+        The wrapped function that raises MPTAPIError on HTTP errors.
+
+    """
+
     @wraps(func)
     def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
         try:
@@ -47,6 +59,8 @@ def wrap_http_error(func: Callable[Param, RetType]) -> Callable[Param, RetType]:
 
 
 class AccountNotFoundError(CLIError):
+    """Exception raised when a specified account cannot be found."""
+
     def __init__(self, account_id: str):
         self._account_id = account_id
 
@@ -55,6 +69,8 @@ class AccountNotFoundError(CLIError):
 
 
 class NoActiveAccountFoundError(CLIError):
+    """Exception raised when no active account is configured."""
+
     def __str__(self) -> str:
         return (
             "No active account found. Activate any account first using "

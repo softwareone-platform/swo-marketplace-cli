@@ -1,27 +1,32 @@
 from abc import abstractmethod
-from collections.abc import Generator
-from typing import Any, Generic, TypeVar
+from collections.abc import Generator, Mapping
+from typing import TYPE_CHECKING, Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
 from cli.core.handlers.file_manager import ExcelFileManager
-from cli.core.models import BaseDataModel
 from openpyxl.styles import NamedStyle
 
-DataModel = TypeVar("DataModel", bound=BaseDataModel)
+if TYPE_CHECKING:
+    from cli.core.models import BaseDataModel
 
 
-class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
+class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
+    """File manager for handling horizontally-oriented Excel tabs.
+
+    This class manages Excel sheets where data is organized horizontally,
+    with field names in the first row and corresponding data in subsequent rows.
+    """
+
     _data_model: type[DataModel]
-    _fields: list[str]
+    _fields: tuple[str, ...]
     _id_field: str
-    _required_tabs: list[str]
-    _required_fields_by_tab: dict[str, Any]
+    _required_tabs: tuple[str, ...]
+    _required_fields_by_tab: ClassVar[Mapping[str, Any]]
     _sheet_name: str
 
     def add(self, items: list[DataModel]) -> None:
-        """
-        Add a row for each item to the tab.
+        """Add a row for each item to the tab.
 
         Args:
             items: The items to add.
@@ -42,10 +47,8 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
         self.file_handler.save()
 
+    @override
     def create_tab(self) -> None:
-        """
-        Creates the tab in the Excel file. If the file does not exist, it is created.
-        """
         if not self.file_handler.exists():
             self.file_handler.create()
 
@@ -58,9 +61,8 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
                 style=horizontal_tab_style,
             )
 
-    def read_data(self) -> Generator[BaseDataModel, None, None]:
-        """
-        Reads all item rows from the sheet and yields them as DataModel objects.
+    def read_data(self) -> Generator[DataModel, None, None]:
+        """Reads all item rows from the sheet and yields them as DataModel objects.
 
         Yields:
             DataModel: An object containing the data for each item row.
@@ -68,22 +70,15 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
         for item in self._read_data():
             yield self._data_model.from_dict(item)
 
+    @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        """
-        Writes an error message to the error column in the sheet.
-        If the error column does not exist, it is created.
-
-        Args:
-            error: The error message to write.
-            resource_id: Resource id related to the error.
-        """
-        item_row = [
+        item_row = next(
             row
             for row in self.file_handler.get_data_from_horizontal_sheet(
-                self._sheet_name, [self._id_field, ERROR_COLUMN_NAME]
+                self._sheet_name, (self._id_field, ERROR_COLUMN_NAME)
             )
             if row[self._id_field]["value"] == resource_id
-        ][0]
+        )
         try:
             coordinate = item_row[ERROR_COLUMN_NAME]["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
@@ -112,4 +107,4 @@ class HorizontalTabFileManager(ExcelFileManager, Generic[DataModel]):
 
     @abstractmethod
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
-        raise NotImplementedError()
+        raise NotImplementedError

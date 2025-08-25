@@ -2,6 +2,8 @@ from enum import StrEnum
 
 
 class DataActionEnum(StrEnum):
+    """Enumeration of possible data actions for processing operations."""
+
     CREATE = "create"
     DELETE = "delete"
     UPDATE = "update"
@@ -10,6 +12,8 @@ class DataActionEnum(StrEnum):
 
 
 class ItemActionEnum(StrEnum):
+    """Enumeration of possible item actions for item lifecycle management."""
+
     CREATE = "create"
     UPDATE = "update"
     REVIEW = "review"
@@ -20,6 +24,8 @@ class ItemActionEnum(StrEnum):
 
 
 class ItemTermsModelEnum(StrEnum):
+    """Enumeration of item terms models for pricing structures."""
+
     ONE_TIME = "one-time"
     QUANTITY = "quantity"
     USAGE = "usage"

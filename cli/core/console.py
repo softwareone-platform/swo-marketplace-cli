@@ -1,4 +1,4 @@
-import os
+import pathlib
 import sys
 
 from pyfiglet import Figlet
@@ -21,15 +21,16 @@ def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:
     return gradient_colors
 
 
-def show_banner():  # pragma: no cover
-    program_name = os.path.basename(sys.argv[0])
+def show_banner() -> None:
+    """Display a stylized program banner with a color gradient."""
+    program_name = pathlib.Path(sys.argv[0]).name
     program_name = "".join((program_name[0:3].upper(), program_name[3:7]))
     figlet = Figlet("georgia11")
 
     banner_text = figlet.renderText(program_name)
 
     banner_lines = [Text(line) for line in banner_text.splitlines()]
-    max_line_length = max([len(line) for line in banner_lines])
+    max_line_length = max(len(line) for line in banner_lines)
     half_length = max_line_length // 2
 
     colors = _gradient("#00C9CD", "#472AFF", half_length) + _gradient(

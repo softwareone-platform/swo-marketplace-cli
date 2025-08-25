@@ -2,6 +2,8 @@ from pydantic import BaseModel
 
 
 class Account(BaseModel):
+    """Model representing a user account."""
+
     id: str
     name: str
     type: str
@@ -11,4 +13,5 @@ class Account(BaseModel):
     is_active: bool = False
 
     def is_operations(self) -> bool:
+        """Check if the account type is 'Operations'."""
         return self.type == "Operations"

@@ -27,14 +27,21 @@ except PackageNotFoundError:  # pragma: no cover
 __version__ = VERSION
 
 
-def get_version():
+def get_version() -> str:
+    """Get the current CLI version."""
     return __version__
 
 
-def version_callback(value: bool):
+def version_callback(value: bool) -> None:  # noqa: FBT001
+    """Callback to display the CLI version and exit if requested.
+
+    Args:
+        value: If True, prints the version and exits.
+
+    """
     if value:
         console.print(f"version: {get_version()}")
-        raise typer.Exit()
+        raise typer.Exit
 
 
 @app.callback()
@@ -43,7 +50,7 @@ def main(
         bool | None,
         typer.Option("--version", callback=version_callback, is_eager=True),
     ] = None,
-    verbose: Annotated[
+    verbose: Annotated[  # noqa: FBT002
         bool,
         typer.Option(
             "--verbose",
@@ -59,7 +66,15 @@ def main(
             dir_okay=False,
         ),
     ] = None,
-):
+) -> None:
+    """Main callback for the CLI application.
+
+    Args:
+        version: If True, displays the CLI version and exits.
+        verbose: Enables verbose mode with console output.
+        log_file: File path for debug logs, disables console output if set.
+
+    """
     if verbose and log_file:
         console.print("[red]Error: Cannot use both --verbose and --log-file together[/]")
         raise typer.Exit(1)

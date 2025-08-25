@@ -1,26 +1,29 @@
+import datetime as dt
 from dataclasses import dataclass
-from datetime import date
 from enum import StrEnum
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.price_lists import constants
 
 
 class ItemAction(StrEnum):
+    """Enumeration of possible actions for a price list item."""
+
     SKIP = "-"
     SKIPPED = ""
     UPDATE = "update"
 
     @classmethod
-    def _missing_(cls, value):
+    def _missing_(cls, value: object) -> "ItemAction":
         if value is None:
             return cls.SKIP
-
         return super()._missing_(value)
 
 
 class ItemStatus(StrEnum):
+    """Enumeration of possible statuses for a price list item."""
+
     DRAFT = "Draft"
     FOR_SALE = "ForSale"
     PRIVATE = "Private"
@@ -28,6 +31,8 @@ class ItemStatus(StrEnum):
 
 @dataclass
 class ItemData(BaseDataModel):
+    """Data model representing a price list item."""
+
     id: str
     billing_frequency: str
     commitment: str | None
@@ -47,7 +52,7 @@ class ItemData(BaseDataModel):
     lp_x1: float | None = None
     lp_xm: float | None = None
     lp_xy: float | None = None
-    modified_date: date | None = None
+    modified_date: dt.date | None = None
     precision: int | None = None
     pp_x1: float | None = None
     pp_xm: float | None = None
@@ -58,15 +63,19 @@ class ItemData(BaseDataModel):
     type: str | None = None
 
     def is_operations(self) -> bool:
+        """Check if the item type is 'operations'."""
         return self.type == "operations"
 
     def is_vendor(self) -> bool:
+        """Check if the item type is 'vendor'."""
         return self.type == "vendor"
 
     def to_update(self) -> bool:
+        """Check if the item action is 'UPDATE'."""
         return self.action == ItemAction.UPDATE
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.PRICELIST_ITEMS_ID]["value"],
@@ -87,6 +96,7 @@ class ItemData(BaseDataModel):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data.get("id", ""),
@@ -115,6 +125,7 @@ class ItemData(BaseDataModel):
             action=ItemAction.SKIP,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         data: dict[str, Any] = {
             "unitLP": self.unit_lp,
@@ -133,6 +144,7 @@ class ItemData(BaseDataModel):
 
         return data
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.PRICELIST_ITEMS_ID: self.id,

@@ -33,9 +33,9 @@ def test_set_new_parameter_groups(
     service.set_new_parameter_group(param_group)
 
     read_data_mock.assert_called_once()
-    write_ids_mock.assert_called_once_with(
-        {parameters_data_from_dict.group_id_coordinate: parameter_group_data_from_dict.id}
-    )
+    write_ids_mock.assert_called_once_with({
+        parameters_data_from_dict.group_id_coordinate: parameter_group_data_from_dict.id
+    })
 
 
 def test_set_new_parameter_groups_error(

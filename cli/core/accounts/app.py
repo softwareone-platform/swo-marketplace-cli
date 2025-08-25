@@ -36,9 +36,7 @@ def add_account(
         str, typer.Option("--environment", "-e", help="URL to the API for environment")
     ] = "https://api.platform.softwareone.com/public/v1",
 ):
-    """
-    Add an account to work with the SoftwareOne Marketplace
-    """
+    """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
         mpt_client = MPTClient(environment, secret, debug=state.verbose)
@@ -47,7 +45,7 @@ def add_account(
         except MPTAPIError as e:
             console.print(
                 f"Cannot find account for token {secret} on "
-                f"environment {environment}. Exception: {str(e)}"
+                f"environment {environment}. Exception: {e!s}"
             )
             raise typer.Exit(code=3)
         account = from_token(token, environment)
@@ -78,9 +76,7 @@ def activate_account(
         typer.Argument(help="SoftwareOne Marketplace Account ID", metavar="ACCOUNT-ID"),
     ],
 ):
-    """
-    Activate SoftwareOne Marketplace account
-    """
+    """Activate SoftwareOne Marketplace account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -106,9 +102,7 @@ def extract_account(
         typer.Argument(help="SoftwareOne Marketplace Account ID", metavar="ACCOUNT-ID"),
     ],
 ):
-    """
-    Remove SoftwareOne Marketplace account
-    """
+    """Remove SoftwareOne Marketplace account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -134,13 +128,11 @@ def extract_account(
 
 @app.command(name="list")
 def list_accounts(
-    active_only: Annotated[
+    active_only: Annotated[  # noqa: FBT002
         bool, typer.Option("--active", "-a", help="Show only current active account")
     ] = False,
 ):
-    """
-    List available SoftwareOne Marketplace accounts
-    """
+    """List available SoftwareOne Marketplace accounts."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
@@ -157,19 +149,18 @@ def list_accounts(
 
 
 def get_active_account() -> Account:
-    """
-    Check for file and create current active account
-    """
+    """Check for file and create current active account."""
     with console.status(STATUS_MSG[READING]):
         accounts = get_or_create_accounts()
 
     try:
         account = find_active_account(accounts)
         console.print(f"Current active account: {account.id} ({account.name})")
-        return account
     except NoActiveAccountFoundError as e:
         console.print(str(e))
         raise typer.Exit(code=3)
+
+    return account
 
 
 def _account_table(title: str) -> Table:
@@ -185,7 +176,7 @@ def _account_table(title: str) -> Table:
     return table
 
 
-def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = True) -> Table:
+def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:  # noqa: C901
     def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
         match account_type:
             case "Vendor":
@@ -197,19 +188,15 @@ def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = Tr
             case _:
                 return account_type
 
-    def _wrap_active(is_active: bool) -> str:  # pragma: no cover
+    def _wrap_active(*, is_active: bool) -> str:  # pragma: no cover
         if is_active:
             return "[red bold]\u2714"
-        else:
-            return ""
+        return ""
 
-    def _wrap_token(account: Account, to_wrap_secret: bool) -> str:
+    def _wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
         is_new_token = "idt:TKN-" in account.token
 
-        if is_new_token:
-            token = account.token
-        else:
-            token = f"{account.token_id}:{account.token}"
+        token = account.token if is_new_token else f"{account.token_id}:{account.token}"
 
         if to_wrap_secret:
             if is_new_token:
@@ -224,9 +211,9 @@ def _list_accounts(table: Table, accounts: list[Account], wrap_secret: bool = Tr
             account.id,
             account.name,
             _wrap_account_type(account.type),
-            _wrap_token(account, wrap_secret),
+            _wrap_token(account, to_wrap_secret=wrap_secret),
             account.environment,
-            _wrap_active(account.is_active),
+            _wrap_active(is_active=account.is_active),
         )
 
     return table

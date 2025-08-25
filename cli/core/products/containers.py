@@ -1,4 +1,5 @@
 from functools import partial
+from typing import Any, ClassVar
 
 from cli.core.accounts.containers import AccountContainer
 from cli.core.products.api import (
@@ -92,7 +93,7 @@ class ProductContainer(containers.DeclarativeContainer):
         settings=providers.Factory(SettingsExcelFileManager, file_path),
     )
 
-    _services = {
+    _services: ClassVar[dict[str, Any]] = {
         "product": {
             "api": _apis.provided["product"],
             "data_model": ProductData,

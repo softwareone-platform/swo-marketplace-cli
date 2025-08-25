@@ -1,8 +1,7 @@
-import os
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models.data_model import BaseDataModel
 from cli.core.products import constants
@@ -13,12 +12,15 @@ from dateutil import parser
 
 @dataclass
 class SettingsItem(BaseDataModel, ActionMixin):
+    """Data model representing a product settings item."""
+
     name: str
     value: str | bool
 
     coordinate: str | None = None
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             action=data[constants.SETTINGS_ACTION]["value"],
@@ -28,12 +30,15 @@ class SettingsItem(BaseDataModel, ActionMixin):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
-        return cls(name=data["name"], value=cls._parse_json_value(data["value"]))
+        return cls(name=data["name"], value=cls._parse_json_value(value=data["value"]))
 
+    @override
     def to_json(self) -> dict[str, Any]:
         return {}
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.SETTINGS_SETTING: self.name,
@@ -42,7 +47,7 @@ class SettingsItem(BaseDataModel, ActionMixin):
         }
 
     @staticmethod
-    def _parse_json_value(value: str | bool) -> str | bool:
+    def _parse_json_value(*, value: str | bool) -> str | bool:
         match value:
             case True:
                 return "Enabled"
@@ -54,14 +59,18 @@ class SettingsItem(BaseDataModel, ActionMixin):
 
 @dataclass
 class SettingsData(BaseDataModel):
+    """Data model representing product settings configuration."""
+
     items: list[SettingsItem] = field(default_factory=list)
     json_path: str | None = None
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(items=[SettingsItem.from_dict(data)])
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         formatted_settings = cls._format_data_from_json(data)
         items = [
@@ -70,6 +79,7 @@ class SettingsData(BaseDataModel):
         ]
         return cls(items=items)
 
+    @override
     def to_json(self) -> dict[str, Any]:
         settings: dict[str, Any] = {}
         for setting_item in self.items:
@@ -85,6 +95,7 @@ class SettingsData(BaseDataModel):
 
         return {"settings": settings}
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {}
 
@@ -103,6 +114,8 @@ class SettingsData(BaseDataModel):
 
 @dataclass
 class ProductData(BaseDataModel):
+    """Data model representing a complete product."""
+
     id: str
     name: str
     short_description: str
@@ -113,13 +126,14 @@ class ProductData(BaseDataModel):
     account_id: str | None = None
     account_name: str | None = None
     coordinate: str | None = None
-    export_date: date = field(default_factory=date.today)
+    export_date: dt.date = field(default_factory=dt.date.today)
     icon: bytes | None = None
     status: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         settings = (
             SettingsData.from_dict(data["settings"]) if "settings" in data else SettingsData()
@@ -140,6 +154,7 @@ class ProductData(BaseDataModel):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -152,10 +167,11 @@ class ProductData(BaseDataModel):
             website=data["website"],
             status=data["status"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
             settings=SettingsData.from_json(data["settings"]),
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         return {
             "name": self.name,
@@ -164,6 +180,7 @@ class ProductData(BaseDataModel):
             "website": self.website,
         }
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.GENERAL_PRODUCT_ID: self.id,
@@ -181,5 +198,5 @@ class ProductData(BaseDataModel):
 
     @staticmethod
     def _get_default_icon() -> bytes:
-        icon = Path(os.path.dirname(__file__)) / "icons/fake-icon.png"
-        return open(icon, "rb").read()
+        icon_path = Path(Path(__file__).parent) / "icons/fake-icon.png"
+        return Path(icon_path).open("rb").read()

@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import Annotated
 
@@ -18,12 +17,12 @@ from rich.table import Table
 app = typer.Typer()
 
 
-def _offset_by_page(page: int, limit: int) -> int:
+def _offset_by_page(page: int, limit: int) -> int:  # noqa: FURB118
     return page * limit
 
 
 @app.command("export")
-def export(
+def export(  # noqa: C901
     product_ids: Annotated[
         list[str],
         typer.Argument(help="List of product IDs to export"),
@@ -37,6 +36,16 @@ def export(
         ),
     ] = None,
 ):
+    """Export products to Excel files.
+
+    Args:
+        product_ids: List of product IDs to export.
+        out_path: Output directory path. Defaults to current working directory.
+
+    Raises:
+        typer.Exit: With code 4 if account is not operations, code 3 if export fails.
+
+    """
     account_container = AccountContainer()
     active_account = account_container.account()
     if not active_account.is_operations():
@@ -46,7 +55,7 @@ def export(
         )
         raise typer.Exit(code=4)
 
-    out_path = out_path if out_path is not None else os.getcwd()
+    out_path = out_path if out_path is not None else str(Path.cwd())
     has_error = False
     for product_id in product_ids:
         file_path = Path(out_path) / f"{product_id}.xlsx"
@@ -62,7 +71,7 @@ def export(
                 console.print(f"Skipped export for {product_id}.")
                 continue
 
-            os.remove(file_path)
+            Path(file_path).unlink()
         else:
             _ = typer.confirm(
                 f"Do you want to export {product_id} in {out_path}?",
@@ -102,8 +111,12 @@ def list_products(
         typer.Option("--query", "-q", help="RQL Query to filter products list"),
     ] = None,
 ):
-    """
-    List available products from SoftwareOne Marketplace
+    """List available products from SoftwareOne Marketplace.
+
+    Args:
+        page_size: Number of products to display per page.
+        rql_query: RQL query string to filter products.
+
     """
     active_account = get_active_account()
 
@@ -133,7 +146,7 @@ def sync_product(
         str,
         typer.Argument(help="Path to Product Definition file", metavar="PRODUCT-PATH"),
     ],
-    is_dry_run: Annotated[
+    is_dry_run: Annotated[  # noqa: FBT002
         bool,
         typer.Option(
             "--dry-run",
@@ -141,7 +154,7 @@ def sync_product(
             help="Do not sync Product Definition. Check the file consistency only.",
         ),
     ] = False,
-    force_create: Annotated[
+    force_create: Annotated[  # noqa: FBT002
         bool,
         typer.Option(
             "--force-create",
@@ -150,8 +163,16 @@ def sync_product(
         ),
     ] = False,
 ):
-    """
-    Sync product to the environment
+    """Sync product to the environment.
+
+    Args:
+        product_path: Path to the product definition file.
+        is_dry_run: Whether to only validate the file without syncing.
+        force_create: Whether to force create product even if it exists.
+
+    Raises:
+        typer.Exit: With code 3 if validation fails or sync errors occur.
+
     """
     container = ProductContainer(file_path=str(product_path))
     product_service = container.product_service()
@@ -200,10 +221,17 @@ def sync_product(
 
 
 def create_product(container, status):
+    """Create a new product with all its components.
+
+    Args:
+        container: The product container instance.
+        status: The status object used to display progress updates.
+
+    """
     status.update("Create product...")
     result = container.product_service().create()
     if not result.success or result.model is None:
-        return None
+        return
 
     product = result.model
     container.resource_id.override(product.id)
@@ -248,12 +276,11 @@ def create_product(container, status):
     item_service.set_new_item_groups(item_group_data_collection)
     item_service.create()
 
-    return None
-
 
 def update_product(container: ProductContainer, status: Status):
     """
     Update product definition.
+
     Args:
         container: The product container instance.
         status: The status object used to display progress.
@@ -303,7 +330,7 @@ def _products_table(title: str) -> Table:
 
 
 # TODO: move to to_table()
-def _list_products(table: Table, products: list[MPTProduct]) -> Table:
+def _list_products(table: Table, products: list[MPTProduct]) -> Table:  # noqa: C901
     def _wrap_product_status(status: str) -> str:  # pragma: no cover
         match status:
             case "Draft":

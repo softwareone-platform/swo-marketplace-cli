@@ -1,5 +1,6 @@
 import json
 from operator import itemgetter
+from pathlib import Path
 
 import pytest
 from cli.core.accounts.flows import (
@@ -27,7 +28,7 @@ def test_from_token(expected_account):
             name="Account 1",
             type="Vendor",
         ),
-        token="secret 1",
+        token="secret 1",  # noqa: S106
     )
     account = from_token(token, "https://example.com")
 
@@ -62,8 +63,8 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
             id="ACC-4321",
             name="Not exists account",
             type="Vendor",
-            token="secret",
-            token_id="TKN-0000-0000-0001",
+            token="secret",  # noqa: S106
+            token_id="TKN-0000-0000-0001",  # noqa: S106
             environment="https://example.com",
             is_active=False,
         ),
@@ -85,7 +86,7 @@ def test_write_accounts(mocker, tmp_path, expected_account, another_expected_acc
     accounts = [expected_account, another_expected_account]
     write_accounts(accounts)
 
-    with open(file_path) as f:
+    with Path(file_path).open(encoding="utf-8") as f:
         written_accounts = json.load(f)
 
     assert sorted(written_accounts, key=itemgetter("id")) == [a.model_dump() for a in accounts]

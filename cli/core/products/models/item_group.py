@@ -1,6 +1,6 @@
+import datetime as dt
 from dataclasses import dataclass
-from datetime import date
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.products import constants
@@ -10,6 +10,8 @@ from dateutil import parser
 
 @dataclass
 class ItemGroupData(BaseDataModel, ActionMixin):
+    """Data model representing an item group."""
+
     id: str
     default: bool
     description: str
@@ -20,10 +22,11 @@ class ItemGroupData(BaseDataModel, ActionMixin):
     required: bool
 
     coordinate: str | None = None
-    created_date: date | None = None
-    updated_date: date | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.ITEMS_GROUPS_ID]["value"],
@@ -38,6 +41,7 @@ class ItemGroupData(BaseDataModel, ActionMixin):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -50,9 +54,10 @@ class ItemGroupData(BaseDataModel, ActionMixin):
             multiple=data["multiple"],
             required=data["required"],
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         return {
             "name": self.name,
@@ -64,6 +69,7 @@ class ItemGroupData(BaseDataModel, ActionMixin):
             "required": self.required,
         }
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.ITEMS_GROUPS_ID: self.id,

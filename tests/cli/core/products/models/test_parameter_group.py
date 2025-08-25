@@ -1,4 +1,4 @@
-from datetime import date
+import datetime as dt
 
 from cli.core.products.models import ParameterGroupData
 
@@ -27,8 +27,8 @@ def test_parameter_data_from_json(mpt_parameter_group_data):
     assert data.display_order == 101
     assert data.label == "Create agreement"
     assert data.name == "Create agreement"
-    assert data.created_date == date(2024, 3, 19)
-    assert data.updated_date == date(2025, 6, 10)
+    assert data.created_date == dt.date(2024, 3, 19)
+    assert data.updated_date == dt.date(2025, 6, 10)
 
 
 def test_parameter_data_to_json(parameter_group_data_from_dict):

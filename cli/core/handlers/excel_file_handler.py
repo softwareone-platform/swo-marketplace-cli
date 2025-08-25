@@ -24,6 +24,8 @@ type StyleData = dict[str, dict[str, NamedStyle]]
 
 
 class ExcelFileHandler(FileHandler):
+    """Handler for Excel (.xlsx) file operations."""
+
     def __init__(self, file_path: Path):
         super().__init__(file_path)
         self.__workbook: Workbook | None = None
@@ -42,8 +44,7 @@ class ExcelFileHandler(FileHandler):
 
     @classmethod
     def normalize_file_path(cls, file_path: str) -> Path:
-        """
-        Converts a file path string to a Path object with .xlsx extension.
+        """Converts a file path string to a Path object with .xlsx extension.
 
         Args:
             file_path: the file path to normalize.
@@ -54,9 +55,7 @@ class ExcelFileHandler(FileHandler):
         return Path(file_path).with_suffix(".xlsx")
 
     def create(self):
-        """
-        Creates a new Excel workbook and saves it to the file_path.
-        """
+        """Creates a new Excel workbook and saves it to the file_path."""
         wb = openpyxl.Workbook()
         # Change the default sheet name by General
         wb.active.title = "General"
@@ -64,9 +63,8 @@ class ExcelFileHandler(FileHandler):
         wb.save(self.file_path)
         wb.close()
 
-    def check_required_sheet(self, required_sheets: list[str]) -> None:
-        """
-        Checks if specified required sheets exist in the workbook.
+    def check_required_sheet(self, required_sheets: tuple[str, ...]) -> None:
+        """Checks if specified required sheets exist in the workbook.
 
         Args:
             required_sheets: List of required sheet names.
@@ -80,10 +78,9 @@ class ExcelFileHandler(FileHandler):
 
     # TODO: Extract the common logic with check_horizontal into a separate method.
     def check_required_fields_in_vertical_sheet(
-        self, sheet_name: str, required_fields: list[str]
+        self, sheet_name: str, required_fields: tuple[str, ...]
     ) -> None:
-        """
-        Checks if all required fields are present in a vertical sheet.
+        """Checks if all required fields are present in a vertical sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -100,8 +97,7 @@ class ExcelFileHandler(FileHandler):
     def check_required_field_values_in_vertical_sheet(
         self, sheet_name: str, required_fields: list[str]
     ) -> None:
-        """
-        Checks if all required fields have values in a vertical sheet.
+        """Checks if all required fields have values in a vertical sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -127,8 +123,7 @@ class ExcelFileHandler(FileHandler):
     def check_required_fields_in_horizontal_sheet(
         self, sheet_name: str, required_fields: list[str]
     ) -> None:
-        """
-        Checks if all required fields are present in a horizontal sheet.
+        """Checks if all required fields are present in a horizontal sheet.
 
         Args:
             sheet_name: The name of the sheet to check.
@@ -145,8 +140,7 @@ class ExcelFileHandler(FileHandler):
             raise RequiredFieldsError(details=missed_fields)
 
     def get_cell_value_by_coordinate(self, sheet_name: str, coordinate: str) -> str:
-        """
-        Retrieves the value of a specific cell in a sheet by its coordinate.
+        """Retrieves the value of a specific cell in a sheet by its coordinate.
 
         Args:
             sheet_name: The name of the sheet.
@@ -158,10 +152,9 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name)[coordinate].value
 
     def get_data_from_horizontal_sheet(
-        self, sheet_name: str, fields: list[str] | None = None
+        self, sheet_name: str, fields: tuple[str, ...] | None = None
     ) -> SheetDataGenerator:
-        """
-        Retrieves data from a horizontally oriented sheet.
+        """Retrieves data from a horizontally oriented sheet.
 
         Args:
             sheet_name: the name of the sheet.
@@ -184,10 +177,9 @@ class ExcelFileHandler(FileHandler):
             }
 
     def get_data_from_vertical_sheet(
-        self, sheet_name: str, fields: list[str] | None = None
+        self, sheet_name: str, fields: tuple[str, ...] | None = None
     ) -> SheetData:
-        """
-        Extracts data from a vertical sheet where the first column contains field names.
+        """Extracts data from a vertical sheet where the first column contains field names.
 
         Args:
             sheet_name: The name of the sheet to extract data from.
@@ -206,17 +198,33 @@ class ExcelFileHandler(FileHandler):
         }
 
     def get_sheet_next_column(self, sheet_name: str) -> str:
+        """Get the next available column letter in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+
+        Returns:
+            The next available column letter as a string.
+
+        """
         return get_column_letter(self._get_worksheet(sheet_name).max_column + 1)
 
     def get_sheet_next_row(self, sheet_name: str) -> int:
+        """Get the next available row number in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+
+        Returns:
+            The next available row number (1-based index).
+
+        """
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: list[str], patterns: list[Pattern[str]]
+        self, sheet_name: str, fields: tuple[str, ...], patterns: list[Pattern[str]]
     ) -> SheetDataGenerator:
-        """
-        Extracts data from a sheet with a dynamic column structure based on field matches and regex
-        patterns.
+        """Extracts data from a sheet with a dynamic column structure.
 
         Args:
             sheet_name: The name of the sheet to extract data from.
@@ -247,6 +255,13 @@ class ExcelFileHandler(FileHandler):
             }
 
     def merge_cells(self, sheet_name: str, range_string: str) -> None:
+        """Merges a range of cells in the specified sheet.
+
+        Args:
+            sheet_name: The name of the sheet.
+            range_string: The cell range to merge (e.g., "A1:B2").
+
+        """
         self._workbook[sheet_name].merge_cells(range_string)
 
     def read(self) -> list[Any]:
@@ -259,6 +274,7 @@ class ExcelFileHandler(FileHandler):
         return []
 
     def save(self) -> None:
+        """Saves the current workbook to the file path and cleans worksheet cache."""
         self._workbook.save(self.file_path)
         self._clean_worksheets()
 
@@ -291,6 +307,17 @@ class ExcelFileHandler(FileHandler):
         data_validation: DataValidation | None = None,
         style: NamedStyle | None = None,
     ) -> None:
+        """Writes a value to a cell, applying style and data validation if provided.
+
+        Args:
+            sheet_name: The name of the sheet.
+            col: The column number (1-based).
+            row: The row number (1-based).
+            value: The value to write to the cell.
+            data_validation: Optional data validation to apply.
+            style: Optional cell style to apply.
+
+        """
         try:
             sheet = self._get_worksheet(sheet_name)
         except KeyError:
@@ -303,7 +330,6 @@ class ExcelFileHandler(FileHandler):
         if data_validation is not None:
             if data_validation not in list(sheet.data_validations):
                 sheet.add_data_validation(data_validation)
-
             data_validation.add(sheet[coordinate])
 
         sheet[coordinate] = value

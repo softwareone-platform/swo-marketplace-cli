@@ -1,6 +1,6 @@
+import datetime as dt
 from dataclasses import dataclass, field
-from datetime import date
-from typing import Any, Self
+from typing import Any, Self, override
 
 from cli.core.models import BaseDataModel
 from cli.core.price_lists import constants
@@ -9,6 +9,8 @@ from dateutil import parser
 
 @dataclass
 class PriceListData(BaseDataModel):
+    """Data model representing a price list."""
+
     id: str | None
     currency: str
     product_id: str
@@ -21,9 +23,9 @@ class PriceListData(BaseDataModel):
     coordinate: str | None = None
     default_markup: float | None = None
     external_id: str | None = None
-    export_date: date = field(default_factory=date.today)
-    created_date: date | None = None
-    updated_date: date | None = None
+    export_date: dt.date = field(default_factory=dt.date.today)
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
     # TODO: review this attr. Type depends on the account type, should we split into
     # operation and vendor model?
     type: str | None = None
@@ -33,9 +35,11 @@ class PriceListData(BaseDataModel):
         return {"id": self.product_id}
 
     def is_operations(self) -> bool:
+        """Check if the price list type is 'operations'."""
         return self.type == "operations"
 
     @classmethod
+    @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
         return cls(
             id=data[constants.GENERAL_PRICELIST_ID]["value"],
@@ -54,6 +58,7 @@ class PriceListData(BaseDataModel):
         )
 
     @classmethod
+    @override
     def from_json(cls, data: dict[str, Any]) -> Self:
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
@@ -68,9 +73,10 @@ class PriceListData(BaseDataModel):
             default_markup=data["defaultMarkup"],
             external_id=data.get("externalIds", {}).get("vendor"),
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
-            updated_date=updated and parser.parse(updated).date() or None,
+            updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
+    @override
     def to_json(self) -> dict[str, Any]:
         data = {
             "currency": self.currency,
@@ -85,6 +91,7 @@ class PriceListData(BaseDataModel):
 
         return data
 
+    @override
     def to_xlsx(self) -> dict[str, Any]:
         return {
             constants.GENERAL_PRICELIST_ID: self.id,

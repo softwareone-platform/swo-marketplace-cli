@@ -1,5 +1,5 @@
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, cast, override
 
 from cli.core.models import DataCollectionModel
 from cli.core.models.data_model import DataModel
@@ -11,6 +11,9 @@ from cli.core.products.services.related_components_base_service import (
 
 
 class ItemService(RelatedComponentsBaseService):
+    """Service for managing item operations."""
+
+    @override
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
         data_model = super().prepare_data_model_to_create(data_model)
 
@@ -24,15 +27,14 @@ class ItemService(RelatedComponentsBaseService):
         return data_model
 
     def set_new_item_groups(self, item_groups: DataCollectionModel | None) -> None:
-        """
-        Update item group references in item content.
+        """Update item group references in item content.
 
         Args:
             item_groups: A collection of item groups to update.
 
         """
         if item_groups is None or not item_groups.collection:
-            return None
+            return
 
         new_ids = {}
         for item in self.file_manager.read_data():
@@ -46,8 +48,7 @@ class ItemService(RelatedComponentsBaseService):
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
-        return None
-
+    @override
     def set_export_params(self) -> dict[str, Any]:
         params = super().set_export_params()
         params.update({"product.id": self.resource_id})
@@ -86,7 +87,7 @@ class ItemService(RelatedComponentsBaseService):
         super()._action_update_item(data_model)
 
     def _get_update_action_handler(self, model_action: DataActionEnum) -> Callable:
-        if model_action in (ItemActionEnum.REVIEW, ItemActionEnum.PUBLISH):
+        if model_action in {ItemActionEnum.REVIEW, ItemActionEnum.PUBLISH}:
             return self._action_post_action_item
 
         return super()._get_update_action_handler(model_action)

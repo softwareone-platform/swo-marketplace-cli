@@ -5,9 +5,7 @@ from cli.core.products.models import DataActionEnum, ItemActionEnum
 
 @dataclass(kw_only=True)
 class ActionMixin:
-    """
-    Mixin class providing action-related functionality for data models.
-    """
+    """Mixin class providing action-related functionality for data models."""
 
     action: DataActionEnum = DataActionEnum.SKIP
 
@@ -45,11 +43,13 @@ class ActionMixin:
         Returns:
             True if the object should be skipped, False otherwise.
         """
-        return self.action in (DataActionEnum.SKIP, DataActionEnum.SKIPPED)
+        return self.action in {DataActionEnum.SKIP, DataActionEnum.SKIPPED}
 
 
 @dataclass
 class ItemActionMixin(ActionMixin):
+    """Mixin class providing item-specific action functionality."""
+
     @property
     def to_review(self) -> bool:
         """Check if the object is marked for review.
