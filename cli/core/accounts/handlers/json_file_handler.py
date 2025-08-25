@@ -32,7 +32,7 @@ class JsonFileHandler(FileHandler):
         if not self.exists():
             self.create()
 
-        with Path(self.file_path).open() as f:
+        with Path(self.file_path).open(encoding="utf-8") as f:
             return json.load(f)
 
     def write(self, data: list[dict[str, Any]]) -> None:
@@ -44,6 +44,6 @@ class JsonFileHandler(FileHandler):
             data: the data to be written to the file.
         """
         Path(self.file_path).parent.mkdir(parents=True, exist_ok=True)
-        with Path(self.file_path).open("w+") as f:
+        with Path(self.file_path).open("w+", encoding="utf-8") as f:
             json_data = json.dumps(data, indent=2)
             f.write(json_data)

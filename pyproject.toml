@@ -175,8 +175,6 @@ ignore = [
   "PLR09",   # we have our own complexity rules
   "PLR2004", # do not report magic numbers
   "PLR6301", # do not require classmethod / staticmethod when self not used
-  "PLW1514", # conflict with PTH123 using Path().open()
-  "PT011", # pytest.raises({exception}) is too broad, set the match parameter or use a more specific exception
   "TRY003",  # long exception messages from `tryceratops`
 ]
 external = [ "WPS" ]
@@ -195,6 +193,7 @@ pydocstyle.ignore-decorators = ["property"]
   "D101", # missing docstring in public class
   "D102", # missing docstring in publich method
   "D103", # missing docstring in public function
+  "PT011", # pytest.raises({exception}) is too broad, set the match parameter or use a more specific exception
   "S101", # asserts
   "S105", # hardcoded passwords
   "S404", # subprocess calls are for tests

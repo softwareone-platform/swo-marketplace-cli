@@ -86,7 +86,7 @@ def test_write_accounts(mocker, tmp_path, expected_account, another_expected_acc
     accounts = [expected_account, another_expected_account]
     write_accounts(accounts)
 
-    with Path(file_path).open() as f:
+    with Path(file_path).open(encoding="utf-8") as f:
         written_accounts = json.load(f)
 
     assert sorted(written_accounts, key=itemgetter("id")) == [a.model_dump() for a in accounts]
