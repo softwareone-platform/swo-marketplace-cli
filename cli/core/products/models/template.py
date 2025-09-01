@@ -17,16 +17,17 @@ class TemplateData(BaseDataModel, ActionMixin):
     name: str
     type: str
     content: str
-    default: bool
 
     coordinate: str | None = None
     content_coordinate: str | None = None
+    default: bool | None = None
     created_date: dt.date | None = None
     updated_date: dt.date | None = None
 
     @classmethod
     @override
     def from_dict(cls, data: dict[str, Any]) -> Self:
+        default = data[constants.TEMPLATES_DEFAULT]["value"]
         return cls(
             id=data[constants.TEMPLATES_ID]["value"],
             coordinate=data[constants.TEMPLATES_ID]["coordinate"],
@@ -35,7 +36,7 @@ class TemplateData(BaseDataModel, ActionMixin):
             type=data[constants.TEMPLATES_TYPE]["value"],
             content=data[constants.TEMPLATES_CONTENT]["value"],
             content_coordinate=data[constants.TEMPLATES_CONTENT]["coordinate"],
-            default=data[constants.TEMPLATES_DEFAULT]["value"] == "True",
+            default=None if default is None else default == "True",
         )
 
     @classmethod
@@ -47,7 +48,7 @@ class TemplateData(BaseDataModel, ActionMixin):
             name=data["name"],
             type=data["type"],
             content=data["content"],
-            default=data["default"],
+            default=data.get("default"),
             created_date=parser.parse(data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
@@ -68,7 +69,7 @@ class TemplateData(BaseDataModel, ActionMixin):
             constants.TEMPLATES_NAME: self.name,
             constants.TEMPLATES_ACTION: self.action,
             constants.TEMPLATES_TYPE: self.type,
-            constants.TEMPLATES_DEFAULT: str(self.default),
+            constants.TEMPLATES_DEFAULT: str(self.default) if self.default is not None else None,
             constants.TEMPLATES_CONTENT: self.content,
             constants.TEMPLATES_CREATED: self.created_date,
             constants.TEMPLATES_MODIFIED: self.updated_date,
