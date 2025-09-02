@@ -130,7 +130,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             data_model: The data model to be created
 
         """
-        new_data_model = self.api.post(data_model.to_json())
+        new_data_model = self.api.post(json=data_model.to_json())
         data_model.id = new_data_model["id"]  # type: ignore[attr-defined]
 
     def _action_delete_item(self, data_model: DataModel) -> None:

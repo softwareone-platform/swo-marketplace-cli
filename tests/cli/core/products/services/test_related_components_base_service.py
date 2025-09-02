@@ -175,7 +175,7 @@ def test_update_action_create(mocker, service_context):
     assert result.model is None
     write_ids_mock.assert_called_once_with({"fake_coordinate": "new_fake_id"})
     stats_synced_mock.assert_called_once_with("fake_tab_name")
-    api_post_mock.assert_called_once_with({"id": "create_id"})
+    api_post_mock.assert_called_once_with(json={"id": "create_id"})
 
 
 def test_update_action_delete(mocker, service_context):
