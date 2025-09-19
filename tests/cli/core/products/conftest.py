@@ -110,6 +110,7 @@ def product_container_mock(mocker, account_container_mock):
     container.item_group_service.override(MagicMock(ItemGroupService))
     container.parameter_group_service.override(MagicMock(ParameterGroupService))
     container.agreement_parameters_service.override(MagicMock(ParametersService))
+    container.asset_parameters_service.override(MagicMock(ParametersService))
     container.item_parameters_service.override(MagicMock(ParametersService))
     container.request_parameters_service.override(MagicMock(ParametersService))
     container.subscription_parameters_service.override(MagicMock(ParametersService))
@@ -612,6 +613,43 @@ def mpt_agreement_parameter_data():
                     "icon": "/v1/accounts/users/USR-0000-0022/icon",
                 },
             },
+        },
+    }
+
+
+@pytest.fixture
+def mpt_asset_parameter_data():
+    return {
+        "id": "PAR-0232-2541-0027",
+        "name": "Current quantity",
+        "revision": 1,
+        "scope": "Asset",
+        "phase": "Fulfillment",
+        "context": "None",
+        "product": {
+            "id": "PRD-0232-2541",
+            "name": "[DO NOT USE] Adobe VIP Marketplace for Commercial",
+            "externalIds": {"operations": ""},
+            "icon": "/v1/catalog/products/PRD-0232-2541/icon",
+            "status": "Unpublished",
+        },
+        "description": "Current quantity",
+        "externalId": "currentQuantity",
+        "displayOrder": 2021,
+        "constraints": {"required": False},
+        "options": {"placeholderText": "Current quantity", "hintText": "Current quantity"},
+        "type": "SingleLineText",
+        "status": "Active",
+        "audit": {
+            "created": {
+                "at": "2025-08-13T16:10:06.958Z",
+                "by": {
+                    "id": "USR-0000-0022",
+                    "name": "User22",
+                    "icon": "/v1/accounts/users/USR-0000-0022/icon",
+                    "revision": 1,
+                },
+            }
         },
     }
 

@@ -277,8 +277,8 @@ def test_create_product(
     create_item_group_mock.assert_called_once()
     create_parameter_group_mock.assert_called_once()
     create_parameter_service_mock.assert_called_once()
-    assert set_new_parameter_mock.call_count == 1
-    assert add_collection_spy.call_count == 3
+    set_new_parameter_mock.asset_called_once()
+    assert add_collection_spy.call_count == 4
     create_template_service_mock.assert_called_once()
     set_new_parameter_template_mock.assert_called_once()
     create_item_service_mock.assert_called_once()
@@ -348,6 +348,7 @@ def test_update_product(product_container_mock):
     product_container_mock.template_service().update.assert_called_once()
     product_container_mock.parameter_group_service().update.assert_called_once()
     product_container_mock.agreement_parameters_service().update.assert_called_once()
+    product_container_mock.asset_parameters_service().update.assert_called_once()
     product_container_mock.request_parameters_service().update.assert_called_once()
     product_container_mock.subscription_parameters_service().update.assert_called_once()
 
@@ -363,6 +364,7 @@ def test_export_product(
     mpt_item_group_data,
     mpt_parameter_group_data,
     mpt_agreement_parameter_data,
+    mpt_asset_parameter_data,
     mpt_item_parameter_data,
     mpt_request_parameter_data,
     mpt_subscription_parameter_data,
@@ -377,6 +379,7 @@ def test_export_product(
             list_response_mock_data_factory([mpt_item_group_data]),
             list_response_mock_data_factory([mpt_parameter_group_data]),
             list_response_mock_data_factory([mpt_agreement_parameter_data]),
+            list_response_mock_data_factory([mpt_asset_parameter_data]),
             list_response_mock_data_factory([mpt_item_parameter_data]),
             list_response_mock_data_factory([mpt_request_parameter_data]),
             list_response_mock_data_factory([mpt_subscription_parameter_data]),
@@ -399,6 +402,7 @@ def test_export_product(
         "Items Groups",
         "Parameters Groups",
         "Agreements Parameters",
+        "Assets Parameters",
         "Item Parameters",
         "Request Parameters",
         "Subscription Parameters",
@@ -437,6 +441,11 @@ def test_export_product(
     assert agreements_params_sheet.max_row == 2
     assert agreements_params_sheet["A1"].value == "ID"
     assert agreements_params_sheet["A2"].value == "PAR-0232-2541-0001"
+
+    agreements_params_sheet = wb["Assets Parameters"]
+    assert agreements_params_sheet.max_row == 2
+    assert agreements_params_sheet["A1"].value == "ID"
+    assert agreements_params_sheet["A2"].value == "PAR-0232-2541-0027"
 
     item_params_sheet = wb["Item Parameters"]
     assert item_params_sheet.max_row == 2
