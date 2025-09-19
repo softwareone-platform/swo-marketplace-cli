@@ -4,6 +4,7 @@ from .items import ItemData
 from .parameter_group import ParameterGroupData
 from .parameters import (
     AgreementParametersData,
+    AssetParametersData,
     ItemParametersData,
     RequestParametersData,
     SubscriptionParametersData,
@@ -13,6 +14,7 @@ from .template import TemplateData
 
 __all__ = [
     "AgreementParametersData",
+    "AssetParametersData",
     "DataActionEnum",
     "ItemActionEnum",
     "ItemData",

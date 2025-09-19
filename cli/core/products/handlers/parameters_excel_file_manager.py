@@ -9,6 +9,7 @@ from cli.core.products.constants import (
     PARAMETERS_FIELDS,
     PARAMETERS_ID,
     TAB_AGREEMENT_PARAMETERS,
+    TAB_ASSET_PARAMETERS,
     TAB_ITEM_PARAMETERS,
     TAB_REQUEST_PARAMETERS,
     TAB_SUBSCRIPTION_PARAMETERS,
@@ -16,6 +17,7 @@ from cli.core.products.constants import (
 from cli.core.products.handlers.data_validation import ACTION_DATA_VALIDATION
 from cli.core.products.models import (
     AgreementParametersData,
+    AssetParametersData,
     ItemParametersData,
     RequestParametersData,
     SubscriptionParametersData,
@@ -44,6 +46,13 @@ class AgreementParametersExcelFileManager(ParametersExcelFileManager):
 
     _data_model = AgreementParametersData
     _sheet_name = TAB_AGREEMENT_PARAMETERS
+
+
+class AssetParametersExcelFileManager(ParametersExcelFileManager):
+    """Excel file manager for agreement parameter data operations."""
+
+    _data_model = AssetParametersData
+    _sheet_name = TAB_ASSET_PARAMETERS
 
 
 class ItemParametersExcelFileManager(ParametersExcelFileManager):

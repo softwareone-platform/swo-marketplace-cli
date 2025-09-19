@@ -22,8 +22,10 @@ from cli.core.products.handlers import (
     SubscriptionParametersExcelFileManager,
     TemplateExcelFileManager,
 )
+from cli.core.products.handlers.parameters_excel_file_manager import AssetParametersExcelFileManager
 from cli.core.products.models import (
     AgreementParametersData,
+    AssetParametersData,
     ItemData,
     ItemGroupData,
     ItemParametersData,
@@ -84,6 +86,7 @@ class ProductContainer(containers.DeclarativeContainer):
         item_group=providers.Factory(ItemGroupExcelFileManager, file_path),
         parameter_group=providers.Factory(ParameterGroupExcelFileManager, file_path),
         agreement_parameters=providers.Factory(AgreementParametersExcelFileManager, file_path),
+        asset_parameters=providers.Factory(AssetParametersExcelFileManager, file_path),
         item_parameters=providers.Factory(ItemParametersExcelFileManager, file_path),
         request_parameters=providers.Factory(RequestParametersExcelFileManager, file_path),
         subscription_parameters=providers.Factory(
@@ -118,6 +121,11 @@ class ProductContainer(containers.DeclarativeContainer):
             "api": _apis.provided["parameters"],
             "data_model": AgreementParametersData,
             "file_manager": _file_managers.provided["agreement_parameters"],
+        },
+        "asset_parameters": {
+            "api": _apis.provided["parameters"],
+            "data_model": AssetParametersData,
+            "file_manager": _file_managers.provided["asset_parameters"],
         },
         "item_parameters": {
             "api": _apis.provided["parameters"],
@@ -156,6 +164,9 @@ class ProductContainer(containers.DeclarativeContainer):
     )
     agreement_parameters_service = providers.Factory(
         ParametersService, service_context=_partial_context(**_services["agreement_parameters"])
+    )
+    asset_parameters_service = providers.Factory(
+        ParametersService, service_context=_partial_context(**_services["asset_parameters"])
     )
     item_parameters_service = providers.Factory(
         ParametersService, service_context=_partial_context(**_services["item_parameters"])
