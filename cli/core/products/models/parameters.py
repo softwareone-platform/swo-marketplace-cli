@@ -18,6 +18,7 @@ class ParamScopeEnum(StrEnum):
     """Enumeration for parameter scope."""
 
     AGREEMENT = "Agreement"
+    ASSET = "Asset"
     ITEM = "Item"
     REQUEST = "Request"
     SUBSCRIPTION = "Subscription"
@@ -146,6 +147,13 @@ class AgreementParametersData(ParametersData):
     """Data model representing agreement parameters."""
 
     scope: ParamScopeEnum = ParamScopeEnum.AGREEMENT
+
+
+@dataclass
+class AssetParametersData(ParametersData):
+    """Data model representing agreement parameters."""
+
+    scope: ParamScopeEnum = ParamScopeEnum.ASSET
 
 
 @dataclass

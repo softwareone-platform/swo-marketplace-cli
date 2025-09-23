@@ -189,6 +189,7 @@ class ProductStatsCollector(StatsCollector):
         parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
         items_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
         agreements_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
+        asset_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
         item_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
         request_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
         subscription_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
@@ -200,6 +201,7 @@ class ProductStatsCollector(StatsCollector):
             "Parameters Groups": parameters_groups,
             "Items Groups": items_groups,
             "Agreements Parameters": agreements_parameters,
+            "Assets Parameters": asset_parameters,
             "Item Parameters": item_parameters,
             "Request Parameters": request_parameters,
             "Subscription Parameters": subscription_parameters,
