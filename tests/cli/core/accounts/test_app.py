@@ -16,13 +16,13 @@ runner = CliRunner()
 @pytest.fixture
 def new_token():
     return Token(
-        id="TKN-123456",
+        id="TKN-1111-1111",
         account=Account(
             id="ACC-12345new",
             name="New Account",
             type="Vendor",
         ),
-        token="new-secret",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
     )
 
 
@@ -30,7 +30,7 @@ def new_token():
 def existing_token():
     def _wrapper(token):
         return Token(
-            id="TKN-0000-0000-0002",
+            id="TKN-1111-1111",
             account=Account(
                 id="ACC-12342",
                 name="Account 2",
@@ -45,9 +45,12 @@ def existing_token():
 def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
-    mocker.patch("cli.core.accounts.app.get_token", return_value=new_token)
+    mocker.patch(
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
+        return_value=new_token,
+    )
 
-    result = runner.invoke(app, ["add", "new-secret"])
+    result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
     with Path(account_file_path).open(encoding="utf-8") as f:
@@ -58,9 +61,9 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
             "id": "ACC-12345new",
             "name": "New Account",
             "type": "Vendor",
-            "token": "new-secret",
-            "token_id": "TKN-123456",
-            "environment": "https://api.platform.softwareone.com/public/v1",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
+            "environment": "https://api.platform.softwareone.com",
             "is_active": True,
         }
     ]
@@ -68,9 +71,12 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
 
 def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch("cli.core.accounts.app.get_token", return_value=new_token)
+    mocker.patch(
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
+        return_value=new_token,
+    )
 
-    result = runner.invoke(app, ["add", "new-secret"])
+    result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
     with Path(new_accounts_path).open(encoding="utf-8") as f:
@@ -81,8 +87,8 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
             "id": "ACC-12341",
             "name": "Account 1",
             "type": "Vendor",
-            "token": "secret 1",
-            "token_id": "TKN-0000-0000-0001",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -90,8 +96,8 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "idt:TKN-0000-0000-0002:secret 2",
-            "token_id": "TKN-0000-0000-0002",
+            "token": "idt:TKN-1111-1112:secret2",
+            "token_id": "TKN-1111-1112",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -99,9 +105,9 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
             "id": "ACC-12345new",
             "name": "New Account",
             "type": "Vendor",
-            "token": "new-secret",
-            "token_id": "TKN-123456",
-            "environment": "https://api.platform.softwareone.com/public/v1",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
+            "environment": "https://api.platform.softwareone.com",
             "is_active": True,
         },
     ]
@@ -109,13 +115,16 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
 
 def test_add_account_accounts_override_environment(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch("cli.core.accounts.app.get_token", return_value=new_token)
+    mocker.patch(
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
+        return_value=new_token,
+    )
 
     result = runner.invoke(
         app,
         [
             "add",
-            "new-secret",
+            "idt:TKN-1111-1111:secret",
             "--environment",
             "https://new-environment.example.com",
         ],
@@ -130,8 +139,8 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
             "id": "ACC-12341",
             "name": "Account 1",
             "type": "Vendor",
-            "token": "secret 1",
-            "token_id": "TKN-0000-0000-0001",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -139,8 +148,8 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "idt:TKN-0000-0000-0002:secret 2",
-            "token_id": "TKN-0000-0000-0002",
+            "token": "idt:TKN-1111-1112:secret2",
+            "token_id": "TKN-1111-1112",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -148,8 +157,8 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
             "id": "ACC-12345new",
             "name": "New Account",
             "type": "Vendor",
-            "token": "new-secret",
-            "token_id": "TKN-123456",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://new-environment.example.com",
             "is_active": True,
         },
@@ -159,20 +168,23 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
 def test_add_account_token_failed(new_accounts_path, mocker):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
-        "cli.core.accounts.app.get_token",
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
         side_effect=MPTAPIError("critical error", "you can't perform the operation"),
     )
 
-    result = runner.invoke(app, ["add", "new-secret"])
+    result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 3, result.stdout
 
 
 def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch("cli.core.accounts.app.get_token", return_value=existing_token("new-super-secret"))
+    mocker.patch(
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
+        return_value=existing_token("idt:TKN-1111-1111:secret"),
+    )
 
-    result = runner.invoke(app, ["add", "new-super-secret"], input="N\n")
+    result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="N\n")
 
     assert result.exit_code == 1, result.stdout
     with Path(new_accounts_path).open(encoding="utf-8") as f:
@@ -183,8 +195,8 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
             "id": "ACC-12341",
             "name": "Account 1",
             "type": "Vendor",
-            "token": "secret 1",
-            "token_id": "TKN-0000-0000-0001",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://example.com",
             "is_active": True,
         },
@@ -192,8 +204,8 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "idt:TKN-0000-0000-0002:secret 2",
-            "token_id": "TKN-0000-0000-0002",
+            "token": "idt:TKN-1111-1112:secret2",
+            "token_id": "TKN-1111-1112",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -202,9 +214,12 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
 
 def test_add_existing_account_replace(new_accounts_path, mocker, existing_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    mocker.patch("cli.core.accounts.app.get_token", return_value=existing_token("new-super-secret"))
+    mocker.patch(
+        "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
+        return_value=existing_token("idt:TKN-1111-1111:secret"),
+    )
 
-    result = runner.invoke(app, ["add", "new-super-secret"], input="y\n")
+    result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
     with Path(new_accounts_path).open(encoding="utf-8") as f:
@@ -215,8 +230,8 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
             "id": "ACC-12341",
             "name": "Account 1",
             "type": "Vendor",
-            "token": "secret 1",
-            "token_id": "TKN-0000-0000-0001",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -224,9 +239,9 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "new-super-secret",
-            "token_id": "TKN-0000-0000-0002",
-            "environment": "https://api.platform.softwareone.com/public/v1",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
+            "environment": "https://api.platform.softwareone.com",
             "is_active": True,
         },
     ]
@@ -263,8 +278,8 @@ def test_activate_account(new_accounts_path, mocker):
             "id": "ACC-12341",
             "name": "Account 1",
             "type": "Vendor",
-            "token": "secret 1",
-            "token_id": "TKN-0000-0000-0001",
+            "token": "idt:TKN-1111-1111:secret",
+            "token_id": "TKN-1111-1111",
             "environment": "https://example.com",
             "is_active": False,
         },
@@ -272,8 +287,8 @@ def test_activate_account(new_accounts_path, mocker):
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "idt:TKN-0000-0000-0002:secret 2",
-            "token_id": "TKN-0000-0000-0002",
+            "token": "idt:TKN-1111-1112:secret2",
+            "token_id": "TKN-1111-1112",
             "environment": "https://example.com",
             "is_active": True,
         },
@@ -319,8 +334,8 @@ def test_remove_account(new_accounts_path, mocker):
             "id": "ACC-12342",
             "name": "Account 2",
             "type": "Vendor",
-            "token": "idt:TKN-0000-0000-0002:secret 2",
-            "token_id": "TKN-0000-0000-0002",
+            "token": "idt:TKN-1111-1112:secret2",
+            "token_id": "TKN-1111-1112",
             "environment": "https://example.com",
             "is_active": False,
         }

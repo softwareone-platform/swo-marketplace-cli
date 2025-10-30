@@ -22,13 +22,13 @@ from cli.core.mpt.models import Token
 
 def test_from_token(expected_account):
     token = Token(
-        id="TKN-0000-0000-0001",
+        id="TKN-1111-1111",
         account=MPTAccount(
             id="ACC-12341",
             name="Account 1",
             type="Vendor",
         ),
-        token="secret 1",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
     )
     account = from_token(token, "https://example.com")
 

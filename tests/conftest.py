@@ -8,6 +8,17 @@ from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
 from cli.core.mpt.client import MPTClient
 from cli.core.mpt.models import Account, Product
+from mpt_api_client import MPTClient as MPTAPIClient
+
+
+@pytest.fixture
+def mock_mpt_api_client(mocker):
+    return mocker.MagicMock(spec=MPTAPIClient)
+
+
+@pytest.fixture
+def mock_mpt_api_tokens(mock_mpt_api_client):
+    return mock_mpt_api_client.accounts.api_tokens.get.return_value
 
 
 @pytest.fixture
@@ -140,8 +151,8 @@ def expected_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="secret 1",  # noqa: S106
-        token_id="TKN-0000-0000-0001",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token_id="TKN-1111-1111",  # noqa: S106
         environment="https://example.com",
         is_active=True,
     )
@@ -153,8 +164,8 @@ def operations_account():
         id="ACC-12341",
         name="Account 1",
         type="Operations",
-        token="secret 1",  # noqa: S106
-        token_id="TKN-0000-0000-0001",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token_id="TKN-1111-1111",  # noqa: S106
         environment="https://example.com",
         is_active=True,
     )
@@ -166,8 +177,8 @@ def another_expected_account():
         id="ACC-12342",
         name="Account 2",
         type="Vendor",
-        token="idt:TKN-0000-0000-0002:secret 2",  # noqa: S106
-        token_id="TKN-0000-0000-0002",  # noqa: S106
+        token="idt:TKN-1111-1112:secret2",  # noqa: S106
+        token_id="TKN-1111-1112",  # noqa: S106
         environment="https://example.com",
         is_active=False,
     )
@@ -179,8 +190,8 @@ def active_vendor_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="secret 1",  # noqa: S106
-        token_id="TKN-0000-0000-0001",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token_id="TKN-1111-1111",  # noqa: S106
         environment="https://example.com",
         is_active=True,
     )
@@ -192,8 +203,8 @@ def active_operations_account():
         id="ACC-12341",
         name="Account 1",
         type="Operations",
-        token="secret 1",  # noqa: S106
-        token_id="TKN-0000-0000-0001",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token_id="TKN-1111-1111",  # noqa: S106
         environment="https://example.com",
         is_active=True,
     )
@@ -205,8 +216,8 @@ def new_token_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="idt:TKN-0000-0000-0001:secret 1",  # noqa: S106
-        token_id="TKN-0000-0000-0001",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token_id="TKN-1111-1111",  # noqa: S106
         environment="https://example.com",
         is_active=True,
     )

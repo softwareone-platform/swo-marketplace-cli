@@ -1,6 +1,7 @@
 from typing import Annotated
 
 import typer
+from cli.core.accounts.api.account_api_service import MPTAccountService
 from cli.core.accounts.constants import FETCHING, READING, REMOVING, STATUS_MSG
 from cli.core.console import console
 from cli.core.errors import (
@@ -8,9 +9,7 @@ from cli.core.errors import (
     MPTAPIError,
     NoActiveAccountFoundError,
 )
-from cli.core.mpt.client import MPTClient
-from cli.core.mpt.flows import get_token
-from cli.core.state import state
+from mpt_api_client import MPTClient
 from rich import box
 from rich.table import Table
 
@@ -34,15 +33,16 @@ def add_account(
     secret: Annotated[str, typer.Argument(help="SoftwareOne Marketplace API Token secret")],
     environment: Annotated[
         str, typer.Option("--environment", "-e", help="URL to the API for environment")
-    ] = "https://api.platform.softwareone.com/public/v1",
+    ] = "https://api.platform.softwareone.com",
 ):
     """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
-        mpt_client = MPTClient(environment, secret, debug=state.verbose)
+        mpt_client = MPTClient.from_config(api_token=secret, base_url=environment)
+        account_service = MPTAccountService(mpt_client)
         try:
-            token = get_token(mpt_client, secret)
-        except MPTAPIError as e:
+            token = account_service.get_authentication(secret)
+        except (MPTAPIError, ValueError) as e:
             console.print(
                 f"Cannot find account for token {secret} on "
                 f"environment {environment}. Exception: {e!s}"
