@@ -250,18 +250,10 @@ def create_product(container, status):
 
     status.update(f"Create asset parameters for product {product.id}...")
     asset_parameter_service = container.asset_parameters_service()
-    # Allow creating products without the Asset Parameters tab. This can be removed once the
-    # assets feature is backported to v4 or v5 becomes official.
-    try:  # pragma: no cover
-        asset_parameter_service.set_new_parameter_group(parameter_group_collection_data)
-        asset_parameter_data_collection = asset_parameter_service.create().collection
-        parameters_data_collection.add(asset_parameter_data_collection.collection)
-    except KeyError:  # pragma: no cover
-        console.print(
-            f"Product {product.id} definition file does not contain an Asset Parameters tab. "
-            f"This will be mandatory once the Assets feature is backported to v4 or when v5 "
-            f"becomes official"
-        )
+    asset_parameter_service.set_new_parameter_group(parameter_group_collection_data)
+    asset_parameter_data_collection = asset_parameter_service.create().collection
+    parameters_data_collection.add(asset_parameter_data_collection.collection)
+
     status.update(f"Create item parameters for product {product.id}...")
     item_parameter_service = container.item_parameters_service()
     item_parameter_service.set_new_parameter_group(parameter_group_collection_data)
