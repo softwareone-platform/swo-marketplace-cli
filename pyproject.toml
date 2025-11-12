@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "dependency-injector==4.48.*",
+    "mpt-api-client==0.0.*",
     "openpyxl==3.1.*",
     "pydantic==2.11.*",
     "pyfiglet==1.0.*",
@@ -75,7 +76,7 @@ build-backend = "hatchling.build"
 [tool.pytest.ini_options]
 testpaths = "tests"
 pythonpath = "."
-addopts = "--cov=cli --cov-report=term-missing --cov-report=html --cov-report=xml"
+addopts = "--cov=cli --cov-report=term-missing --cov-report=html --cov-report=xml --import-mode=importlib"
 log_cli = false
 filterwarnings = [
     "ignore:Support for class-based `config` is deprecated:DeprecationWarning",
@@ -107,7 +108,7 @@ omit = [
 # Ruff config: https://docs.astral.sh/ruff/settings
 preview = true
 target-version = "py312"
-extend-exclude = [".vscode", ".devcontainer", "swo", "adobe_vipm/flows/pipeline.py"]
+extend-exclude = [".vscode", ".devcontainer", "swo"]
 output-format = "full"
 line-length = 100
 

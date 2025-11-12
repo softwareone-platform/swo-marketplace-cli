@@ -2,6 +2,7 @@ from collections.abc import Callable
 from functools import wraps
 from typing import ParamSpec, TypeVar
 
+from mpt_api_client.exceptions import MPTHttpError as APIException
 from requests import RequestException
 
 Param = ParamSpec("Param")
@@ -54,6 +55,21 @@ def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callabl
                 msg = str(e.response.content)
 
             raise MPTAPIError(str(e), msg)
+
+    return _wrapper
+
+
+def wrap_mpt_api_error[**Param, RetType](
+    func: Callable[Param, RetType],
+) -> Callable[Param, RetType]:
+    """Decorator to wrap MPT API functions and handle APIException."""
+
+    @wraps(func)
+    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+        try:
+            return func(*args, **kwargs)
+        except APIException as e:
+            raise MPTAPIError(str(e), e.body)
 
     return _wrapper
 

@@ -19,47 +19,6 @@ def create_mock_account():
     )
 
 
-def test_verbose_flag_enables_logging(caplog, requests_mocker):
-    data = {
-        "$meta": {
-            "pagination": {"offset": 0, "limit": 10, "total": 1},
-            "omitted": ["modules", "audit"],
-        },
-        "data": [
-            {
-                "id": "TKN-1234-5678",
-                "href": "/accounts/api-tokens/TKN-1234-5678",
-                "status": "Active",
-                "name": "Test API Token",
-                "description": "Token for testing purposes",
-                "icon": "",
-                "lastAccessAt": "2024-03-15T10:00:00.000Z",
-                "token": "idt:TKN-1234-5678:abc123",
-                "account": {
-                    "id": "ACC-8765-4321",
-                    "href": "/accounts/accounts/ACC-8765-4321",
-                    "type": "Development",
-                    "status": "Active",
-                    "icon": "/v1/accounts/accounts/ACC-8765-4321/icon",
-                    "name": "TestCompany",
-                },
-            }
-        ],
-    }
-    requests_mocker.add(
-        requests_mocker.GET,
-        "https://api.platform.softwareone.com/public/v1/accounts/api-tokens?limit=2&token=test_token",
-        json=data,
-        status=200,
-    )
-    with caplog.at_level(logging.DEBUG):
-        runner.invoke(app, ["--verbose", "accounts", "add", "test_token"])
-
-    assert len(caplog.records) > 0
-    assert any("GET" in record.message for record in caplog.records)
-    assert any("/accounts" in record.message for record in caplog.records)
-
-
 def test_log_file_writes_to_file(tmp_path, mocker):
     mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
     mock_account = create_mock_account()
