@@ -14,8 +14,9 @@ class FakeExcelFileManager(ExcelFileManager):
 
 
 def test_get_row_and_column_from_coordinate_valid():
-    col, row = FakeExcelFileManager._get_row_and_column_from_coordinate("B12")  # noqa: SLF001
+    result = FakeExcelFileManager._get_row_and_column_from_coordinate("B12")  # noqa: SLF001
 
+    col, row = result
     assert col == "B"
     assert row == 12
 
@@ -29,6 +30,6 @@ def test_write_ids(mocker):
     file_handler_spy = mocker.patch.object(ExcelFileHandler, "write")
     file_manager = FakeExcelFileManager("/tmp/fake.xlsx")  # noqa: S108
 
-    file_manager.write_ids({"A1": "12345"})
+    file_manager.write_ids({"A1": "12345"})  # act
 
     file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])  # noqa: SLF001

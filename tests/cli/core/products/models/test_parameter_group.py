@@ -16,19 +16,19 @@ def test_parameter_data_from_dict(parameter_group_file_data):
 
 
 def test_parameter_data_from_json(mpt_parameter_group_data):
-    data = ParameterGroupData.from_json(mpt_parameter_group_data)
+    result = ParameterGroupData.from_json(mpt_parameter_group_data)
 
-    assert data.id == "PGR-0232-2541-0002"
-    assert data.default is True
-    assert data.description == (
+    assert result.id == "PGR-0232-2541-0002"
+    assert result.default is True
+    assert result.description == (
         "When you are creating a new agreement with SoftwareOne, you have the option to establish "
         "a new Microsoft account or connect it to an existing account you already hold with Adobe."
     )
-    assert data.display_order == 101
-    assert data.label == "Create agreement"
-    assert data.name == "Create agreement"
-    assert data.created_date == dt.date(2024, 3, 19)
-    assert data.updated_date == dt.date(2025, 6, 10)
+    assert result.display_order == 101
+    assert result.label == "Create agreement"
+    assert result.name == "Create agreement"
+    assert result.created_date == dt.date(2024, 3, 19)
+    assert result.updated_date == dt.date(2025, 6, 10)
 
 
 def test_parameter_data_to_json(parameter_group_data_from_dict):

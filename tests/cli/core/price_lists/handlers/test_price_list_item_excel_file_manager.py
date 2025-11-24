@@ -9,12 +9,12 @@ from cli.core.price_lists.models import ItemData
 
 
 def test_class_properties(mocker, price_list_data_from_dict):
-    manager = PriceListItemExcelFileManager("fake_file.xlsx")
+    result = PriceListItemExcelFileManager("fake_file.xlsx")
 
-    assert manager._data_model == ItemData  # noqa: SLF001
-    assert manager._fields == PRICELIST_ITEMS_FIELDS
-    assert manager._sheet_name == TAB_PRICE_ITEMS  # noqa: SLF001
-    assert manager._data_validation_map[PRICELIST_ITEMS_ACTION].formula1 == '"-,update"'  # noqa: SLF001
+    assert result._data_model == ItemData  # noqa: SLF001
+    assert result._fields == PRICELIST_ITEMS_FIELDS
+    assert result._sheet_name == TAB_PRICE_ITEMS  # noqa: SLF001
+    assert result._data_validation_map[PRICELIST_ITEMS_ACTION].formula1 == '"-,update"'  # noqa: SLF001
 
 
 def test_read_data(mocker, item_data_from_dict):

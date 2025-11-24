@@ -48,7 +48,7 @@ def test_add(mocker, file_manager):
     to_xlsx_mock = mocker.patch.object(FakeDataModel, "to_xlsx", return_value={"ID": "fake_id"})
     write_mock = mocker.patch.object(file_manager.file_handler, "write")
 
-    file_manager.add(FakeDataModel())
+    file_manager.add(FakeDataModel())  # act
 
     to_xlsx_mock.assert_called_once()
     write_mock.assert_called_once_with([{"FakeSheet": {"B2": "fake_id", "B3": ""}}])
@@ -59,7 +59,7 @@ def test_check_required_tabs(mocker, file_manager):
         file_manager.file_handler, "check_required_sheet"
     )
 
-    file_manager.check_required_tabs()
+    file_manager.check_required_tabs()  # act
 
     check_required_sheet_mock.assert_called_once_with(("Required tab",))
 
@@ -75,7 +75,7 @@ def test_check_required_fields_by_section(mocker, file_manager):
         file_manager.file_handler, "check_required_fields_in_horizontal_sheet"
     )
 
-    file_manager.check_required_fields_by_section()
+    file_manager.check_required_fields_by_section()  # act
 
     check_required_fields_in_vertical_mock.assert_called_once()
     check_required_field_values_mock.assert_called_once()
@@ -88,7 +88,7 @@ def test_create_tab(mocker, file_manager):
     merge_cell_mock = mocker.patch.object(file_manager.file_handler, "merge_cells")
     write_mock = mocker.patch.object(file_manager.file_handler, "write")
 
-    file_manager.create_tab()
+    file_manager.create_tab()  # act
 
     exists_mock.assert_called_once()
     write_cell_mock.assert_called_once_with(
@@ -122,7 +122,7 @@ def test_write_error_existing_column(mocker, file_manager):
     )
     write_mock = mocker.patch.object(file_manager.file_handler, "write", return_value=None)
 
-    file_manager.write_error("fake error message")
+    file_manager.write_error("fake error message")  # act
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
         "FakeSheet", ("ID", ERROR_COLUMN_NAME)
@@ -140,7 +140,7 @@ def test_write_error_missing_column(mocker, file_manager):
     )
     write_mock = mocker.patch.object(file_manager.file_handler, "write")
 
-    file_manager.write_error("fake error message")
+    file_manager.write_error("fake error message")  # act
 
     get_data_from_vertical_sheet_mock.assert_called_once_with(
         "FakeSheet", ("ID", ERROR_COLUMN_NAME)

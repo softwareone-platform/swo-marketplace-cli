@@ -44,13 +44,10 @@ class TestDiffByObjectId:
         mock_get_active_account,
         sample_audit_records,
     ):
-        # Setup
         mock_get_records.return_value = sample_audit_records
 
-        # Execute
         result = runner.invoke(app, ["diff-by-object-id", "obj123"])
 
-        # Assert
         assert result.exit_code == 0
         mock_get_records.assert_called_once_with(
             mock_client_from_account.return_value, "obj123", 10
@@ -69,13 +66,10 @@ class TestDiffByObjectId:
         mock_get_active_account,
         sample_audit_records,
     ):
-        # Setup
         mock_get_records.return_value = sample_audit_records
 
-        # Execute
         result = runner.invoke(app, ["diff-by-object-id", "obj123", "--positions", "2,1"])
 
-        # Assert
         assert result.exit_code == 0
         assert "Comparing audit trails..." in result.stdout
         assert "old_value" in result.stdout
@@ -91,13 +85,10 @@ class TestDiffByObjectId:
         mock_get_active_account,
         sample_audit_records,
     ):
-        # Setup
         mock_get_records.return_value = [sample_audit_records[0]]
 
-        # Execute
         result = runner.invoke(app, ["diff-by-object-id", "obj123"])
 
-        # Assert
         assert result.exit_code == 1
         assert "Need at least 2 audit records to compare" in result.stdout
 
@@ -111,13 +102,10 @@ class TestDiffByObjectId:
         mock_get_active_account,
         sample_audit_records,
     ):
-        # Setup
         mock_get_records.return_value = sample_audit_records
 
-        # Execute
         result = runner.invoke(app, ["diff-by-object-id", "obj123", "--positions", "1,99"])
 
-        # Assert
         assert result.exit_code == 1
         assert "Invalid positions" in result.stdout
 
@@ -133,13 +121,10 @@ class TestDiffByRecordsId:
         mock_get_active_account,
         sample_audit_records,
     ):
-        # Setup
         mock_get_trail.side_effect = sample_audit_records
 
-        # Execute
         result = runner.invoke(app, ["diff-by-records-id", "audit1", "audit2"])
 
-        # Assert
         assert result.exit_code == 0
         assert "Comparing audit trails..." in result.stdout
         assert "old_value" in result.stdout
@@ -151,16 +136,13 @@ class TestDiffByRecordsId:
     def test_different_objects(
         self, mock_get_trail, mock_client_from_account, mock_get_active_account
     ):
-        # Setup
         mock_get_trail.side_effect = [
             {"object": {"id": "obj1"}, "timestamp": "2024-01-01T10:00:00Z"},
             {"object": {"id": "obj2"}, "timestamp": "2024-01-01T11:00:00Z"},
         ]
 
-        # Execute
         result = runner.invoke(app, ["diff-by-records-id", "audit1", "audit2"])
 
-        # Assert
         assert result.exit_code == 1
         assert "Cannot compare different objects" in result.stdout
 
@@ -172,9 +154,7 @@ def test_compare_audit_trails_no_differences():
     }
     target = source.copy()
 
-    # Execute
     with patch("cli.plugins.audit_plugin.app.console.print") as mock_print:
-        compare_audit_trails(source, target)
+        compare_audit_trails(source, target)  # act
 
-    # Assert
     mock_print.assert_any_call("\n[green]No differences found between the audit trails[/green]")

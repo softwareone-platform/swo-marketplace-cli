@@ -78,7 +78,7 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
     )
     save_mock = mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
 
-    fake_horizontal_tab_file_manager.add([item])
+    fake_horizontal_tab_file_manager.add([item])  # act
 
     get_sheet_next_row_mock.assert_called_once_with("FakeSheet")
     item_to_xlsx_mock.assert_called_once()
@@ -116,7 +116,7 @@ def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
         fake_horizontal_tab_file_manager.file_handler, "write_cell"
     )
 
-    fake_horizontal_tab_file_manager.add([item_mock])
+    fake_horizontal_tab_file_manager.add([item_mock])  # act
 
     write_cell_mock.assert_has_calls([
         call("FakeSheet", col=1, row=2, value="fake_id", data_validation=None, style=None),
@@ -137,7 +137,7 @@ def test_create_tab(mocker, fake_horizontal_tab_file_manager):
     create_mock = mocker.patch.object(file_handler, "create")
     write_cell_mock = mocker.patch.object(file_handler, "write_cell")
 
-    fake_horizontal_tab_file_manager.create_tab()
+    fake_horizontal_tab_file_manager.create_tab()  # act
 
     exists_mock.assert_called_once()
     create_mock.assert_called_once()
@@ -173,7 +173,7 @@ def test_write_error(mocker, fake_horizontal_tab_file_manager):
     )
     write_mock = mocker.patch.object(file_handler, "write")
 
-    fake_horizontal_tab_file_manager.write_error("Test Error", "fake_id")
+    fake_horizontal_tab_file_manager.write_error("Test Error", "fake_id")  # act
 
     get_data_from_horizontal_sheet_mock.assert_called_once()
     write_mock.assert_called_with([{"FakeSheet": {"H4": "Test Error"}}])
@@ -192,7 +192,7 @@ def test_write_error_no_column(mocker, fake_horizontal_tab_file_manager):
     )
     write_mock = mocker.patch.object(file_handler, "write")
 
-    fake_horizontal_tab_file_manager.write_error("Test Error", "fake_id")
+    fake_horizontal_tab_file_manager.write_error("Test Error", "fake_id")  # act
 
     get_data_from_horizontal_sheet_mock.assert_called_once()
     get_sheet_next_column_mock.assert_called_once()

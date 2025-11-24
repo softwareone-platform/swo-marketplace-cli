@@ -30,7 +30,7 @@ def test_set_new_parameter_groups(
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
-    service.set_new_parameter_group(param_group)
+    service.set_new_parameter_group(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({
@@ -48,7 +48,7 @@ def test_set_new_parameter_groups_error(
     write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
-    service.set_new_parameter_group(param_group)
+    service.set_new_parameter_group(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_spy.assert_not_called()
@@ -59,7 +59,7 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
     write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ParametersService(service_context)
 
-    service.set_new_parameter_group(DataCollectionModel(collection={}))
+    service.set_new_parameter_group(DataCollectionModel(collection={}))  # act
 
     read_data_spy.assert_not_called()
     write_ids_spy.assert_not_called()
@@ -68,6 +68,6 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
 def test_set_export_params(service_context, parameters_data_from_dict):
     service = ParametersService(service_context)
 
-    params = service.set_export_params()
+    params = service.set_export_params()  # act
 
     assert params == {"scope": parameters_data_from_dict.scope}

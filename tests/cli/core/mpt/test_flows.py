@@ -18,8 +18,9 @@ def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_pr
         json=mpt_products_response,
     )
 
-    _meta, products = get_products(mpt_client, 10, 0)
+    result = get_products(mpt_client, 10, 0)
 
+    _meta, products = result
     assert products == [Product.model_validate(p) for p in mpt_products]
 
 
@@ -32,8 +33,9 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
         json=mpt_products_response,
     )
 
-    _, products = get_products(mpt_client, 10, 0)
+    result = get_products(mpt_client, 10, 0)
 
+    _, products = result
     assert products == [Product.model_validate(p) for p in mpt_products]
 
 
@@ -56,9 +58,9 @@ def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_respo
         json=mpt_uoms_response,
     )
 
-    uom = search_uom_by_name(mpt_client, name)
+    result = search_uom_by_name(mpt_client, name)
 
-    assert uom == Uom.model_validate(mpt_uom)
+    assert result == Uom.model_validate(mpt_uom)
 
 
 def test_search_uom_by_name_exception(requests_mocker, mpt_client):

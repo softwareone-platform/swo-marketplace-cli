@@ -19,8 +19,8 @@ def test_load_plugins(mocker):
         "cli.core.plugins.list_entrypoints",
         return_value=[EntryPoint("tests", "tests.plugins.test_plugin", None)],
     )
-
     load_plugins(app)
+
     result = runner.invoke(app, ["tests", "test"])
 
     assert result.exit_code == 0, result.stdout

@@ -44,6 +44,7 @@ def test_sync_price_lists_multiple_files(
         ["sync", "fake_dir_path"],
         input="y\ny\ny\ny\n",
     )
+
     assert result.exit_code == 0, result.stdout
     assert price_list_service_retrieve_mock.call_count == 2
     assert price_list_service_create_mock.call_count == 2

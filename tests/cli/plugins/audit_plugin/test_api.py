@@ -24,7 +24,6 @@ def mock_response():
 
 class TestGetAuditTrail:
     def test_successful_retrieval(self, mock_client, mock_response):
-        # Setup
         expected_data = {
             "id": "audit123",
             "object": {"id": "obj123"},
@@ -33,10 +32,8 @@ class TestGetAuditTrail:
         mock_response.json.return_value = expected_data
         mock_client.get.return_value = mock_response
 
-        # Execute
         result = get_audit_trail(mock_client, "audit123")
 
-        # Assert
         assert result == expected_data
         mock_client.get.assert_called_once()
         called_endpoint = mock_client.get.call_args[0][0]
@@ -45,27 +42,23 @@ class TestGetAuditTrail:
         assert "select=object,actor,details,documents,request.api.geolocation" in called_endpoint
 
     def test_api_error(self, mock_client):
-        # Setup
         mock_client.get.side_effect = Exception("API Error")
 
-        # Execute and Assert
         with pytest.raises(Exit):
             get_audit_trail(mock_client, "audit123")
+
         mock_client.get.assert_called_once()
 
     def test_json_decode_error(self, mock_client, mock_response):
-        # Setup
         mock_response.json.side_effect = ValueError("Invalid JSON")
         mock_client.get.return_value = mock_response
 
-        # Execute and Assert
         with pytest.raises(Exit):
             get_audit_trail(mock_client, "audit123")
 
 
 class TestGetAuditRecordsByObject:
     def test_successful_retrieval(self, mock_client, mock_response):
-        # Setup
         expected_data = {
             "data": [
                 {
@@ -83,10 +76,8 @@ class TestGetAuditRecordsByObject:
         mock_response.json.return_value = expected_data
         mock_client.get.return_value = mock_response
 
-        # Execute
         result = get_audit_records_by_object(mock_client, "obj123", limit=10)
 
-        # Assert
         assert result == expected_data["data"]
         mock_client.get.assert_called_once()
         called_endpoint = mock_client.get.call_args[0][0]
@@ -96,41 +87,34 @@ class TestGetAuditRecordsByObject:
         assert "limit=10" in called_endpoint
 
     def test_no_records_found(self, mock_client, mock_response):
-        # Setup
         mock_response.json.return_value = {"data": []}
         mock_client.get.return_value = mock_response
 
-        # Execute and Assert
         with pytest.raises(Exit):
             get_audit_records_by_object(mock_client, "obj123")
+
         mock_client.get.assert_called_once()
 
     def test_api_error(self, mock_client):
-        # Setup
         mock_client.get.side_effect = Exception("API Error")
 
-        # Execute and Assert
         with pytest.raises(Exit):
             get_audit_records_by_object(mock_client, "obj123")
+
         mock_client.get.assert_called_once()
 
     def test_json_decode_error(self, mock_client, mock_response):
-        # Setup
         mock_response.json.side_effect = ValueError("Invalid JSON")
         mock_client.get.return_value = mock_response
 
-        # Execute and Assert
         with pytest.raises(Exit):
             get_audit_records_by_object(mock_client, "obj123")
 
     def test_custom_limit(self, mock_client, mock_response):
-        # Setup
         mock_response.json.return_value = {"data": [{"id": "audit1"}]}
         mock_client.get.return_value = mock_response
 
-        # Execute
-        get_audit_records_by_object(mock_client, "obj123", limit=5)
+        get_audit_records_by_object(mock_client, "obj123", limit=5)  # act
 
-        # Assert
         called_endpoint = mock_client.get.call_args[0][0]
         assert "limit=5" in called_endpoint

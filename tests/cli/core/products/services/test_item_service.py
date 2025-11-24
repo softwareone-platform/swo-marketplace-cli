@@ -125,7 +125,7 @@ def test_set_new_item_groups(
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = ItemService(service_context)
 
-    service.set_new_item_groups(param_group)
+    service.set_new_item_groups(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({
@@ -143,7 +143,7 @@ def test_set_new_item_groups_error(
     write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ItemService(service_context)
 
-    service.set_new_item_groups(param_group)
+    service.set_new_item_groups(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_spy.assert_not_called()
@@ -154,7 +154,7 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
     write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = ItemService(service_context)
 
-    service.set_new_item_groups(DataCollectionModel(collection={}))
+    service.set_new_item_groups(DataCollectionModel(collection={}))  # act
 
     read_data_spy.assert_not_called()
     write_ids_spy.assert_not_called()
@@ -163,9 +163,9 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
 def test_set_export_params(service_context, item_data_from_dict):
     service = ItemService(service_context)
 
-    params = service.set_export_params()
+    result = service.set_export_params()
 
-    assert params["product.id"] is not None
+    assert result["product.id"] is not None
 
 
 def test_prepare_data_model_to_create(mocker, service_context, item_data_from_dict):
@@ -176,10 +176,10 @@ def test_prepare_data_model_to_create(mocker, service_context, item_data_from_di
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = ItemService(service_context)
 
-    data_model = service.prepare_data_model_to_create(item_data_from_dict)
+    result = service.prepare_data_model_to_create(item_data_from_dict)
 
-    assert data_model.unit_id == "fake_unit_id"
-    assert data_model.item_type == "vendor"
-    assert data_model.product_id == "test-product-id"
+    assert result.unit_id == "fake_unit_id"
+    assert result.item_type == "vendor"
+    assert result.product_id == "test-product-id"
     search_uom_by_name_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({item_data_from_dict.unit_coordinate: "fake_unit_id"})
