@@ -43,6 +43,8 @@ audit = "cli.plugins.audit_plugin.app:app"
 
 [dependency-groups]
 dev = [
+    "flake8-aaa>=0.17.2",
+    "flake8-pyproject>=1.2.3",
     "freezegun==1.5.*",
     "ipdb==0.13.*",
     "ipython==9.*",
@@ -55,7 +57,7 @@ dev = [
     "pytest-randomly==3.16.*",
     "pytest-xdist==3.6.*",
     "responses==0.25.*",
-    "ruff==0.12.11",  # force ruff version to have same formatting everywhere
+    "ruff==0.12.11", # force ruff version to have same formatting everywhere
     "types-openpyxl==3.1.*",
     "types-python-dateutil==2.9.*",
     "types-requests==2.31.*",
@@ -104,11 +106,23 @@ omit = [
     "*/__init__.py"
 ]
 
+[tool.flake8]
+aaa_act_block_style = "large"
+doctests = true
+extend-ignore = ["WPS226"]
+extend-exclude = [".venv"]
+format = "wemake"
+max-imports = 17
+max-line-length=100
+select = ["AAA", "E999", "WPS"]
+show-source = true
+statistics = false
+
 [tool.ruff]
 # Ruff config: https://docs.astral.sh/ruff/settings
 preview = true
 target-version = "py312"
-extend-exclude = [".vscode", ".devcontainer", "swo"]
+extend-exclude = [".vscode", ".devcontainer"]
 output-format = "full"
 line-length = 100
 
@@ -178,7 +192,7 @@ ignore = [
   "PLR6301", # do not require classmethod / staticmethod when self not used
   "TRY003",  # long exception messages from `tryceratops`
 ]
-external = [ "WPS" ]
+external = [ "AAA", "WPS" ]
 
 # Plugin configs:
 flake8-import-conventions.banned-from = [ "ast", "datetime" ]
