@@ -56,8 +56,9 @@ def test_exists(total, expected_response, mocker, api_service):
     )
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
-    assert api_service.exists() is expected_response
+    result = api_service.exists()
 
+    assert result is expected_response
     client_mock.assert_called_once_with("fake_url", params={"limit": 0})
 
 
@@ -107,7 +108,7 @@ def test_post_action(mocker, api_service):
     response_mock = Mock(spec=Response)
     client_mock = mocker.patch.object(MPTClient, "post", return_value=response_mock)
 
-    api_service.post_action("fake_resource_id", "fake_action")
+    api_service.post_action("fake_resource_id", "fake_action")  # act
 
     client_mock.assert_called_once_with("fake_url/fake_resource_id/fake_action")
 
@@ -115,10 +116,12 @@ def test_post_action(mocker, api_service):
 def test_update_success(mocker, api_service):
     client_mock = mocker.patch.object(MPTClient, "put")
 
-    api_service.update("fakeId", {"bla": "foo", "name": "test"})
+    api_service.update("fakeId", {"bla": "foo", "name": "test"})  # act
 
     client_mock.assert_called_once_with("fake_url/fakeId", json={"bla": "foo", "name": "test"})
 
 
 def test_related_api_service(mocker, related_api_service):
-    assert related_api_service.url == "fake_url/fake_resource_id/action"
+    result = related_api_service.url
+
+    assert result == "fake_url/fake_resource_id/action"

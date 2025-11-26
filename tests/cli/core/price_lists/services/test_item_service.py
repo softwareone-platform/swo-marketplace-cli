@@ -139,7 +139,6 @@ def test_update_item_not_found(mocker, service_context):
     assert not result.success
     assert len(result.errors) > 0
     assert result.model is None
-
     file_handler_mock.assert_called()
     stats_spy.assert_called()
 

@@ -23,9 +23,9 @@ def test_log_file_writes_to_file(tmp_path, mocker):
     mocker.patch("cli.core.accounts.app.list_accounts", return_value=[])
     mock_account = create_mock_account()
     mocker.patch("cli.core.mpt.client.client_from_account", return_value=mock_account)
-
     log_file = tmp_path / "test.log"
 
+    # BL
     def mock_basic_config(**kwargs):
         handler = kwargs.get("handlers", [None])[0]
         if handler:
@@ -35,6 +35,7 @@ def test_log_file_writes_to_file(tmp_path, mocker):
             # Generate a log message immediately after setup
             logging.getLogger().debug("Test debug message")
 
+    # BL
     mocker.patch("logging.basicConfig", side_effect=mock_basic_config)
 
     result = runner.invoke(app, ["--log-file", str(log_file), "accounts", "list"])
@@ -58,6 +59,7 @@ def test_log_file_creates_parent_directories(tmp_path, mocker):
     mock_account = create_mock_account()
     mocker.patch("cli.core.mpt.client.client_from_account", return_value=mock_account)
 
+    # BL
     def mock_basic_config(**kwargs):
         handler = kwargs.get("handlers", [None])[0]
         if handler:
@@ -67,8 +69,8 @@ def test_log_file_creates_parent_directories(tmp_path, mocker):
             # Generate a log message immediately after setup
             logging.getLogger().debug("Test debug message")
 
+    # BL
     mocker.patch("logging.basicConfig", side_effect=mock_basic_config)
-
     nested_log_file = tmp_path / "nested" / "dir" / "test.log"
 
     result = runner.invoke(app, ["--log-file", str(nested_log_file), "accounts", "list"])

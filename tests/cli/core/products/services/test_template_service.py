@@ -32,7 +32,7 @@ def test_set_new_parameter_group(
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = TemplateService(service_context)
 
-    service.set_new_parameter_group(param_group)
+    service.set_new_parameter_group(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({
@@ -45,7 +45,7 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
     write_ids_spy = mocker.spy(service_context.file_manager, "write_ids")
     service = TemplateService(service_context)
 
-    service.set_new_parameter_group(DataCollectionModel(collection={}))
+    service.set_new_parameter_group(DataCollectionModel(collection={}))  # act
 
     read_data_spy.assert_not_called()
     write_ids_spy.assert_not_called()

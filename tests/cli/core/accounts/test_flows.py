@@ -30,34 +30,39 @@ def test_from_token(expected_account):
         ),
         token="idt:TKN-1111-1111:secret",  # noqa: S106
     )
-    account = from_token(token, "https://example.com")
 
-    assert account == expected_account
+    result = from_token(token, "https://example.com")
+
+    assert result == expected_account
 
 
 def test_get_or_create_accounts_create(mocker, tmp_path):
     mocker.patch.object(JsonFileHandler, "_default_file_path", tmp_path / "no_exists_file.json")
-    accounts = get_or_create_accounts()
 
-    assert accounts == []
+    result = get_or_create_accounts()
+
+    assert result == []
 
 
 def test_get_or_create_accounts_get(
     mocker, accounts_path, expected_account, another_expected_account
 ):
     mocker.patch.object(JsonFileHandler, "_default_file_path", accounts_path)
-    accounts = get_or_create_accounts()
+
+    result = get_or_create_accounts()
 
     expected_accounts = [expected_account, another_expected_account]
-    assert accounts == expected_accounts
+    assert result == expected_accounts
 
 
 def test_does_account_exist(expected_account, another_expected_account):
-    assert does_account_exist([expected_account, another_expected_account], expected_account)
+    result = does_account_exist([expected_account, another_expected_account], expected_account)
+
+    assert result is True
 
 
 def test_doesnot_account_exist(expected_account, another_expected_account):
-    assert not does_account_exist(
+    result = does_account_exist(
         [expected_account, another_expected_account],
         Account(
             id="ACC-4321",
@@ -70,41 +75,43 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
         ),
     )
 
+    assert result is False
+
 
 def test_remove_account(expected_account, another_expected_account):
     accounts = [expected_account, another_expected_account]
 
-    accounts_after_remove = remove_account(accounts, another_expected_account)
+    result = remove_account(accounts, another_expected_account)
 
-    assert accounts_after_remove == [expected_account]
+    assert result == [expected_account]
 
 
 def test_write_accounts(mocker, tmp_path, expected_account, another_expected_account):
     file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", file_path)
-
     accounts = [expected_account, another_expected_account]
     write_accounts(accounts)
-
     with Path(file_path).open(encoding="utf-8") as f:
         written_accounts = json.load(f)
 
-    assert sorted(written_accounts, key=itemgetter("id")) == [a.model_dump() for a in accounts]
+    result = sorted(written_accounts, key=itemgetter("id"))
+
+    assert result == [a.model_dump() for a in accounts]
 
 
 def test_disable_accounts_except(expected_account, another_expected_account):
     accounts = [expected_account, another_expected_account]
 
-    disable_accounts_except(accounts, another_expected_account)
+    disable_accounts_except(accounts, another_expected_account)  # act
 
     assert not expected_account.is_active
     assert another_expected_account.is_active
 
 
 def test_find_account(expected_account, another_expected_account):
-    account = find_account([expected_account, another_expected_account], expected_account.id)
+    result = find_account([expected_account, another_expected_account], expected_account.id)
 
-    assert account == expected_account
+    assert result == expected_account
 
 
 def test_find_account_exception(expected_account, another_expected_account):
@@ -119,9 +126,9 @@ def test_find_account_exception(expected_account, another_expected_account):
 def test_find_active_account(expected_account, another_expected_account):
     accounts = [expected_account, another_expected_account]
 
-    account = find_active_account(accounts)
+    result = find_active_account(accounts)
 
-    assert account == expected_account
+    assert result == expected_account
 
 
 def test_find_active_account_exception(expected_account, another_expected_account):

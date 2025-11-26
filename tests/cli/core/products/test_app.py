@@ -270,7 +270,7 @@ def test_create_product(
     )
     add_collection_spy = mocker.spy(DataCollectionModel, "add")
 
-    create_product(product_container_mock, Mock())
+    create_product(product_container_mock, Mock())  # act
 
     create_product_mock.assert_called_once()
     assert product_container_mock.resource_id() == product_data_from_dict.id
@@ -294,7 +294,7 @@ def test_create_product_error(mocker, product_container_mock):
     )
     create_item_group_spy = mocker.spy(product_container_mock.item_service(), "create")
 
-    create_product(product_container_mock, Mock())
+    create_product(product_container_mock, Mock())  # act
 
     create_product_mock.assert_called_once()
     create_item_group_spy.assert_not_called()
@@ -310,6 +310,7 @@ def test_export_product_account_not_allowed(account_container_mock, active_vendo
 
 def test_export_product_error_exporting_product(account_container_mock, product_container_mock):
     product_container_mock.stats.override(Mock(ProductStatsCollector, has_errors=True))
+
     result = runner.invoke(app, ["export", "fake_id"], input="y\n")
 
     assert result.exit_code == 3, result.stdout
@@ -341,7 +342,7 @@ def test_export_product_overwrites_existing_files(
 
 
 def test_update_product(product_container_mock):
-    update_product(product_container_mock, Mock())
+    update_product(product_container_mock, Mock())  # act
 
     product_container_mock.item_service().update.assert_called_once()
     product_container_mock.item_group_service().update.assert_called_once()
@@ -386,15 +387,14 @@ def test_export_product(
             list_response_mock_data_factory([mpt_template_data]),
         ],
     )
-
     product_id = "PRD-0232-2541"
+
     result = runner.invoke(app, ["export", product_id, "--out", str(tmp_path)], input="y\ny\n")
 
     assert result.exit_code == 0, result.stdout
     product_path = tmp_path / f"{product_id}.xlsx"
     assert product_path.exists()
     wb = load_workbook(product_path)
-
     expected_sheets = [
         "General",
         "Settings",
@@ -409,62 +409,50 @@ def test_export_product(
         "Templates",
     ]
     assert wb.sheetnames == expected_sheets
-
     general_sheet = wb["General"]
     assert general_sheet.max_row == 12
     assert general_sheet["A1"].value == "General Information"
     assert general_sheet["A2"].value == "Product ID"
     assert general_sheet["B2"].value == product_id
-
     settings_sheet = wb["Settings"]
     assert settings_sheet.max_row == 12
     assert settings_sheet["A1"].value == "Setting"
     assert settings_sheet["A2"].value == "Change order validation (draft)"
     assert settings_sheet["C2"].value == "Enabled"
-
     items_sheet = wb["Items"]
     assert items_sheet.max_row == 2
     assert items_sheet["A1"].value == "ID"
     assert items_sheet["A2"].value == "ITM-0232-2541-0001"
-
     items_groups_sheet = wb["Items Groups"]
     assert items_groups_sheet.max_row == 2
     assert items_groups_sheet["A1"].value == "ID"
     assert items_groups_sheet["A2"].value == "IGR-0232-2541-0001"
-
     parameters_groups_sheet = wb["Parameters Groups"]
     assert parameters_groups_sheet.max_row == 2
     assert parameters_groups_sheet["A1"].value == "ID"
     assert parameters_groups_sheet["A2"].value == "PGR-0232-2541-0002"
-
     agreements_params_sheet = wb["Agreements Parameters"]
     assert agreements_params_sheet.max_row == 2
     assert agreements_params_sheet["A1"].value == "ID"
     assert agreements_params_sheet["A2"].value == "PAR-0232-2541-0001"
-
     agreements_params_sheet = wb["Assets Parameters"]
     assert agreements_params_sheet.max_row == 2
     assert agreements_params_sheet["A1"].value == "ID"
     assert agreements_params_sheet["A2"].value == "PAR-0232-2541-0027"
-
     item_params_sheet = wb["Item Parameters"]
     assert item_params_sheet.max_row == 2
     assert item_params_sheet["A1"].value == "ID"
     assert item_params_sheet["A2"].value == "PAR-0232-2541-0022"
-
     request_params_sheet = wb["Request Parameters"]
     assert request_params_sheet.max_row == 2
     assert request_params_sheet["A1"].value == "ID"
     assert request_params_sheet["A2"].value == "PAR-0232-2541-0012"
-
     subscription_parameter_sheet = wb["Subscription Parameters"]
     assert subscription_parameter_sheet.max_row == 2
     assert subscription_parameter_sheet["A1"].value == "ID"
     assert subscription_parameter_sheet["A2"].value == "PAR-0232-2541-0023"
-
     templates_sheet = wb["Templates"]
     assert templates_sheet.max_row == 2
     assert templates_sheet["A1"].value == "ID"
     assert templates_sheet["A2"].value == "TPL-0232-2541-0005"
-
     wb.close()

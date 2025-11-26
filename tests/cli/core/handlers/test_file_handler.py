@@ -25,6 +25,6 @@ class FakeFileHandler(FileHandler):
 def test_exists_file_returns_true(exists, expected_response, mocker):
     mocker.patch.object(Path, "exists", return_value=exists)
 
-    file_handler = FakeFileHandler(Path("test.txt"))
+    result = FakeFileHandler(Path("test.txt"))
 
-    assert file_handler.exists() is expected_response
+    assert result.exists() is expected_response

@@ -152,6 +152,8 @@ def test_setting_item_from_json(mpt_product_data):
     assert result.value == "Off"
     assert result.action == DataActionEnum.SKIP
 
+
+def test_setting_item_from_json_enabled(mpt_product_data):
     result = SettingsItem.from_json({"name": "Change order validation (draft)", "value": True})
 
     assert result.name == "Change order validation (draft)"

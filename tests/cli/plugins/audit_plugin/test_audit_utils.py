@@ -18,7 +18,9 @@ from cli.plugins.audit_plugin.utils import (
     ],
 )
 def test_flatten_dict(input_dict, expected_result):
-    assert flatten_dict(input_dict) == expected_result
+    result = flatten_dict(input_dict)
+
+    assert result == expected_result
 
 
 @pytest.mark.parametrize(
@@ -40,7 +42,9 @@ def test_flatten_dict(input_dict, expected_result):
     ],
 )
 def test_format_json_path(path, source, target, expected_result):
-    assert format_json_path(path, source, target) == expected_result
+    result = format_json_path(path, source, target)
+
+    assert result == expected_result
 
 
 @pytest.mark.parametrize(
@@ -82,11 +86,11 @@ def test_display_records(capsys):
             "details": "Created object",
         }
     ]
-    display_audit_records(records)
+
+    display_audit_records(records)  # act
+
     captured = capsys.readouterr()
     output = captured.out
-
-    # Check for key elements in the output
     assert "Available Audit Records" in output
     assert "2024-01-01T10:00:00Z" in output
     assert "audit1" in output
@@ -100,11 +104,11 @@ def test_display_records(capsys):
 
 def test_display_records_missing_fields(capsys):
     records = [{"id": "audit1", "timestamp": "2024-01-01T10:00:00Z"}]
-    display_audit_records(records)
+
+    display_audit_records(records)  # act
+
     captured = capsys.readouterr()
     output = captured.out
-
-    # Check individual elements instead of exact string matches
     assert "audit1" in output
     assert "2024-01-01T10:00:00Z" in output
     assert "N/A" in output  # For missing fields

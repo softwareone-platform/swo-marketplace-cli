@@ -16,7 +16,7 @@ services:
       context: .
       dockerfile: dev.Dockerfile
     working_dir: /cli
-    command: bash -c "ruff format --check . && ruff check . && mypy . && uv lock --check && pytest"
+    command: bash -c "ruff format --check . && ruff check . && flake8 --select AAA . && mypy . && uv lock --check && pytest"
     volumes:
       - .:/cli
 

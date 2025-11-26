@@ -106,7 +106,6 @@ def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict)
         "exists",
         return_value=True,
     )
-
     service = PriceListService(service_context)
 
     result = service.retrieve()

@@ -55,32 +55,32 @@ def excel_file_handler(tmp_path, workbook):
     [("non_extension_file", "non_extension_file.xlsx"), ("test_file.xlsx", "test_file.xlsx")],
 )
 def test_normalize_file_path(file_path, expected_path):
-    normalized = ExcelFileHandler.normalize_file_path(file_path)
+    result = ExcelFileHandler.normalize_file_path(file_path)
 
-    assert normalized == Path(expected_path)
+    assert result == Path(expected_path)
 
 
 def test_create(tmp_path):
     file_path = tmp_path / "fake_file.xlsx"
     handler = ExcelFileHandler(file_path)
 
-    handler.create()
+    handler.create()  # act
 
     assert handler.sheet_names == ["General"]
 
 
 def test_check_required_sheet(excel_file_handler):
-    excel_file_handler.check_required_sheet(["VerticalSheet", "HorizontalSheet"])
+    excel_file_handler.check_required_sheet(("VerticalSheet", "HorizontalSheet"))  # act
 
 
 def test_check_required_sheet_missing_sheet(excel_file_handler):
     with pytest.raises(RequiredSheetsError):
-        excel_file_handler.check_required_sheet(["HorizontalSheet", "MissingSheet"])
+        excel_file_handler.check_required_sheet(("HorizontalSheet", "MissingSheet"))
 
 
 def test_check_required_fields_in_vertical_sheet(excel_file_handler):
-    excel_file_handler.check_required_fields_in_vertical_sheet(
-        "VerticalSheet", ["Field1", "Field2"]
+    excel_file_handler.check_required_fields_in_vertical_sheet(  # act
+        "VerticalSheet", ("Field1", "Field2")
     )
 
 
@@ -97,7 +97,8 @@ def test_check_required_field_values_in_vertical_sheet(mocker, excel_file_handle
         "get_data_from_vertical_sheet",
         return_value={"Field1": {"value": "Value1"}, "Field2": {"value": "Value2"}},
     )
-    excel_file_handler.check_required_field_values_in_vertical_sheet(
+
+    excel_file_handler.check_required_field_values_in_vertical_sheet(  # act
         "VerticalSheet", ["Field1", "Field2"]
     )
 
@@ -110,6 +111,7 @@ def test_check_required_field_values_in_vertical_sheet_empty_value(mocker, excel
         "get_data_from_vertical_sheet",
         return_value={"Field1": {"value": "Value1"}, "EmptyField": {"value": None}},
     )
+
     with pytest.raises(RequiredFieldValuesError) as exc_info:
         excel_file_handler.check_required_field_values_in_vertical_sheet(
             "VerticalSheet", ["Field1", "EmptyField"]
@@ -120,7 +122,7 @@ def test_check_required_field_values_in_vertical_sheet_empty_value(mocker, excel
 
 
 def test_check_required_fields_in_horizontal_sheet(excel_file_handler):
-    excel_file_handler.check_required_fields_in_horizontal_sheet(
+    excel_file_handler.check_required_fields_in_horizontal_sheet(  # act
         "HorizontalSheet", ["Header1", "Header2"]
     )
 
@@ -135,16 +137,16 @@ def test_check_required_fields_in_horizontal_sheet_missing_field(excel_file_hand
 
 
 def test_get_cell_value_by_coordinate(excel_file_handler):
-    value = excel_file_handler.get_cell_value_by_coordinate("HorizontalSheet", "A1")
+    result = excel_file_handler.get_cell_value_by_coordinate("HorizontalSheet", "A1")
 
-    assert value == "Header1"
+    assert result == "Header1"
 
 
 def test_get_data_from_horizontal_sheet(excel_file_handler):
-    data = list(excel_file_handler.get_data_from_horizontal_sheet("HorizontalSheet"))
+    result = list(excel_file_handler.get_data_from_horizontal_sheet("HorizontalSheet"))
 
-    assert len(data[0]) == 3
-    assert data[0] == {
+    assert len(result[0]) == 3
+    assert result[0] == {
         "Header1": {"value": "Value1", "coordinate": "A2"},
         "Header2": {"value": "Value2", "coordinate": "B2"},
         "Header3": {"value": "Value3", "coordinate": "C2"},
@@ -152,39 +154,39 @@ def test_get_data_from_horizontal_sheet(excel_file_handler):
 
 
 def test_get_data_from_horizontal_sheet_by_fields(excel_file_handler):
-    data = list(excel_file_handler.get_data_from_horizontal_sheet("HorizontalSheet", ["Header2"]))
+    result = list(excel_file_handler.get_data_from_horizontal_sheet("HorizontalSheet", ["Header2"]))
 
-    assert len(data[0]) == 1
-    assert data[0] == {"Header2": {"value": "Value2", "coordinate": "B2"}}
+    assert len(result[0]) == 1
+    assert result[0] == {"Header2": {"value": "Value2", "coordinate": "B2"}}
 
 
 def test_get_data_from_vertical_sheet(excel_file_handler):
-    data = excel_file_handler.get_data_from_vertical_sheet("VerticalSheet")
+    result = excel_file_handler.get_data_from_vertical_sheet("VerticalSheet")
 
-    assert data["Field1"]["value"] == "Value1"
-    assert data["Field1"]["coordinate"] == "B2"
-    assert data["Field2"]["value"] == "Value2"
-    assert data["Field2"]["coordinate"] == "B3"
-    assert data["EmptyField"]["value"] is None
-    assert data["EmptyField"]["coordinate"] == "B4"
+    assert result["Field1"]["value"] == "Value1"
+    assert result["Field1"]["coordinate"] == "B2"
+    assert result["Field2"]["value"] == "Value2"
+    assert result["Field2"]["coordinate"] == "B3"
+    assert result["EmptyField"]["value"] is None
+    assert result["EmptyField"]["coordinate"] == "B4"
 
 
 def test_get_data_from_vertical_sheet_by_fields(excel_file_handler):
-    data = excel_file_handler.get_data_from_vertical_sheet("VerticalSheet", ["Field1"])
+    result = excel_file_handler.get_data_from_vertical_sheet("VerticalSheet", ("Field1",))
 
-    assert data == {"Field1": {"value": "Value1", "coordinate": "B2"}}
+    assert result == {"Field1": {"value": "Value1", "coordinate": "B2"}}
 
 
 def test_get_values_for_dynamic_sheet(excel_file_handler):
     fields = ["Header1"]
     patterns = [re.compile(r"Value\d+")]
 
-    data = list(
+    result = list(
         excel_file_handler.get_values_for_dynamic_sheet("HorizontalSheet", fields, patterns)
     )
 
-    assert len(data[0]) == 1
-    assert data[0] == {"Header1": {"value": "Value1", "coordinate": "A2"}}
+    assert len(result[0]) == 1
+    assert result[0] == {"Header1": {"value": "Value1", "coordinate": "A2"}}
 
 
 def test_write(excel_file_handler):
@@ -193,7 +195,7 @@ def test_write(excel_file_handler):
         {"FakeSheet": {"D1": "ValueD1", "J23": "ValueJ23"}},
     ]
 
-    excel_file_handler.write(test_data)
+    excel_file_handler.write(test_data)  # act
 
     assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"  # noqa: SLF001
     assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"  # noqa: SLF001
@@ -201,7 +203,7 @@ def test_write(excel_file_handler):
 
 
 def test_write_cell(excel_file_handler):
-    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue")
+    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue")  # act
 
     cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # noqa: SLF001
     assert cell.value == "FakeValue"
@@ -210,14 +212,18 @@ def test_write_cell(excel_file_handler):
 
 def test_write_cell_with_style(excel_file_handler):
     fake_style = NamedStyle("fake_style")
-    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue", style=fake_style)
+
+    excel_file_handler.write_cell(  # act
+        "Sheet1", row=2, col=3, value="FakeValue", style=fake_style
+    )
 
     assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # noqa: SLF001
 
 
 def test_write_cell_with_data_validation(excel_file_handler):
     fake_data_validation = DataValidation()
-    excel_file_handler.write_cell(
+
+    excel_file_handler.write_cell(  # act
         "Sheet1", row=2, col=3, value="FakeValue", data_validation=fake_data_validation
     )
 

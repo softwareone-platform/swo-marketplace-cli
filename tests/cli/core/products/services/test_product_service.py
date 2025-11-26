@@ -132,8 +132,8 @@ def test_export_mpt_error(mocker, service_context):
 def test_validate_definition(mocker, service_context):
     mocker.patch.object(service_context.file_manager, "check_required_tabs")
     mocker.patch.object(service_context.file_manager, "check_required_fields_by_section")
-
     service = ProductService(service_context)
+
     result = service.validate_definition()
 
     assert result.success is True
@@ -143,8 +143,8 @@ def test_validate_definition(mocker, service_context):
 
 def test_validate_definition_file_doesnt_exist(mocker, service_context):
     mocker.patch.object(service_context.file_manager.file_handler, "exists", return_value=False)
-
     service = ProductService(service_context)
+
     result = service.validate_definition()
 
     assert result.success is False
@@ -161,8 +161,8 @@ def test_validate_definition_missing_tabs(mocker, service_context):
         service_context.file_manager, "check_required_fields_by_section"
     )
     stats_spy = mocker.spy(service_context.stats.errors, "add_msg")
-
     service = ProductService(service_context)
+
     result = service.validate_definition()
 
     assert result.success is False
@@ -184,8 +184,8 @@ def test_validate_definition_missing_fields(mocker, service_context):
         side_effect=RequiredFieldsError("Required fields missing", ["Field1", "Field2"]),
     )
     stats_spy = mocker.spy(service_context.stats.errors, "add_msg")
-
     service = ProductService(service_context)
+
     result = service.validate_definition()
 
     assert result.success is False
@@ -206,7 +206,6 @@ def test_retrieve(mocker, service_context, product_data_from_dict):
         "exists",
         return_value=True,
     )
-
     service = ProductService(service_context)
 
     result = service.retrieve()
@@ -222,7 +221,6 @@ def test_retrieve_empty(mocker, service_context):
         service_context.file_manager, "read_data", return_value=Mock(ProductData, id=None)
     )
     api_exists_mock = mocker.spy(service_context.api, "exists")
-
     service = ProductService(service_context)
 
     result = service.retrieve()
