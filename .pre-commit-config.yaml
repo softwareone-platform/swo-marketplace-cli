@@ -26,7 +26,7 @@ repos:
     rev: 7.3.0
     hooks:
       - id: flake8
-        additional_dependencies: [Flake8-pyproject]
+        additional_dependencies: [Flake8-pyproject, Flake8-AAA, wemake-python-styleguide==1.3.*]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.17.0
