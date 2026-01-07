@@ -1,0 +1,9 @@
+services:
+  app:
+    container_name: swo_cli
+    build:
+      context: .
+      target: dev
+    working_dir: /cli
+    volumes:
+      - .:/cli
