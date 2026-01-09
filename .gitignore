@@ -127,6 +127,7 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+.swocli/accounts.json
 
 # Spyder project settings
 .spyderproject
