@@ -7,3 +7,4 @@ services:
     working_dir: /cli
     volumes:
       - .:/cli
+      - /Users/${USER}/.swocli:/root/.swocli
