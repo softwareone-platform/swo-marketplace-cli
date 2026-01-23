@@ -95,7 +95,7 @@ class StatsCollector(ABC):
         self.__tab_aliases = tabs
 
     @property
-    def id(self) -> str | None:
+    def stat_id(self) -> str | None:
         """Get the identifier of the stats collector.
 
         Returns:
@@ -104,8 +104,8 @@ class StatsCollector(ABC):
         """
         return self.__id
 
-    @id.setter
-    def id(self, value: str) -> None:
+    @stat_id.setter
+    def stat_id(self, value: str) -> None:
         self.__id = value
 
     @property
@@ -237,6 +237,6 @@ class PriceListStatsCollector(StatsCollector):
         if self.has_errors:
             title = "Pricelist sync [red bold]FAILED"
         else:
-            title = f"Pricelist {self.id} sync [green bold]SUCCEED"
+            title = f"Pricelist {self.stat_id} sync [green bold]SUCCEED"
 
         return title

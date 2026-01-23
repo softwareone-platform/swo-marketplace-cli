@@ -100,7 +100,7 @@ def sync_price_lists(  # noqa: C901
         with console.status("Sync Price list Items..."):
             result = price_list_item_service.update()
 
-        stats.id = price_list.id
+        stats.stat_id = price_list.id
         console.print(stats.to_table())
 
     if has_error:
