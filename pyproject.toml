@@ -25,14 +25,14 @@ classifiers = [
 ]
 dependencies = [
     "dependency-injector==4.48.*",
-    "mpt-api-client==0.0.*",
+    "mpt-api-client==5.0.*",
     "openpyxl==3.1.*",
     "pydantic==2.11.*",
     "pyfiglet==1.0.*",
     "python-dateutil==2.9.*",
     "requests==2.32.*",
     "requests-toolbelt==1.0.*",
-    "typer==0.15.*",
+    "typer==0.21.*",
 ]
 
 [project.scripts]
