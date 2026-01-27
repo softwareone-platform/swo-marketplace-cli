@@ -29,7 +29,9 @@ class MPTClient(Session):
                 "Authorization": f"Bearer {api_token}",
             },
         )
-        self.base_url = f"{base_url}/" if base_url[-1] != "/" else base_url
+        normalized = base_url.rstrip("/")
+        self.base_url = urljoin(normalized, "/public/v1/")
+
         self.api_token = api_token
 
     @override

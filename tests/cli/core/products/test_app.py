@@ -22,8 +22,7 @@ def test_list_products(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/catalog/products?limit=10&offset=0",
-            allow_fragments=True,
+            "catalog/products?limit=10&offset=0",
         ),
         json=mpt_products_response,
     )
@@ -41,8 +40,7 @@ def test_list_products_with_query_and_paging(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/catalog/products?limit=20&offset=0&eq(product.id,PRD-1234)",
-            allow_fragments=True,
+            "catalog/products?limit=20&offset=0&eq(product.id,PRD-1234)",
         ),
         json=mpt_products_response,
     )

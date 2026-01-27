@@ -14,7 +14,10 @@ from cli.core.mpt.models import (
 
 def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_products):
     requests_mocker.get(
-        urljoin(mpt_client.base_url, "/catalog/products?limit=10&offset=0"),
+        urljoin(
+            mpt_client.base_url,
+            "catalog/products?limit=10&offset=0",
+        ),
         json=mpt_products_response,
     )
 
@@ -28,7 +31,7 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "/catalog/products?limit=10&offset=0&eq(product.id,PRD-1234-1234)",
+            "catalog/products?limit=10&offset=0&eq(product.id,PRD-1234-1234)",
         ),
         json=mpt_products_response,
     )
@@ -41,7 +44,10 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
 
 def test_get_products_exception(requests_mocker, mpt_client):
     requests_mocker.get(
-        urljoin(mpt_client.base_url, "/catalog/products?limit=10&offset=0"),
+        urljoin(
+            mpt_client.base_url,
+            "catalog/products?limit=10&offset=0",
+        ),
         status=500,
     )
 
@@ -54,7 +60,10 @@ def test_get_products_exception(requests_mocker, mpt_client):
 def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_response):
     name = "User"
     requests_mocker.get(
-        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
+        urljoin(
+            mpt_client.base_url,
+            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
+        ),
         json=mpt_uoms_response,
     )
 
@@ -66,7 +75,10 @@ def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_respo
 def test_search_uom_by_name_exception(requests_mocker, mpt_client):
     name = "User"
     requests_mocker.get(
-        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
+        urljoin(
+            mpt_client.base_url,
+            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
+        ),
         status=500,
     )
 
@@ -79,7 +91,10 @@ def test_search_uom_by_name_exception(requests_mocker, mpt_client):
 def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response, mpt_client):
     name = "User"
     requests_mocker.get(
-        urljoin(mpt_client.base_url, f"/catalog/units-of-measure?name={name}&limit=1&offset=0"),
+        urljoin(
+            mpt_client.base_url,
+            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
+        ),
         json=wrap_to_mpt_list_response([]),
     )
 
