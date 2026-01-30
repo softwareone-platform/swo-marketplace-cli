@@ -42,7 +42,7 @@ class ParameterGroupData(BaseDataModel, ActionMixin):
         updated = data["audit"].get("updated", {}).get("at")
         return cls(
             id=data["id"],
-            description=data["description"],
+            description=data.get("description"),
             default=data["default"],
             display_order=data["displayOrder"],
             label=data["label"],
