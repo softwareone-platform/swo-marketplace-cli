@@ -14,12 +14,12 @@ class ParameterGroupData(BaseDataModel, ActionMixin):
 
     id: str
     default: bool
-    description: str
     display_order: int
     label: str
     name: str
 
     coordinate: str | None = None
+    description: str | None = None
     created_date: dt.date | None = None
     updated_date: dt.date | None = None
 
