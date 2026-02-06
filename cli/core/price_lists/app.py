@@ -43,7 +43,7 @@ def sync_price_lists(  # noqa: C901
         console.print(f"No files found for provided paths {', '.join(pricelists_paths)}")
         raise typer.Exit(code=3)
 
-    _ = typer.confirm(
+    typer.confirm(
         f"Do you want to sync {len(file_paths)} price_lists files?",
         abort=True,
     )
@@ -63,7 +63,7 @@ def sync_price_lists(  # noqa: C901
         price_list_service = PriceListService(service_context)
         price_list = price_list_service.retrieve().model
         if price_list is None:
-            _ = typer.confirm(
+            typer.confirm(
                 f"Do you want to create new price list from file {file_path} for "
                 f"account {active_account.id} ({active_account.name})?",
                 abort=True,
@@ -76,7 +76,7 @@ def sync_price_lists(  # noqa: C901
 
                 price_list = result.model
         else:
-            _ = typer.confirm(
+            typer.confirm(
                 f"Do you want to update {price_list.id} for "
                 f"account {active_account.id} ({active_account.name})?",
                 abort=True,
@@ -141,7 +141,7 @@ def export(  # noqa: C901
         )
         raise typer.Exit(code=4)
 
-    out_path = out_path if out_path is not None else str(Path.cwd())
+    out_path = out_path or str(Path.cwd())
     mpt_client = client_from_account(active_account)
     stats = PriceListStatsCollector()
     has_error = False
@@ -157,7 +157,7 @@ def export(  # noqa: C901
                 continue
             Path(file_path).unlink()
         else:
-            _ = typer.confirm(
+            typer.confirm(
                 f"Do you want to export {price_list_id} in {out_path}?",
                 abort=True,
             )

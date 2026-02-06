@@ -28,17 +28,19 @@ def get_or_create_accounts() -> list[Account]:
 
 def does_account_exist(accounts: list[Account], account: Account) -> bool:
     """Checks if the account exists in the passed list."""
-    return any(a.id == account.id for a in accounts)
+    return any(account_iter.id == account.id for account_iter in accounts)
 
 
 def remove_account(accounts: list[Account], account: Account) -> list[Account]:
     """Remove an account from the passed accounts list."""
-    return [a for a in accounts if a.id != account.id]
+    return [account_iter for account_iter in accounts if account_iter.id != account.id]
 
 
 def write_accounts(accounts: list[Account]) -> None:
     """Write accounts list to the file."""
-    accounts_data = [a.model_dump() for a in sorted(accounts, key=attrgetter("id"))]
+    accounts_data = [
+        account_iter.model_dump() for account_iter in sorted(accounts, key=attrgetter("id"))
+    ]
     JsonFileHandler().write(accounts_data)
 
 
@@ -55,7 +57,9 @@ def disable_accounts_except(accounts: list[Account], except_account: Account) ->
 
 def find_account(accounts: list[Account], account_id: str) -> Account:
     """Return account by id."""
-    account = next((a for a in accounts if a.id == account_id), None)
+    account = next(
+        (account_iter for account_iter in accounts if account_iter.id == account_id), None
+    )
     if not account:
         raise AccountNotFoundError(account_id)
 
@@ -64,7 +68,7 @@ def find_account(accounts: list[Account], account_id: str) -> Account:
 
 def find_active_account(accounts: list[Account]) -> Account:
     """Return an active account."""
-    account = next((a for a in accounts if a.is_active), None)
+    account = next((account_iter for account_iter in accounts if account_iter.is_active), None)
     if not account:
         raise NoActiveAccountFoundError
 

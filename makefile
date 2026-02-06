@@ -22,7 +22,7 @@ build:
 	  $(DC) build
 
 check:
-	  $(DC) run --rm app bash -c "ruff format --check . && ruff check . && flake8 --select AAA . && uv lock --check"
+	  $(DC) run --rm app bash -c "ruff format --check . && ruff check . && flake8 . && uv lock --check"
 
 check-all:
 	  $(MAKE) check
