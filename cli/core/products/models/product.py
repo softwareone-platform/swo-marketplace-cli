@@ -21,18 +21,18 @@ class SettingsItem(BaseDataModel, ActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         return cls(
-            action=data[constants.SETTINGS_ACTION]["value"],
-            name=data[constants.SETTINGS_SETTING]["value"],
-            coordinate=data[constants.SETTINGS_SETTING]["coordinate"],
-            value=data[constants.SETTINGS_VALUE]["value"],
+            action=source_dict[constants.SETTINGS_ACTION]["value"],
+            name=source_dict[constants.SETTINGS_SETTING]["value"],
+            coordinate=source_dict[constants.SETTINGS_SETTING]["coordinate"],
+            value=source_dict[constants.SETTINGS_VALUE]["value"],
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        return cls(name=data["name"], value=cls._parse_json_value(value=data["value"]))
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        return cls(name=json_dict["name"], value=cls._parse_json_value(value=json_dict["value"]))
 
     @override
     def to_json(self) -> dict[str, Any]:
@@ -66,13 +66,13 @@ class SettingsData(BaseDataModel):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        return cls(items=[SettingsItem.from_dict(data)])
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
+        return cls(items=[SettingsItem.from_dict(source_dict)])
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        formatted_settings = cls._format_data_from_json(data)
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        formatted_settings = cls._format_data_from_json(json_dict)
         items = [
             SettingsItem.from_json({"name": key, "value": formatted_settings.get(value)})
             for key, value in constants.SETTINGS_API_MAPPING.items()
@@ -81,7 +81,7 @@ class SettingsData(BaseDataModel):
 
     @override
     def to_json(self) -> dict[str, Any]:
-        settings: dict[str, Any] = {}
+        settings_output: dict[str, Any] = {}
         for setting_item in self.items:
             settings_name = setting_item.name
             settings_value: str | bool = setting_item.value
@@ -91,25 +91,25 @@ class SettingsData(BaseDataModel):
             if ".label" not in json_path and ".title" not in json_path:
                 settings_value = settings_value == "Enabled"
 
-            settings = set_dict_value(settings, json_path, settings_value)
+            settings_output = set_dict_value(settings_output, json_path, settings_value)
 
-        return {"settings": settings}
+        return {"settings": settings_output}
 
     @override
     def to_xlsx(self) -> dict[str, Any]:
         return {}
 
     @staticmethod
-    def _format_data_from_json(data: dict[str, Any]) -> dict[str, Any]:
-        formatted_data = {}
-        for key, value in data.items():
+    def _format_data_from_json(source_dict: dict[str, Any]) -> dict[str, Any]:
+        formatted_output = {}
+        for key, value in source_dict.items():
             if isinstance(value, dict):
                 for sub_key, sub_value in value.items():
-                    formatted_data[f"{key}.{sub_key}"] = sub_value
+                    formatted_output[f"{key}.{sub_key}"] = sub_value
             else:
-                formatted_data[key] = value
+                formatted_output[key] = value
 
-        return formatted_data
+        return formatted_output
 
 
 @dataclass
@@ -134,41 +134,41 @@ class ProductData(BaseDataModel):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         settings = (
-            SettingsData.from_dict(data["settings"]) if "settings" in data else SettingsData()
+            SettingsData.from_dict(source_dict["settings"]) if "settings" in source_dict else SettingsData()
         )
         return cls(
-            id=data[constants.GENERAL_PRODUCT_ID]["value"],
-            coordinate=data[constants.GENERAL_PRODUCT_ID]["coordinate"],
-            name=data[constants.GENERAL_PRODUCT_NAME]["value"],
-            short_description=data[constants.GENERAL_CATALOG_DESCRIPTION]["value"],
-            long_description=data[constants.GENERAL_PRODUCT_DESCRIPTION]["value"],
-            website=data[constants.GENERAL_PRODUCT_WEBSITE]["value"],
+            id=source_dict[constants.GENERAL_PRODUCT_ID]["value"],
+            coordinate=source_dict[constants.GENERAL_PRODUCT_ID]["coordinate"],
+            name=source_dict[constants.GENERAL_PRODUCT_NAME]["value"],
+            short_description=source_dict[constants.GENERAL_CATALOG_DESCRIPTION]["value"],
+            long_description=source_dict[constants.GENERAL_PRODUCT_DESCRIPTION]["value"],
+            website=source_dict[constants.GENERAL_PRODUCT_WEBSITE]["value"],
             settings=settings,
-            account_id=data.get(constants.GENERAL_ACCOUNT_ID),
-            account_name=data.get(constants.GENERAL_ACCOUNT_NAME),
-            export_date=data.get(constants.GENERAL_EXPORT_DATE, {}).get("value"),
-            status=data[constants.GENERAL_STATUS]["value"],
+            account_id=source_dict.get(constants.GENERAL_ACCOUNT_ID),
+            account_name=source_dict.get(constants.GENERAL_ACCOUNT_NAME),
+            export_date=source_dict.get(constants.GENERAL_EXPORT_DATE, {}).get("value"),
+            status=source_dict[constants.GENERAL_STATUS]["value"],
             icon=cls._get_default_icon(),
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        updated = json_dict["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            name=data["name"],
-            account_id=data["vendor"]["id"],
-            account_name=data["vendor"]["name"],
-            short_description=data["shortDescription"],
-            long_description=data["longDescription"],
-            website=data["website"],
-            status=data["status"],
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_dict["id"],
+            name=json_dict["name"],
+            account_id=json_dict["vendor"]["id"],
+            account_name=json_dict["vendor"]["name"],
+            short_description=json_dict["shortDescription"],
+            long_description=json_dict["longDescription"],
+            website=json_dict["website"],
+            status=json_dict["status"],
+            created_date=parser.parse(json_dict["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
-            settings=SettingsData.from_json(data["settings"]),
+            settings=SettingsData.from_json(json_dict["settings"]),
         )
 
     @override

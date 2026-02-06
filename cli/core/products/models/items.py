@@ -51,15 +51,15 @@ class ItemData(BaseDataModel, ItemActionMixin):
 
     @property
     def terms(self) -> dict[str, Any]:
-        data: dict[str, Any] = {"model": self.terms_model.value}
+        terms_dict: dict[str, Any] = {"model": self.terms_model.value}
 
         if self.terms_model == ItemTermsModelEnum.ONE_TIME:
-            data["period"] = self.terms_model.value
+            terms_dict["period"] = self.terms_model.value
         else:
-            data["commitment"] = self.terms_commitment
-            data["period"] = self.terms_period
+            terms_dict["commitment"] = self.terms_commitment
+            terms_dict["period"] = self.terms_period
 
-        return data
+        return terms_dict
 
     @property
     def unit(self) -> dict[str, Any]:
@@ -67,56 +67,56 @@ class ItemData(BaseDataModel, ItemActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         try:
-            group_id = data["group_id"]
+            group_id = source_dict["group_id"]
         except KeyError:
-            group_id = data[constants.ITEMS_GROUP_ID]["value"]
+            group_id = source_dict[constants.ITEMS_GROUP_ID]["value"]
 
         return cls(
-            id=data[constants.ITEMS_ID]["value"],
-            action=data[constants.ITEMS_ACTION]["value"],
-            coordinate=data[constants.ITEMS_ID]["coordinate"],
-            description=data[constants.ITEMS_DESCRIPTION]["value"],
+            id=source_dict[constants.ITEMS_ID]["value"],
+            action=source_dict[constants.ITEMS_ACTION]["value"],
+            coordinate=source_dict[constants.ITEMS_ID]["coordinate"],
+            description=source_dict[constants.ITEMS_DESCRIPTION]["value"],
             group_id=group_id,
-            group_coordinate=data[constants.ITEMS_GROUP_ID]["coordinate"],
-            item_type="operations" if data.get("is_operations") else "vendor",
-            name=data[constants.ITEMS_NAME]["value"],
-            terms_commitment=data[constants.ITEMS_TERMS_COMMITMENT]["value"],
-            terms_model=ItemTermsModelEnum(data[constants.ITEMS_TERMS_MODEL]["value"]),
-            terms_period=data[constants.ITEMS_TERMS_PERIOD]["value"],
-            quantity_not_applicable=data[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
-            unit_name=data[constants.ITEMS_UNIT_NAME]["value"],
-            unit_coordinate=data[constants.ITEMS_UNIT_ID]["coordinate"],
-            vendor_id=data[constants.ITEMS_VENDOR_ITEM_ID]["value"],
-            group_name=data.get(constants.ITEMS_GROUP_NAME, {}).get("value"),
-            operations_id=data.get(constants.ITEMS_ERP_ITEM_ID, {}).get("value"),
-            parameters=data.get("parameters", []),
-            unit_id=data.get(constants.ITEMS_UNIT_ID, {}).get("value"),
+            group_coordinate=source_dict[constants.ITEMS_GROUP_ID]["coordinate"],
+            item_type="operations" if source_dict.get("is_operations") else "vendor",
+            name=source_dict[constants.ITEMS_NAME]["value"],
+            terms_commitment=source_dict[constants.ITEMS_TERMS_COMMITMENT]["value"],
+            terms_model=ItemTermsModelEnum(source_dict[constants.ITEMS_TERMS_MODEL]["value"]),
+            terms_period=source_dict[constants.ITEMS_TERMS_PERIOD]["value"],
+            quantity_not_applicable=source_dict[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
+            unit_name=source_dict[constants.ITEMS_UNIT_NAME]["value"],
+            unit_coordinate=source_dict[constants.ITEMS_UNIT_ID]["coordinate"],
+            vendor_id=source_dict[constants.ITEMS_VENDOR_ITEM_ID]["value"],
+            group_name=source_dict.get(constants.ITEMS_GROUP_NAME, {}).get("value"),
+            operations_id=source_dict.get(constants.ITEMS_ERP_ITEM_ID, {}).get("value"),
+            parameters=source_dict.get("parameters", []),
+            unit_id=source_dict.get(constants.ITEMS_UNIT_ID, {}).get("value"),
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        updated = json_dict["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            description=data["description"],
-            group_id=data["group"]["id"],
-            group_name=data["group"]["name"],
-            name=data["name"],
-            product_id=data["product"]["id"],
-            quantity_not_applicable=data["quantityNotApplicable"],
-            terms_commitment=data["terms"].get("commitment"),
-            terms_model=ItemTermsModelEnum(data["terms"]["model"]),
-            terms_period=data["terms"]["period"],
-            unit_id=data["unit"]["id"],
-            vendor_id=data["externalIds"]["vendor"],
-            operations_id=data["externalIds"].get("operations"),
+            id=json_dict["id"],
+            description=json_dict["description"],
+            group_id=json_dict["group"]["id"],
+            group_name=json_dict["group"]["name"],
+            name=json_dict["name"],
+            product_id=json_dict["product"]["id"],
+            quantity_not_applicable=json_dict["quantityNotApplicable"],
+            terms_commitment=json_dict["terms"].get("commitment"),
+            terms_model=ItemTermsModelEnum(json_dict["terms"]["model"]),
+            terms_period=json_dict["terms"]["period"],
+            unit_id=json_dict["unit"]["id"],
+            vendor_id=json_dict["externalIds"]["vendor"],
+            operations_id=json_dict["externalIds"].get("operations"),
             parameters=[],
-            status=data["status"],
-            unit_name=data["unit"]["name"],
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            status=json_dict["status"],
+            unit_name=json_dict["unit"]["name"],
+            created_date=parser.parse(json_dict["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
