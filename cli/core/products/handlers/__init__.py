@@ -1,3 +1,4 @@
+# noqa: WPS300, WPS410, WPS412
 from .item_excel_file_manager import ItemExcelFileManager
 from .item_group_excel_file_manager import ItemGroupExcelFileManager
 from .parameter_group_excel_file_manager import ParameterGroupExcelFileManager

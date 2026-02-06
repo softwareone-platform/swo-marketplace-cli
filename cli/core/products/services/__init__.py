@@ -1,3 +1,4 @@
+# noqa: WPS300, WPS410, WPS412
 from .item_group_service import ItemGroupService
 from .item_service import ItemService
 from .parameter_group_service import ParameterGroupService

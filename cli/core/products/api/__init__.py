@@ -1,3 +1,4 @@
+# noqa: WPS300, WPS410, WPS412
 from .item_api_service import ItemAPIService
 from .item_group_api_service import ItemGroupAPIService
 from .parameter_group_api_service import ParameterGroupAPIService
