@@ -23,13 +23,13 @@ type SheetDataGenerator = Generator[SheetData, None, None]
 type StyleData = dict[str, dict[str, NamedStyle]]
 
 
-class ExcelFileHandler(FileHandler):
+class ExcelFileHandler(FileHandler):  # noqa: WPS112, WPS214
     """Handler for Excel (.xlsx) file operations."""
 
     def __init__(self, file_path: Path):
         super().__init__(file_path)
-        self.__workbook: Workbook | None = None
-        self.__worksheets: dict[str, Worksheet] = {}
+        self.__workbook: Workbook | None = None  # noqa: WPS112
+        self.__worksheets: dict[str, Worksheet] = {}  # noqa: WPS112
 
     @property
     def _workbook(self) -> Workbook:

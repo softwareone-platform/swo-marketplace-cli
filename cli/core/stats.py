@@ -31,11 +31,11 @@ DEFAULT_RESULTS: Results = {
 }
 
 
-class ErrorMessagesCollector:
+class ErrorMessagesCollector:  # noqa: WPS112
     """Error messages collector."""
 
     def __init__(self) -> None:
-        self._sections: dict[str, dict[str, list[str]]] = {}
+        self._sections: dict[str, dict[str, list[str]]] = {}  # noqa: WPS112
         self._is_empty: bool = True
 
     def add_msg(self, section_name: str, item_name: str, msg: str) -> None:
