@@ -24,7 +24,7 @@ class MPTAPIError(CLIError):
         return f"{self._request_msg} with response body {self._response_body}"
 
 
-def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:  # noqa: C901
+def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:
     """Decorator to wrap HTTP request functions and handle RequestException.
 
     Args:

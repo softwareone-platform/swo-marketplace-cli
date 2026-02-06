@@ -1,3 +1,4 @@
+# noqa: WPS202, WPS203, WPS218, WPS430, WPS432
 import shutil
 from pathlib import Path
 from unittest.mock import MagicMock
