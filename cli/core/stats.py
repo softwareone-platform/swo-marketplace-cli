@@ -67,21 +67,24 @@ class ErrorMessagesCollector:  # noqa: WPS112
         return self._is_empty
 
     def __str__(self) -> str:
-        msg = ""
+        message_parts = []
         for section_name, section in self._sections.items():
-            msg = f"{msg}{section_name}:"
+            section_header = f"{section_name}:"
+
             if "" in section:
-                msg = f"{msg} {', '.join(section[''])}\n"
+                section_line = f"{section_header} {', '.join(section[''])}"
+                message_parts.append(section_line)
             else:
-                msg += "\n"
+                message_parts.append(section_header)
 
             for item_name, item_messages in section.items():
                 if not item_name:
                     continue
 
-                msg = f"{msg}\t\t{item_name}: {', '.join(item_messages)}"
+                item_line = f"\t\t{item_name}: {', '.join(item_messages)}"
+                message_parts.append(item_line)
 
-        return msg
+        return "\n".join(message_parts)
 
 
 class StatsCollector(ABC):

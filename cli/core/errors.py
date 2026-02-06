@@ -39,22 +39,25 @@ def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callabl
     def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
         try:
             return func(*args, **kwargs)
-        except RequestException as e:
-            if e.response is None:
+        except RequestException as error:
+            if error.response is None:
                 msg = "No response"
-            elif e.response.status_code == 400:
-                response_body = e.response.json()
+            elif error.response.status_code == 400:  # noqa: WPS432
+                response_body = error.response.json()
 
-                msg = ""
                 if "errors" in response_body:
-                    for field, error in response_body["errors"].items():
-                        msg += f"{field}: {error[0]}\n"
+                    # Build error message from all field errors
+                    error_messages = [
+                        f"{field}: {error_list[0]}"
+                        for field, error_list in response_body["errors"].items()
+                    ]
+                    msg = "\n".join(error_messages)
                 else:
-                    msg = str(e.response.content)
+                    msg = str(error.response.content)
             else:
-                msg = str(e.response.content)
+                msg = str(error.response.content)
 
-            raise MPTAPIError(str(e), msg)
+            raise MPTAPIError(str(error), msg)
 
     return _wrapper
 
@@ -68,8 +71,8 @@ def wrap_mpt_api_error[**Param, RetType](
     def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
         try:
             return func(*args, **kwargs)
-        except APIException as e:
-            raise MPTAPIError(str(e), e.body)
+        except APIException as error:
+            raise MPTAPIError(str(error), error.body)
 
     return _wrapper
 
