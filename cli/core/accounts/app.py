@@ -200,9 +200,15 @@ def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool =
 
         if to_wrap_secret:
             if is_new_token:
-                token = f"{token[0:][:22]}*****{token[:4]}"
+                # Show first 22 chars and last 4 chars of new token format
+                token_prefix = token[:22]
+                token_suffix = token[-4:]
+                token = f"{token_prefix}*****{token_suffix}"
             else:
-                token = f"{token[0:][:4]}*****{token[:4]}"
+                # Show first 4 chars and last 4 chars of legacy token
+                token_prefix = token[:4]
+                token_suffix = token[-4:]
+                token = f"{token_prefix}*****{token_suffix}"
 
         return token
 

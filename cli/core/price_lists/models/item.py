@@ -15,7 +15,7 @@ class ItemAction(StrEnum):
     UPDATE = "update"
 
     @classmethod
-    def _missing_(cls, value: object) -> "ItemAction":
+    def _missing_(cls, value: object) -> "ItemAction":  # noqa: WPS120
         if value is None:
             return cls.SKIP
         return super()._missing_(value)
