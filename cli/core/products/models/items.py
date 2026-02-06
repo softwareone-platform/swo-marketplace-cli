@@ -85,7 +85,8 @@ class ItemData(BaseDataModel, ItemActionMixin):
             terms_commitment=source_dict[constants.ITEMS_TERMS_COMMITMENT]["value"],
             terms_model=ItemTermsModelEnum(source_dict[constants.ITEMS_TERMS_MODEL]["value"]),
             terms_period=source_dict[constants.ITEMS_TERMS_PERIOD]["value"],
-            quantity_not_applicable=source_dict[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
+            quantity_not_applicable=source_dict[constants.ITEMS_QUANTITY_APPLICABLE]["value"]
+            == "True",
             unit_name=source_dict[constants.ITEMS_UNIT_NAME]["value"],
             unit_coordinate=source_dict[constants.ITEMS_UNIT_ID]["coordinate"],
             vendor_id=source_dict[constants.ITEMS_VENDOR_ITEM_ID]["value"],

@@ -136,7 +136,9 @@ class ProductData(BaseDataModel):
     @override
     def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         settings = (
-            SettingsData.from_dict(source_dict["settings"]) if "settings" in source_dict else SettingsData()
+            SettingsData.from_dict(source_dict["settings"])
+            if "settings" in source_dict
+            else SettingsData()
         )
         return cls(
             id=source_dict[constants.GENERAL_PRODUCT_ID]["value"],

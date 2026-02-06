@@ -1,9 +1,11 @@
-CREATING = "creating"
-FETCHING = "fetching"
-READING = "reading"
-REMOVING = "removing"
+from typing import Final
 
-STATUS_MSG = {
+CREATING: Final = "creating"
+FETCHING: Final = "fetching"
+READING: Final = "reading"
+REMOVING: Final = "removing"
+
+STATUS_MSG: Final = {
     CREATING: "Making account",
     FETCHING: "Fetching account information",
     READING: "Reading accounts from the configuration file",
