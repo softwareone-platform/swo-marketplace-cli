@@ -25,29 +25,29 @@ class ParameterGroupData(BaseDataModel, ActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         return cls(
-            id=data[constants.PARAMETERS_GROUPS_ID]["value"],
-            coordinate=data[constants.PARAMETERS_GROUPS_ID]["coordinate"],
-            default=data[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
-            description=data[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
-            display_order=int(data[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"]),
-            label=data[constants.PARAMETERS_GROUPS_LABEL]["value"],
-            name=data[constants.PARAMETERS_GROUPS_NAME]["value"],
+            id=source_dict[constants.PARAMETERS_GROUPS_ID]["value"],
+            coordinate=source_dict[constants.PARAMETERS_GROUPS_ID]["coordinate"],
+            default=source_dict[constants.PARAMETERS_GROUPS_DEFAULT]["value"] == "True",
+            description=source_dict[constants.PARAMETERS_GROUPS_DESCRIPTION]["value"],
+            display_order=int(source_dict[constants.PARAMETERS_GROUPS_DISPLAY_ORDER]["value"]),
+            label=source_dict[constants.PARAMETERS_GROUPS_LABEL]["value"],
+            name=source_dict[constants.PARAMETERS_GROUPS_NAME]["value"],
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        updated = json_dict["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            description=data.get("description"),
-            default=data["default"],
-            display_order=data["displayOrder"],
-            label=data["label"],
-            name=data["name"],
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_dict["id"],
+            description=json_dict.get("description"),
+            default=json_dict["default"],
+            display_order=json_dict["displayOrder"],
+            label=json_dict["label"],
+            name=json_dict["name"],
+            created_date=parser.parse(json_dict["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 

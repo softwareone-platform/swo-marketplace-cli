@@ -26,30 +26,30 @@ class TemplateData(BaseDataModel, ActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
-        default = data[constants.TEMPLATES_DEFAULT]["value"]
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
+        default = source_dict[constants.TEMPLATES_DEFAULT]["value"]
         return cls(
-            id=data[constants.TEMPLATES_ID]["value"],
-            coordinate=data[constants.TEMPLATES_ID]["coordinate"],
-            action=DataActionEnum(data[constants.TEMPLATES_ACTION]["value"]),
-            name=data[constants.TEMPLATES_NAME]["value"],
-            type=data[constants.TEMPLATES_TYPE]["value"],
-            content=data[constants.TEMPLATES_CONTENT]["value"],
-            content_coordinate=data[constants.TEMPLATES_CONTENT]["coordinate"],
+            id=source_dict[constants.TEMPLATES_ID]["value"],
+            coordinate=source_dict[constants.TEMPLATES_ID]["coordinate"],
+            action=DataActionEnum(source_dict[constants.TEMPLATES_ACTION]["value"]),
+            name=source_dict[constants.TEMPLATES_NAME]["value"],
+            type=source_dict[constants.TEMPLATES_TYPE]["value"],
+            content=source_dict[constants.TEMPLATES_CONTENT]["value"],
+            content_coordinate=source_dict[constants.TEMPLATES_CONTENT]["coordinate"],
             default=None if default is None else default == "True",
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
+        updated = json_dict["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            name=data["name"],
-            type=data["type"],
-            content=data["content"],
-            default=data.get("default"),
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_dict["id"],
+            name=json_dict["name"],
+            type=json_dict["type"],
+            content=json_dict["content"],
+            default=json_dict.get("default"),
+            created_date=parser.parse(json_dict["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
