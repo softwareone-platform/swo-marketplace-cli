@@ -1,4 +1,6 @@
+import re
 from typing import Annotated
+from urllib.parse import urlsplit, urlunparse
 
 import typer
 from cli.core.accounts.api.account_api_service import MPTAccountService
@@ -25,14 +27,38 @@ from .flows import (
 )
 from .models import Account
 
+INVALID_ENV_URL_MESSAGE = "Invalid environment URL. Expected scheme://host[:port]"
+INCOMPLETE_API_PATH_RE = re.compile(r"^$|^/$|^/public/?$")
+
 app = typer.Typer()
+
+
+def protocol_and_host(value: str):
+    """Composes environment URL from input URL removing useless parts."""
+    split_result = urlsplit(value, scheme="https")
+    if split_result.scheme and split_result.hostname:
+        host = (
+            f"[{split_result.hostname}]" if ":" in split_result.hostname else split_result.hostname
+        )
+        port = f":{split_result.port}" if split_result.port else ""
+        path = split_result.path
+        if INCOMPLETE_API_PATH_RE.match(path):
+            path = "public/v1"
+        return urlunparse((split_result.scheme, f"{host}{port}", path, "", "", ""))
+    raise ValueError(INVALID_ENV_URL_MESSAGE)
 
 
 @app.command(name="add")
 def add_account(
     secret: Annotated[str, typer.Argument(help="SoftwareOne Marketplace API Token secret")],
     environment: Annotated[
-        str, typer.Option("--environment", "-e", help="URL to the API for environment")
+        str,
+        typer.Option(
+            "--environment",
+            "-e",
+            help="Protocol and host part of API URL for environment",
+            parser=protocol_and_host,
+        ),
     ] = "https://api.platform.softwareone.com",
 ):
     """Add an account to work with the SoftwareOne Marketplace."""

@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 import typer
 from cli.core.accounts import app
-from cli.core.accounts.app import get_active_account
+from cli.core.accounts.app import get_active_account, protocol_and_host
 from cli.core.accounts.handlers import JsonFileHandler
 from cli.core.errors import MPTAPIError
 from cli.core.mpt.models import Account, Token
@@ -62,7 +62,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
             "type": "Vendor",
             "token": "idt:TKN-1111-1111:secret",
             "token_id": "TKN-1111-1111",
-            "environment": "https://api.platform.softwareone.com",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         }
     ]
@@ -105,7 +105,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
             "type": "Vendor",
             "token": "idt:TKN-1111-1111:secret",
             "token_id": "TKN-1111-1111",
-            "environment": "https://api.platform.softwareone.com",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         },
     ]
@@ -156,7 +156,7 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
             "type": "Vendor",
             "token": "idt:TKN-1111-1111:secret",
             "token_id": "TKN-1111-1111",
-            "environment": "https://new-environment.example.com",
+            "environment": "https://new-environment.example.com/public/v1",
             "is_active": True,
         },
     ]
@@ -236,7 +236,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
             "type": "Vendor",
             "token": "idt:TKN-1111-1111:secret",
             "token_id": "TKN-1111-1111",
-            "environment": "https://api.platform.softwareone.com",
+            "environment": "https://api.platform.softwareone.com/public/v1",
             "is_active": True,
         },
     ]
@@ -382,3 +382,41 @@ def test_get_active_account_no_active_account(new_accounts_path, mocker, expecte
 
     with pytest.raises(typer.Exit):
         get_active_account()
+
+
+@pytest.mark.parametrize(
+    ("input_url", "expected"),
+    [
+        ("//[2001:db8:85a3::8a2e:370:7334]:80/a", "https://[2001:db8:85a3::8a2e:370:7334]:80/a"),
+        ("//example.com", "https://example.com/public/v1"),
+        ("http://example.com", "http://example.com/public/v1"),
+        ("http://example.com:88/something/else", "http://example.com:88/something/else"),
+        ("http://user@example.com:88/", "http://example.com:88/public/v1"),
+        ("http://user:pass@example.com:88/", "http://example.com:88/public/v1"),
+        ("http://example.com/public", "http://example.com/public/v1"),
+        ("http://example.com/public/", "http://example.com/public/v1"),
+        ("http://example.com/public/else", "http://example.com/public/else"),
+        ("http://example.com/public/v1", "http://example.com/public/v1"),
+        ("http://example.com/public/v1/", "http://example.com/public/v1/"),
+        ("http://example.com/else/public", "http://example.com/else/public"),
+        ("http://example.com/elsepublic", "http://example.com/elsepublic"),
+    ],
+)
+def test_protocol_and_host(input_url, expected):
+    result = protocol_and_host(input_url)
+
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    "input_url",
+    [
+        "http//example.com",
+        "://example.com",
+        "http:example.com",
+        "http:/example.com",
+    ],
+)
+def test_protocol_and_host_error(input_url):
+    with pytest.raises(ValueError):
+        protocol_and_host(input_url)
