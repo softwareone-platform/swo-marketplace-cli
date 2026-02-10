@@ -45,6 +45,7 @@ htmlcov/
 .cache
 nosetests.xml
 coverage.xml
+out.xml
 *.cover
 *.py,cover
 .hypothesis/
@@ -127,7 +128,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-.swocli/accounts.json
 
 # Spyder project settings
 .spyderproject
@@ -160,11 +160,20 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
+.devcontainer/
+.vscode
+
 .DS_Store
 
 # ignore xlsx temporary files
 ~$*.xlsx
 
+# ignore local configuration
+.swocli/accounts.json
+
 # ruff cache
 .ruff_cache
 .idea
+
+# Makefile
+make/local.mk
