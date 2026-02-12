@@ -23,9 +23,9 @@ class Service(ABC):
 
     @property
     def export_params(self):
-        params = {"select": "audit", "limit": 100, "offset": 0}
-        params.update(self.set_export_params())
-        return params
+        export_query = {"select": "audit", "limit": 100, "offset": 0}
+        export_query.update(self.set_export_params())
+        return export_query
 
     @abstractmethod
     def create(self) -> ServiceResult:

@@ -26,13 +26,13 @@ def test_get_files_path_no_files():
 
 
 def test_get_files_path_single_file(tmp_path):
-    file = tmp_path / "file.xlsx"
-    file.touch()
+    file_path = tmp_path / "file.xlsx"
+    file_path.touch()
 
-    result = get_files_path([str(file)])
+    result = get_files_path([str(file_path)])
 
     assert len(result) == 1
-    assert str(file) in result
+    assert str(file_path) in result
 
 
 def test_get_files_path_multiple_files(tmp_path):

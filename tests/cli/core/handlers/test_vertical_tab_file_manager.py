@@ -15,11 +15,11 @@ from cli.core.products.constants import (
 @dataclass
 class FakeDataModel(BaseDataModel):
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls()
 
     @classmethod
-    def from_json(cls, data: dict[str, Any]) -> Self:
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
         return cls()
 
     def to_json(self) -> dict[str, Any]:

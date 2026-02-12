@@ -12,9 +12,9 @@ def test_read_data(mocker, template_data_from_dict):
     template_data_from_dict_mock = mocker.patch.object(
         TemplateData, "from_dict", return_value=template_data_from_dict
     )
-    handler = TemplateExcelFileManager("fake_file.xlsx")
+    excel_manager = TemplateExcelFileManager("fake_file.xlsx")
 
-    result = list(handler.read_data())
+    result = list(excel_manager.read_data())
 
     assert result == [template_data_from_dict]
     get_data_from_horizonal_sheet.assert_called_once_with(TAB_TEMPLATES, TEMPLATES_FIELDS)

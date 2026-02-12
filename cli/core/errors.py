@@ -5,7 +5,7 @@ from typing import ParamSpec, TypeVar
 from mpt_api_client.exceptions import MPTHttpError as APIException
 from requests import RequestException
 
-Param = ParamSpec("Param")
+CallableParams = ParamSpec("CallableParams")
 RetType = TypeVar("RetType")
 
 
@@ -24,7 +24,9 @@ class MPTAPIError(CLIError):
         return f"{self._request_msg} with response body {self._response_body}"
 
 
-def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:  # noqa: C901
+def wrap_http_error[**CallableParams, RetType](  # noqa: C901
+    func: Callable[CallableParams, RetType],
+) -> Callable[CallableParams, RetType]:
     """Decorator to wrap HTTP request functions and handle RequestException.
 
     Args:
@@ -36,7 +38,7 @@ def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callabl
     """
 
     @wraps(func)
-    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+    def _wrapper(*args: CallableParams.args, **kwargs: CallableParams.kwargs) -> RetType:
         try:
             return func(*args, **kwargs)
         except RequestException as e:
@@ -59,13 +61,13 @@ def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callabl
     return _wrapper
 
 
-def wrap_mpt_api_error[**Param, RetType](
-    func: Callable[Param, RetType],
-) -> Callable[Param, RetType]:
+def wrap_mpt_api_error[**CallableParams, RetType](
+    func: Callable[CallableParams, RetType],
+) -> Callable[CallableParams, RetType]:
     """Decorator to wrap MPT API functions and handle APIException."""
 
     @wraps(func)
-    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+    def _wrapper(*args: CallableParams.args, **kwargs: CallableParams.kwargs) -> RetType:
         try:
             return func(*args, **kwargs)
         except APIException as e:

@@ -33,17 +33,17 @@ def related_api_service(mpt_client):
 
 
 @pytest.mark.parametrize(
-    ("params", "expected_params"),
+    ("query_params", "expected_params"),
     [
         (None, {}),
         ({"bla": "foo"}, {"bla": "foo"}),
     ],
 )
-def test_get(params, expected_params, mocker, api_service):
+def test_get(query_params, expected_params, mocker, api_service):
     response_mock = Mock(spec=Response, json=Mock(return_value={"id": "fakeId", "name": "test"}))
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
-    result = api_service.get("fakeId", params=params)
+    result = api_service.get("fakeId", query_params=query_params)
 
     assert result == {"id": "fakeId", "name": "test"}
     client_mock.assert_called_once_with("fake_url/fakeId", params=expected_params)
@@ -63,13 +63,13 @@ def test_exists(total, expected_response, mocker, api_service):
 
 
 @pytest.mark.parametrize(
-    ("params", "expected_params"),
+    ("query_params", "expected_params"),
     [
         (None, {}),
         ({"bla": "foo"}, {"bla": "foo"}),
     ],
 )
-def test_list(params, expected_params, mocker, api_service):
+def test_list(query_params, expected_params, mocker, api_service):
     expected_meta_data = {"offset": 0, "limit": 100, "total": 10}
     expected_data = [{"id": "fakeId", "name": "test"}]
     meta_data = {"pagination": expected_meta_data, "omitted": ["audit"]}
@@ -77,15 +77,18 @@ def test_list(params, expected_params, mocker, api_service):
     response_mock = Mock(spec=Response, json=Mock(return_value=response))
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
-    result = api_service.list(params=params)
+    result = api_service.list(query_params=query_params)
 
     assert result == {"meta": expected_meta_data, "data": expected_data}
     client_mock.assert_called_once_with("fake_url", params=expected_params)
 
 
 def test_list_no_data(mocker, api_service):
-    data = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": []}
-    response_mock = Mock(spec=Response, json=Mock(return_value=data))
+    response_payload = {
+        "$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}},
+        "data": [],
+    }
+    response_mock = Mock(spec=Response, json=Mock(return_value=response_payload))
     client_mock = mocker.patch.object(MPTClient, "get", return_value=response_mock)
 
     result = api_service.list()

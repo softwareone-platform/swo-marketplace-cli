@@ -27,33 +27,33 @@ class ItemGroupData(BaseDataModel, ActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls(
-            id=data[constants.ITEMS_GROUPS_ID]["value"],
-            coordinate=data[constants.ITEMS_GROUPS_ID]["coordinate"],
-            name=data[constants.ITEMS_GROUPS_NAME]["value"],
-            label=data[constants.ITEMS_GROUPS_LABEL]["value"],
-            description=data[constants.ITEMS_GROUPS_DESCRIPTION]["value"],
-            display_order=data[constants.ITEMS_GROUPS_DISPLAY_ORDER]["value"],
-            default=data[constants.ITEMS_GROUPS_DEFAULT]["value"] == "True",
-            multiple=data[constants.ITEMS_GROUPS_MULTIPLE_CHOICES]["value"] == "True",
-            required=data[constants.ITEMS_GROUPS_REQUIRED]["value"] == "True",
+            id=row_data[constants.ITEMS_GROUPS_ID]["value"],
+            coordinate=row_data[constants.ITEMS_GROUPS_ID]["coordinate"],
+            name=row_data[constants.ITEMS_GROUPS_NAME]["value"],
+            label=row_data[constants.ITEMS_GROUPS_LABEL]["value"],
+            description=row_data[constants.ITEMS_GROUPS_DESCRIPTION]["value"],
+            display_order=row_data[constants.ITEMS_GROUPS_DISPLAY_ORDER]["value"],
+            default=row_data[constants.ITEMS_GROUPS_DEFAULT]["value"] == "True",
+            multiple=row_data[constants.ITEMS_GROUPS_MULTIPLE_CHOICES]["value"] == "True",
+            required=row_data[constants.ITEMS_GROUPS_REQUIRED]["value"] == "True",
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
+        updated = json_data["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            name=data["name"],
-            label=data["label"],
-            description=data["description"],
-            display_order=data["displayOrder"],
-            default=data["default"],
-            multiple=data["multiple"],
-            required=data["required"],
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_data["id"],
+            name=json_data["name"],
+            label=json_data["label"],
+            description=json_data["description"],
+            display_order=json_data["displayOrder"],
+            default=json_data["default"],
+            multiple=json_data["multiple"],
+            required=json_data["required"],
+            created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 

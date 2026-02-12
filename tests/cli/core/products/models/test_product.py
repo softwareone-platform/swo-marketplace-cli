@@ -104,20 +104,20 @@ def test_settings_data_from_dict(settings_file_data):
         SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
     })
 
-    assert len(result.items) == 1
-    item = result.items[0]
-    assert isinstance(item, SettingsItem)
-    assert item.name == "Change order validation (draft)"
-    assert item.value == "Enabled"
-    assert item.coordinate == "A2"
+    assert len(result.settings_items) == 1
+    setting_item = result.settings_items[0]
+    assert isinstance(setting_item, SettingsItem)
+    assert setting_item.name == "Change order validation (draft)"
+    assert setting_item.setting_value == "Enabled"
+    assert setting_item.coordinate == "A2"
     assert result.json_path is None
 
 
 def test_settings_data_from_json(mpt_product_data):
     result = SettingsData.from_json(mpt_product_data["settings"])
 
-    assert len(result.items) == 11
-    assert isinstance(result.items[0], SettingsItem)
+    assert len(result.settings_items) == 11
+    assert isinstance(result.settings_items[0], SettingsItem)
     assert result.json_path is None
 
 
@@ -140,7 +140,7 @@ def test_setting_item_from_dict(settings_file_data):
     })
 
     assert result.name == "Purchase order validation (query)"
-    assert result.value == "Off"
+    assert result.setting_value == "Off"
     assert result.coordinate == "A10"
     assert result.action == DataActionEnum.DELETE
 
@@ -149,7 +149,7 @@ def test_setting_item_from_json(mpt_product_data):
     result = SettingsItem.from_json({"name": "Product requests", "value": False})
 
     assert result.name == "Product requests"
-    assert result.value == "Off"
+    assert result.setting_value == "Off"
     assert result.action == DataActionEnum.SKIP
 
 
@@ -157,18 +157,18 @@ def test_setting_item_from_json_enabled(mpt_product_data):
     result = SettingsItem.from_json({"name": "Change order validation (draft)", "value": True})
 
     assert result.name == "Change order validation (draft)"
-    assert result.value == "Enabled"
+    assert result.setting_value == "Enabled"
     assert result.action == DataActionEnum.SKIP
 
 
 def test_setting_item_to_json():
-    result = SettingsItem(name="Item selection validation", value="Off").to_json()
+    result = SettingsItem(name="Item selection validation", setting_value="Off").to_json()
 
     assert result == {}
 
 
 def test_setting_item_to_xlsx():
-    result = SettingsItem(name="Item selection validation", value="Off").to_xlsx()
+    result = SettingsItem(name="Item selection validation", setting_value="Off").to_xlsx()
 
     assert result == {
         SETTINGS_SETTING: "Item selection validation",

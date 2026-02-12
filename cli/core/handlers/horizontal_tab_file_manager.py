@@ -25,22 +25,24 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
     _required_fields_by_tab: ClassVar[Mapping[str, Any]]
     _sheet_name: str
 
-    def add(self, items: list[DataModel]) -> None:
+    def add(self, records: list[DataModel]) -> None:
         """Add a row for each item to the tab.
 
         Args:
-            items: The items to add.
+            records: The items to add.
         """
-        for row, item in enumerate(items, self.file_handler.get_sheet_next_row(self._sheet_name)):
-            item_xlsx = item.to_xlsx()
+        for row, record in enumerate(
+            records, self.file_handler.get_sheet_next_row(self._sheet_name)
+        ):
+            item_xlsx = record.to_xlsx()
             for col, field in enumerate(self._fields, 1):
-                value = item_xlsx.get(field, "")
-                style = self._get_style(item, value)
+                cell_value = item_xlsx.get(field, "")
+                style = self._get_style(record, cell_value)
                 self.file_handler.write_cell(
                     self._sheet_name,
                     col=col,
                     row=row,
-                    value=value,
+                    cell_value=cell_value,
                     data_validation=self._data_validation_map.get(field, None),
                     style=style,
                 )
@@ -57,7 +59,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
                 self._sheet_name,
                 row=1,
                 col=col,
-                value=field,
+                cell_value=field,
                 style=horizontal_tab_style,
             )
 
@@ -67,8 +69,8 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         Yields:
             DataModel: An object containing the data for each item row.
         """
-        for item in self._read_data():
-            yield self._data_model.from_dict(item)
+        for row_data in self._read_data():
+            yield self._data_model.from_dict(row_data)
 
     @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
@@ -90,13 +92,13 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
 
-    def _get_style(self, item: DataModel, value: Any) -> NamedStyle | None:
-        if not isinstance(value, float):
+    def _get_style(self, record: DataModel, cell_value: Any) -> NamedStyle | None:
+        if not isinstance(cell_value, float):
             return None
 
         try:
-            currency = item.currency  # type: ignore[attr-defined]
-            precision = item.precision  # type: ignore[attr-defined]
+            currency = record.currency  # type: ignore[attr-defined]
+            precision = record.precision  # type: ignore[attr-defined]
         except AttributeError:
             return None
 

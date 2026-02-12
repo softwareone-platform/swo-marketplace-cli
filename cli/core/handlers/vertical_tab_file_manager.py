@@ -32,8 +32,10 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
 
         """
         data_xlsx = data_model.to_xlsx()
-        data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
-        self.file_handler.write([{self._sheet_name: data}])
+        row_values = {
+            f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)
+        }
+        self.file_handler.write([{self._sheet_name: row_values}])
 
     def check_required_tabs(self) -> None:
         """Checks that all required tabs exist in the Excel file."""
@@ -72,18 +74,18 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         Returns:
             DataModel: An object containing the information from the sheet.
         """
-        data = self._read_data(self._fields)
-        return self._data_model.from_dict(data)
+        row_data = self._read_data(self._fields)
+        return self._data_model.from_dict(row_data)
 
     @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
-        data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
+        row_data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
         try:
-            coordinate = data[ERROR_COLUMN_NAME]["coordinate"]
+            coordinate = row_data[ERROR_COLUMN_NAME]["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
         except KeyError:
             column_letter = self.file_handler.get_sheet_next_column(self._sheet_name)
-            coordinate = next(iter(data.values()))["coordinate"]
+            coordinate = next(iter(row_data.values()))["coordinate"]
             _, row_number = self._get_row_and_column_from_coordinate(coordinate)
             self.file_handler.write([{self._sheet_name: {f"{column_letter}1": ERROR_COLUMN_NAME}}])
 

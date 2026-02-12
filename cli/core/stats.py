@@ -6,7 +6,7 @@ from rich import box
 from rich.table import Table
 
 
-class Results(TypedDict):
+class TabResults(TypedDict):
     """TypedDict representing the result statistics for synchronization operations.
 
     Attributes:
@@ -23,7 +23,7 @@ class Results(TypedDict):
     skipped: int
 
 
-DEFAULT_RESULTS: Results = {
+DEFAULT_RESULTS: TabResults = {
     "synced": 0,
     "error": 0,
     "total": 0,
@@ -90,7 +90,7 @@ class StatsCollector(ABC):
     __id: str | None = None
     errors = ErrorMessagesCollector()
 
-    def __init__(self, tabs: dict[str, Results]) -> None:
+    def __init__(self, tabs: dict[str, TabResults]) -> None:
         self.__has_error = False
         self.__tab_aliases = tabs
 
@@ -105,11 +105,11 @@ class StatsCollector(ABC):
         return self.__id
 
     @stat_id.setter
-    def stat_id(self, value: str) -> None:
-        self.__id = value
+    def stat_id(self, stat_value: str) -> None:
+        self.__id = stat_value
 
     @property
-    def tabs(self) -> dict[str, Results]:
+    def tabs(self) -> dict[str, TabResults]:
         """Get the tab aliases with their results.
 
         Returns:
@@ -185,16 +185,16 @@ class ProductStatsCollector(StatsCollector):
     """Statistics collector specifically for product synchronization operations."""
 
     def __init__(self) -> None:
-        general: Results = copy.deepcopy(DEFAULT_RESULTS)
-        parameters_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
-        items_groups: Results = copy.deepcopy(DEFAULT_RESULTS)
-        agreements_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        asset_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        item_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        request_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        subscription_parameters: Results = copy.deepcopy(DEFAULT_RESULTS)
-        items: Results = copy.deepcopy(DEFAULT_RESULTS)
-        templates: Results = copy.deepcopy(DEFAULT_RESULTS)
+        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        parameters_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        items_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        agreements_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        asset_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        item_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        request_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        subscription_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        item_rows: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        templates: TabResults = copy.deepcopy(DEFAULT_RESULTS)
 
         tabs = {
             "General": general,
@@ -205,7 +205,7 @@ class ProductStatsCollector(StatsCollector):
             "Item Parameters": item_parameters,
             "Request Parameters": request_parameters,
             "Subscription Parameters": subscription_parameters,
-            "Items": items,
+            "Items": item_rows,
             "Templates": templates,
         }
 
@@ -224,8 +224,8 @@ class PriceListStatsCollector(StatsCollector):
     """
 
     def __init__(self) -> None:
-        general: Results = copy.deepcopy(DEFAULT_RESULTS)
-        price_items: Results = copy.deepcopy(DEFAULT_RESULTS)
+        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        price_items: TabResults = copy.deepcopy(DEFAULT_RESULTS)
 
         tabs = {
             "General": general,

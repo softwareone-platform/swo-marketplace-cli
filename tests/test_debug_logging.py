@@ -27,10 +27,10 @@ def test_log_file_writes_to_file(tmp_path, mocker):
 
     # BL
     def mock_basic_config(**kwargs):
-        handler = kwargs.get("handlers", [None])[0]
-        if handler:
-            handler.setFormatter(logging.Formatter(kwargs.get("format")))
-            logging.getLogger().addHandler(handler)
+        log_handler = kwargs.get("handlers", [None])[0]
+        if log_handler:
+            log_handler.setFormatter(logging.Formatter(kwargs.get("format")))
+            logging.getLogger().addHandler(log_handler)
             logging.getLogger().setLevel(kwargs.get("level", logging.DEBUG))
             # Generate a log message immediately after setup
             logging.getLogger().debug("Test debug message")
@@ -61,10 +61,10 @@ def test_log_file_creates_parent_directories(tmp_path, mocker):
 
     # BL
     def mock_basic_config(**kwargs):
-        handler = kwargs.get("handlers", [None])[0]
-        if handler:
-            handler.setFormatter(logging.Formatter(kwargs.get("format")))
-            logging.getLogger().addHandler(handler)
+        log_handler = kwargs.get("handlers", [None])[0]
+        if log_handler:
+            log_handler.setFormatter(logging.Formatter(kwargs.get("format")))
+            logging.getLogger().addHandler(log_handler)
             logging.getLogger().setLevel(kwargs.get("level", logging.DEBUG))
             # Generate a log message immediately after setup
             logging.getLogger().debug("Test debug message")

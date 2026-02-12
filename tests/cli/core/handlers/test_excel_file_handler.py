@@ -62,11 +62,11 @@ def test_normalize_file_path(file_path, expected_path):
 
 def test_create(tmp_path):
     file_path = tmp_path / "fake_file.xlsx"
-    handler = ExcelFileHandler(file_path)
+    excel_handler = ExcelFileHandler(file_path)
 
-    handler.create()  # act
+    excel_handler.create()  # act
 
-    assert handler.sheet_names == ["General"]
+    assert excel_handler.sheet_names == ["General"]
 
 
 def test_check_required_sheet(excel_file_handler):
@@ -203,7 +203,7 @@ def test_write(excel_file_handler):
 
 
 def test_write_cell(excel_file_handler):
-    excel_file_handler.write_cell("Sheet1", row=2, col=3, value="FakeValue")  # act
+    excel_file_handler.write_cell("Sheet1", row=2, col=3, cell_value="FakeValue")  # act
 
     cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # noqa: SLF001
     assert cell.value == "FakeValue"
@@ -214,7 +214,7 @@ def test_write_cell_with_style(excel_file_handler):
     fake_style = NamedStyle("fake_style")
 
     excel_file_handler.write_cell(  # act
-        "Sheet1", row=2, col=3, value="FakeValue", style=fake_style
+        "Sheet1", row=2, col=3, cell_value="FakeValue", style=fake_style
     )
 
     assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # noqa: SLF001
@@ -224,7 +224,7 @@ def test_write_cell_with_data_validation(excel_file_handler):
     fake_data_validation = DataValidation()
 
     excel_file_handler.write_cell(  # act
-        "Sheet1", row=2, col=3, value="FakeValue", data_validation=fake_data_validation
+        "Sheet1", row=2, col=3, cell_value="FakeValue", data_validation=fake_data_validation
     )
 
     assert "C2" in fake_data_validation.ranges

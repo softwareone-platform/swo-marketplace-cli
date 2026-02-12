@@ -40,56 +40,56 @@ class PriceListData(BaseDataModel):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls(
-            id=data[constants.GENERAL_PRICELIST_ID]["value"],
-            coordinate=data[constants.GENERAL_PRICELIST_ID]["coordinate"],
-            currency=data[constants.GENERAL_CURRENCY]["value"],
-            product_id=data[constants.GENERAL_PRODUCT_ID]["value"],
-            product_name=data[constants.GENERAL_PRODUCT_NAME]["value"],
-            vendor_id=data[constants.GENERAL_VENDOR_ID]["value"],
-            vendor_name=data[constants.GENERAL_VENDOR_NAME]["value"],
-            export_date=data[constants.GENERAL_EXPORT_DATE]["value"].date(),
-            precision=data[constants.GENERAL_PRECISION]["value"],
-            notes=data[constants.GENERAL_NOTES]["value"],
-            type=data.get("type"),
-            default_markup=data.get(constants.GENERAL_DEFAULT_MARKUP, {}).get("value"),
-            external_id=data.get(constants.EXTERNAL_ID, {}).get("value"),
+            id=row_data[constants.GENERAL_PRICELIST_ID]["value"],
+            coordinate=row_data[constants.GENERAL_PRICELIST_ID]["coordinate"],
+            currency=row_data[constants.GENERAL_CURRENCY]["value"],
+            product_id=row_data[constants.GENERAL_PRODUCT_ID]["value"],
+            product_name=row_data[constants.GENERAL_PRODUCT_NAME]["value"],
+            vendor_id=row_data[constants.GENERAL_VENDOR_ID]["value"],
+            vendor_name=row_data[constants.GENERAL_VENDOR_NAME]["value"],
+            export_date=row_data[constants.GENERAL_EXPORT_DATE]["value"].date(),
+            precision=row_data[constants.GENERAL_PRECISION]["value"],
+            notes=row_data[constants.GENERAL_NOTES]["value"],
+            type=row_data.get("type"),
+            default_markup=row_data.get(constants.GENERAL_DEFAULT_MARKUP, {}).get("value"),
+            external_id=row_data.get(constants.EXTERNAL_ID, {}).get("value"),
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
+        updated = json_data["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            currency=data["currency"],
-            product_id=data["product"]["id"],
-            product_name=data["product"]["name"],
-            vendor_id=data["vendor"]["id"],
-            vendor_name=data["vendor"]["name"],
-            precision=data["precision"],
-            notes=data.get("notes", ""),
-            default_markup=data["defaultMarkup"],
-            external_id=data.get("externalIds", {}).get("vendor"),
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_data["id"],
+            currency=json_data["currency"],
+            product_id=json_data["product"]["id"],
+            product_name=json_data["product"]["name"],
+            vendor_id=json_data["vendor"]["id"],
+            vendor_name=json_data["vendor"]["name"],
+            precision=json_data["precision"],
+            notes=json_data.get("notes", ""),
+            default_markup=json_data["defaultMarkup"],
+            external_id=json_data.get("externalIds", {}).get("vendor"),
+            created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
     @override
     def to_json(self) -> dict[str, Any]:
-        data = {
+        json_payload = {
             "currency": self.currency,
             "precision": self.precision,
             "notes": self.notes,
             "product": self.product,
         }
         if self.is_operations():
-            data["defaultMarkup"] = self.default_markup
+            json_payload["defaultMarkup"] = self.default_markup
         elif not self.is_operations() and self.external_id:
-            data["externalIds"] = {"vendor": self.external_id}
+            json_payload["externalIds"] = {"vendor": self.external_id}
 
-        return data
+        return json_payload
 
     @override
     def to_xlsx(self) -> dict[str, Any]:

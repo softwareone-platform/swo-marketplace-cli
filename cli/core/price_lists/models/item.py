@@ -15,10 +15,10 @@ class ItemAction(StrEnum):
     UPDATE = "update"
 
     @classmethod
-    def _missing_(cls, value: object) -> "ItemAction":
-        if value is None:
+    def _missing_(cls, raw_input: object) -> "ItemAction":
+        if raw_input is None:
             return cls.SKIP
-        return super()._missing_(value)
+        return super()._missing_(raw_input)
 
 
 class ItemStatus(StrEnum):
@@ -76,73 +76,73 @@ class ItemData(BaseDataModel):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls(
-            id=data[constants.PRICELIST_ITEMS_ID]["value"],
-            coordinate=data[constants.PRICELIST_ITEMS_ID]["coordinate"],
-            billing_frequency=data[constants.PRICELIST_ITEMS_BILLING_FREQUENCY]["value"],
-            commitment=data[constants.PRICELIST_ITEMS_COMMITMENT]["value"],
-            erp_id=data[constants.PRICELIST_ITEMS_ITEM_ERP_ID]["value"],
-            item_id=data[constants.PRICELIST_ITEMS_ITEM_ID]["value"],
-            item_name=data[constants.PRICELIST_ITEMS_ITEM_NAME]["value"],
-            markup=data.get(constants.PRICELIST_ITEMS_MARKUP, {}).get("value"),
-            status=ItemStatus(data[constants.PRICELIST_ITEMS_STATUS]["value"]),
-            unit_lp=data[constants.PRICELIST_ITEMS_UNIT_LP]["value"],
-            unit_pp=data[constants.PRICELIST_ITEMS_UNIT_PP]["value"],
-            unit_sp=data.get(constants.PRICELIST_ITEMS_UNIT_SP, {}).get("value"),
-            vendor_id=data[constants.PRICELIST_ITEMS_ITEM_VENDOR_ID]["value"],
-            action=ItemAction(data[constants.PRICELIST_ITEMS_ACTION]["value"]),
-            type=data.get("type"),
+            id=row_data[constants.PRICELIST_ITEMS_ID]["value"],
+            coordinate=row_data[constants.PRICELIST_ITEMS_ID]["coordinate"],
+            billing_frequency=row_data[constants.PRICELIST_ITEMS_BILLING_FREQUENCY]["value"],
+            commitment=row_data[constants.PRICELIST_ITEMS_COMMITMENT]["value"],
+            erp_id=row_data[constants.PRICELIST_ITEMS_ITEM_ERP_ID]["value"],
+            item_id=row_data[constants.PRICELIST_ITEMS_ITEM_ID]["value"],
+            item_name=row_data[constants.PRICELIST_ITEMS_ITEM_NAME]["value"],
+            markup=row_data.get(constants.PRICELIST_ITEMS_MARKUP, {}).get("value"),
+            status=ItemStatus(row_data[constants.PRICELIST_ITEMS_STATUS]["value"]),
+            unit_lp=row_data[constants.PRICELIST_ITEMS_UNIT_LP]["value"],
+            unit_pp=row_data[constants.PRICELIST_ITEMS_UNIT_PP]["value"],
+            unit_sp=row_data.get(constants.PRICELIST_ITEMS_UNIT_SP, {}).get("value"),
+            vendor_id=row_data[constants.PRICELIST_ITEMS_ITEM_VENDOR_ID]["value"],
+            action=ItemAction(row_data[constants.PRICELIST_ITEMS_ACTION]["value"]),
+            type=row_data.get("type"),
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
         return cls(
-            id=data.get("id", ""),
-            billing_frequency=data["item"]["terms"]["period"],
-            currency=data["priceList"]["currency"],
-            commitment=data["item"]["terms"].get("commitment"),
-            erp_id=data["item"]["externalIds"].get("operations"),
-            item_id=data["item"]["id"],
-            item_name=data["item"]["name"],
-            lp_x1=data.get("LPx1"),
-            lp_xm=data.get("LPxM"),
-            lp_xy=data.get("LPxY"),
-            markup=data.get("markup"),
-            precision=data["priceList"]["precision"],
-            pp_x1=data.get("PPx1"),
-            pp_xm=data.get("PPxM"),
-            pp_xy=data.get("PPxY"),
-            sp_x1=data.get("SPx1"),
-            sp_xm=data.get("SPxM"),
-            sp_xy=data.get("SPxY"),
-            status=ItemStatus(data["status"]),
-            unit_lp=data.get("unitLP"),
-            unit_pp=data.get("unitPP"),
-            unit_sp=data.get("unitSP"),
-            vendor_id=data["item"]["externalIds"]["vendor"],
+            id=json_data.get("id", ""),
+            billing_frequency=json_data["item"]["terms"]["period"],
+            currency=json_data["priceList"]["currency"],
+            commitment=json_data["item"]["terms"].get("commitment"),
+            erp_id=json_data["item"]["externalIds"].get("operations"),
+            item_id=json_data["item"]["id"],
+            item_name=json_data["item"]["name"],
+            lp_x1=json_data.get("LPx1"),
+            lp_xm=json_data.get("LPxM"),
+            lp_xy=json_data.get("LPxY"),
+            markup=json_data.get("markup"),
+            precision=json_data["priceList"]["precision"],
+            pp_x1=json_data.get("PPx1"),
+            pp_xm=json_data.get("PPxM"),
+            pp_xy=json_data.get("PPxY"),
+            sp_x1=json_data.get("SPx1"),
+            sp_xm=json_data.get("SPxM"),
+            sp_xy=json_data.get("SPxY"),
+            status=ItemStatus(json_data["status"]),
+            unit_lp=json_data.get("unitLP"),
+            unit_pp=json_data.get("unitPP"),
+            unit_sp=json_data.get("unitSP"),
+            vendor_id=json_data["item"]["externalIds"]["vendor"],
             action=ItemAction.SKIP,
         )
 
     @override
     def to_json(self) -> dict[str, Any]:
-        data: dict[str, Any] = {
+        json_payload: dict[str, Any] = {
             "unitLP": self.unit_lp,
             "unitPP": self.unit_pp,
         }
         if self.is_vendor():
-            data["status"] = self.status.value
+            json_payload["status"] = self.status.value
 
         if self.is_operations():
-            data["markup"] = self.markup
+            json_payload["markup"] = self.markup
             if self.unit_sp is not None:
-                data["unitSP"] = self.unit_sp
+                json_payload["unitSP"] = self.unit_sp
 
             if self.status != "Draft":
-                data["status"] = self.status.value
+                json_payload["status"] = self.status.value
 
-        return data
+        return json_payload
 
     @override
     def to_xlsx(self) -> dict[str, Any]:

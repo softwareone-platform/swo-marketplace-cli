@@ -34,6 +34,6 @@ class ParametersService(RelatedComponentsBaseService):
 
     @override
     def set_export_params(self) -> dict[str, Any]:
-        params = super().set_export_params()
-        params.update({"scope": self.data_model.scope})
-        return params
+        export_query = super().set_export_params()
+        export_query.update({"scope": self.data_model.scope})
+        return export_query

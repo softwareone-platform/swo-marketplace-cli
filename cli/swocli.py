@@ -32,14 +32,14 @@ def get_version() -> str:
     return __version__
 
 
-def version_callback(value: bool) -> None:  # noqa: FBT001
+def version_callback(show_version: bool) -> None:  # noqa: FBT001
     """Callback to display the CLI version and exit if requested.
 
     Args:
-        value: If True, prints the version and exits.
+        show_version: If True, prints the version and exits.
 
     """
-    if value:
+    if show_version:
         console.print(f"version: {get_version()}")
         raise typer.Exit
 
@@ -83,17 +83,17 @@ def main(
         if log_file:
             # Create parent directories if they don't exist
             log_file.parent.mkdir(parents=True, exist_ok=True)
-            handler = logging.FileHandler(log_file)
+            log_handler = logging.FileHandler(log_file)
             console.print(f"Debug logs will be written to: {log_file}")
         else:
-            handler = logging.StreamHandler()  # type: ignore[assignment]
+            log_handler = logging.StreamHandler()  # type: ignore[assignment]
 
         # Configure logging
         logging.basicConfig(
             level=logging.DEBUG,
             format="%(asctime)s [%(levelname)s] %(name)s:\n%(message)s\n",
             datefmt="%Y-%m-%d %H:%M:%S",
-            handlers=[handler],
+            handlers=[log_handler],
         )
         state.verbose = True
     show_banner()

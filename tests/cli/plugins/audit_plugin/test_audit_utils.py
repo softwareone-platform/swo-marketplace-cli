@@ -48,15 +48,15 @@ def test_format_json_path(path, source, target, expected_result):
 
 
 @pytest.mark.parametrize(
-    ("obj", "index", "expected_result"),
+    ("source_node", "index", "expected_result"),
     [
         ([{"externalId": "EXT123", "value": "old"}], 0, "EXT123"),
         ([{"key": "error"}], 0, None),
         ([{"index": "error"}], 2, None),
     ],
 )
-def test_get_external_id_path(obj, index, expected_result):
-    result = get_external_id(obj, index)
+def test_get_external_id_path(source_node, index, expected_result):
+    result = get_external_id(source_node, index)
 
     assert result == expected_result
 

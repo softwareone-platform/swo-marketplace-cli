@@ -22,9 +22,9 @@ def test_read_data(mocker, item_data_from_dict):
     get_data_from_horizontal_sheet_mock = mocker.patch.object(
         ExcelFileHandler, "get_data_from_horizontal_sheet", return_value=iter([mock_data])
     )
-    handler = PriceListItemExcelFileManager("fake_file.xlsx")
+    excel_manager = PriceListItemExcelFileManager("fake_file.xlsx")
 
-    result = list(handler._read_data())  # noqa: SLF001
+    result = list(excel_manager._read_data())  # noqa: SLF001
 
     assert result == [mock_data]
     get_data_from_horizontal_sheet_mock.assert_called_once_with(

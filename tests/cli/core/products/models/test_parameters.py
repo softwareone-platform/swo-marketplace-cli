@@ -216,7 +216,7 @@ def test_is_order_request(mocker, parameters_data_from_dict):
 
 def test_is_order_request_scope_false(mocker, parameters_data_from_dict):
     mocker.patch.object(parameters_data_from_dict, "phase", "Order")
-    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM)
+    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM_SCOPE)
 
     result = parameters_data_from_dict.is_order_request()
 
@@ -225,7 +225,7 @@ def test_is_order_request_scope_false(mocker, parameters_data_from_dict):
 
 def test_is_order_request_phase_false(mocker, parameters_data_from_dict):
     mocker.patch.object(parameters_data_from_dict, "phase", "Fullfillment")
-    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM)
+    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM_SCOPE)
 
     result = parameters_data_from_dict.is_order_request()
 

@@ -21,7 +21,7 @@ def test_template_data_from_dict(template_file_data):
     assert result.action == "-"
     assert result.name == "BulkMigrate"
     assert result.type == "OrderCompleted"
-    assert result.content == "Querying template for Adobe VIP Marketplace"
+    assert result.template_content == "Querying template for Adobe VIP Marketplace"
     assert result.content_coordinate == "F3"
     assert result.default is False
 
@@ -32,7 +32,7 @@ def test_template_data_from_json(mpt_template_data):
     assert result.id == "TPL-0232-2541-0005"
     assert result.name == "Default Processing Template"
     assert result.type == "OrderProcessing"
-    assert result.content == (
+    assert result.template_content == (
         "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
         "we are working on your order."
     )
