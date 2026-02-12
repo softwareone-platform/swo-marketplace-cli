@@ -59,8 +59,8 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
     response = mpt_client.get(f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0")
     response.raise_for_status()
 
-    data = response.json()["data"]
-    if not data:
+    response_data = response.json()["data"]
+    if not response_data:
         raise MPTAPIError(f"Unit of measure by name '{uom_name}' is not found.", "404 not found")
 
-    return Uom.model_validate(data[0])
+    return Uom.model_validate(response_data[0])

@@ -11,7 +11,7 @@ class FakeFileHandler(FileHandler):
     def read(self):
         return "fake"
 
-    def write(self, data):
+    def write(self, records):
         pass
 
 

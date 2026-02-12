@@ -11,11 +11,11 @@ class BaseDataModel(ABC):
 
     @classmethod
     @abstractmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, source_dict: dict[str, Any]) -> Self:
         """Create an instance from a dictionary.
 
         Args:
-            data: A dictionary containing the data.
+            source_dict: A dictionary containing the data.
 
         Returns:
             An instance of the class.
@@ -25,11 +25,11 @@ class BaseDataModel(ABC):
 
     @classmethod
     @abstractmethod
-    def from_json(cls, data: dict[str, Any]) -> Self:
+    def from_json(cls, json_dict: dict[str, Any]) -> Self:
         """Create an instance from a JSON-like dictionary.
 
         Args:
-            data: A dictionary representing JSON data.
+            json_dict: A dictionary representing JSON data.
 
         Returns:
             An instance of the class.

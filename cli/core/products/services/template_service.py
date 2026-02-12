@@ -20,14 +20,14 @@ class TemplateService(RelatedComponentsBaseService):
 
         new_ids = {}
         for data_model in self.file_manager.read_data():
-            content = data_model.content
+            template_content = data_model.template_content
 
-            for item_id, item in param_groups.collection.items():
-                if item_id not in content:
+            for item_id, parameter_group in param_groups.collection.items():
+                if item_id not in template_content:
                     continue
 
-                content = content.replace(item_id, item.id)
-                new_ids[data_model.content_coordinate] = content
+                template_content = template_content.replace(item_id, parameter_group.id)
+                new_ids[data_model.content_coordinate] = template_content
 
         if new_ids:
             self.file_manager.write_ids(new_ids)

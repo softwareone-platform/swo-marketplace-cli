@@ -28,7 +28,7 @@ def test_set_new_parameter_group(
     param_group = DataCollectionModel(
         collection={"old_param_id": parameter_group_data_from_dict, "no_id": None}
     )
-    template_data_from_dict.content = "old_param_id: bla"
+    template_data_from_dict.template_content = "old_param_id: bla"
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = TemplateService(service_context)
 

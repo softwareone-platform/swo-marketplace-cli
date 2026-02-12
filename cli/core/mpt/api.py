@@ -36,29 +36,33 @@ class APIService[APIModel: "BaseModel"](ABC):
         return self._base_url
 
     @wrap_http_error
-    def exists(self, params: dict[str, Any] | None = None) -> bool:
+    def exists(self, query_params: dict[str, Any] | None = None) -> bool:
         """Check if any resources exist matching the given parameters.
 
         Args:
-            params: Optional query parameters for the request.
+            query_params: Optional query parameters for the request.
 
         Returns:
             True if at least one resource exists, False otherwise.
 
         """
-        params = params or {}
-        params["limit"] = 0
-        response = self.client.get(f"{self.url}", params=params)
+        query_params = query_params or {}
+        query_params["limit"] = 0
+        response = self.client.get(f"{self.url}", params=query_params)
         response.raise_for_status()
         return response.json()["$meta"]["pagination"]["total"] > 0
 
     @wrap_http_error
-    def get(self, resource_id: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def get(
+        self,
+        resource_id: str,
+        query_params: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
         """Retrieve a resource by its ID.
 
         Args:
             resource_id: The unique identifier of the resource.
-            params: Optional query parameters for the request.
+            query_params: Optional query parameters for the request.
 
         Returns:
             The resource data as a dictionary.
@@ -67,30 +71,30 @@ class APIService[APIModel: "BaseModel"](ABC):
             MPTAPIError: If the resource is not found.
 
         """
-        params = params or {}
-        response = self.client.get(f"{self.url}/{resource_id}", params=params)
+        query_params = query_params or {}
+        response = self.client.get(f"{self.url}/{resource_id}", params=query_params)
         response.raise_for_status()
-        data = response.json()
-        if not data:
+        response_payload = response.json()
+        if not response_payload:
             raise MPTAPIError(
                 f"Resource with ID {resource_id} not found at {self.url}", "404 not found"
             )
-        self.api_model.model_validate(data)
-        return data
+        self.api_model.model_validate(response_payload)
+        return response_payload
 
     @wrap_http_error
-    def list(self, params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def list(self, query_params: dict[str, Any] | None = None) -> dict[str, Any]:
         """List resources with optional query parameters.
 
         Args:
-            params: Optional query parameters for the request.
+            query_params: Optional query parameters for the request.
 
         Returns:
             A dictionary containing meta information and the list of resources.
 
         """
-        params = params or {}
-        response = self.client.get(self.url, params=params)
+        query_params = query_params or {}
+        response = self.client.get(self.url, params=query_params)
         response.raise_for_status()
         json_body = response.json()
         meta = Meta.model_validate(json_body["$meta"]["pagination"])
@@ -99,14 +103,14 @@ class APIService[APIModel: "BaseModel"](ABC):
     @wrap_http_error
     def post(
         self,
-        data: dict[str, Any] | None = None,
+        form_payload: dict[str, Any] | None = None,
         json: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
         """Create a new resource.
 
         Args:
-            data: Form data to send in the request body.
+            form_payload: Form data to send in the request body.
             json: JSON data to send in the request body.
             headers: Optional headers for the request.
 
@@ -115,7 +119,7 @@ class APIService[APIModel: "BaseModel"](ABC):
 
         """
         headers = headers or {}
-        response = self.client.post(self.url, data=data, json=json, headers=headers)
+        response = self.client.post(self.url, data=form_payload, json=json, headers=headers)
         response.raise_for_status()
         return self.api_model.model_validate(response.json(), by_alias=True).model_dump()
 
@@ -132,15 +136,15 @@ class APIService[APIModel: "BaseModel"](ABC):
         response.raise_for_status()
 
     @wrap_http_error
-    def update(self, resource_id: str, data: dict[str, Any]) -> None:
+    def update(self, resource_id: str, json_payload: dict[str, Any]) -> None:
         """Update a resource by its ID.
 
         Args:
             resource_id: The unique identifier of the resource.
-            data: The data to update the resource with.
+            json_payload: The data to update the resource with.
 
         """
-        response = self.client.put(f"{self.url}/{resource_id}", json=data)
+        response = self.client.put(f"{self.url}/{resource_id}", json=json_payload)
         response.raise_for_status()
 
 

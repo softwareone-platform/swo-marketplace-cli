@@ -19,7 +19,7 @@ class ParamScopeEnum(StrEnum):
 
     AGREEMENT = "Agreement"
     ASSET = "Asset"
-    ITEM = "Item"
+    ITEM_SCOPE = "Item"
     REQUEST = "Request"
     SUBSCRIPTION = "Subscription"
 
@@ -55,40 +55,40 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls(
-            id=data[constants.PARAMETERS_ID]["value"],
-            coordinate=data[constants.PARAMETERS_ID]["coordinate"],
-            action=DataActionEnum(data[constants.PARAMETERS_ACTION]["value"]),
-            description=data[constants.PARAMETERS_DESCRIPTION]["value"],
-            display_order=data[constants.PARAMETERS_DISPLAY_ORDER]["value"],
-            external_id=data[constants.PARAMETERS_EXTERNALID]["value"],
-            name=data[constants.PARAMETERS_NAME]["value"],
-            phase=data[constants.PARAMETERS_PHASE]["value"],
-            type=data[constants.PARAMETERS_TYPE]["value"],
-            constraints=json.loads(data[constants.PARAMETERS_CONSTRAINTS]["value"]),
-            options=json.loads(data[constants.PARAMETERS_OPTIONS]["value"]),
-            group_id=data[constants.PARAMETERS_GROUP_ID]["value"],
-            group_id_coordinate=data[constants.PARAMETERS_GROUP_ID]["coordinate"],
+            id=row_data[constants.PARAMETERS_ID]["value"],
+            coordinate=row_data[constants.PARAMETERS_ID]["coordinate"],
+            action=DataActionEnum(row_data[constants.PARAMETERS_ACTION]["value"]),
+            description=row_data[constants.PARAMETERS_DESCRIPTION]["value"],
+            display_order=row_data[constants.PARAMETERS_DISPLAY_ORDER]["value"],
+            external_id=row_data[constants.PARAMETERS_EXTERNALID]["value"],
+            name=row_data[constants.PARAMETERS_NAME]["value"],
+            phase=row_data[constants.PARAMETERS_PHASE]["value"],
+            type=row_data[constants.PARAMETERS_TYPE]["value"],
+            constraints=json.loads(row_data[constants.PARAMETERS_CONSTRAINTS]["value"]),
+            options=json.loads(row_data[constants.PARAMETERS_OPTIONS]["value"]),
+            group_id=row_data[constants.PARAMETERS_GROUP_ID]["value"],
+            group_id_coordinate=row_data[constants.PARAMETERS_GROUP_ID]["coordinate"],
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
+        updated = json_data["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            description=data["description"],
-            display_order=data["displayOrder"],
-            external_id=data.get("externalId"),
-            name=data["name"],
-            phase=data["phase"],
-            type=data["type"],
-            constraints=data["constraints"],
-            options=data["options"],
-            group_id=data.get("group", {}).get("id"),
-            group_name=data.get("group", {}).get("name"),
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_data["id"],
+            description=json_data["description"],
+            display_order=json_data["displayOrder"],
+            external_id=json_data.get("externalId"),
+            name=json_data["name"],
+            phase=json_data["phase"],
+            type=json_data["type"],
+            constraints=json_data["constraints"],
+            options=json_data["options"],
+            group_id=json_data.get("group", {}).get("id"),
+            group_name=json_data.get("group", {}).get("name"),
+            created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
@@ -96,31 +96,34 @@ class ParametersData(BaseDataModel, ActionMixin, ABC):
         """Determine if the parameter is for an order request.
 
         Returns:
-            True if the phase is 'Order' and the scope is not ITEM or REQUEST, False otherwise.
+            True if the phase is 'Order' and the scope is not ITEM_SCOPE or REQUEST,
+            otherwise False.
 
         """
         return self.phase == "Order" and self.scope not in {
-            ParamScopeEnum.ITEM,
+            ParamScopeEnum.ITEM_SCOPE,
             ParamScopeEnum.REQUEST,
         }
 
     @override
     def to_json(self) -> dict[str, Any]:
-        data: dict[str, Any] = {
+        json_payload: dict[str, Any] = {
             "name": self.name,
             "description": self.description,
             "scope": str(self.scope),
             "phase": self.phase,
             "type": self.type,
-            "options": {key: value for key, value in self.options.items() if key != "label"},
+            "options": {
+                key: option_value for key, option_value in self.options.items() if key != "label"
+            },
             "constraints": self.constraints,
             "externalId": self.external_id,
             "displayOrder": self.display_order,
         }
         if self.group is not None:
-            data["group"] = self.group
+            json_payload["group"] = self.group
 
-        return data
+        return json_payload
 
     @override
     def to_xlsx(self) -> dict[str, Any]:
@@ -160,7 +163,7 @@ class AssetParametersData(ParametersData):
 class ItemParametersData(ParametersData):
     """Data model representing item parameters."""
 
-    scope: ParamScopeEnum = ParamScopeEnum.ITEM
+    scope: ParamScopeEnum = ParamScopeEnum.ITEM_SCOPE
 
 
 @dataclass

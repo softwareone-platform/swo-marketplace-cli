@@ -12,9 +12,9 @@ def test_read_data(mocker, parameter_group_data_from_dict):
     parameter_group_data_from_dict_mock = mocker.patch.object(
         ParameterGroupData, "from_dict", return_value=parameter_group_data_from_dict
     )
-    handler = ParameterGroupExcelFileManager("fake_file.xlsx")
+    excel_manager = ParameterGroupExcelFileManager("fake_file.xlsx")
 
-    result = list(handler.read_data())
+    result = list(excel_manager.read_data())
 
     assert result == [parameter_group_data_from_dict]
     get_data_from_horizonal_sheet.assert_called_once_with(

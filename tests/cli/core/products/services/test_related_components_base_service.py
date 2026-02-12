@@ -33,11 +33,11 @@ class FakeDataModel(BaseDataModel):
         return False
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         return cls()
 
     @classmethod
-    def from_json(cls, data: dict[str, Any]) -> Self:
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
         return cls()
 
     def to_json(self) -> dict[str, Any]:
@@ -101,8 +101,8 @@ def test_create_api_error(mocker, service_context, parameters_data_from_dict):
 
 def test_export(mocker, service_context, mpt_agreement_parameter_data):
     create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
-    data = {"meta": {"offset": 0, "limit": 100, "total": 0}, "data": []}
-    api_list_mock = mocker.patch.object(service_context.api, "list", return_value=data)
+    response_payload = {"meta": {"offset": 0, "limit": 100, "total": 0}, "data": []}
+    api_list_mock = mocker.patch.object(service_context.api, "list", return_value=response_payload)
     add_mock = mocker.patch.object(service_context.file_manager, "add")
     service = FakeRelatedComponentsService(service_context)
 

@@ -8,8 +8,8 @@ def get_audit_trail(client: Any, record_id: str) -> dict[str, Any]:
     """Retrieve audit trail for a specific record."""
     try:
         endpoint = f"/audit/records/{record_id}"
-        params = "render()&select=object,actor,details,documents,request.api.geolocation"
-        response = client.get(endpoint + "?" + params)
+        query_string = "render()&select=object,actor,details,documents,request.api.geolocation"
+        response = client.get(endpoint + "?" + query_string)
         return response.json()
     except Exception as e:
         console.print(f"[red]Failed to retrieve audit trail for record {record_id}: {e!s}[/red]")
@@ -22,11 +22,11 @@ def get_audit_records_by_object(
     """Retrieve all audit records for a specific object."""
     try:
         endpoint = "/audit/records"
-        params = (
+        query_string = (
             "render()&select=object,actor,details,documents,request.api.geolocation"
             f"&eq(object.id,{object_id})&order=-timestamp&limit={limit}"
         )
-        response = client.get(endpoint + "?" + params)
+        response = client.get(endpoint + "?" + query_string)
         records = response.json().get("data", [])
         if not records:
             console.print(f"[red]No audit records found for object {object_id}[/red]")

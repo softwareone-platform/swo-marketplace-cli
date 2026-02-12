@@ -36,10 +36,10 @@ class FileHandler(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def write(self, data: list[dict[str, Any]]) -> None:
+    def write(self, records: list[dict[str, Any]]) -> None:
         """Writes data to the file.
 
         Args:
-            data: The data to write to the file.
+            records: The data to write to the file.
         """
         raise NotImplementedError

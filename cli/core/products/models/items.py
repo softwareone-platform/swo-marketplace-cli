@@ -29,7 +29,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
     group_name: str | None = None
     item_type: str | None = None
     operations_id: str | None = None
-    parameters: list[dict[str, Any]] = field(default_factory=list)
+    parameter_values: list[dict[str, Any]] = field(default_factory=list)
     product_id: str | None = None
     status: str | None = None
     unit_coordinate: str | None = None
@@ -51,15 +51,15 @@ class ItemData(BaseDataModel, ItemActionMixin):
 
     @property
     def terms(self) -> dict[str, Any]:
-        data: dict[str, Any] = {"model": self.terms_model.value}
+        terms_payload: dict[str, Any] = {"model": self.terms_model.value}
 
         if self.terms_model == ItemTermsModelEnum.ONE_TIME:
-            data["period"] = self.terms_model.value
+            terms_payload["period"] = self.terms_model.value
         else:
-            data["commitment"] = self.terms_commitment
-            data["period"] = self.terms_period
+            terms_payload["commitment"] = self.terms_commitment
+            terms_payload["period"] = self.terms_period
 
-        return data
+        return terms_payload
 
     @property
     def unit(self) -> dict[str, Any]:
@@ -67,56 +67,57 @@ class ItemData(BaseDataModel, ItemActionMixin):
 
     @classmethod
     @override
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, row_data: dict[str, Any]) -> Self:
         try:
-            group_id = data["group_id"]
+            group_id = row_data["group_id"]
         except KeyError:
-            group_id = data[constants.ITEMS_GROUP_ID]["value"]
+            group_id = row_data[constants.ITEMS_GROUP_ID]["value"]
 
         return cls(
-            id=data[constants.ITEMS_ID]["value"],
-            action=data[constants.ITEMS_ACTION]["value"],
-            coordinate=data[constants.ITEMS_ID]["coordinate"],
-            description=data[constants.ITEMS_DESCRIPTION]["value"],
+            id=row_data[constants.ITEMS_ID]["value"],
+            action=row_data[constants.ITEMS_ACTION]["value"],
+            coordinate=row_data[constants.ITEMS_ID]["coordinate"],
+            description=row_data[constants.ITEMS_DESCRIPTION]["value"],
             group_id=group_id,
-            group_coordinate=data[constants.ITEMS_GROUP_ID]["coordinate"],
-            item_type="operations" if data.get("is_operations") else "vendor",
-            name=data[constants.ITEMS_NAME]["value"],
-            terms_commitment=data[constants.ITEMS_TERMS_COMMITMENT]["value"],
-            terms_model=ItemTermsModelEnum(data[constants.ITEMS_TERMS_MODEL]["value"]),
-            terms_period=data[constants.ITEMS_TERMS_PERIOD]["value"],
-            quantity_not_applicable=data[constants.ITEMS_QUANTITY_APPLICABLE]["value"] == "True",
-            unit_name=data[constants.ITEMS_UNIT_NAME]["value"],
-            unit_coordinate=data[constants.ITEMS_UNIT_ID]["coordinate"],
-            vendor_id=data[constants.ITEMS_VENDOR_ITEM_ID]["value"],
-            group_name=data.get(constants.ITEMS_GROUP_NAME, {}).get("value"),
-            operations_id=data.get(constants.ITEMS_ERP_ITEM_ID, {}).get("value"),
-            parameters=data.get("parameters", []),
-            unit_id=data.get(constants.ITEMS_UNIT_ID, {}).get("value"),
+            group_coordinate=row_data[constants.ITEMS_GROUP_ID]["coordinate"],
+            item_type="operations" if row_data.get("is_operations") else "vendor",
+            name=row_data[constants.ITEMS_NAME]["value"],
+            terms_commitment=row_data[constants.ITEMS_TERMS_COMMITMENT]["value"],
+            terms_model=ItemTermsModelEnum(row_data[constants.ITEMS_TERMS_MODEL]["value"]),
+            terms_period=row_data[constants.ITEMS_TERMS_PERIOD]["value"],
+            quantity_not_applicable=row_data[constants.ITEMS_QUANTITY_APPLICABLE]["value"]
+            == "True",
+            unit_name=row_data[constants.ITEMS_UNIT_NAME]["value"],
+            unit_coordinate=row_data[constants.ITEMS_UNIT_ID]["coordinate"],
+            vendor_id=row_data[constants.ITEMS_VENDOR_ITEM_ID]["value"],
+            group_name=row_data.get(constants.ITEMS_GROUP_NAME, {}).get("value"),
+            operations_id=row_data.get(constants.ITEMS_ERP_ITEM_ID, {}).get("value"),
+            parameter_values=row_data.get("parameters", []),
+            unit_id=row_data.get(constants.ITEMS_UNIT_ID, {}).get("value"),
         )
 
     @classmethod
     @override
-    def from_json(cls, data: dict[str, Any]) -> Self:
-        updated = data["audit"].get("updated", {}).get("at")
+    def from_json(cls, json_data: dict[str, Any]) -> Self:
+        updated = json_data["audit"].get("updated", {}).get("at")
         return cls(
-            id=data["id"],
-            description=data["description"],
-            group_id=data["group"]["id"],
-            group_name=data["group"]["name"],
-            name=data["name"],
-            product_id=data["product"]["id"],
-            quantity_not_applicable=data["quantityNotApplicable"],
-            terms_commitment=data["terms"].get("commitment"),
-            terms_model=ItemTermsModelEnum(data["terms"]["model"]),
-            terms_period=data["terms"]["period"],
-            unit_id=data["unit"]["id"],
-            vendor_id=data["externalIds"]["vendor"],
-            operations_id=data["externalIds"].get("operations"),
-            parameters=[],
-            status=data["status"],
-            unit_name=data["unit"]["name"],
-            created_date=parser.parse(data["audit"]["created"]["at"]).date(),
+            id=json_data["id"],
+            description=json_data["description"],
+            group_id=json_data["group"]["id"],
+            group_name=json_data["group"]["name"],
+            name=json_data["name"],
+            product_id=json_data["product"]["id"],
+            quantity_not_applicable=json_data["quantityNotApplicable"],
+            terms_commitment=json_data["terms"].get("commitment"),
+            terms_model=ItemTermsModelEnum(json_data["terms"]["model"]),
+            terms_period=json_data["terms"]["period"],
+            unit_id=json_data["unit"]["id"],
+            vendor_id=json_data["externalIds"]["vendor"],
+            operations_id=json_data["externalIds"].get("operations"),
+            parameter_values=[],
+            status=json_data["status"],
+            unit_name=json_data["unit"]["name"],
+            created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
 
@@ -131,7 +132,7 @@ class ItemData(BaseDataModel, ItemActionMixin):
             "quantityNotApplicable": self.quantity_not_applicable,
             "terms": self.terms,
             "unit": self.unit,
-            "parameters": self.parameters,
+            "parameters": self.parameter_values,
         }
 
     @override

@@ -110,11 +110,11 @@ class ExcelFileHandler(FileHandler):
         missed_values = []
         for required_field in required_fields:
             try:
-                value = sheet_data[required_field]["value"]
+                required_value = sheet_data[required_field]["value"]
             except KeyError:
                 continue
 
-            if value is None:
+            if required_value is None:
                 missed_values.append(required_field)
 
         if missed_values:
@@ -278,23 +278,23 @@ class ExcelFileHandler(FileHandler):
         self._workbook.save(self.file_path)
         self._clean_worksheets()
 
-    def write(self, data: list[SheetData]) -> None:
+    def write(self, sheet_rows: list[SheetData]) -> None:
         """
         Writes data to the Excel workbook.
 
         Args:
-            data: A list of dictionaries where each dictionary represents a sheet with
+            sheet_rows: A list of dictionaries where each dictionary represents a sheet with
                 cell coordinates as keys and values to be written
         """
-        for sheet in data:
+        for sheet in sheet_rows:
             for sheet_name, cells in sheet.items():
                 try:
                     worksheet = self._get_worksheet(sheet_name)
                 except KeyError:
                     worksheet = self._workbook.create_sheet(title=sheet_name)
 
-                for coordinate, value in cells.items():
-                    worksheet[coordinate] = value
+                for coordinate, cell_value in cells.items():
+                    worksheet[coordinate] = cell_value
 
         self.save()
 
@@ -303,7 +303,7 @@ class ExcelFileHandler(FileHandler):
         sheet_name: str,
         col: int,
         row: int,
-        value: str,
+        cell_value: str,
         data_validation: DataValidation | None = None,
         style: NamedStyle | None = None,
     ) -> None:
@@ -313,7 +313,7 @@ class ExcelFileHandler(FileHandler):
             sheet_name: The name of the sheet.
             col: The column number (1-based).
             row: The row number (1-based).
-            value: The value to write to the cell.
+            cell_value: The value to write to the cell.
             data_validation: Optional data validation to apply.
             style: Optional cell style to apply.
 
@@ -332,7 +332,7 @@ class ExcelFileHandler(FileHandler):
                 sheet.add_data_validation(data_validation)
             data_validation.add(sheet[coordinate])
 
-        sheet[coordinate] = value
+        sheet[coordinate] = cell_value
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
         if sheet_name is not None:

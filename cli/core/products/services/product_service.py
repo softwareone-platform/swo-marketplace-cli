@@ -16,22 +16,22 @@ class ProductService(BaseService):
     @override
     def create(self) -> ServiceResult:
         product = self.file_manager.read_data()
-        data = MultipartEncoder(
+        multipart_payload = MultipartEncoder(
             fields={
                 "product": json.dumps(product.to_json()),
                 "icon": ("icon.png", product.icon, "image/png"),
             }
         )
-        headers = {"Content-Type": data.content_type}
+        headers = {"Content-Type": multipart_payload.content_type}
         try:
-            new_product_data = self.api.post(data=data, headers=headers)
+            new_product_data = self.api.post(form_payload=multipart_payload, headers=headers)
         except Exception as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
 
         product.id = new_product_data["id"]
         try:
-            self.api.update(f"{product.id}/settings", data=product.settings.to_json())
+            self.api.update(f"{product.id}/settings", json_payload=product.settings.to_json())
         except MPTAPIError as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
@@ -57,7 +57,7 @@ class ProductService(BaseService):
         )
         settings_excel_file_manager.create_tab()
 
-        settings_excel_file_manager.add(product.settings.items)
+        settings_excel_file_manager.add(product.settings.records)
 
         return ServiceResult(success=True, model=product, stats=self.stats)
 
@@ -122,15 +122,15 @@ class ProductService(BaseService):
         settings_excel_file_manager = SettingsExcelFileManager(
             self.file_manager.file_handler.file_path
         )
-        items = [
-            item
+        setting_items = [
+            settings_item
             for setting_data in settings_excel_file_manager.read_data()
-            for item in setting_data.items  # type: ignore[attr-defined]
-            if item.action == DataActionEnum.UPDATE
+            for settings_item in setting_data.records  # type: ignore[attr-defined]
+            if settings_item.action == DataActionEnum.UPDATE
         ]
 
         try:
-            self.api.update(product.id, SettingsData(items=items).to_json())
+            self.api.update(product.id, SettingsData(records=setting_items).to_json())
         except MPTAPIError as e:
             self._set_error(str(e))
             return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)

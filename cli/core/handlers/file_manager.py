@@ -40,14 +40,14 @@ class ExcelFileManager(ABC):
         """
         raise NotImplementedError
 
-    def write_ids(self, data: dict[str, Any]) -> None:
+    def write_ids(self, id_map: dict[str, Any]) -> None:
         """Writes the IDs into the managed sheet.
 
         Args:
-            data: A dict where each key is a cell coordinate (e.g., 'A1') as each value is
+            id_map: A dict where each key is a cell coordinate (e.g., 'A1') and each value is
             the corresponding ID.
         """
-        self.file_handler.write([{self._sheet_name: data}])
+        self.file_handler.write([{self._sheet_name: id_map}])
 
     @staticmethod
     def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:

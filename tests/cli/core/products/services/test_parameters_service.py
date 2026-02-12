@@ -68,6 +68,6 @@ def test_set_new_parameter_groups_empty(mocker, service_context):
 def test_set_export_params(service_context, parameters_data_from_dict):
     service = ParametersService(service_context)
 
-    params = service.set_export_params()  # act
+    export_query = service.set_export_params()  # act
 
-    assert params == {"scope": parameters_data_from_dict.scope}
+    assert export_query == {"scope": parameters_data_from_dict.scope}
