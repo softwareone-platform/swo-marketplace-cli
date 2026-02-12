@@ -28,7 +28,7 @@ from .flows import (
 from .models import Account
 
 INVALID_ENV_URL_MESSAGE = "Invalid environment URL. Expected scheme://host[:port]"
-INCOMPLETE_API_PATH_RE = re.compile(r"^$|^/$|^/public/?$")
+PATH_TO_REMOVE_RE = re.compile(r"^/$|^/public/?$|^/public/v1/?$")
 
 app = typer.Typer()
 
@@ -41,9 +41,7 @@ def protocol_and_host(value: str):
             f"[{split_result.hostname}]" if ":" in split_result.hostname else split_result.hostname
         )
         port = f":{split_result.port}" if split_result.port else ""
-        path = split_result.path
-        if INCOMPLETE_API_PATH_RE.match(path):
-            path = "public/v1"
+        path = PATH_TO_REMOVE_RE.sub("", split_result.path)
         return urlunparse((split_result.scheme, f"{host}{port}", path, "", "", ""))
     raise ValueError(INVALID_ENV_URL_MESSAGE)
 
