@@ -33,9 +33,9 @@ PATH_TO_REMOVE_RE = re.compile(r"^/$|^/public/?$|^/public/v1/?$")
 app = typer.Typer()
 
 
-def protocol_and_host(value: str):
+def protocol_and_host(environment_url: str):
     """Composes environment URL from input URL removing useless parts."""
-    split_result = urlsplit(value, scheme="https")
+    split_result = urlsplit(environment_url, scheme="https")
     if split_result.scheme and split_result.hostname:
         host = (
             f"[{split_result.hostname}]" if ":" in split_result.hostname else split_result.hostname
