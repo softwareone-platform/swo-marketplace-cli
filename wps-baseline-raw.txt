@@ -1,0 +1,2143 @@
+WPS400|./cli/core/accounts/__init__.py|0|1|Found wrong magic comment: noqa
+WPS300|./cli/core/accounts/app.py|16|1|Found local folder import
+from .flows import (
+^
+WPS347|./cli/core/accounts/app.py|16|1|Found vague import that may cause confusion: from_token
+from .flows import (
+^
+WPS300|./cli/core/accounts/app.py|26|1|Found local folder import
+from .models import Account
+^
+WPS210|./cli/core/accounts/app.py|32|1|Found too many local variables: 7 > 5
+def add_account(
+^
+WPS111|./cli/core/accounts/app.py|45|9|Found too short name: e < 2
+        except (MPTAPIError, ValueError) as e:
+        ^
+WPS122|./cli/core/accounts/app.py|55|9|Found all unused variables definition: _
+        _ = typer.confirm(
+        ^
+WPS111|./cli/core/accounts/app.py|85|5|Found too short name: e < 2
+    except AccountNotFoundError as e:
+    ^
+WPS111|./cli/core/accounts/app.py|111|5|Found too short name: e < 2
+    except AccountNotFoundError as e:
+    ^
+WPS122|./cli/core/accounts/app.py|115|5|Found all unused variables definition: _
+    _ = typer.confirm(
+    ^
+WPS111|./cli/core/accounts/app.py|140|43|Found too short name: a < 2
+            accounts = list(filter(lambda a: a.is_active, accounts))
+                                          ^
+WPS229|./cli/core/accounts/app.py|156|5|Found too long ``try`` body length: 2 > 1
+    try:
+    ^
+WPS111|./cli/core/accounts/app.py|159|5|Found too short name: e < 2
+    except NoActiveAccountFoundError as e:
+    ^
+WPS231|./cli/core/accounts/app.py|179|1|Found function with too much cognitive complexity: 18 > 12
+def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:  # noqa: C901
+^
+WPS430|./cli/core/accounts/app.py|180|5|Found nested function: _wrap_account_type
+    def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
+    ^
+WPS430|./cli/core/accounts/app.py|191|5|Found nested function: _wrap_active
+    def _wrap_active(*, is_active: bool) -> str:  # pragma: no cover
+    ^
+WPS430|./cli/core/accounts/app.py|196|5|Found nested function: _wrap_token
+    def _wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
+    ^
+WPS237|./cli/core/accounts/app.py|203|25|Found a too complex `f` string
+                token = f"{token[0:][:22]}*****{token[:4]}"
+                        ^
+WPS471|./cli/core/accounts/app.py|203|28|Found consecutive slices
+                token = f"{token[0:][:22]}*****{token[:4]}"
+                           ^
+WPS349|./cli/core/accounts/app.py|203|34|Found redundant subscript slice
+                token = f"{token[0:][:22]}*****{token[:4]}"
+                                 ^
+WPS478|./cli/core/accounts/app.py|203|34|Found non strict slice operation
+                token = f"{token[0:][:22]}*****{token[:4]}"
+                                 ^
+WPS432|./cli/core/accounts/app.py|203|39|Found magic number: 22
+                token = f"{token[0:][:22]}*****{token[:4]}"
+                                      ^
+WPS237|./cli/core/accounts/app.py|205|25|Found a too complex `f` string
+                token = f"{token[0:][:4]}*****{token[:4]}"
+                        ^
+WPS471|./cli/core/accounts/app.py|205|28|Found consecutive slices
+                token = f"{token[0:][:4]}*****{token[:4]}"
+                           ^
+WPS349|./cli/core/accounts/app.py|205|34|Found redundant subscript slice
+                token = f"{token[0:][:4]}*****{token[:4]}"
+                                 ^
+WPS478|./cli/core/accounts/app.py|205|34|Found non strict slice operation
+                token = f"{token[0:][:4]}*****{token[:4]}"
+                                 ^
+WPS407|./cli/core/accounts/constants.py|6|1|Found mutable module constant
+STATUS_MSG = {
+^
+WPS202|./cli/core/accounts/flows.py|0|1|Found too many module members: 8 > 7
+WPS111|./cli/core/accounts/flows.py|31|39|Found too short name: a < 2
+    return any(a.id == account.id for a in accounts)
+                                      ^
+WPS111|./cli/core/accounts/flows.py|36|19|Found too short name: a < 2
+    return [a for a in accounts if a.id != account.id]
+                  ^
+WPS111|./cli/core/accounts/flows.py|41|41|Found too short name: a < 2
+    accounts_data = [a.model_dump() for a in sorted(accounts, key=attrgetter("id"))]
+                                        ^
+WPS111|./cli/core/accounts/flows.py|58|27|Found too short name: a < 2
+    account = next((a for a in accounts if a.id == account_id), None)
+                          ^
+WPS111|./cli/core/accounts/flows.py|67|27|Found too short name: a < 2
+    account = next((a for a in accounts if a.is_active), None)
+                          ^
+WPS412|./cli/core/accounts/handlers/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/accounts/handlers/__init__.py|1|1|Found local folder import
+from .json_file_handler import JsonFileHandler
+^
+WPS410|./cli/core/accounts/handlers/__init__.py|3|1|Found wrong metadata variable: __all__
+__all__ = ["JsonFileHandler"]
+^
+WPS111|./cli/core/accounts/handlers/json_file_handler.py|35|61|Found too short name: f < 2
+        with Path(self.file_path).open(encoding="utf-8") as f:
+                                                            ^
+WPS110|./cli/core/accounts/handlers/json_file_handler.py|38|21|Found wrong variable name: data
+    def write(self, data: list[dict[str, Any]]) -> None:
+                    ^
+WPS111|./cli/core/accounts/handlers/json_file_handler.py|47|67|Found too short name: f < 2
+        with Path(self.file_path).open("w+", encoding="utf-8") as f:
+                                                                  ^
+WPS237|./cli/core/alias_group.py|34|18|Found a too complex `f` string
+        ctx.fail(f"Too many matches: {', '.join(sorted(matches))}")
+                 ^
+WPS210|./cli/core/console.py|9|1|Found too many local variables: 7 > 5
+def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:  # pragma: no cover
+^
+WPS221|./cli/core/console.py|10|5|Found line with high Jones Complexity: 21 > 14
+    start_rgb = tuple(int(start_hex[i : i + 2], 16) for i in range(1, 6, 2))
+    ^
+WPS432|./cli/core/console.py|10|49|Found magic number: 16
+    start_rgb = tuple(int(start_hex[i : i + 2], 16) for i in range(1, 6, 2))
+                                                ^
+WPS111|./cli/core/console.py|10|57|Found too short name: i < 2
+    start_rgb = tuple(int(start_hex[i : i + 2], 16) for i in range(1, 6, 2))
+                                                        ^
+WPS221|./cli/core/console.py|11|5|Found line with high Jones Complexity: 21 > 14
+    end_rgb = tuple(int(end_hex[i : i + 2], 16) for i in range(1, 6, 2))
+    ^
+WPS432|./cli/core/console.py|11|45|Found magic number: 16
+    end_rgb = tuple(int(end_hex[i : i + 2], 16) for i in range(1, 6, 2))
+                                            ^
+WPS111|./cli/core/console.py|11|53|Found too short name: i < 2
+    end_rgb = tuple(int(end_hex[i : i + 2], 16) for i in range(1, 6, 2))
+                                                    ^
+WPS221|./cli/core/console.py|14|9|Found line with high Jones Complexity: 23 > 14
+        red = int(start_rgb[0] + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0]))
+        ^
+WPS221|./cli/core/console.py|16|13|Found line with high Jones Complexity: 19 > 14
+            start_rgb[1] + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
+            ^
+WPS221|./cli/core/console.py|18|9|Found line with high Jones Complexity: 23 > 14
+        blue = int(start_rgb[2] + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2]))
+        ^
+WPS210|./cli/core/console.py|24|1|Found too many local variables: 11 > 5
+def show_banner() -> None:
+^
+WPS221|./cli/core/console.py|27|5|Found line with high Jones Complexity: 18 > 14
+    program_name = "".join((program_name[0:3].upper(), program_name[3:7]))
+    ^
+WPS349|./cli/core/console.py|27|42|Found redundant subscript slice
+    program_name = "".join((program_name[0:3].upper(), program_name[3:7]))
+                                         ^
+WPS111|./cli/core/console.py|42|13|Found too short name: i < 2
+        for i in range(len(line)):
+            ^
+WPS518|./cli/core/console.py|42|18|Found implicit `enumerate()` call
+        for i in range(len(line)):
+                 ^
+WPS110|./cli/core/errors.py|8|1|Found wrong variable name: Param
+Param = ParamSpec("Param")
+^
+WPS231|./cli/core/errors.py|27|1|Found function with too much cognitive complexity: 22 > 12
+def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:  # noqa: C901
+^
+WPS110|./cli/core/errors.py|27|21|Found wrong variable name: Param
+def wrap_http_error[**Param, RetType](func: Callable[Param, RetType]) -> Callable[Param, RetType]:  # noqa: C901
+                    ^
+WPS231|./cli/core/errors.py|39|5|Found function with too much cognitive complexity: 16 > 12
+    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+    ^
+WPS430|./cli/core/errors.py|39|5|Found nested function: _wrapper
+    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+    ^
+WPS111|./cli/core/errors.py|42|9|Found too short name: e < 2
+        except RequestException as e:
+        ^
+WPS432|./cli/core/errors.py|45|44|Found magic number: 400
+            elif e.response.status_code == 400:
+                                           ^
+WPS519|./cli/core/errors.py|50|21|Found implicit `sum()` call
+                    for field, error in response_body["errors"].items():
+                    ^
+WPS529|./cli/core/errors.py|50|41|Found implicit `.get()` dict usage
+                    for field, error in response_body["errors"].items():
+                                        ^
+WPS336|./cli/core/errors.py|51|32|Found explicit string concatenation
+                        msg += f"{field}: {error[0]}\n"
+                               ^
+WPS110|./cli/core/errors.py|62|24|Found wrong variable name: Param
+def wrap_mpt_api_error[**Param, RetType](
+                       ^
+WPS430|./cli/core/errors.py|68|5|Found nested function: _wrapper
+    def _wrapper(*args: Param.args, **kwargs: Param.kwargs) -> RetType:
+    ^
+WPS111|./cli/core/errors.py|71|9|Found too short name: e < 2
+        except APIException as e:
+        ^
+WPS412|./cli/core/handlers/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/handlers/__init__.py|1|1|Found local folder import
+from .file_handler import FileHandler
+^
+WPS410|./cli/core/handlers/__init__.py|3|1|Found wrong metadata variable: __all__
+__all__ = ["FileHandler"]
+^
+WPS504|./cli/core/handlers/errors.py|7|24|Found negated condition
+        self.message = message if message is not None else self._default_message
+                       ^
+WPS504|./cli/core/handlers/errors.py|8|24|Found negated condition
+        self.details = details if details is not None else []
+                       ^
+WPS458|./cli/core/handlers/excel_file_handler.py|4|1|Found imports collision: re
+from re import Pattern
+^
+WPS214|./cli/core/handlers/excel_file_handler.py|26|1|Found too many methods: 24 > 7
+class ExcelFileHandler(FileHandler):
+^
+WPS338|./cli/core/handlers/excel_file_handler.py|26|1|Found incorrect order of methods in a class
+class ExcelFileHandler(FileHandler):
+^
+WPS112|./cli/core/handlers/excel_file_handler.py|31|9|Found private name pattern: __workbook
+        self.__workbook: Workbook | None = None
+        ^
+WPS112|./cli/core/handlers/excel_file_handler.py|32|9|Found private name pattern: __worksheets
+        self.__worksheets: dict[str, Worksheet] = {}
+        ^
+WPS112|./cli/core/handlers/excel_file_handler.py|37|13|Found private name pattern: __workbook
+            self.__workbook = load_workbook(self.file_path)
+            ^
+WPS110|./cli/core/handlers/excel_file_handler.py|113|17|Found wrong variable name: value
+                value = sheet_data[required_field]["value"]
+                ^
+WPS111|./cli/core/handlers/excel_file_handler.py|170|40|Found too short name: c < 2
+            if all(c.value is None for c in row):
+                                       ^
+WPS221|./cli/core/handlers/excel_file_handler.py|195|13|Found line with high Jones Complexity: 17 > 14
+            str(row[0].value): {"value": row[1].value, "coordinate": row[1].coordinate}
+            ^
+WPS210|./cli/core/handlers/excel_file_handler.py|224|5|Found too many local variables: 6 > 5
+    def get_values_for_dynamic_sheet(
+    ^
+WPS221|./cli/core/handlers/excel_file_handler.py|225|9|Found line with high Jones Complexity: 15 > 14
+        self, sheet_name: str, fields: tuple[str, ...], patterns: list[Pattern[str]]
+        ^
+WPS221|./cli/core/handlers/excel_file_handler.py|241|17|Found line with high Jones Complexity: 16 > 14
+                column.value in fields or any(re.match(p, column.value) for p in patterns)
+                ^
+WPS111|./cli/core/handlers/excel_file_handler.py|241|77|Found too short name: p < 2
+                column.value in fields or any(re.match(p, column.value) for p in patterns)
+                                                                            ^
+WPS111|./cli/core/handlers/excel_file_handler.py|246|40|Found too short name: c < 2
+            if all(c.value is None for c in row):
+                                       ^
+WPS441|./cli/core/handlers/excel_file_handler.py|251|34|Found control variable used after block: index
+                    "value": row[index].value,
+                                 ^
+WPS441|./cli/core/handlers/excel_file_handler.py|252|42|Found control variable used after block: index
+                    "coordinate": f"{row[index].column_letter}{row[index].row}",  # type: ignore[union-attr]
+                                         ^
+WPS441|./cli/core/handlers/excel_file_handler.py|252|68|Found control variable used after block: index
+                    "coordinate": f"{row[index].column_letter}{row[index].row}",  # type: ignore[union-attr]
+                                                                   ^
+WPS210|./cli/core/handlers/excel_file_handler.py|281|5|Found too many local variables: 6 > 5
+    def write(self, data: list[SheetData]) -> None:
+    ^
+WPS110|./cli/core/handlers/excel_file_handler.py|281|21|Found wrong variable name: data
+    def write(self, data: list[SheetData]) -> None:
+                    ^
+WPS110|./cli/core/handlers/excel_file_handler.py|296|33|Found wrong variable name: value
+                for coordinate, value in cells.items():
+                                ^
+WPS211|./cli/core/handlers/excel_file_handler.py|301|5|Found too many arguments: 6 > 5
+    def write_cell(
+    ^
+WPS110|./cli/core/handlers/excel_file_handler.py|306|9|Found wrong variable name: value
+        value: str,
+        ^
+WPS504|./cli/core/handlers/excel_file_handler.py|338|9|Found negated condition
+        if sheet_name is not None:
+        ^
+WPS112|./cli/core/handlers/excel_file_handler.py|341|13|Found private name pattern: __worksheets
+            self.__worksheets = {}
+            ^
+WPS237|./cli/core/handlers/excel_styles.py|29|41|Found a too complex `f` string
+    number_format_style.number_format = f"{currency_letter.get(currency, '')}#.{'0' * precision}"
+                                        ^
+WPS110|./cli/core/handlers/file_handler.py|39|21|Found wrong variable name: data
+    def write(self, data: list[dict[str, Any]]) -> None:
+                    ^
+WPS338|./cli/core/handlers/file_manager.py|11|1|Found incorrect order of methods in a class
+class ExcelFileManager(ABC):
+^
+WPS110|./cli/core/handlers/file_manager.py|43|25|Found wrong variable name: data
+    def write_ids(self, data: dict[str, Any]) -> None:
+                        ^
+WPS602|./cli/core/handlers/file_manager.py|53|5|Found using `@staticmethod`
+    def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:
+    ^
+WPS210|./cli/core/handlers/horizontal_tab_file_manager.py|28|5|Found too many local variables: 7 > 5
+    def add(self, items: list[DataModel]) -> None:
+    ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|28|19|Found wrong variable name: items
+    def add(self, items: list[DataModel]) -> None:
+                  ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|34|18|Found wrong variable name: item
+        for row, item in enumerate(items, self.file_handler.get_sheet_next_row(self._sheet_name)):
+                 ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|37|17|Found wrong variable name: value
+                value = item_xlsx.get(field, "")
+                ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|70|13|Found wrong variable name: item
+        for item in self._read_data():
+            ^
+WPS229|./cli/core/handlers/horizontal_tab_file_manager.py|82|9|Found too long ``try`` body length: 2 > 1
+        try:
+        ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|93|26|Found wrong variable name: item
+    def _get_style(self, item: DataModel, value: Any) -> NamedStyle | None:
+                         ^
+WPS110|./cli/core/handlers/horizontal_tab_file_manager.py|93|43|Found wrong variable name: value
+    def _get_style(self, item: DataModel, value: Any) -> NamedStyle | None:
+                                          ^
+WPS229|./cli/core/handlers/horizontal_tab_file_manager.py|97|9|Found too long ``try`` body length: 2 > 1
+        try:
+        ^
+WPS221|./cli/core/handlers/vertical_tab_file_manager.py|35|9|Found line with high Jones Complexity: 18 > 14
+        data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
+        ^
+WPS110|./cli/core/handlers/vertical_tab_file_manager.py|35|9|Found wrong variable name: data
+        data = {f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)}
+        ^
+WPS110|./cli/core/handlers/vertical_tab_file_manager.py|75|9|Found wrong variable name: data
+        data = self._read_data(self._fields)
+        ^
+WPS110|./cli/core/handlers/vertical_tab_file_manager.py|80|9|Found wrong variable name: data
+        data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
+        ^
+WPS229|./cli/core/handlers/vertical_tab_file_manager.py|81|9|Found too long ``try`` body length: 2 > 1
+        try:
+        ^
+WPS412|./cli/core/models/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/models/__init__.py|1|1|Found local folder import
+from .data_model import BaseDataModel, DataCollectionModel
+^
+WPS410|./cli/core/models/__init__.py|3|1|Found wrong metadata variable: __all__
+__all__ = ["BaseDataModel", "DataCollectionModel"]
+^
+WPS110|./cli/core/models/data_model.py|14|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/models/data_model.py|28|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS214|./cli/core/mpt/api.py|12|1|Found too many methods: 9 > 7
+class APIService[APIModel: "BaseModel"](ABC):
+^
+WPS110|./cli/core/mpt/api.py|39|22|Found wrong variable name: params
+    def exists(self, params: dict[str, Any] | None = None) -> bool:
+                     ^
+WPS110|./cli/core/mpt/api.py|49|9|Found wrong variable name: params
+        params = params or {}
+        ^
+WPS221|./cli/core/mpt/api.py|56|13|Found line with high Jones Complexity: 17 > 14
+    def get(self, resource_id: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+            ^
+WPS110|./cli/core/mpt/api.py|56|37|Found wrong variable name: params
+    def get(self, resource_id: str, params: dict[str, Any] | None = None) -> dict[str, Any]:
+                                    ^
+WPS110|./cli/core/mpt/api.py|70|9|Found wrong variable name: params
+        params = params or {}
+        ^
+WPS110|./cli/core/mpt/api.py|73|9|Found wrong variable name: data
+        data = response.json()
+        ^
+WPS221|./cli/core/mpt/api.py|82|14|Found line with high Jones Complexity: 15 > 14
+    def list(self, params: dict[str, Any] | None = None) -> dict[str, Any]:
+             ^
+WPS110|./cli/core/mpt/api.py|82|20|Found wrong variable name: params
+    def list(self, params: dict[str, Any] | None = None) -> dict[str, Any]:
+                   ^
+WPS110|./cli/core/mpt/api.py|92|9|Found wrong variable name: params
+        params = params or {}
+        ^
+WPS110|./cli/core/mpt/api.py|102|9|Found wrong variable name: data
+        data: dict[str, Any] | None = None,
+        ^
+WPS110|./cli/core/mpt/api.py|135|40|Found wrong variable name: data
+    def update(self, resource_id: str, data: dict[str, Any]) -> None:
+                                       ^
+WPS221|./cli/core/mpt/client.py|79|9|Found line with high Jones Complexity: 15 > 14
+        url = url[1:] if url and url[0] == "/" else url
+        ^
+WPS300|./cli/core/mpt/flows.py|6|1|Found local folder import
+from .client import MPTClient
+^
+WPS300|./cli/core/mpt/flows.py|7|1|Found local folder import
+from .models import (
+^
+WPS111|./cli/core/mpt/flows.py|39|40|Found too short name: p < 2
+        [Product.model_validate(p) for p in json_body["data"]],
+                                       ^
+WPS110|./cli/core/mpt/flows.py|62|5|Found wrong variable name: data
+    data = response.json()["data"]
+    ^
+WPS202|./cli/core/mpt/models.py|0|1|Found too many module members: 12 > 7
+WPS110|./cli/core/mpt/models.py|66|1|Found wrong variable name: Item
+class Item(BaseModel):
+^
+WPS110|./cli/core/mpt/models.py|97|5|Found wrong variable name: item
+    item: Item
+    ^
+WPS400|./cli/core/price_lists/__init__.py|0|1|Found wrong magic comment: noqa
+WPS412|./cli/core/price_lists/api/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/price_lists/api/__init__.py|1|1|Found local folder import
+from .price_list_api_service import PriceListAPIService
+^
+WPS300|./cli/core/price_lists/api/__init__.py|2|1|Found local folder import
+from .price_list_item_api_service import PriceListItemAPIService
+^
+WPS410|./cli/core/price_lists/api/__init__.py|4|1|Found wrong metadata variable: __all__
+__all__ = ["PriceListAPIService", "PriceListItemAPIService"]
+^
+WPS232|./cli/core/price_lists/app.py|0|1|Found module cognitive complexity that is too high: 21.0 > 8
+WPS210|./cli/core/price_lists/app.py|24|1|Found too many local variables: 11 > 5
+def sync_price_lists(  # noqa: C901
+^
+WPS231|./cli/core/price_lists/app.py|24|1|Found function with too much cognitive complexity: 20 > 12
+def sync_price_lists(  # noqa: C901
+^
+WPS237|./cli/core/price_lists/app.py|43|23|Found a too complex `f` string
+        console.print(f"No files found for provided paths {', '.join(pricelists_paths)}")
+                      ^
+WPS122|./cli/core/price_lists/app.py|46|5|Found all unused variables definition: _
+    _ = typer.confirm(
+    ^
+WPS122|./cli/core/price_lists/app.py|66|13|Found all unused variables definition: _
+            _ = typer.confirm(
+            ^
+WPS122|./cli/core/price_lists/app.py|79|13|Found all unused variables definition: _
+            _ = typer.confirm(
+            ^
+WPS210|./cli/core/price_lists/app.py|112|1|Found too many local variables: 11 > 5
+def export(  # noqa: C901
+^
+WPS231|./cli/core/price_lists/app.py|112|1|Found function with too much cognitive complexity: 22 > 12
+def export(  # noqa: C901
+^
+WPS504|./cli/core/price_lists/app.py|144|16|Found negated condition
+    out_path = out_path if out_path is not None else str(Path.cwd())
+               ^
+WPS122|./cli/core/price_lists/app.py|160|13|Found all unused variables definition: _
+            _ = typer.confirm(
+            ^
+WPS407|./cli/core/price_lists/constants.py|11|1|Found mutable module constant
+REQUIRED_FIELDS_BY_TAB: dict[str, Any] = {}
+^
+WPS412|./cli/core/price_lists/handlers/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/price_lists/handlers/__init__.py|1|1|Found local folder import
+from .price_list_excel_file_manager import PriceListExcelFileManager
+^
+WPS300|./cli/core/price_lists/handlers/__init__.py|2|1|Found local folder import
+from .price_list_item_excel_file_manager import PriceListItemExcelFileManager
+^
+WPS410|./cli/core/price_lists/handlers/__init__.py|4|1|Found wrong metadata variable: __all__
+__all__ = ["PriceListExcelFileManager", "PriceListItemExcelFileManager"]
+^
+WPS412|./cli/core/price_lists/models/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/price_lists/models/__init__.py|1|1|Found local folder import
+from .item import ItemData
+^
+WPS300|./cli/core/price_lists/models/__init__.py|2|1|Found local folder import
+from .price_list import PriceListData
+^
+WPS410|./cli/core/price_lists/models/__init__.py|4|1|Found wrong metadata variable: __all__
+__all__ = ["ItemData", "PriceListData"]
+^
+WPS120|./cli/core/price_lists/models/item.py|18|5|Found regular name with trailing underscore: _missing_
+    def _missing_(cls, value: object) -> "ItemAction":
+    ^
+WPS110|./cli/core/price_lists/models/item.py|18|24|Found wrong variable name: value
+    def _missing_(cls, value: object) -> "ItemAction":
+                       ^
+WPS110|./cli/core/price_lists/models/item.py|79|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/price_lists/models/item.py|100|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS204|./cli/core/price_lists/models/item.py|103|31|Found overused expression: data['item']; used 6 > 4
+            billing_frequency=data["item"]["terms"]["period"],
+                              ^
+WPS110|./cli/core/price_lists/models/item.py|130|9|Found wrong variable name: data
+        data: dict[str, Any] = {
+        ^
+WPS110|./cli/core/price_lists/models/price_list.py|43|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/price_lists/models/price_list.py|62|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/price_lists/models/price_list.py|81|9|Found wrong variable name: data
+        data = {
+        ^
+WPS412|./cli/core/price_lists/services/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/price_lists/services/__init__.py|1|1|Found local folder import
+from .item_service import ItemService
+^
+WPS300|./cli/core/price_lists/services/__init__.py|2|1|Found local folder import
+from .price_list_service import PriceListService
+^
+WPS410|./cli/core/price_lists/services/__init__.py|4|1|Found wrong metadata variable: __all__
+__all__ = ["ItemService", "PriceListService"]
+^
+WPS210|./cli/core/price_lists/services/item_service.py|21|5|Found too many local variables: 6 > 5
+    def export(self) -> ServiceResult:
+    ^
+WPS111|./cli/core/price_lists/services/item_service.py|30|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS221|./cli/core/price_lists/services/item_service.py|32|17|Found line with high Jones Complexity: 15 > 14
+                return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
+                ^
+WPS110|./cli/core/price_lists/services/item_service.py|34|13|Found wrong variable name: data
+            data = [self.data_model.from_json(item) for item in response["data"]]
+            ^
+WPS110|./cli/core/price_lists/services/item_service.py|34|57|Found wrong variable name: item
+            data = [self.data_model.from_json(item) for item in response["data"]]
+                                                        ^
+WPS111|./cli/core/price_lists/services/item_service.py|55|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/price_lists/services/item_service.py|56|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS231|./cli/core/price_lists/services/item_service.py|62|5|Found function with too much cognitive complexity: 17 > 12
+    def update(self) -> ServiceResult:
+    ^
+WPS110|./cli/core/price_lists/services/item_service.py|64|13|Found wrong variable name: item
+        for item in self.file_manager.read_data():
+            ^
+WPS229|./cli/core/price_lists/services/item_service.py|69|13|Found too long ``try`` body length: 2 > 1
+            try:
+            ^
+WPS110|./cli/core/price_lists/services/item_service.py|70|17|Found wrong variable name: params
+                params = {"item.ExternalIds.vendor": item.vendor_id, "limit": 1}
+                ^
+WPS111|./cli/core/price_lists/services/item_service.py|72|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS229|./cli/core/price_lists/services/item_service.py|79|13|Found too long ``try`` body length: 2 > 1
+            try:
+            ^
+WPS111|./cli/core/price_lists/services/item_service.py|82|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS221|./cli/core/price_lists/services/item_service.py|85|9|Found line with high Jones Complexity: 16 > 14
+        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+        ^
+WPS111|./cli/core/price_lists/services/price_list_service.py|18|9|Found too short name: e < 2
+        except Exception as e:
+        ^
+WPS221|./cli/core/price_lists/services/price_list_service.py|20|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/price_lists/services/price_list_service.py|47|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/price_lists/services/price_list_service.py|49|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/price_lists/services/price_list_service.py|57|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/price_lists/services/price_list_service.py|58|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/price_lists/services/price_list_service.py|70|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/price_lists/services/price_list_service.py|72|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS400|./cli/core/products/__init__.py|0|1|Found wrong magic comment: noqa
+WPS412|./cli/core/products/api/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/products/api/__init__.py|1|1|Found local folder import
+from .item_api_service import ItemAPIService
+^
+WPS300|./cli/core/products/api/__init__.py|2|1|Found local folder import
+from .item_group_api_service import ItemGroupAPIService
+^
+WPS300|./cli/core/products/api/__init__.py|3|1|Found local folder import
+from .parameter_group_api_service import ParameterGroupAPIService
+^
+WPS300|./cli/core/products/api/__init__.py|4|1|Found local folder import
+from .parameters_api_service import ParametersAPIService
+^
+WPS300|./cli/core/products/api/__init__.py|5|1|Found local folder import
+from .product_api_service import ProductAPIService
+^
+WPS300|./cli/core/products/api/__init__.py|6|1|Found local folder import
+from .template_api_service import TemplateAPIService
+^
+WPS410|./cli/core/products/api/__init__.py|8|1|Found wrong metadata variable: __all__
+__all__ = [
+^
+WPS202|./cli/core/products/app.py|0|1|Found too many module members: 8 > 7
+WPS210|./cli/core/products/app.py|25|1|Found too many local variables: 8 > 5
+def export(  # noqa: C901
+^
+WPS213|./cli/core/products/app.py|25|1|Found too many expressions: 16 > 9
+def export(  # noqa: C901
+^
+WPS231|./cli/core/products/app.py|25|1|Found function with too much cognitive complexity: 18 > 12
+def export(  # noqa: C901
+^
+WPS504|./cli/core/products/app.py|58|16|Found negated condition
+    out_path = out_path if out_path is not None else str(Path.cwd())
+               ^
+WPS122|./cli/core/products/app.py|76|13|Found all unused variables definition: _
+            _ = typer.confirm(
+            ^
+WPS210|./cli/core/products/app.py|105|1|Found too many local variables: 8 > 5
+def list_products(
+^
+WPS122|./cli/core/products/app.py|138|13|Found all unused variables definition: _
+            _ = typer.confirm("Do you want to fetch next page?", abort=True)
+            ^
+WPS210|./cli/core/products/app.py|145|1|Found too many local variables: 7 > 5
+def sync_product(
+^
+WPS122|./cli/core/products/app.py|203|9|Found all unused variables definition: _
+        _ = typer.confirm(msg, abort=True)
+        ^
+WPS122|./cli/core/products/app.py|208|9|Found all unused variables definition: _
+        _ = typer.confirm(
+        ^
+WPS210|./cli/core/products/app.py|224|1|Found too many local variables: 16 > 5
+def create_product(container, status):
+^
+WPS213|./cli/core/products/app.py|224|1|Found too many expressions: 25 > 9
+def create_product(container, status):
+^
+WPS213|./cli/core/products/app.py|287|1|Found too many expressions: 21 > 9
+def update_product(container: ProductContainer, status: Status):
+^
+WPS430|./cli/core/products/app.py|344|5|Found nested function: _wrap_product_status
+    def _wrap_product_status(status: str) -> str:  # pragma: no cover
+    ^
+WPS430|./cli/core/products/app.py|357|5|Found nested function: _wrap_vendor
+    def _wrap_vendor(vendor: MPTAccount) -> str:  # pragma: no cover
+    ^
+WPS407|./cli/core/products/constants.py|274|1|Found mutable module constant
+SETTINGS_API_MAPPING = {
+^
+WPS407|./cli/core/products/constants.py|294|1|Found mutable module constant
+REQUIRED_FIELDS_BY_TAB = {
+^
+WPS407|./cli/core/products/constants.py|307|1|Found mutable module constant
+REQUIRED_FIELDS_WITH_VALUES_BY_TAB = {
+^
+WPS235|./cli/core/products/containers.py|13|1|Found too many imported names from a module: 10 > 8
+from cli.core.products.handlers import (
+^
+WPS235|./cli/core/products/containers.py|26|1|Found too many imported names from a module: 10 > 8
+from cli.core.products.models import (
+^
+WPS412|./cli/core/products/handlers/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/products/handlers/__init__.py|1|1|Found local folder import
+from .item_excel_file_manager import ItemExcelFileManager
+^
+WPS300|./cli/core/products/handlers/__init__.py|2|1|Found local folder import
+from .item_group_excel_file_manager import ItemGroupExcelFileManager
+^
+WPS300|./cli/core/products/handlers/__init__.py|3|1|Found local folder import
+from .parameter_group_excel_file_manager import ParameterGroupExcelFileManager
+^
+WPS300|./cli/core/products/handlers/__init__.py|4|1|Found local folder import
+from .parameters_excel_file_manager import (
+^
+WPS300|./cli/core/products/handlers/__init__.py|10|1|Found local folder import
+from .product_excel_file_manager import ProductExcelFileManager
+^
+WPS300|./cli/core/products/handlers/__init__.py|11|1|Found local folder import
+from .settings_excel_file_manager import SettingsExcelFileManager
+^
+WPS300|./cli/core/products/handlers/__init__.py|12|1|Found local folder import
+from .template_excel_file_manager import TemplateExcelFileManager
+^
+WPS410|./cli/core/products/handlers/__init__.py|14|1|Found wrong metadata variable: __all__
+__all__ = [
+^
+WPS412|./cli/core/products/models/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/products/models/__init__.py|1|1|Found local folder import
+from .enums import DataActionEnum, ItemActionEnum
+^
+WPS300|./cli/core/products/models/__init__.py|2|1|Found local folder import
+from .item_group import ItemGroupData
+^
+WPS300|./cli/core/products/models/__init__.py|3|1|Found local folder import
+from .items import ItemData
+^
+WPS300|./cli/core/products/models/__init__.py|4|1|Found local folder import
+from .parameter_group import ParameterGroupData
+^
+WPS300|./cli/core/products/models/__init__.py|5|1|Found local folder import
+from .parameters import (
+^
+WPS300|./cli/core/products/models/__init__.py|12|1|Found local folder import
+from .product import ProductData, SettingsData
+^
+WPS300|./cli/core/products/models/__init__.py|13|1|Found local folder import
+from .template import TemplateData
+^
+WPS410|./cli/core/products/models/__init__.py|15|1|Found wrong metadata variable: __all__
+__all__ = [
+^
+WPS110|./cli/core/products/models/item_group.py|30|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/item_group.py|45|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS214|./cli/core/products/models/items.py|13|1|Found too many methods: 9 > 7
+class ItemData(BaseDataModel, ItemActionMixin):
+^
+WPS110|./cli/core/products/models/items.py|32|5|Found wrong variable name: parameters
+    parameters: list[dict[str, Any]] = field(default_factory=list)
+    ^
+WPS110|./cli/core/products/models/items.py|54|9|Found wrong variable name: data
+        data: dict[str, Any] = {"model": self.terms_model.value}
+        ^
+WPS110|./cli/core/products/models/items.py|70|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/items.py|100|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/parameter_group.py|28|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/parameter_group.py|41|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/parameters.py|22|5|Found wrong variable name: ITEM
+    ITEM = "Item"
+    ^
+WPS110|./cli/core/products/models/parameters.py|58|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/parameters.py|77|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/parameters.py|109|9|Found wrong variable name: data
+        data: dict[str, Any] = {
+        ^
+WPS110|./cli/core/products/models/parameters.py|115|45|Found wrong variable name: value
+            "options": {key: value for key, value in self.options.items() if key != "label"},
+                                            ^
+WPS110|./cli/core/products/models/product.py|18|5|Found wrong variable name: value
+    value: str | bool
+    ^
+WPS110|./cli/core/products/models/product.py|24|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/product.py|34|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS221|./cli/core/products/models/product.py|35|9|Found line with high Jones Complexity: 15 > 14
+        return cls(name=data["name"], value=cls._parse_json_value(value=data["value"]))
+        ^
+WPS602|./cli/core/products/models/product.py|50|5|Found using `@staticmethod`
+    def _parse_json_value(*, value: str | bool) -> str | bool:
+    ^
+WPS110|./cli/core/products/models/product.py|50|30|Found wrong variable name: value
+    def _parse_json_value(*, value: str | bool) -> str | bool:
+                             ^
+WPS110|./cli/core/products/models/product.py|64|5|Found wrong variable name: items
+    items: list[SettingsItem] = field(default_factory=list)
+    ^
+WPS110|./cli/core/products/models/product.py|69|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/product.py|74|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/product.py|76|9|Found wrong variable name: items
+        items = [
+        ^
+WPS110|./cli/core/products/models/product.py|78|22|Found wrong variable name: value
+            for key, value in constants.SETTINGS_API_MAPPING.items()
+                     ^
+WPS602|./cli/core/products/models/product.py|103|5|Found using `@staticmethod`
+    def _format_data_from_json(data: dict[str, Any]) -> dict[str, Any]:
+    ^
+WPS110|./cli/core/products/models/product.py|103|32|Found wrong variable name: data
+    def _format_data_from_json(data: dict[str, Any]) -> dict[str, Any]:
+                               ^
+WPS110|./cli/core/products/models/product.py|105|18|Found wrong variable name: value
+        for key, value in data.items():
+                 ^
+WPS110|./cli/core/products/models/product.py|137|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/product.py|158|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS602|./cli/core/products/models/product.py|200|5|Found using `@staticmethod`
+    def _get_default_icon() -> bytes:
+    ^
+WPS110|./cli/core/products/models/template.py|19|5|Found wrong variable name: content
+    content: str
+    ^
+WPS110|./cli/core/products/models/template.py|29|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./cli/core/products/models/template.py|44|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS504|./cli/core/products/models/template.py|72|42|Found negated condition
+            constants.TEMPLATES_DEFAULT: str(self.default) if self.default is not None else None,
+                                         ^
+WPS412|./cli/core/products/services/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/products/services/__init__.py|1|1|Found local folder import
+from .item_group_service import ItemGroupService
+^
+WPS300|./cli/core/products/services/__init__.py|2|1|Found local folder import
+from .item_service import ItemService
+^
+WPS300|./cli/core/products/services/__init__.py|3|1|Found local folder import
+from .parameter_group_service import ParameterGroupService
+^
+WPS300|./cli/core/products/services/__init__.py|4|1|Found local folder import
+from .parameters_service import ParametersService
+^
+WPS300|./cli/core/products/services/__init__.py|5|1|Found local folder import
+from .product_service import ProductService
+^
+WPS300|./cli/core/products/services/__init__.py|6|1|Found local folder import
+from .template_service import TemplateService
+^
+WPS410|./cli/core/products/services/__init__.py|8|1|Found wrong metadata variable: __all__
+__all__ = [
+^
+WPS110|./cli/core/products/services/item_service.py|20|9|Found wrong variable name: item
+        item = cast(ItemData, data_model)
+        ^
+WPS110|./cli/core/products/services/item_service.py|40|13|Found wrong variable name: item
+        for item in self.file_manager.read_data():
+            ^
+WPS110|./cli/core/products/services/item_service.py|53|9|Found wrong variable name: params
+        params = super().set_export_params()
+        ^
+WPS110|./cli/core/products/services/item_service.py|58|9|Found wrong variable name: item
+        item = cast(ItemData, data_model)
+        ^
+WPS110|./cli/core/products/services/item_service.py|73|9|Found wrong variable name: item
+        item = cast(ItemData, data_model)
+        ^
+WPS110|./cli/core/products/services/item_service.py|77|9|Found wrong variable name: item
+        item = cast(ItemData, data_model)
+        ^
+WPS110|./cli/core/products/services/item_service.py|79|9|Found wrong variable name: params
+        params = {
+        ^
+WPS110|./cli/core/products/services/parameters_service.py|37|9|Found wrong variable name: params
+        params = super().set_export_params()
+        ^
+WPS110|./cli/core/products/services/product_service.py|19|9|Found wrong variable name: data
+        data = MultipartEncoder(
+        ^
+WPS111|./cli/core/products/services/product_service.py|28|9|Found too short name: e < 2
+        except Exception as e:
+        ^
+WPS204|./cli/core/products/services/product_service.py|29|29|Found overused expression: str(e); used 9 > 7
+            self._set_error(str(e))
+                            ^
+WPS221|./cli/core/products/services/product_service.py|30|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/products/services/product_service.py|35|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/products/services/product_service.py|37|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/products/services/product_service.py|72|9|Found too short name: e < 2
+        except Exception as e:
+        ^
+WPS221|./cli/core/products/services/product_service.py|74|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS111|./cli/core/products/services/product_service.py|82|9|Found too short name: e < 2
+        except Exception as e:
+        ^
+WPS221|./cli/core/products/services/product_service.py|83|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS221|./cli/core/products/services/product_service.py|107|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            ^
+WPS221|./cli/core/products/services/product_service.py|115|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            ^
+WPS110|./cli/core/products/services/product_service.py|125|9|Found wrong variable name: items
+        items = [
+        ^
+WPS110|./cli/core/products/services/product_service.py|128|17|Found wrong variable name: item
+            for item in setting_data.items  # type: ignore[attr-defined]
+                ^
+WPS111|./cli/core/products/services/product_service.py|134|9|Found too short name: e < 2
+        except MPTAPIError as e:
+        ^
+WPS221|./cli/core/products/services/product_service.py|136|13|Found line with high Jones Complexity: 15 > 14
+            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+            ^
+WPS214|./cli/core/products/services/related_components_base_service.py|16|1|Found too many methods: 10 > 7
+class RelatedComponentsBaseService(RelatedBaseService, ABC):
+^
+WPS210|./cli/core/products/services/related_components_base_service.py|20|5|Found too many local variables: 6 > 5
+    def create(self) -> ServiceResult:
+    ^
+WPS111|./cli/core/products/services/related_components_base_service.py|28|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS204|./cli/core/products/services/related_components_base_service.py|29|31|Found overused expression: str(e); used 8 > 7
+                errors.append(str(e))
+                              ^
+WPS110|./cli/core/products/services/related_components_base_service.py|49|9|Found wrong variable name: params
+        params = self.export_params
+        ^
+WPS111|./cli/core/products/services/related_components_base_service.py|53|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS221|./cli/core/products/services/related_components_base_service.py|55|17|Found line with high Jones Complexity: 15 > 14
+                return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
+                ^
+WPS221|./cli/core/products/services/related_components_base_service.py|57|13|Found line with high Jones Complexity: 15 > 14
+            self.file_manager.add([self.data_model.from_json(item) for item in response["data"]])
+            ^
+WPS110|./cli/core/products/services/related_components_base_service.py|57|72|Found wrong variable name: item
+            self.file_manager.add([self.data_model.from_json(item) for item in response["data"]])
+                                                                       ^
+WPS231|./cli/core/products/services/related_components_base_service.py|83|5|Found function with too much cognitive complexity: 13 > 12
+    def update(self) -> ServiceResult:
+    ^
+WPS111|./cli/core/products/services/related_components_base_service.py|93|13|Found too short name: e < 2
+            except ValueError as e:
+            ^
+WPS111|./cli/core/products/services/related_components_base_service.py|100|13|Found too short name: e < 2
+            except MPTAPIError as e:
+            ^
+WPS221|./cli/core/products/services/related_components_base_service.py|107|9|Found line with high Jones Complexity: 16 > 14
+        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+        ^
+WPS110|./cli/core/products/services/template_service.py|23|13|Found wrong variable name: content
+            content = data_model.content
+            ^
+WPS110|./cli/core/products/services/template_service.py|25|26|Found wrong variable name: item
+            for item_id, item in param_groups.collection.items():
+                         ^
+WPS110|./cli/core/products/services/template_service.py|29|17|Found wrong variable name: content
+                content = content.replace(item_id, item.id)
+                ^
+WPS412|./cli/core/services/__init__.py|0|1|Found `__init__.py` module with logic
+WPS300|./cli/core/services/__init__.py|1|1|Found local folder import
+from .base_service import BaseService, RelatedBaseService
+^
+WPS410|./cli/core/services/__init__.py|3|1|Found wrong metadata variable: __all__
+__all__ = [
+^
+WPS214|./cli/core/services/base_service.py|8|1|Found too many methods: 10 > 7
+class Service(ABC):
+^
+WPS110|./cli/core/services/base_service.py|26|9|Found wrong variable name: params
+        params = {"select": "audit", "limit": 100, "offset": 0}
+        ^
+WPS410|./cli/core/state.py|10|1|Found wrong metadata variable: __all__
+__all__ = ["state"]
+^
+WPS110|./cli/core/stats.py|9|1|Found wrong variable name: Results
+class Results(TypedDict):
+^
+WPS407|./cli/core/stats.py|26|1|Found mutable module constant
+DEFAULT_RESULTS: Results = {
+^
+WPS234|./cli/core/stats.py|38|9|Found overly complex annotation: 4 > 3
+        self._sections: dict[str, dict[str, list[str]]] = {}
+        ^
+WPS237|./cli/core/stats.py|74|23|Found a too complex `f` string
+                msg = f"{msg} {', '.join(section[''])}\n"
+                      ^
+WPS529|./cli/core/stats.py|74|42|Found implicit `.get()` dict usage
+                msg = f"{msg} {', '.join(section[''])}\n"
+                                         ^
+WPS336|./cli/core/stats.py|76|24|Found explicit string concatenation
+                msg += "\n"
+                       ^
+WPS237|./cli/core/stats.py|82|23|Found a too complex `f` string
+                msg = f"{msg}\t\t{item_name}: {', '.join(item_messages)}"
+                      ^
+WPS214|./cli/core/stats.py|87|1|Found too many methods: 10 > 7
+class StatsCollector(ABC):
+^
+WPS338|./cli/core/stats.py|87|1|Found incorrect order of methods in a class
+class StatsCollector(ABC):
+^
+WPS112|./cli/core/stats.py|90|5|Found private name pattern: __id
+    __id: str | None = None
+    ^
+WPS112|./cli/core/stats.py|94|9|Found private name pattern: __has_error
+        self.__has_error = False
+        ^
+WPS112|./cli/core/stats.py|95|9|Found private name pattern: __tab_aliases
+        self.__tab_aliases = tabs
+        ^
+WPS110|./cli/core/stats.py|108|23|Found wrong variable name: value
+    def stat_id(self, value: str) -> None:
+                      ^
+WPS112|./cli/core/stats.py|109|9|Found private name pattern: __id
+        self.__id = value
+        ^
+WPS601|./cli/core/stats.py|109|9|Found shadowed class attribute: __id
+        self.__id = value
+        ^
+WPS112|./cli/core/stats.py|135|9|Found private name pattern: __has_error
+        self.__has_error = True
+        ^
+WPS210|./cli/core/stats.py|187|5|Found too many local variables: 11 > 5
+    def __init__(self) -> None:
+    ^
+WPS204|./cli/core/stats.py|188|28|Found overused expression: copy.deepcopy(DEFAULT_RESULTS); used 12 > 7
+        general: Results = copy.deepcopy(DEFAULT_RESULTS)
+                           ^
+WPS204|./cli/core/stats.py|188|28|Found overused expression: copy.deepcopy(DEFAULT_RESULTS); used 10 > 4
+        general: Results = copy.deepcopy(DEFAULT_RESULTS)
+                           ^
+WPS110|./cli/core/stats.py|196|9|Found wrong variable name: items
+        items: Results = copy.deepcopy(DEFAULT_RESULTS)
+        ^
+WPS100|./cli/core/utils.py|0|1|Found wrong module name
+WPS221|./cli/core/utils.py|6|20|Found line with high Jones Complexity: 15 > 14
+def set_dict_value(original_dict: dict[str, Any], path: str, value: Any) -> dict[str, Any]:
+                   ^
+WPS110|./cli/core/utils.py|6|62|Found wrong variable name: value
+def set_dict_value(original_dict: dict[str, Any], path: str, value: Any) -> dict[str, Any]:
+                                                             ^
+WPS529|./cli/core/utils.py|24|13|Found implicit `.get()` dict usage
+            original_dict[current] = set_dict_value(original_dict[current], next_path, value)
+            ^
+WPS529|./cli/core/utils.py|24|53|Found implicit `.get()` dict usage
+            original_dict[current] = set_dict_value(original_dict[current], next_path, value)
+                                                    ^
+WPS529|./cli/core/utils.py|26|13|Found implicit `.get()` dict usage
+            original_dict[current] = set_dict_value({}, next_path, value)
+            ^
+WPS111|./cli/core/utils.py|52|31|Found too short name: p < 2
+    return list(filter(lambda p: p.endswith(".xlsx"), file_paths))
+                              ^
+WPS229|./cli/plugins/audit_plugin/api.py|9|5|Found too long ``try`` body length: 4 > 1
+    try:
+    ^
+WPS110|./cli/plugins/audit_plugin/api.py|11|9|Found wrong variable name: params
+        params = "render()&select=object,actor,details,documents,request.api.geolocation"
+        ^
+WPS336|./cli/plugins/audit_plugin/api.py|12|42|Found explicit string concatenation
+        response = client.get(endpoint + "?" + params)
+                                         ^
+WPS111|./cli/plugins/audit_plugin/api.py|14|5|Found too short name: e < 2
+    except Exception as e:
+    ^
+WPS229|./cli/plugins/audit_plugin/api.py|23|5|Found too long ``try`` body length: 5 > 1
+    try:
+    ^
+WPS110|./cli/plugins/audit_plugin/api.py|25|9|Found wrong variable name: params
+        params = (
+        ^
+WPS336|./cli/plugins/audit_plugin/api.py|29|42|Found explicit string concatenation
+        response = client.get(endpoint + "?" + params)
+                                         ^
+WPS111|./cli/plugins/audit_plugin/api.py|34|5|Found too short name: e < 2
+    except Exception as e:
+    ^
+WPS300|./cli/plugins/audit_plugin/app.py|10|1|Found local folder import
+from .api import get_audit_records_by_object, get_audit_trail
+^
+WPS300|./cli/plugins/audit_plugin/app.py|11|1|Found local folder import
+from .utils import display_audit_records, flatten_dict, format_json_path
+^
+WPS210|./cli/plugins/audit_plugin/app.py|16|1|Found too many local variables: 12 > 5
+def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
+^
+WPS504|./cli/plugins/audit_plugin/app.py|58|17|Found negated condition
+                str(source_value) if source_value is not None else "[red]<missing>[/red]",
+                ^
+WPS504|./cli/plugins/audit_plugin/app.py|59|17|Found negated condition
+                str(target_value) if target_value is not None else "[red]<missing>[/red]",
+                ^
+WPS210|./cli/plugins/audit_plugin/app.py|69|1|Found too many local variables: 8 > 5
+def diff_by_object_id(
+^
+WPS231|./cli/plugins/audit_plugin/app.py|69|1|Found function with too much cognitive complexity: 18 > 12
+def diff_by_object_id(
+^
+WPS404|./cli/plugins/audit_plugin/app.py|70|22|Found complex default value
+    object_id: str = typer.Argument(
+                     ^
+WPS404|./cli/plugins/audit_plugin/app.py|73|29|Found complex default value
+    positions: str | None = typer.Option(
+                            ^
+WPS404|./cli/plugins/audit_plugin/app.py|76|18|Found complex default value
+    limit: int = typer.Option(10, "--limit", help="Maximum number of audit records to retrieve"),
+                 ^
+WPS229|./cli/plugins/audit_plugin/app.py|97|9|Found too long ``try`` body length: 2 > 1
+        try:
+        ^
+WPS221|./cli/plugins/audit_plugin/app.py|99|13|Found line with high Jones Complexity: 15 > 14
+            if not (1 <= pos1 <= len(records) and 1 <= pos2 <= len(records)):
+            ^
+WPS404|./cli/plugins/audit_plugin/app.py|123|19|Found complex default value
+    source: str = typer.Argument(..., help="ID of the source audit record"),
+                  ^
+WPS404|./cli/plugins/audit_plugin/app.py|124|19|Found complex default value
+    target: str = typer.Argument(..., help="ID of the target audit record"),
+                  ^
+WPS100|./cli/plugins/audit_plugin/utils.py|0|1|Found wrong module name
+WPS210|./cli/plugins/audit_plugin/utils.py|7|1|Found too many local variables: 6 > 5
+def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+^
+WPS231|./cli/plugins/audit_plugin/utils.py|7|1|Found function with too much cognitive complexity: 18 > 12
+def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+^
+WPS221|./cli/plugins/audit_plugin/utils.py|7|18|Found line with high Jones Complexity: 17 > 14
+def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+                 ^
+WPS111|./cli/plugins/audit_plugin/utils.py|7|18|Found too short name: d < 2
+def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+                 ^
+WPS110|./cli/plugins/audit_plugin/utils.py|9|5|Found wrong variable name: items
+    items: list = []
+    ^
+WPS111|./cli/plugins/audit_plugin/utils.py|10|9|Found too short name: k < 2
+    for k, v in d.items():
+        ^
+WPS111|./cli/plugins/audit_plugin/utils.py|10|12|Found too short name: v < 2
+    for k, v in d.items():
+           ^
+WPS111|./cli/plugins/audit_plugin/utils.py|15|17|Found too short name: i < 2
+            for i, item in enumerate(v):
+                ^
+WPS110|./cli/plugins/audit_plugin/utils.py|15|20|Found wrong variable name: item
+            for i, item in enumerate(v):
+                   ^
+WPS221|./cli/plugins/audit_plugin/utils.py|17|21|Found line with high Jones Complexity: 15 > 14
+                    items.extend(flatten_dict(item, f"{new_key}[{i}]", sep=sep).items())
+                    ^
+WPS210|./cli/plugins/audit_plugin/utils.py|25|1|Found too many local variables: 9 > 5
+def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
+^
+WPS221|./cli/plugins/audit_plugin/utils.py|25|22|Found line with high Jones Complexity: 15 > 14
+def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
+                     ^
+WPS335|./cli/plugins/audit_plugin/utils.py|34|18|Found incorrect `for` loop iter type
+    for trail in [source_trail, target_trail]:
+                 ^
+WPS110|./cli/plugins/audit_plugin/utils.py|35|9|Found wrong variable name: obj
+        obj = trail
+        ^
+WPS327|./cli/plugins/audit_plugin/utils.py|36|9|Found useless `continue` at the end of the loop
+        for part in base_path.split("."):
+        ^
+WPS110|./cli/plugins/audit_plugin/utils.py|38|17|Found wrong variable name: obj
+                obj = obj[part]
+                ^
+WPS332|./cli/plugins/audit_plugin/utils.py|42|13|Found walrus operator outside a comprehension
+        if (external_id := get_external_id(obj, index)) is not None:
+            ^
+WPS110|./cli/plugins/audit_plugin/utils.py|60|21|Found wrong variable name: obj
+def get_external_id(obj: Any, index: int) -> str | None:
+                    ^
+WPS210|./cli/plugins/audit_plugin/utils.py|79|1|Found too many local variables: 9 > 5
+def display_audit_records(records: list) -> None:
+^
+WPS221|./cli/plugins/audit_plugin/utils.py|93|9|Found line with high Jones Complexity: 15 > 14
+        actor_account = record.get("actor", {}).get("account", {}).get("name", "")
+        ^
+WPS410|./cli/swocli.py|27|1|Found wrong metadata variable: __version__
+__version__ = VERSION
+^
+WPS110|./cli/swocli.py|35|22|Found wrong variable name: value
+def version_callback(value: bool) -> None:  # noqa: FBT001
+                     ^
+WPS110|./cli/swocli.py|86|13|Found wrong variable name: handler
+            handler = logging.FileHandler(log_file)
+            ^
+WPS110|./cli/swocli.py|89|13|Found wrong variable name: handler
+            handler = logging.StreamHandler()  # type: ignore[assignment]
+            ^
+WPS122|./tests/cli/core/accounts/api/test_account_api_service.py|37|9|Found all unused variables definition: _
+        _ = service.get_authentication(secret)
+        ^
+WPS432|./tests/cli/core/accounts/api/test_account_api_service.py|43|9|Found magic number: 400
+        400, "Not Found", "Entity for given id TKN-1111-1111 not found"
+        ^
+WPS202|./tests/cli/core/accounts/handlers/test_json_file_handler.py|0|1|Found too many module members: 9 > 7
+WPS210|./tests/cli/core/accounts/handlers/test_json_file_handler.py|47|1|Found too many local variables: 6 > 5
+def test_write_creates_directory_if_not_exists(tmp_path):
+^
+WPS110|./tests/cli/core/accounts/handlers/test_json_file_handler.py|48|5|Found wrong variable name: data
+    data = [{"id": "test_id", "name": "Test Name"}]
+    ^
+WPS110|./tests/cli/core/accounts/handlers/test_json_file_handler.py|51|5|Found wrong variable name: handler
+    handler = JsonFileHandler(file_path=file_path)
+    ^
+WPS111|./tests/cli/core/accounts/handlers/test_json_file_handler.py|57|52|Found too short name: f < 2
+    with Path(file_path).open(encoding="utf-8") as f:
+                                                   ^
+WPS110|./tests/cli/core/accounts/handlers/test_json_file_handler.py|63|5|Found wrong variable name: data
+    data = [{"id": "test_id", "name": "Test Name"}]
+    ^
+WPS111|./tests/cli/core/accounts/handlers/test_json_file_handler.py|67|57|Found too short name: f < 2
+    with Path(mock_file_path).open(encoding="utf-8") as f:
+                                                        ^
+WPS111|./tests/cli/core/accounts/handlers/test_json_file_handler.py|75|62|Found too short name: f < 2
+    with Path(mock_file_path).open("w", encoding="utf-8") as f:
+                                                             ^
+WPS111|./tests/cli/core/accounts/handlers/test_json_file_handler.py|80|57|Found too short name: f < 2
+    with Path(mock_file_path).open(encoding="utf-8") as f:
+                                                        ^
+WPS111|./tests/cli/core/accounts/handlers/test_json_file_handler.py|90|57|Found too short name: f < 2
+    with Path(mock_file_path).open(encoding="utf-8") as f:
+                                                        ^
+WPS202|./tests/cli/core/accounts/test_app.py|0|1|Found too many module members: 20 > 7
+WPS458|./tests/cli/core/accounts/test_app.py|7|1|Found imports collision: cli.core.accounts.app
+from cli.core.accounts.app import get_active_account
+^
+WPS430|./tests/cli/core/accounts/test_app.py|31|5|Found nested function: _wrapper
+    def _wrapper(token):
+    ^
+WPS204|./tests/cli/core/accounts/test_app.py|55|5|Found overused expression: assert result.exit_code == 0, result.stdout; used 9 > 7
+    assert result.exit_code == 0, result.stdout
+    ^
+WPS204|./tests/cli/core/accounts/test_app.py|55|12|Found overused expression: result.exit_code == 0; used 9 > 7
+    assert result.exit_code == 0, result.stdout
+           ^
+WPS111|./tests/cli/core/accounts/test_app.py|56|60|Found too short name: f < 2
+    with Path(account_file_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS204|./tests/cli/core/accounts/test_app.py|57|20|Found overused expression: json.load(f); used 8 > 7
+        accounts = json.load(f)
+                   ^
+WPS204|./tests/cli/core/accounts/test_app.py|72|5|Found overused expression: mocker.patch.object(JsonFileHandler, '_default_file_path', new_accounts_path); used 14 > 7
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
+    ^
+WPS204|./tests/cli/core/accounts/test_app.py|81|10|Found overused expression: Path(new_accounts_path); used 8 > 7
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+         ^
+WPS111|./tests/cli/core/accounts/test_app.py|81|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS118|./tests/cli/core/accounts/test_app.py|114|1|Found too long name: test_add_account_accounts_override_environment > 45
+def test_add_account_accounts_override_environment(new_accounts_path, mocker, new_token):
+^
+WPS111|./tests/cli/core/accounts/test_app.py|132|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS111|./tests/cli/core/accounts/test_app.py|187|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS111|./tests/cli/core/accounts/test_app.py|221|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS118|./tests/cli/core/accounts/test_app.py|245|1|Found too long name: test_activate_account_accounts_file_not_exists > 45
+def test_activate_account_accounts_file_not_exists(tmp_path, mocker):
+^
+WPS111|./tests/cli/core/accounts/test_app.py|268|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS111|./tests/cli/core/accounts/test_app.py|323|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS335|./tests/cli/core/accounts/test_app.py|353|58|Found incorrect `for` loop iter type
+    assert all((account in result.stdout) for account in ["ACC-12341", "ACC-12342"]), result.stdout
+                                                         ^
+WPS111|./tests/cli/core/accounts/test_app.py|376|60|Found too short name: f < 2
+    with Path(new_accounts_path).open(encoding="utf-8") as f:
+                                                           ^
+WPS111|./tests/cli/core/accounts/test_app.py|380|65|Found too short name: f < 2
+    with Path(new_accounts_path).open("w", encoding="utf-8") as f:
+                                                                ^
+WPS202|./tests/cli/core/accounts/test_flows.py|0|1|Found too many module members: 12 > 7
+WPS347|./tests/cli/core/accounts/test_flows.py|6|1|Found vague import that may cause confusion: from_token
+from cli.core.accounts.flows import (
+^
+WPS204|./tests/cli/core/accounts/test_flows.py|54|25|Found overused expression: [expected_account, another_expected_account]; used 10 > 7
+    expected_accounts = [expected_account, another_expected_account]
+                        ^
+WPS111|./tests/cli/core/accounts/test_flows.py|94|52|Found too short name: f < 2
+    with Path(file_path).open(encoding="utf-8") as f:
+                                                   ^
+WPS111|./tests/cli/core/accounts/test_flows.py|99|42|Found too short name: a < 2
+    assert result == [a.model_dump() for a in accounts]
+                                         ^
+WPS111|./tests/cli/core/accounts/test_flows.py|120|49|Found too short name: e < 2
+    with pytest.raises(AccountNotFoundError) as e:
+                                                ^
+WPS111|./tests/cli/core/accounts/test_flows.py|138|54|Found too short name: e < 2
+    with pytest.raises(NoActiveAccountFoundError) as e:
+                                                     ^
+WPS202|./tests/cli/core/handlers/test_excel_file_handler.py|0|1|Found too many module members: 22 > 7
+WPS110|./tests/cli/core/handlers/test_excel_file_handler.py|65|5|Found wrong variable name: handler
+    handler = ExcelFileHandler(file_path)
+    ^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|87|1|Found too long name: test_check_required_fields_in_vertical_sheet_missing_sheet > 45
+def test_check_required_fields_in_vertical_sheet_missing_sheet(excel_file_handler):
+^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|94|1|Found too long name: test_check_required_field_values_in_vertical_sheet > 45
+def test_check_required_field_values_in_vertical_sheet(mocker, excel_file_handler):
+^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|95|5|Found too long name: test_get_data_from_vertical_sheet_by_fields_mock > 45
+    test_get_data_from_vertical_sheet_by_fields_mock = mocker.patch.object(
+    ^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|108|1|Found too long name: test_check_required_field_values_in_vertical_sheet_empty_value > 45
+def test_check_required_field_values_in_vertical_sheet_empty_value(mocker, excel_file_handler):
+^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|109|5|Found too long name: test_get_data_from_vertical_sheet_by_fields_mock > 45
+    test_get_data_from_vertical_sheet_by_fields_mock = mocker.patch.object(
+    ^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|124|1|Found too long name: test_check_required_fields_in_horizontal_sheet > 45
+def test_check_required_fields_in_horizontal_sheet(excel_file_handler):
+^
+WPS118|./tests/cli/core/handlers/test_excel_file_handler.py|130|1|Found too long name: test_check_required_fields_in_horizontal_sheet_missing_field > 45
+def test_check_required_fields_in_horizontal_sheet_missing_field(excel_file_handler):
+^
+WPS218|./tests/cli/core/handlers/test_excel_file_handler.py|163|1|Found too many `assert` statements: 6 > 5
+def test_get_data_from_vertical_sheet(excel_file_handler):
+^
+WPS420|./tests/cli/core/handlers/test_excel_file_manager.py|10|9|Found wrong keyword: pass
+        pass
+        ^
+WPS420|./tests/cli/core/handlers/test_excel_file_manager.py|13|9|Found wrong keyword: pass
+        pass
+        ^
+WPS432|./tests/cli/core/handlers/test_excel_file_manager.py|21|19|Found magic number: 12
+    assert row == 12
+                  ^
+WPS118|./tests/cli/core/handlers/test_excel_file_manager.py|24|1|Found too long name: test_get_row_and_column_from_coordinate_invalid > 45
+def test_get_row_and_column_from_coordinate_invalid():
+^
+WPS420|./tests/cli/core/handlers/test_file_handler.py|9|9|Found wrong keyword: pass
+        pass
+        ^
+WPS110|./tests/cli/core/handlers/test_file_handler.py|14|21|Found wrong variable name: data
+    def write(self, data):
+                    ^
+WPS420|./tests/cli/core/handlers/test_file_handler.py|15|9|Found wrong keyword: pass
+        pass
+        ^
+WPS202|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|0|1|Found too many module members: 9 > 7
+WPS458|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|6|1|Found imports collision: unittest.mock
+from unittest.mock import MagicMock, Mock, call
+^
+WPS458|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|6|1|Found imports collision: unittest.mock
+from unittest.mock import MagicMock, Mock, call
+^
+WPS458|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|6|1|Found imports collision: unittest.mock
+from unittest.mock import MagicMock, Mock, call
+^
+WPS110|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|25|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|29|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|70|5|Found wrong variable name: item
+    item = FakeDataModel(currency=currency, precision=precision)
+    ^
+WPS432|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|91|19|Found magic number: 22.5
+            value=22.5,
+                  ^
+WPS432|./tests/cli/core/handlers/test_horizontal_tab_file_manager.py|127|19|Found magic number: 22.5
+            value=22.5,
+                  ^
+WPS202|./tests/cli/core/handlers/test_vertical_tab_file_manager.py|0|1|Found too many module members: 10 > 7
+WPS110|./tests/cli/core/handlers/test_vertical_tab_file_manager.py|18|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./tests/cli/core/handlers/test_vertical_tab_file_manager.py|22|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS202|./tests/cli/core/mpt/test_api.py|0|1|Found too many module members: 13 > 7
+WPS110|./tests/cli/core/mpt/test_api.py|42|14|Found wrong variable name: params
+def test_get(params, expected_params, mocker, api_service):
+             ^
+WPS221|./tests/cli/core/mpt/test_api.py|43|5|Found line with high Jones Complexity: 15 > 14
+    response_mock = Mock(spec=Response, json=Mock(return_value={"id": "fakeId", "name": "test"}))
+    ^
+WPS210|./tests/cli/core/mpt/test_api.py|72|1|Found too many local variables: 7 > 5
+def test_list(params, expected_params, mocker, api_service):
+^
+WPS110|./tests/cli/core/mpt/test_api.py|72|15|Found wrong variable name: params
+def test_list(params, expected_params, mocker, api_service):
+              ^
+WPS221|./tests/cli/core/mpt/test_api.py|87|5|Found line with high Jones Complexity: 15 > 14
+    data = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": []}
+    ^
+WPS110|./tests/cli/core/mpt/test_api.py|87|5|Found wrong variable name: data
+    data = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": []}
+    ^
+WPS221|./tests/cli/core/mpt/test_api.py|98|5|Found line with high Jones Complexity: 15 > 14
+    response_mock = Mock(spec=Response, json=Mock(return_value={"id": "fakeId", "name": "test"}))
+    ^
+WPS111|./tests/cli/core/mpt/test_flows.py|27|55|Found too short name: p < 2
+    assert products == [Product.model_validate(p) for p in mpt_products]
+                                                      ^
+WPS111|./tests/cli/core/mpt/test_flows.py|42|55|Found too short name: p < 2
+    assert products == [Product.model_validate(p) for p in mpt_products]
+                                                      ^
+WPS432|./tests/cli/core/mpt/test_flows.py|51|16|Found magic number: 500
+        status=500,
+               ^
+WPS111|./tests/cli/core/mpt/test_flows.py|54|40|Found too short name: e < 2
+    with pytest.raises(MPTAPIError) as e:
+                                       ^
+WPS432|./tests/cli/core/mpt/test_flows.py|82|16|Found magic number: 500
+        status=500,
+               ^
+WPS111|./tests/cli/core/mpt/test_flows.py|85|40|Found too short name: e < 2
+    with pytest.raises(MPTAPIError) as e:
+                                       ^
+WPS111|./tests/cli/core/mpt/test_flows.py|101|40|Found too short name: e < 2
+    with pytest.raises(MPTAPIError) as e:
+                                       ^
+WPS202|./tests/cli/core/price_lists/conftest.py|0|1|Found too many module members: 11 > 7
+WPS235|./tests/cli/core/price_lists/conftest.py|6|1|Found too many imported names from a module: 26 > 8
+from cli.core.price_lists.constants import (
+^
+WPS432|./tests/cli/core/price_lists/conftest.py|65|34|Found magic number: 2024
+            "value": dt.datetime(2024, 6, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/price_lists/conftest.py|72|34|Found magic number: 2024
+            "value": dt.datetime(2024, 6, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/price_lists/conftest.py|76|34|Found magic number: 2025
+            "value": dt.datetime(2025, 2, 10, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS339|./tests/cli/core/price_lists/conftest.py|114|26|Found number with meaningless zeros: 42.0000000000
+        "defaultMarkup": 42.0000000000,
+                         ^
+WPS339|./tests/cli/core/price_lists/conftest.py|126|30|Found number with meaningless zeros: 0.0000000000
+            "averageMargin": 0.0000000000,
+                             ^
+WPS432|./tests/cli/core/price_lists/conftest.py|263|34|Found magic number: 2025
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/price_lists/conftest.py|263|43|Found magic number: 23
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/price_lists/conftest.py|283|16|Found magic number: 0.15
+        markup=0.15,
+               ^
+WPS432|./tests/cli/core/price_lists/conftest.py|285|17|Found magic number: 10.28
+        unit_lp=10.28,
+                ^
+WPS432|./tests/cli/core/price_lists/conftest.py|286|17|Found magic number: 12.1
+        unit_pp=12.1,
+                ^
+WPS432|./tests/cli/core/price_lists/conftest.py|287|17|Found magic number: 10.55
+        unit_sp=10.55,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|300|19|Found number with meaningless zeros: 123.00000
+        "unitLP": 123.00000,
+                  ^
+WPS339|./tests/cli/core/price_lists/conftest.py|301|19|Found number with meaningless zeros: 123.00000
+        "unitPP": 123.00000,
+                  ^
+WPS339|./tests/cli/core/price_lists/conftest.py|302|19|Found number with meaningless zeros: 123.0000000000
+        "markup": 123.0000000000,
+                  ^
+WPS339|./tests/cli/core/price_lists/conftest.py|303|19|Found number with meaningless zeros: 0.0000000000
+        "margin": 0.0000000000,
+                  ^
+WPS339|./tests/cli/core/price_lists/conftest.py|304|19|Found number with meaningless zeros: 9328.85000
+        "unitSP": 9328.85000,
+                  ^
+WPS339|./tests/cli/core/price_lists/conftest.py|305|17|Found number with meaningless zeros: 123.00000
+        "PPx1": 123.00000,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|306|17|Found number with meaningless zeros: 123.00000
+        "PPxM": 123.00000,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|307|17|Found number with meaningless zeros: 123.00000
+        "PPxY": 123.00000,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|308|17|Found number with meaningless zeros: 0.00000
+        "SPx1": 0.00000,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|309|17|Found number with meaningless zeros: 777.40000
+        "SPxM": 777.40000,
+                ^
+WPS339|./tests/cli/core/price_lists/conftest.py|310|17|Found number with meaningless zeros: 9328.85000
+        "SPxY": 9328.85000,
+                ^
+WPS110|./tests/cli/core/price_lists/handlers/test_price_list_excel_file_manager.py|18|5|Found wrong variable name: handler
+    handler = PriceListExcelFileManager("fake_file.xlsx")
+    ^
+WPS110|./tests/cli/core/price_lists/handlers/test_price_list_item_excel_file_manager.py|25|5|Found wrong variable name: handler
+    handler = PriceListItemExcelFileManager("fake_file.xlsx")
+    ^
+WPS218|./tests/cli/core/price_lists/models/test_item.py|10|1|Found too many `assert` statements: 15 > 5
+def test_item_data_from_dict(item_file_data):
+^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|20|12|Found comparison with float or complex number
+    assert result.markup == 11.1111111111111
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|20|29|Found magic number: 11.1111111111111
+    assert result.markup == 11.1111111111111
+                            ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|22|12|Found comparison with float or complex number
+    assert result.unit_lp == 119.88
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|22|30|Found magic number: 119.88
+    assert result.unit_lp == 119.88
+                             ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|23|12|Found comparison with float or complex number
+    assert result.unit_pp == 107.88
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|23|30|Found magic number: 107.88
+    assert result.unit_pp == 107.88
+                             ^
+WPS218|./tests/cli/core/price_lists/models/test_item.py|30|1|Found too many `assert` statements: 16 > 5
+def test_item_data_from_json(mpt_item_data):
+^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|40|12|Found comparison with float or complex number
+    assert result.markup == 123.0
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|40|29|Found magic number: 123.0
+    assert result.markup == 123.0
+                            ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|42|12|Found comparison with float or complex number
+    assert result.unit_lp == 123.0
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|42|30|Found magic number: 123.0
+    assert result.unit_lp == 123.0
+                             ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|43|12|Found comparison with float or complex number
+    assert result.unit_pp == 123.0
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|43|30|Found magic number: 123.0
+    assert result.unit_pp == 123.0
+                             ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|44|12|Found comparison with float or complex number
+    assert result.unit_sp == 9328.85
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|44|30|Found magic number: 9328.85
+    assert result.unit_sp == 9328.85
+                             ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|54|12|Found comparison with float or complex number
+    assert result["unitLP"] == 10.28
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|54|32|Found magic number: 10.28
+    assert result["unitLP"] == 10.28
+                               ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|55|12|Found comparison with float or complex number
+    assert result["unitPP"] == 12.1
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|55|32|Found magic number: 12.1
+    assert result["unitPP"] == 12.1
+                               ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|56|12|Found comparison with float or complex number
+    assert result["markup"] == 0.15
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|56|32|Found magic number: 0.15
+    assert result["markup"] == 0.15
+                               ^
+WPS459|./tests/cli/core/price_lists/models/test_item.py|57|12|Found comparison with float or complex number
+    assert result["unitSP"] == 10.55
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_item.py|57|32|Found magic number: 10.55
+    assert result["unitSP"] == 10.55
+                               ^
+WPS218|./tests/cli/core/price_lists/models/test_price_list.py|7|1|Found too many `assert` statements: 15 > 5
+def test_price_list_data_from_dict(price_list_file_data):
+^
+WPS432|./tests/cli/core/price_lists/models/test_price_list.py|16|42|Found magic number: 2024
+    assert result.export_date == dt.date(2024, 6, 1)
+                                         ^
+WPS218|./tests/cli/core/price_lists/models/test_price_list.py|27|1|Found too many `assert` statements: 13 > 5
+def test_price_list_data_from_json(mpt_price_list_data):
+^
+WPS432|./tests/cli/core/price_lists/models/test_price_list.py|37|42|Found magic number: 2025
+    assert result.export_date == dt.date(2025, 4, 23)
+                                         ^
+WPS432|./tests/cli/core/price_lists/models/test_price_list.py|37|51|Found magic number: 23
+    assert result.export_date == dt.date(2025, 4, 23)
+                                                  ^
+WPS459|./tests/cli/core/price_lists/models/test_price_list.py|41|12|Found comparison with float or complex number
+    assert result.default_markup == 42.0
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_price_list.py|41|37|Found magic number: 42.0
+    assert result.default_markup == 42.0
+                                    ^
+WPS218|./tests/cli/core/price_lists/models/test_price_list.py|46|1|Found too many `assert` statements: 6 > 5
+def test_price_list_data_to_json(price_list_data_from_dict):
+^
+WPS459|./tests/cli/core/price_lists/models/test_price_list.py|53|12|Found comparison with float or complex number
+    assert result["defaultMarkup"] == 10.0
+           ^
+WPS432|./tests/cli/core/price_lists/models/test_price_list.py|53|39|Found magic number: 10.0
+    assert result["defaultMarkup"] == 10.0
+                                      ^
+WPS202|./tests/cli/core/price_lists/services/test_item_service.py|0|1|Found too many module members: 9 > 7
+WPS204|./tests/cli/core/price_lists/services/test_item_service.py|33|14|Found overused expression: ItemService(service_context); used 8 > 7
+    result = ItemService(service_context).export()
+             ^
+WPS202|./tests/cli/core/price_lists/services/test_pricelist_service.py|0|1|Found too many module members: 11 > 7
+WPS210|./tests/cli/core/price_lists/services/test_pricelist_service.py|24|1|Found too many local variables: 6 > 5
+def test_create_price_list(mocker, service_context, mpt_price_list_data, price_list_data_from_dict):
+^
+WPS204|./tests/cli/core/price_lists/services/test_pricelist_service.py|35|15|Found overused expression: PriceListService(service_context); used 10 > 7
+    service = PriceListService(service_context)
+              ^
+WPS210|./tests/cli/core/price_lists/services/test_pricelist_service.py|46|1|Found too many local variables: 6 > 5
+def test_create_price_list_error(mocker, service_context, price_list_data_from_dict):
+^
+WPS210|./tests/cli/core/price_lists/services/test_pricelist_service.py|179|1|Found too many local variables: 6 > 5
+def test_update_price_list_error(mocker, service_context, price_list_data_from_dict):
+^
+WPS202|./tests/cli/core/price_lists/test_app.py|0|1|Found too many module members: 10 > 7
+WPS210|./tests/cli/core/price_lists/test_app.py|54|1|Found too many local variables: 6 > 5
+def test_sync_price_lists_create(
+^
+WPS210|./tests/cli/core/price_lists/test_app.py|85|1|Found too many local variables: 6 > 5
+def test_sync_price_lists_update(
+^
+WPS118|./tests/cli/core/price_lists/test_app.py|200|1|Found too long name: test_export_price_list_export_price_list_no_success > 45
+def test_export_price_list_export_price_list_no_success(
+^
+WPS203|./tests/cli/core/products/conftest.py|0|1|Found module with too many imported names: 95 > 50
+WPS202|./tests/cli/core/products/conftest.py|0|1|Found too many module members: 34 > 7
+WPS235|./tests/cli/core/products/conftest.py|7|1|Found too many imported names from a module: 69 > 8
+from cli.core.products.constants import (
+^
+WPS235|./tests/cli/core/products/conftest.py|79|1|Found too many imported names from a module: 9 > 8
+from cli.core.products.models import (
+^
+WPS213|./tests/cli/core/products/conftest.py|105|1|Found too many expressions: 11 > 9
+def product_container_mock(mocker, account_container_mock):
+^
+WPS204|./tests/cli/core/products/conftest.py|112|53|Found overused expression: MagicMock(ParametersService); used 5 > 4
+    container.agreement_parameters_service.override(MagicMock(ParametersService))
+                                                    ^
+WPS432|./tests/cli/core/products/conftest.py|153|34|Found magic number: 2024
+            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|161|34|Found magic number: 2024
+            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|165|34|Found magic number: 2024
+            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|178|33|Found magic number: 2024
+        export_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                ^
+WPS432|./tests/cli/core/products/conftest.py|183|34|Found magic number: 2024
+        created_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|184|34|Found magic number: 2024
+        updated_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|294|34|Found magic number: 2025
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|294|43|Found magic number: 23
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|298|34|Found magic number: 2025
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|298|43|Found magic number: 23
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|382|34|Found magic number: 2025
+            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|382|43|Found magic number: 23
+            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|386|34|Found magic number: 2025
+            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|386|43|Found magic number: 23
+            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS462|./tests/cli/core/products/conftest.py|471|20|Wrong multiline string usage
+            "value": """{"defaultValue": "Buyer","hintText": "Address.","label": "Address"}""",
+                   ^
+WPS322|./tests/cli/core/products/conftest.py|471|22|Found incorrect multi-line string
+            "value": """{"defaultValue": "Buyer","hintText": "Address.","label": "Address"}""",
+                     ^
+WPS432|./tests/cli/core/products/conftest.py|481|34|Found magic number: 2024
+            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|481|43|Found magic number: 23
+            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|485|34|Found magic number: 2024
+            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|485|43|Found magic number: 14
+            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|508|23|Found magic number: 101
+        display_order=101,
+                      ^
+WPS462|./tests/cli/core/products/conftest.py|515|34|Wrong multiline string usage
+                    "description": """
+                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
+       products before, or if you wish to set up a new account in addition to an account you may
+       already have. You will need to provide details such as your company address and contacts,
+       and you will be required to accept both the Adobe Terms and Conditions as well as
+       SoftwareOne\u0027s terms and conditions.""",
+                                 ^
+WPS462|./tests/cli/core/products/conftest.py|525|34|Wrong multiline string usage
+                    "description": """Migrate from Adobe VIP if you are currently purchasing
+                    products under the Adobe VIP licensing program. This comes with several
+                    advantages including the ability to self-service manage your subscriptions
+                    within the SoftwareOne Marketplace. You will need to provide details such as
+                    your company address and contacts, and you will be required to accept  both the
+                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
+                    conditions.\n\n Note: If you are purchasing Adobe products under a different
+                    licensing program such as CLP or TLP, you cannot use this option.""",
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|764|34|Found magic number: 2024
+            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|764|43|Found magic number: 23
+            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|768|34|Found magic number: 2024
+            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|768|43|Found magic number: 14
+            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|786|34|Found magic number: 2024
+        created_date=dt.datetime(2024, 5, 6, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|787|34|Found magic number: 2024
+        updated_date=dt.datetime(2024, 5, 18, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|787|43|Found magic number: 18
+        updated_date=dt.datetime(2024, 5, 18, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS432|./tests/cli/core/products/conftest.py|840|34|Found magic number: 2025
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                 ^
+WPS432|./tests/cli/core/products/conftest.py|840|43|Found magic number: 23
+            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+                                          ^
+WPS430|./tests/cli/core/products/conftest.py|934|5|Found nested function: _create_data_response
+    def _create_data_response(data):
+    ^
+WPS110|./tests/cli/core/products/conftest.py|934|31|Found wrong variable name: data
+    def _create_data_response(data):
+                              ^
+WPS221|./tests/cli/core/products/conftest.py|935|9|Found line with high Jones Complexity: 15 > 14
+        response = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": data}
+        ^
+WPS110|./tests/cli/core/products/handlers/test_item_excel_file_manager.py|20|5|Found wrong variable name: handler
+    handler = ItemExcelFileManager("fake_file.xlsx")
+    ^
+WPS110|./tests/cli/core/products/handlers/test_item_group_excel_file_manager.py|15|5|Found wrong variable name: handler
+    handler = ItemGroupExcelFileManager("fake_file.xlsx")
+    ^
+WPS110|./tests/cli/core/products/handlers/test_parameter_group_excel_file_manager.py|15|5|Found wrong variable name: handler
+    handler = ParameterGroupExcelFileManager("fake_file.xlsx")
+    ^
+WPS110|./tests/cli/core/products/handlers/test_template_excel_file_manager.py|15|5|Found wrong variable name: handler
+    handler = TemplateExcelFileManager("fake_file.xlsx")
+    ^
+WPS235|./tests/cli/core/products/models/test_item_group.py|3|1|Found too many imported names from a module: 11 > 8
+from cli.core.products.constants import (
+^
+WPS218|./tests/cli/core/products/models/test_item_group.py|19|1|Found too many `assert` statements: 9 > 5
+def test_item_group_data_from_dict(item_group_file_data):
+^
+WPS218|./tests/cli/core/products/models/test_item_group.py|33|1|Found too many `assert` statements: 10 > 5
+def test_item_group_data_from_json(mpt_item_group_data):
+^
+WPS432|./tests/cli/core/products/models/test_item_group.py|44|43|Found magic number: 2024
+    assert result.created_date == dt.date(2024, 3, 19)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_item_group.py|44|52|Found magic number: 19
+    assert result.created_date == dt.date(2024, 3, 19)
+                                                   ^
+WPS462|./tests/cli/core/products/models/test_item_group.py|54|22|Wrong multiline string usage
+        "description": """About this step:
+1. If you are creating a Change order for an existing agreement, you may add items or increase
+the quantities of existing subscriptions.
+2. If you are creating a Purchase order for a new cloud account, you may add new items and set the
+quantities of those items.
+3. If you are creating a Purchase order to migrate from Adobe VIP, the items will be added for you.
+You may not add items or adjust the quantity of items. You will not be billed for this order until
+your anniversary date since these items have already been paid for under the Adobe VIP program for
+the current term.""",
+                     ^
+WPS432|./tests/cli/core/products/models/test_item_group.py|83|39|Found magic number: 2024
+        ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
+                                      ^
+WPS432|./tests/cli/core/products/models/test_item_group.py|83|48|Found magic number: 19
+        ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
+                                               ^
+WPS218|./tests/cli/core/products/models/test_items.py|34|1|Found too many `assert` statements: 11 > 5
+def test_item_data_from_dict(item_file_data):
+^
+WPS218|./tests/cli/core/products/models/test_parameter_group.py|6|1|Found too many `assert` statements: 7 > 5
+def test_parameter_data_from_dict(parameter_group_file_data):
+^
+WPS432|./tests/cli/core/products/models/test_parameter_group.py|13|36|Found magic number: 232
+    assert result.display_order == 232
+                                   ^
+WPS218|./tests/cli/core/products/models/test_parameter_group.py|18|1|Found too many `assert` statements: 8 > 5
+def test_parameter_data_from_json(mpt_parameter_group_data):
+^
+WPS432|./tests/cli/core/products/models/test_parameter_group.py|27|36|Found magic number: 101
+    assert result.display_order == 101
+                                   ^
+WPS432|./tests/cli/core/products/models/test_parameter_group.py|30|43|Found magic number: 2024
+    assert result.created_date == dt.date(2024, 3, 19)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_parameter_group.py|30|52|Found magic number: 19
+    assert result.created_date == dt.date(2024, 3, 19)
+                                                   ^
+WPS432|./tests/cli/core/products/models/test_parameter_group.py|31|43|Found magic number: 2025
+    assert result.updated_date == dt.date(2025, 6, 10)
+                                          ^
+WPS202|./tests/cli/core/products/models/test_parameters.py|0|1|Found too many module members: 8 > 7
+WPS235|./tests/cli/core/products/models/test_parameters.py|4|1|Found too many imported names from a module: 14 > 8
+from cli.core.products.constants import (
+^
+WPS218|./tests/cli/core/products/models/test_parameters.py|24|1|Found too many `assert` statements: 12 > 5
+def test_parameters_data_from_dict(parameters_file_data):
+^
+WPS432|./tests/cli/core/products/models/test_parameters.py|35|36|Found magic number: 101
+    assert result.display_order == 101
+                                   ^
+WPS218|./tests/cli/core/products/models/test_parameters.py|51|1|Found too many `assert` statements: 13 > 5
+def test_parameters_data_from_json(mpt_agreement_parameter_data):
+^
+WPS432|./tests/cli/core/products/models/test_parameters.py|61|36|Found magic number: 101
+    assert result.display_order == 101
+                                   ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|103|43|Found magic number: 2024
+    assert result.created_date == dt.date(2024, 3, 19)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|103|52|Found magic number: 19
+    assert result.created_date == dt.date(2024, 3, 19)
+                                                   ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|104|43|Found magic number: 2024
+    assert result.updated_date == dt.date(2024, 3, 19)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|104|52|Found magic number: 19
+    assert result.updated_date == dt.date(2024, 3, 19)
+                                                   ^
+WPS462|./tests/cli/core/products/models/test_parameters.py|123|34|Wrong multiline string usage
+                    "description": """
+                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
+       products before, or if you wish to set up a new account in addition to an account you may
+       already have. You will need to provide details such as your company address and contacts,
+       and you will be required to accept both the Adobe Terms and Conditions as well as
+       SoftwareOne\u0027s terms and conditions.""",
+                                 ^
+WPS462|./tests/cli/core/products/models/test_parameters.py|133|34|Wrong multiline string usage
+                    "description": """Migrate from Adobe VIP if you are currently purchasing
+                    products under the Adobe VIP licensing program. This comes with several
+                    advantages including the ability to self-service manage your subscriptions
+                    within the SoftwareOne Marketplace. You will need to provide details such as
+                    your company address and contacts, and you will be required to accept  both the
+                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
+                    conditions.\n\n Note: If you are purchasing Adobe products under a different
+                    licensing program such as CLP or TLP, you cannot use this option.""",
+                                 ^
+WPS342|./tests/cli/core/products/models/test_parameters.py|185|9|Found implicit raw string: "conditions.\\n\\nNote: If you are purchasing Adobe products under "
+        "conditions.\\n\\nNote: If you are purchasing Adobe products under "
+        ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|190|37|Found magic number: 2024
+        PARAMETERS_CREATED: dt.date(2024, 3, 19),
+                                    ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|190|46|Found magic number: 19
+        PARAMETERS_CREATED: dt.date(2024, 3, 19),
+                                             ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|191|38|Found magic number: 2024
+        PARAMETERS_MODIFIED: dt.date(2024, 3, 19),
+                                     ^
+WPS432|./tests/cli/core/products/models/test_parameters.py|191|47|Found magic number: 19
+        PARAMETERS_MODIFIED: dt.date(2024, 3, 19),
+                                              ^
+WPS202|./tests/cli/core/products/models/test_product.py|0|1|Found too many module members: 12 > 7
+WPS235|./tests/cli/core/products/models/test_product.py|3|1|Found too many imported names from a module: 14 > 8
+from cli.core.products.constants import (
+^
+WPS218|./tests/cli/core/products/models/test_product.py|24|1|Found too many `assert` statements: 6 > 5
+def test_product_data_from_dict(product_file_data):
+^
+WPS218|./tests/cli/core/products/models/test_product.py|35|1|Found too many `assert` statements: 12 > 5
+def test_product_data_from_json(mpt_product_data):
+^
+WPS432|./tests/cli/core/products/models/test_product.py|57|42|Found magic number: 2025
+    assert result.export_date == dt.date(2025, 5, 30)
+                                         ^
+WPS432|./tests/cli/core/products/models/test_product.py|57|51|Found magic number: 30
+    assert result.export_date == dt.date(2025, 5, 30)
+                                                  ^
+WPS432|./tests/cli/core/products/models/test_product.py|59|43|Found magic number: 2024
+    assert result.created_date == dt.date(2024, 3, 19)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_product.py|59|52|Found magic number: 19
+    assert result.created_date == dt.date(2024, 3, 19)
+                                                   ^
+WPS432|./tests/cli/core/products/models/test_product.py|60|43|Found magic number: 2025
+    assert result.updated_date == dt.date(2025, 6, 3)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_product.py|93|38|Found magic number: 2025
+        GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
+                                     ^
+WPS432|./tests/cli/core/products/models/test_product.py|93|47|Found magic number: 30
+        GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
+                                              ^
+WPS432|./tests/cli/core/products/models/test_product.py|95|34|Found magic number: 2024
+        GENERAL_CREATED: dt.date(2024, 3, 19),
+                                 ^
+WPS432|./tests/cli/core/products/models/test_product.py|95|43|Found magic number: 19
+        GENERAL_CREATED: dt.date(2024, 3, 19),
+                                          ^
+WPS432|./tests/cli/core/products/models/test_product.py|96|35|Found magic number: 2025
+        GENERAL_MODIFIED: dt.date(2025, 6, 3),
+                                  ^
+WPS218|./tests/cli/core/products/models/test_product.py|100|1|Found too many `assert` statements: 6 > 5
+def test_settings_data_from_dict(settings_file_data):
+^
+WPS110|./tests/cli/core/products/models/test_product.py|108|5|Found wrong variable name: item
+    item = result.items[0]
+    ^
+WPS432|./tests/cli/core/products/models/test_product.py|119|33|Found magic number: 11
+    assert len(result.items) == 11
+                                ^
+WPS218|./tests/cli/core/products/models/test_template.py|16|1|Found too many `assert` statements: 8 > 5
+def test_template_data_from_dict(template_file_data):
+^
+WPS218|./tests/cli/core/products/models/test_template.py|29|1|Found too many `assert` statements: 7 > 5
+def test_template_data_from_json(mpt_template_data):
+^
+WPS432|./tests/cli/core/products/models/test_template.py|40|43|Found magic number: 2024
+    assert result.created_date == dt.date(2024, 4, 8)
+                                          ^
+WPS432|./tests/cli/core/products/models/test_template.py|41|43|Found magic number: 2024
+    assert result.updated_date == dt.date(2024, 5, 3)
+                                          ^
+WPS462|./tests/cli/core/products/models/test_template.py|50|18|Wrong multiline string usage
+        "content": r"""## Your order is complete
+
+Your order has completed and your subscriptions are ready for use.
+
+You can continue to use the Adobe Admin Console to assign licenses to users in your organization.
+<br />Your existing username and password for the Adobe Admin Console remain unchanged.
+
+[Adobe Admin Console](https://adminconsole.adobe.com/)
+
+You can view and manage your agreements and subscriptions within the SoftwareOne Marketplace.
+
+***
+
+## Completed steps
+
+We have completed the following steps:
+
+1\. We changed the quantities of any subscriptions you modified in the order.
+
+2\. We created any new subscriptions based on items added to your order.
+
+***
+
+## Need help?
+
+If you have any questions regarding your order, please contact your SoftwareOne account team.
+
+Thanks for choosing SoftwareOne.
+""",
+                 ^
+WPS432|./tests/cli/core/products/models/test_template.py|96|36|Found magic number: 2024
+        TEMPLATES_CREATED: dt.date(2024, 4, 8),
+                                   ^
+WPS432|./tests/cli/core/products/models/test_template.py|97|37|Found magic number: 2024
+        TEMPLATES_MODIFIED: dt.date(2024, 5, 3),
+                                    ^
+WPS202|./tests/cli/core/products/services/test_item_service.py|0|1|Found too many module members: 10 > 7
+WPS210|./tests/cli/core/products/services/test_item_service.py|26|1|Found too many local variables: 7 > 5
+def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_item_data):
+^
+WPS204|./tests/cli/core/products/services/test_item_service.py|39|15|Found overused expression: ItemService(service_context); used 9 > 7
+    service = ItemService(service_context)
+              ^
+WPS210|./tests/cli/core/products/services/test_item_service.py|53|1|Found too many local variables: 7 > 5
+def test_update_item_create_error(mocker, service_context, item_data_from_dict):
+^
+WPS110|./tests/cli/core/products/services/test_parameters_service.py|71|5|Found wrong variable name: params
+    params = service.set_export_params()  # act
+    ^
+WPS202|./tests/cli/core/products/services/test_product_service.py|0|1|Found too many module members: 17 > 7
+WPS210|./tests/cli/core/products/services/test_product_service.py|28|1|Found too many local variables: 7 > 5
+def test_create(mocker, service_context, mpt_product_data, product_data_from_dict):
+^
+WPS204|./tests/cli/core/products/services/test_product_service.py|36|15|Found overused expression: ProductService(service_context); used 16 > 7
+    service = ProductService(service_context)
+              ^
+WPS210|./tests/cli/core/products/services/test_product_service.py|48|1|Found too many local variables: 6 > 5
+def test_create_post_error(mocker, service_context, product_data_from_dict):
+^
+WPS204|./tests/cli/core/products/services/test_product_service.py|63|5|Found overused expression: assert result.success is False; used 8 > 7
+    assert result.success is False
+    ^
+WPS204|./tests/cli/core/products/services/test_product_service.py|63|12|Found overused expression: result.success is False; used 8 > 7
+    assert result.success is False
+           ^
+WPS210|./tests/cli/core/products/services/test_product_service.py|72|1|Found too many local variables: 7 > 5
+def test_create_update_error(mocker, service_context, mpt_product_data, product_data_from_dict):
+^
+WPS210|./tests/cli/core/products/services/test_product_service.py|98|1|Found too many local variables: 7 > 5
+def test_export(mocker, service_context, mpt_product_data):
+^
+WPS210|./tests/cli/core/products/services/test_product_service.py|280|1|Found too many local variables: 6 > 5
+def test_update(mocker, service_context, product_data_from_dict):
+^
+WPS210|./tests/cli/core/products/services/test_product_service.py|304|1|Found too many local variables: 7 > 5
+def test_update_error(mocker, service_context, product_data_from_dict):
+^
+WPS202|./tests/cli/core/products/services/test_related_components_base_service.py|0|1|Found too many module members: 14 > 7
+WPS420|./tests/cli/core/products/services/test_related_components_base_service.py|18|5|Found wrong keyword: pass
+    pass
+    ^
+WPS604|./tests/cli/core/products/services/test_related_components_base_service.py|18|5|Found incorrect node inside `class` body
+    pass
+    ^
+WPS110|./tests/cli/core/products/services/test_related_components_base_service.py|36|24|Found wrong variable name: data
+    def from_dict(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS110|./tests/cli/core/products/services/test_related_components_base_service.py|40|24|Found wrong variable name: data
+    def from_json(cls, data: dict[str, Any]) -> Self:
+                       ^
+WPS210|./tests/cli/core/products/services/test_related_components_base_service.py|61|1|Found too many local variables: 8 > 5
+def test_create(mocker, service_context, mpt_agreement_parameter_data):
+^
+WPS204|./tests/cli/core/products/services/test_related_components_base_service.py|68|15|Found overused expression: FakeRelatedComponentsService(service_context); used 10 > 7
+    service = FakeRelatedComponentsService(service_context)
+              ^
+WPS210|./tests/cli/core/products/services/test_related_components_base_service.py|102|1|Found too many local variables: 6 > 5
+def test_export(mocker, service_context, mpt_agreement_parameter_data):
+^
+WPS110|./tests/cli/core/products/services/test_related_components_base_service.py|104|5|Found wrong variable name: data
+    data = {"meta": {"offset": 0, "limit": 100, "total": 0}, "data": []}
+    ^
+WPS210|./tests/cli/core/products/services/test_related_components_base_service.py|118|1|Found too many local variables: 7 > 5
+def test_export_error(mocker, service_context, mpt_agreement_parameter_data):
+^
+WPS202|./tests/cli/core/products/test_app.py|0|1|Found too many module members: 15 > 7
+WPS458|./tests/cli/core/products/test_app.py|8|1|Found imports collision: cli.core.products.app
+from cli.core.products.app import create_product, update_product
+^
+WPS458|./tests/cli/core/products/test_app.py|8|1|Found imports collision: cli.core.products.app
+from cli.core.products.app import create_product, update_product
+^
+WPS204|./tests/cli/core/products/test_app.py|32|5|Found overused expression: assert result.exit_code == 0, result.stdout; used 8 > 7
+    assert result.exit_code == 0, result.stdout
+    ^
+WPS204|./tests/cli/core/products/test_app.py|32|12|Found overused expression: result.exit_code == 0; used 8 > 7
+    assert result.exit_code == 0, result.stdout
+           ^
+WPS211|./tests/cli/core/products/test_app.py|203|1|Found too many arguments: 10 > 5
+def test_create_product(
+^
+WPS210|./tests/cli/core/products/test_app.py|203|1|Found too many local variables: 10 > 5
+def test_create_product(
+^
+WPS213|./tests/cli/core/products/test_app.py|203|1|Found too many expressions: 10 > 9
+def test_create_product(
+^
+WPS211|./tests/cli/core/products/test_app.py|356|1|Found too many arguments: 14 > 5
+def test_export_product(
+^
+WPS218|./tests/cli/core/products/test_app.py|356|1|Found too many `assert` statements: 38 > 5
+def test_export_product(
+^
+WPS210|./tests/cli/core/products/test_app.py|356|1|Found too many local variables: 15 > 5
+def test_export_product(
+^
+WPS221|./tests/cli/core/products/test_app.py|390|5|Found line with high Jones Complexity: 15 > 14
+    result = runner.invoke(app, ["export", product_id, "--out", str(tmp_path)], input="y\ny\n")
+    ^
+WPS432|./tests/cli/core/products/test_app.py|411|37|Found magic number: 12
+    assert general_sheet.max_row == 12
+                                    ^
+WPS432|./tests/cli/core/products/test_app.py|416|38|Found magic number: 12
+    assert settings_sheet.max_row == 12
+                                     ^
+WPS110|./tests/cli/core/test_utils.py|29|5|Found wrong variable name: file
+    file = tmp_path / "file.xlsx"
+    ^
+WPS400|./tests/cli/plugins/__init__.py|0|1|Found wrong magic comment: noqa
+WPS441|./tests/cli/plugins/audit_plugin/test_app.py|160|5|Found control variable used after block: mock_print
+    mock_print.assert_any_call("\n[green]No differences found between the audit trails[/green]")
+    ^
+WPS221|./tests/cli/plugins/audit_plugin/test_audit_utils.py|15|9|Found line with high Jones Complexity: 15 > 14
+        ({"a": {"b": 1, "c": {"d": 2}}}, {"a.b": 1, "a.c.d": 2}),  # nested_dict
+        ^
+WPS221|./tests/cli/plugins/audit_plugin/test_audit_utils.py|16|9|Found line with high Jones Complexity: 15 > 14
+        ({"a": [{"b": 1}, {"c": 2}]}, {"a[0].b": 1, "a[1].c": 2}),  # dict with a list
+        ^
+WPS110|./tests/cli/plugins/audit_plugin/test_audit_utils.py|58|31|Found wrong variable name: obj
+def test_get_external_id_path(obj, index, expected_result):
+                              ^
+WPS218|./tests/cli/plugins/audit_plugin/test_audit_utils.py|79|1|Found too many `assert` statements: 9 > 5
+def test_display_records(capsys):
+^
+WPS202|./tests/conftest.py|0|1|Found too many module members: 21 > 7
+WPS402|./tests/conftest.py|0|1|Found `noqa` comments overuse: 12
+WPS430|./tests/conftest.py|54|5|Found nested function: _wrap_to_list
+    def _wrap_to_list(list_response):
+    ^
+WPS430|./tests/test_debug_logging.py|29|5|Found nested function: mock_basic_config
+    def mock_basic_config(**kwargs):
+    ^
+WPS110|./tests/test_debug_logging.py|30|9|Found wrong variable name: handler
+        handler = kwargs.get("handlers", [None])[0]
+        ^
+WPS430|./tests/test_debug_logging.py|63|5|Found nested function: mock_basic_config
+    def mock_basic_config(**kwargs):
+    ^
+WPS110|./tests/test_debug_logging.py|64|9|Found wrong variable name: handler
+        handler = kwargs.get("handlers", [None])[0]
+        ^
+WPS111|./tests/test_debug_logging.py|100|23|Found too short name: r < 2
+    assert len([r for r in caplog.records if r.levelname == "DEBUG"]) == 0
+                      ^
