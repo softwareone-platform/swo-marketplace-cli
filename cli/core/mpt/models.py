@@ -63,7 +63,7 @@ class Parameter(BaseModel):
     name: str
 
 
-class Item(BaseModel):
+class MPTItem(BaseModel):
     """Model representing an item."""
 
     id: str
@@ -94,4 +94,4 @@ class PriceListItem(BaseModel):
     """Model representing a price list item."""
 
     id: str
-    item: Item
+    catalog_item: MPTItem = Field(alias="item")

@@ -12,9 +12,9 @@ def test_read_data(mocker, item_group_data_from_dict):
     item_group_data_from_dict_mock = mocker.patch.object(
         ItemGroupData, "from_dict", return_value=item_group_data_from_dict
     )
-    handler = ItemGroupExcelFileManager("fake_file.xlsx")
+    excel_manager = ItemGroupExcelFileManager("fake_file.xlsx")
 
-    result = list(handler.read_data())
+    result = list(excel_manager.read_data())
 
     assert result == [item_group_data_from_dict]
     get_data_from_horizonal_sheet.assert_called_once_with(TAB_ITEMS_GROUPS, ITEMS_GROUPS_FIELDS)

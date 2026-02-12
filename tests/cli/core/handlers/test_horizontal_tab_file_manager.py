@@ -22,11 +22,11 @@ class FakeDataModel(BaseDataModel):
     precision: int | None = None
 
     @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> Self:
+    def from_dict(cls, _row_data: dict[str, Any]) -> Self:
         return cls()
 
     @classmethod
-    def from_json(cls, data: dict[str, Any]) -> Self:
+    def from_json(cls, _json_data: dict[str, Any]) -> Self:
         return cls()
 
     def to_json(self) -> dict[str, Any]:
@@ -67,9 +67,9 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
     get_sheet_next_row_mock = mocker.patch.object(
         fake_horizontal_tab_file_manager.file_handler, "get_sheet_next_row", return_value=2
     )
-    item = FakeDataModel(currency=currency, precision=precision)
+    model_entry = FakeDataModel(currency=currency, precision=precision)
     item_to_xlsx_mock = mocker.patch.object(
-        item,
+        model_entry,
         "to_xlsx",
         return_value={"ID": "fake_id", "styled_field": 22.5, "field2": "fake field value"},
     )
@@ -78,17 +78,17 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
     )
     save_mock = mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
 
-    fake_horizontal_tab_file_manager.add([item])  # act
+    fake_horizontal_tab_file_manager.add([model_entry])  # act
 
     get_sheet_next_row_mock.assert_called_once_with("FakeSheet")
     item_to_xlsx_mock.assert_called_once()
     write_cell_mock.assert_has_calls([
-        call("FakeSheet", col=1, row=2, value="fake_id", data_validation=None, style=None),
+        call("FakeSheet", col=1, row=2, cell_value="fake_id", data_validation=None, style=None),
         call(
             "FakeSheet",
             col=2,
             row=2,
-            value=22.5,
+            cell_value=22.5,
             data_validation=None,
             style=expected_style,
         ),
@@ -96,7 +96,7 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
             "FakeSheet",
             col=3,
             row=2,
-            value="fake field value",
+            cell_value="fake field value",
             data_validation=mock.ANY,
             style=None,
         ),
@@ -109,22 +109,22 @@ def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
         fake_horizontal_tab_file_manager.file_handler, "get_sheet_next_row", return_value=2
     )
     mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
-    item_mock = MagicMock(
+    model_entry = MagicMock(
         spec=BaseDataModel, to_xlsx=Mock(return_value={"ID": "fake_id", "styled_field": 22.5})
     )
     write_cell_mock = mocker.patch.object(
         fake_horizontal_tab_file_manager.file_handler, "write_cell"
     )
 
-    fake_horizontal_tab_file_manager.add([item_mock])  # act
+    fake_horizontal_tab_file_manager.add([model_entry])  # act
 
     write_cell_mock.assert_has_calls([
-        call("FakeSheet", col=1, row=2, value="fake_id", data_validation=None, style=None),
+        call("FakeSheet", col=1, row=2, cell_value="fake_id", data_validation=None, style=None),
         call(
             "FakeSheet",
             col=2,
             row=2,
-            value=22.5,
+            cell_value=22.5,
             data_validation=None,
             style=None,
         ),
@@ -142,9 +142,9 @@ def test_create_tab(mocker, fake_horizontal_tab_file_manager):
     exists_mock.assert_called_once()
     create_mock.assert_called_once()
     write_cell_mock.assert_has_calls([
-        call("FakeSheet", row=1, col=1, value="ID", style=horizontal_tab_style),
-        call("FakeSheet", row=1, col=2, value="styled_field", style=horizontal_tab_style),
-        call("FakeSheet", row=1, col=3, value="field2", style=horizontal_tab_style),
+        call("FakeSheet", row=1, col=1, cell_value="ID", style=horizontal_tab_style),
+        call("FakeSheet", row=1, col=2, cell_value="styled_field", style=horizontal_tab_style),
+        call("FakeSheet", row=1, col=3, cell_value="field2", style=horizontal_tab_style),
     ])
 
 

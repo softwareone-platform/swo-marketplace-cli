@@ -31,8 +31,8 @@ class ItemService(RelatedBaseService):
                 self.stats.add_error(TAB_PRICE_ITEMS)
                 return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
 
-            data = [self.data_model.from_json(item) for item in response["data"]]
-            self.file_manager.add(data)
+            records = [self.data_model.from_json(record) for record in response["data"]]
+            self.file_manager.add(records)
 
             meta_data = response["meta"]
             if meta_data["offset"] + meta_data["limit"] < meta_data["total"]:
@@ -61,25 +61,25 @@ class ItemService(RelatedBaseService):
     @override
     def update(self) -> ServiceResult:
         errors = []
-        for item in self.file_manager.read_data():
-            if not item.to_update():
+        for record in self.file_manager.read_data():
+            if not record.to_update():
                 self._set_skipped()
                 continue
 
             try:
-                params = {"item.ExternalIds.vendor": item.vendor_id, "limit": 1}
-                item_data = self.api.list(params=params)["data"][0]
+                query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
+                item_data = self.api.list(query_params=query_params)["data"][0]
             except MPTAPIError as e:
                 errors.append(str(e))
-                self._set_error(str(e), item.id)
+                self._set_error(str(e), record.id)
                 continue
 
             # TODO: this logic should be moved to the price list data model creation
-            item.type = "operations" if self.account.is_operations() else "vendor"
+            record.type = "operations" if self.account.is_operations() else "vendor"
             try:
-                self.api.update(item_data["id"], item.to_json())
-                self._set_synced(item.id, item.coordinate)
+                self.api.update(item_data["id"], record.to_json())
+                self._set_synced(record.id, record.coordinate)
             except MPTAPIError as e:
-                errors.append(f"Item {item.id}: {e!s}")
-                self._set_error(str(e), item.id)
+                errors.append(f"Item {record.id}: {e!s}")
+                self._set_error(str(e), record.id)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)

@@ -17,12 +17,12 @@ class ItemService(RelatedComponentsBaseService):
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
         data_model = super().prepare_data_model_to_create(data_model)
 
-        item = cast(ItemData, data_model)
-        item.unit_id = search_uom_by_name(self.api.client, item.unit_name).id
-        self.file_manager.write_ids({item.unit_coordinate: item.unit_id})
+        item_data = cast(ItemData, data_model)
+        item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
+        self.file_manager.write_ids({item_data.unit_coordinate: item_data.unit_id})
 
-        item.item_type = "operations" if self.account.is_operations() else "vendor"
-        item.product_id = self.resource_id
+        item_data.item_type = "operations" if self.account.is_operations() else "vendor"
+        item_data.product_id = self.resource_id
 
         return data_model
 
@@ -37,28 +37,28 @@ class ItemService(RelatedComponentsBaseService):
             return
 
         new_ids = {}
-        for item in self.file_manager.read_data():
+        for item_data in self.file_manager.read_data():
             try:
-                new_group = item_groups.retrieve_by_id(item.group_id)
+                new_group = item_groups.retrieve_by_id(item_data.group_id)
             except KeyError:
                 continue
 
-            new_ids[item.group_coordinate] = new_group.id
+            new_ids[item_data.group_coordinate] = new_group.id
 
         if new_ids:
             self.file_manager.write_ids(new_ids)
 
     @override
     def set_export_params(self) -> dict[str, Any]:
-        params = super().set_export_params()
-        params.update({"product.id": self.resource_id})
-        return params
+        export_query = super().set_export_params()
+        export_query.update({"product.id": self.resource_id})
+        return export_query
 
     def _action_create_item(self, data_model: DataModel):
-        item = cast(ItemData, data_model)
+        item_data = cast(ItemData, data_model)
 
-        item.unit_id = search_uom_by_name(self.api.client, item.unit_name).id
-        item.item_type = "operations" if self.account.is_operations() else "vendor"
+        item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
+        item_data.item_type = "operations" if self.account.is_operations() else "vendor"
 
         super()._action_create_item(data_model)
 
@@ -70,19 +70,19 @@ class ItemService(RelatedComponentsBaseService):
             data_model: The data model to perform the action on.
 
         """
-        item = cast(ItemData, data_model)
-        self.api.post_action(item.id, item.action)
+        item_data = cast(ItemData, data_model)
+        self.api.post_action(item_data.id, item_data.action)
 
     def _action_update_item(self, data_model: DataModel) -> None:
-        item = cast(ItemData, data_model)
+        item_data = cast(ItemData, data_model)
 
-        params = {
-            "externalIds.vendor": item.vendor_id,
-            "product.id": item.product_id,
+        query_params = {
+            "externalIds.vendor": item_data.vendor_id,
+            "product.id": item_data.product_id,
             "limit": 1,
         }
-        item_data = self.api.list(params=params)["data"][0]
-        item.id = item_data["id"]
+        existing_item = self.api.list(query_params=query_params)["data"][0]
+        item_data.id = existing_item["id"]
 
         super()._action_update_item(data_model)
 

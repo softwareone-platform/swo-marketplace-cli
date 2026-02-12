@@ -17,9 +17,9 @@ def test_read_data(mocker, item_data_from_dict):
     item_data_from_dict_mock = mocker.patch.object(
         ItemData, "from_dict", return_value=item_data_from_dict
     )
-    handler = ItemExcelFileManager("fake_file.xlsx")
+    excel_manager = ItemExcelFileManager("fake_file.xlsx")
 
-    result = list(handler.read_data())
+    result = list(excel_manager.read_data())
 
     assert result == [item_data_from_dict]
     get_values_for_dynamic_sheet_mock.assert_called_once_with(

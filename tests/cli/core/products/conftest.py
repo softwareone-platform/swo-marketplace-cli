@@ -88,7 +88,7 @@ from cli.core.products.models import (
     TemplateData,
 )
 from cli.core.products.models.enums import ItemTermsModelEnum
-from cli.core.products.models.product import SettingsItem
+from cli.core.products.models.product import SettingsRecords
 from cli.core.products.services import (
     ItemGroupService,
     ItemService,
@@ -184,12 +184,14 @@ def product_data_from_dict():
         updated_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
         coordinate="B3",
         settings=SettingsData(
-            items=[
-                SettingsItem(name="Product ordering", action=DataActionEnum.SKIP, value="Off"),
-                SettingsItem(
+            records=[
+                SettingsRecords(
+                    name="Product ordering", action=DataActionEnum.SKIP, setting_value="Off"
+                ),
+                SettingsRecords(
                     name="Change order validation (draft)",
                     action=DataActionEnum.UPDATE,
-                    value="Enabled",
+                    setting_value="Enabled",
                 ),
             ]
         ),
@@ -856,7 +858,7 @@ def template_data_from_dict():
         coordinate="A2",
         name="Change",
         type="OrderCompleted",
-        content=r"""## Your order is complete
+        template_content=r"""## Your order is complete
 
 Your order has completed and your subscriptions are ready for use.
 
@@ -931,8 +933,11 @@ def settings_file_data():
 
 @pytest.fixture
 def list_response_mock_data_factory():
-    def _create_data_response(data):
-        response = {"$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}}, "data": data}
+    def _create_data_response(response_items):
+        response = {
+            "$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}},
+            "data": response_items,
+        }
         return Mock(spec=Response, json=Mock(return_value=response))
 
     return _create_data_response

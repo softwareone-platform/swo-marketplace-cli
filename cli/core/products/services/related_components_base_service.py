@@ -46,19 +46,21 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
     @override
     def export(self) -> ServiceResult:
         self.file_manager.create_tab()
-        params = self.export_params
+        export_query = self.export_params
         while True:
             try:
-                response = self.api.list(params=params)
+                response = self.api.list(query_params=export_query)
             except MPTAPIError as e:
                 self._set_error(str(e))
                 return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
 
-            self.file_manager.add([self.data_model.from_json(item) for item in response["data"]])
+            self.file_manager.add([
+                self.data_model.from_json(record) for record in response["data"]
+            ])
 
             meta_data = response["meta"]
             if meta_data["offset"] + meta_data["limit"] < meta_data["total"]:
-                params["offset"] += params["limit"]
+                export_query["offset"] += export_query["limit"]
             else:
                 break
 

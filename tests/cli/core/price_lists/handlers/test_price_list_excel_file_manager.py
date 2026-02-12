@@ -15,9 +15,9 @@ def test_read_data(mocker, price_list_data_from_dict):
     price_list_from_dict_mock = mocker.patch.object(
         PriceListData, "from_dict", return_value=price_list_data_from_dict
     )
-    handler = PriceListExcelFileManager("fake_file.xlsx")
+    excel_manager = PriceListExcelFileManager("fake_file.xlsx")
 
-    result = handler.read_data()
+    result = excel_manager.read_data()
 
     assert result == price_list_data_from_dict
     get_data_from_vertical_sheet_mock.assert_called_once_with(TAB_GENERAL, GENERAL_FIELDS)

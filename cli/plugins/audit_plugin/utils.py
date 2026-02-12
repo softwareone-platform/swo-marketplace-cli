@@ -4,22 +4,26 @@ from cli.core.console import console
 from rich.table import Table
 
 
-def flatten_dict(d: dict[str, Any], parent_key: str = "", sep: str = ".") -> dict[str, Any]:
+def flatten_dict(
+    source_dict: dict[str, Any], parent_key: str = "", sep: str = "."
+) -> dict[str, Any]:
     """Flatten a nested dictionary into a single level with dot notation keys."""
-    items: list = []
-    for k, v in d.items():
-        new_key = f"{parent_key}{sep}{k}" if parent_key else k
-        if isinstance(v, dict):
-            items.extend(flatten_dict(v, new_key, sep=sep).items())
-        elif isinstance(v, list):
-            for i, item in enumerate(v):
-                if isinstance(item, dict):
-                    items.extend(flatten_dict(item, f"{new_key}[{i}]", sep=sep).items())
+    flattened_items: list = []
+    for key, node_value in source_dict.items():
+        new_key = f"{parent_key}{sep}{key}" if parent_key else key
+        if isinstance(node_value, dict):
+            flattened_items.extend(flatten_dict(node_value, new_key, sep=sep).items())
+        elif isinstance(node_value, list):
+            for index, list_entry in enumerate(node_value):
+                if isinstance(list_entry, dict):
+                    flattened_items.extend(
+                        flatten_dict(list_entry, f"{new_key}[{index}]", sep=sep).items()
+                    )
                 else:
-                    items.append((f"{new_key}[{i}]", item))
+                    flattened_items.append((f"{new_key}[{index}]", list_entry))
         else:
-            items.append((new_key, v))
-    return dict(items)
+            flattened_items.append((new_key, node_value))
+    return dict(flattened_items)
 
 
 def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
@@ -32,14 +36,14 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     index = int(index_str)
 
     for trail in [source_trail, target_trail]:
-        obj = trail
+        current_node = trail
         for part in base_path.split("."):
             try:
-                obj = obj[part]
+                current_node = current_node[part]
             except KeyError:
                 continue
 
-        if (external_id := get_external_id(obj, index)) is not None:
+        if (external_id := get_external_id(current_node, index)) is not None:
             return f"{path} (externalId: {external_id})"
 
     return path
@@ -57,19 +61,19 @@ def is_valid_path(path: str) -> bool:
     return "[" in path and "]" in path
 
 
-def get_external_id(obj: Any, index: int) -> str | None:
+def get_external_id(current_node: Any, index: int) -> str | None:
     """Get the external ID from an object.
 
     Args:
-        obj: the object to get the external ID from.
+        current_node: the object to get the external ID from.
         index: the index of the object to get the external ID from.
 
     Returns: the external ID or None.
 
     """
-    if isinstance(obj, list) and len(obj) > index:
+    if isinstance(current_node, list) and len(current_node) > index:
         try:
-            return obj[index]["externalId"]
+            return current_node[index]["externalId"]
         except (IndexError, KeyError):
             return None
 
