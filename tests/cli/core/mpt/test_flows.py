@@ -31,7 +31,7 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "catalog/products?limit=10&offset=0&eq(product.id,PRD-1234-1234)",
+            "catalog/products?limit=10&offset=0&eq(product.id,'PRD-1234-1234')",
         ),
         json=mpt_products_response,
     )
