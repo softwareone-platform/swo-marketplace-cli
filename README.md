@@ -5,49 +5,81 @@
 # SoftwareONE CLI
 Command line utility for SoftwareOne Marketplace Platform
 
-## Prerequisites
+## Documentation
+
+📚 **[Complete Usage Guide](docs/PROJECT_DESCRIPTION.md)**
+
+## Getting started
+
+### Prerequisites
 
 - Docker and Docker Compose plugin (`docker compose` CLI)
 - `make`
 - [CodeRabbit CLI](https://www.coderabbit.ai/cli) (optional. Used for running review check locally)
 
+
 ## Make targets overview
 
-Common development workflows are wrapped in the `makefile`:
+Common development workflows are wrapped in the `Makefile`. Run `make help` to see the list of available commands.
 
-- `make help` – list available commands
-- `make bash` – start the app container and open a bash shell
-- `make build` – build the application image for development
-- `make check` – run code quality checks (ruff, flake8, lockfile check)
-- `make check-all` – run checks, formatting, and tests
-- `make format` – apply formatting and import fixes
-- `make down` – stop and remove containers
-- `make review` –  check the code in the cli by running CodeRabbit
-- `make run` – run the CLI tool
-- `make test` – run the test suite with pytest
+### How the Makefile works
 
-## Running CLI commands
+The project uses a modular Makefile structure that organizes commands into logical groups:
 
-Run the CLI tool:
+- **Main Makefile** (`Makefile`): Entry point that automatically includes all `.mk` files from the `make/` directory
+- **Modular includes** (`make/*.mk`): Commands are organized by category:
+  - `common.mk` - Core development commands (build, test, format, etc.)
+  - `repo.mk` - Repository management and dependency commands
+  - `migrations.mk` - Database migration commands (Only available in extension repositories)
+  - `external_tools.mk` - Integration with external tools
+
+
+You can extend the Makefile with your own custom commands creating a `local.mk` file inside make folder. This file is
+automatically ignored by git, so your personal commands won't affect other developers or appear in version control.
+
+
+### Setup
+
+Follow these steps to set up the development environment:
+
+#### 1. Clone the repository
+
 ```bash
-make run
+git clone <repository-url>
+```
+```bash
+cd swo-marketplace-cli
 ```
 
-## Running tests
+#### 2. Build the Docker images
 
-Tests run inside Docker using the dev configuration.
+Build the development environment:
 
-Run the full test suite:
+```bash
+make build
+```
+
+This will create the Docker images with all required dependencies and the virtualenv.
+
+#### 3. Verify the setup
+
+Run the test suite to ensure everything is configured correctly:
 
 ```bash
 make test
 ```
 
-Pass additional arguments to pytest using the `args` variable:
+You're now ready to start developing! See [Running the cli](#running-the-cli) for next steps.
+
+
+## Running the cli
+
+Before running, ensure your `.env` file is populated.
+
+Start the cli:
 
 ```bash
-make test args="-k test_cli -vv"
-make test args="tests/test_cli.py"
+make run
 ```
 
 ## Developer utilities
@@ -61,136 +93,3 @@ make check-all # run checks and tests
 make format    # auto-format code and imports
 make review    # check the code in the cli by running CodeRabbit
 ```
-
-## Using the CLI
-
-### Getting Started
-
-Launch the CLI tool:
-
-```bash
-make run
-```
-
-To see all available commands and options:
-
-```bash
-mpt-cli --help
-```
-
-### Account Management
-
-Before using the CLI, you need to configure at least one account.
-
-#### Add an Account
-
-Add a new account with your API token and endpoint:
-
-```bash
-mpt-cli accounts add <token_id> -e <api_endpoint>
-```
-
-**Example:**
-```bash
-mpt-cli accounts add idt:xxxxx -e https://api.s1.show/public/v1
-```
-
-#### List Accounts
-
-View all configured accounts and see which one is active:
-
-```bash
-mpt-cli accounts list
-```
-
-#### Activate an Account
-
-If you have multiple accounts, switch between them:
-
-```bash
-mpt-cli accounts activate <account_id>
-```
-
-#### Remove an Account
-
-Delete an account from your configuration:
-
-```bash
-mpt-cli accounts remove <account_id>
-```
-
-### Working with Products
-
-#### List Products
-
-Display available products:
-
-```bash
-mpt-cli products list
-```
-
-**Options:**
-- `--page <number>` – Specify page number (default: 1)
-- `--limit <number>` – Results per page (default: 25)
-
-#### Export Products
-
-Export one or more products to Excel files:
-
-```bash
-mpt-cli products export <product_id> [<product_id>...] -o <output_folder>
-```
-
-**Example:**
-```bash
-mpt-cli products export PRD-1234-5678 PRD-9876-5432 -o ./exports
-```
-
-If no output folder is specified, files are saved to the current directory with the format `<product-id>.xlsx`.
-
-#### Sync Products
-
-Synchronize products from Excel definition files:
-
-```bash
-mpt-cli products sync <file_path> [<file_path>...]
-```
-
-**Example:**
-```bash
-mpt-cli products sync PRD-1234-5678.xlsx PRD-9876-5432.xlsx
-```
-
-### Working with Price Lists
-
-#### Sync Price Lists
-
-Upload and synchronize price lists from Excel files:
-
-```bash
-mpt-cli pricelists sync <file_path> [<file_path>...]
-```
-
-**Example:**
-```bash
-mpt-cli pricelists sync PRC-1234-5678.xlsx
-```
-
-#### Export Price Lists
-
-Export price list data to Excel files:
-
-```bash
-mpt-cli pricelists export <pricelist_id> [<pricelist_id>...] -o <output_folder>
-```
-
-
-### Tips
-
-- Use `--help` with any command to see detailed usage information:
-  ```bash
-  mpt-cli products --help
-  mpt-cli products export --help
-  ```
-- File paths support glob patterns for batch operations
-- The active account is used for all API operations
