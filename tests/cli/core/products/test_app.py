@@ -40,14 +40,14 @@ def test_list_products_with_query_and_paging(
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
-            "catalog/products?limit=20&offset=0&eq(product.id,PRD-1234)",
+            "catalog/products?limit=20&offset=0&eq(product.id,'PRD-1234')",
         ),
         json=mpt_products_response,
     )
 
     result = runner.invoke(
         app,
-        ["list", "--page", "20", "--query", "eq(product.id,PRD-1234)"],
+        ["list", "--page", "20", "--query", "eq(product.id,'PRD-1234')"],
     )
 
     assert result.exit_code == 0, result.stdout

@@ -24,7 +24,7 @@ def get_audit_records_by_object(
         endpoint = "/audit/records"
         query_string = (
             "render()&select=object,actor,details,documents,request.api.geolocation"
-            f"&eq(object.id,{object_id})&order=-timestamp&limit={limit}"
+            f"&eq(object.id,'{object_id}')&order=-timestamp&limit={limit}"
         )
         response = client.get(endpoint + "?" + query_string)
         records = response.json().get("data", [])

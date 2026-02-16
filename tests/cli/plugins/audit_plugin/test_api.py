@@ -83,7 +83,7 @@ class TestGetAuditRecordsByObject:
         called_endpoint = mock_client.get.call_args[0][0]
         assert "/audit/records" in called_endpoint
         assert "render()" in called_endpoint
-        assert "eq(object.id,obj123)" in called_endpoint
+        assert "eq(object.id,'obj123')" in called_endpoint
         assert "limit=10" in called_endpoint
 
     def test_no_records_found(self, mock_client, mock_response):
