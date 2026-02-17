@@ -1,5 +1,5 @@
 import pytest
-from cli.plugins.audit_plugin.utils import (
+from cli.plugins.audit_plugin.audit_records import (
     display_audit_records,
     flatten_dict,
     format_json_path,

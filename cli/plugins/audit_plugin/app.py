@@ -8,7 +8,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from .api import get_audit_records_by_object, get_audit_trail
-from .utils import display_audit_records, flatten_dict, format_json_path
+from .audit_records import display_audit_records, flatten_dict, format_json_path
 
 app = typer.Typer(name="audit", help="Audit commands.")
 

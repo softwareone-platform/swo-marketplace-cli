@@ -1,22 +1,4 @@
-from cli.core.utils import get_files_path, set_dict_value
-
-
-def test_set_dict_value():
-    original_dict = {}
-    path = "a.b.c"
-
-    result = set_dict_value(original_dict, path, "test")
-
-    assert result == {"a": {"b": {"c": "test"}}}
-
-
-def test_set_dict_value_same_leaf():
-    original_dict = {"a": {"b": {"c": "old_value"}}}
-    path = "a.b.d"
-
-    result = set_dict_value(original_dict, path, "test")
-
-    assert result == {"a": {"b": {"c": "old_value", "d": "test"}}}
+from cli.core.file_discovery import get_files_path
 
 
 def test_get_files_path_no_files():

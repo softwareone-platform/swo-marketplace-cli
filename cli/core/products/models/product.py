@@ -4,9 +4,9 @@ from pathlib import Path
 from typing import Any, Self, override
 
 from cli.core.models.data_model import BaseDataModel
+from cli.core.nested_dicts import set_dict_value
 from cli.core.products import constants
 from cli.core.products.models.mixins import ActionMixin
-from cli.core.utils import set_dict_value
 from dateutil import parser
 
 
