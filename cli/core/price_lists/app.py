@@ -4,6 +4,7 @@ from typing import Annotated
 import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.console import console
+from cli.core.file_discovery import get_files_path
 from cli.core.mpt.client import client_from_account
 from cli.core.price_lists.api import PriceListAPIService
 from cli.core.price_lists.api.price_list_item_api_service import PriceListItemAPIService
@@ -15,7 +16,6 @@ from cli.core.price_lists.models import ItemData, PriceListData
 from cli.core.price_lists.services import ItemService, PriceListService
 from cli.core.services.service_context import ServiceContext
 from cli.core.stats import PriceListStatsCollector
-from cli.core.utils import get_files_path
 
 app = typer.Typer()
 
