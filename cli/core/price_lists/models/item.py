@@ -15,10 +15,19 @@ class ItemAction(StrEnum):
     UPDATE = "update"
 
     @classmethod
-    def _missing_(cls, raw_input: object) -> "ItemAction":
+    def from_raw(cls, raw_input: str | None) -> "ItemAction":
+        """Build an ItemAction enum from a raw value.
+
+        Args:
+            raw_input: Raw action value from parsed data.
+
+        Returns:
+            The normalized item action.
+
+        """
         if raw_input is None:
             return cls.SKIP
-        return super()._missing_(raw_input)
+        return cls(raw_input)
 
 
 class ItemStatus(StrEnum):
@@ -91,7 +100,7 @@ class ItemData(BaseDataModel):
             unit_pp=row_data[constants.PRICELIST_ITEMS_UNIT_PP]["value"],
             unit_sp=row_data.get(constants.PRICELIST_ITEMS_UNIT_SP, {}).get("value"),
             vendor_id=row_data[constants.PRICELIST_ITEMS_ITEM_VENDOR_ID]["value"],
-            action=ItemAction(row_data[constants.PRICELIST_ITEMS_ACTION]["value"]),
+            action=ItemAction.from_raw(row_data[constants.PRICELIST_ITEMS_ACTION]["value"]),
             type=row_data.get("type"),
         )
 
