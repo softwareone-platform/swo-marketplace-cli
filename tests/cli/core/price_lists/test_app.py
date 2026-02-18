@@ -197,9 +197,7 @@ def test_export_price_list_no_operations_account(
     item_service_export_spy.assert_not_called()
 
 
-def test_export_price_list_export_price_list_no_success(
-    mocker, active_operations_account, price_list_data_from_json
-):
+def test_export_price_list_no_success(mocker, active_operations_account):
     mocker.patch(
         "cli.core.price_lists.app.get_active_account",
         return_value=active_operations_account,

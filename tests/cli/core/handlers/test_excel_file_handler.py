@@ -84,15 +84,15 @@ def test_check_required_fields_in_vertical_sheet(excel_file_handler):
     )
 
 
-def test_check_required_fields_in_vertical_sheet_missing_sheet(excel_file_handler):
+def test_check_vert_fields_missing(excel_file_handler):
     with pytest.raises(RequiredFieldsError):
         excel_file_handler.check_required_fields_in_vertical_sheet(
             "VerticalSheet", ["Field1", "MissingField"]
         )
 
 
-def test_check_required_field_values_in_vertical_sheet(mocker, excel_file_handler):
-    test_get_data_from_vertical_sheet_by_fields_mock = mocker.patch.object(
+def test_check_vert_field_values_success(mocker, excel_file_handler):
+    get_vertical_sheet_data_mock = mocker.patch.object(
         excel_file_handler,
         "get_data_from_vertical_sheet",
         return_value={"Field1": {"value": "Value1"}, "Field2": {"value": "Value2"}},
@@ -102,11 +102,11 @@ def test_check_required_field_values_in_vertical_sheet(mocker, excel_file_handle
         "VerticalSheet", ["Field1", "Field2"]
     )
 
-    test_get_data_from_vertical_sheet_by_fields_mock.assert_called_once_with("VerticalSheet")
+    get_vertical_sheet_data_mock.assert_called_once_with("VerticalSheet")
 
 
-def test_check_required_field_values_in_vertical_sheet_empty_value(mocker, excel_file_handler):
-    test_get_data_from_vertical_sheet_by_fields_mock = mocker.patch.object(
+def test_check_vert_field_values_empty(mocker, excel_file_handler):
+    get_vertical_sheet_data_mock = mocker.patch.object(
         excel_file_handler,
         "get_data_from_vertical_sheet",
         return_value={"Field1": {"value": "Value1"}, "EmptyField": {"value": None}},
@@ -117,17 +117,17 @@ def test_check_required_field_values_in_vertical_sheet_empty_value(mocker, excel
             "VerticalSheet", ["Field1", "EmptyField"]
         )
 
-    test_get_data_from_vertical_sheet_by_fields_mock.assert_called_once_with("VerticalSheet")
+    get_vertical_sheet_data_mock.assert_called_once_with("VerticalSheet")
     assert exc_info.value.details == ["EmptyField"]
 
 
-def test_check_required_fields_in_horizontal_sheet(excel_file_handler):
+def test_check_fields_in_horizontal_sheet(excel_file_handler):
     excel_file_handler.check_required_fields_in_horizontal_sheet(  # act
         "HorizontalSheet", ["Header1", "Header2"]
     )
 
 
-def test_check_required_fields_in_horizontal_sheet_missing_field(excel_file_handler):
+def test_check_horizontal_sheet_missing_field(excel_file_handler):
     with pytest.raises(RequiredFieldsError) as exc_info:
         excel_file_handler.check_required_fields_in_horizontal_sheet(
             "HorizontalSheet", ["Header2", "MissingHeader"]

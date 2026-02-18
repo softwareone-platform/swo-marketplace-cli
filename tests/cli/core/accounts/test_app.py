@@ -111,7 +111,7 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     ]
 
 
-def test_add_account_accounts_override_environment(new_accounts_path, mocker, new_token):
+def test_add_account_override_environment(new_accounts_path, mocker, new_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
@@ -242,7 +242,7 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
     ]
 
 
-def test_activate_account_accounts_file_not_exists(tmp_path, mocker):
+def test_activate_account_file_not_exists(tmp_path, mocker):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
 
