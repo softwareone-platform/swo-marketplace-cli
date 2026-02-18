@@ -87,12 +87,12 @@ class ErrorMessagesCollector:
 class StatsCollector(ABC):
     """Abstract base class for collecting and managing operation statistics."""
 
-    __id: str | None = None
+    _stat_id: str | None = None
     errors = ErrorMessagesCollector()
 
     def __init__(self, tabs: dict[str, TabResults]) -> None:
-        self.__has_error = False
-        self.__tab_aliases = tabs
+        self._has_error = False
+        self._tab_aliases = tabs
 
     @property
     def stat_id(self) -> str | None:
@@ -102,11 +102,11 @@ class StatsCollector(ABC):
             The identifier as a string, or None if not set.
 
         """
-        return self.__id
+        return self._stat_id
 
     @stat_id.setter
     def stat_id(self, stat_value: str) -> None:
-        self.__id = stat_value
+        self._stat_id = stat_value
 
     @property
     def tabs(self) -> dict[str, TabResults]:
@@ -116,12 +116,12 @@ class StatsCollector(ABC):
             A dictionary mapping tab names to their corresponding results.
 
         """
-        return self.__tab_aliases
+        return self._tab_aliases
 
     @property
     def has_errors(self) -> bool:
         """Check if any errors have been recorded."""
-        return self.__has_error
+        return self._has_error
 
     def add_error(self, tab_name: str) -> None:
         """Increment error and total counters for a tab and mark errors as present.
@@ -130,9 +130,9 @@ class StatsCollector(ABC):
             tab_name: The name of the tab to update.
 
         """
-        self.__tab_aliases[tab_name]["error"] += 1
-        self.__tab_aliases[tab_name]["total"] += 1
-        self.__has_error = True
+        self._tab_aliases[tab_name]["error"] += 1
+        self._tab_aliases[tab_name]["total"] += 1
+        self._has_error = True
 
     def add_synced(self, tab_name: str) -> None:
         """Increment synced and total counters for a tab.
@@ -141,8 +141,8 @@ class StatsCollector(ABC):
             tab_name: The name of the tab to update.
 
         """
-        self.__tab_aliases[tab_name]["synced"] += 1
-        self.__tab_aliases[tab_name]["total"] += 1
+        self._tab_aliases[tab_name]["synced"] += 1
+        self._tab_aliases[tab_name]["total"] += 1
 
     def add_skipped(self, tab_name: str) -> None:
         """Increment skipped and total counters for a tab.
@@ -151,8 +151,8 @@ class StatsCollector(ABC):
             tab_name: The name of the tab to update.
 
         """
-        self.__tab_aliases[tab_name]["skipped"] += 1
-        self.__tab_aliases[tab_name]["total"] += 1
+        self._tab_aliases[tab_name]["skipped"] += 1
+        self._tab_aliases[tab_name]["total"] += 1
 
     @abstractmethod
     def _get_table_title(self) -> str:

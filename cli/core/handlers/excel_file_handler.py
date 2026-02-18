@@ -28,15 +28,15 @@ class ExcelFileHandler(FileHandler):
 
     def __init__(self, file_path: Path):
         super().__init__(file_path)
-        self.__workbook: Workbook | None = None
-        self.__worksheets: dict[str, Worksheet] = {}
+        self._workbook_cache: Workbook | None = None
+        self._worksheets_cache: dict[str, Worksheet] = {}
 
     @property
     def _workbook(self) -> Workbook:
-        if self.__workbook is None:
-            self.__workbook = load_workbook(self.file_path)
+        if self._workbook_cache is None:
+            self._workbook_cache = load_workbook(self.file_path)
 
-        return self.__workbook
+        return self._workbook_cache
 
     @property
     def sheet_names(self) -> list[str]:
@@ -336,9 +336,9 @@ class ExcelFileHandler(FileHandler):
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
         if sheet_name is not None:
-            self.__worksheets.pop(sheet_name, None)
+            self._worksheets_cache.pop(sheet_name, None)
         else:
-            self.__worksheets = {}
+            self._worksheets_cache = {}
 
     def _get_fields_from_horizontal_worksheet(self, worksheet_name: str, max_row: int) -> list[str]:
         return list(
@@ -351,7 +351,7 @@ class ExcelFileHandler(FileHandler):
         )
 
     def _get_worksheet(self, sheet_name: str) -> Worksheet:
-        if self.__worksheets.get(sheet_name) is None:
-            self.__worksheets[sheet_name] = self._workbook[sheet_name]
+        if self._worksheets_cache.get(sheet_name) is None:
+            self._worksheets_cache[sheet_name] = self._workbook[sheet_name]
 
-        return self.__worksheets[sheet_name]
+        return self._worksheets_cache[sheet_name]
