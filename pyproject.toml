@@ -195,6 +195,7 @@ ignore = [
   "PLR09",   # we have our own complexity rules
   "PLR2004", # do not report magic numbers
   "PLR6301", # do not require classmethod / staticmethod when self not used
+  "RUF100", # unused noqa directive 
   "TRY003",  # long exception messages from `tryceratops`
 ]
 external = [ "AAA", "WPS" ]
