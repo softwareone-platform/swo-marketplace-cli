@@ -167,7 +167,7 @@ class ExcelFileHandler(FileHandler):
         sheet = self._get_worksheet(sheet_name)
         header_fields = self._get_fields_from_horizontal_worksheet(sheet_name, 1)
         for row in sheet.iter_rows(min_row=2):
-            if all(c.value is None for c in row):
+            if all(cell.value is None for cell in row):
                 continue
 
             yield {
@@ -238,12 +238,13 @@ class ExcelFileHandler(FileHandler):
         column_map = {}
         for index, column in enumerate(ws["1"]):
             if column.value and (
-                column.value in fields or any(re.match(p, column.value) for p in patterns)
+                column.value in fields
+                or any(re.match(pattern, column.value) for pattern in patterns)
             ):
                 column_map[index] = column.value
 
         for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
-            if all(c.value is None for c in row):
+            if all(cell.value is None for cell in row):
                 continue
 
             yield {

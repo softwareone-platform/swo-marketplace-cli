@@ -53,8 +53,8 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(account_file_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(account_file_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12345new",
@@ -78,8 +78,8 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12341",
@@ -129,8 +129,8 @@ def test_add_account_accounts_override_environment(new_accounts_path, mocker, ne
     )
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12341",
@@ -184,8 +184,8 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="N\n")
 
     assert result.exit_code == 1, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12341",
@@ -218,8 +218,8 @@ def test_add_existing_account_replace(new_accounts_path, mocker, existing_token)
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12341",
@@ -265,8 +265,8 @@ def test_activate_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["activate", "ACC-12342"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12341",
@@ -320,8 +320,8 @@ def test_remove_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["remove", "ACC-12341"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     assert accounts == [
         {
             "id": "ACC-12342",
@@ -373,12 +373,12 @@ def test_get_active_account(new_accounts_path, mocker, expected_account):
 
 def test_get_active_account_no_active_account(new_accounts_path, mocker, expected_account):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    with Path(new_accounts_path).open(encoding="utf-8") as f:
-        accounts = json.load(f)
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
+        accounts = json.load(file_obj)
     for account in accounts:
         account["is_active"] = False
-    with Path(new_accounts_path).open("w", encoding="utf-8") as f:
-        json.dump(accounts, f)
+    with Path(new_accounts_path).open("w", encoding="utf-8") as file_obj:
+        json.dump(accounts, file_obj)
 
     with pytest.raises(typer.Exit):
         get_active_account()

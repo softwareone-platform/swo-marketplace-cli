@@ -91,12 +91,12 @@ def test_write_accounts(mocker, tmp_path, expected_account, another_expected_acc
     mocker.patch.object(JsonFileHandler, "_default_file_path", file_path)
     accounts = [expected_account, another_expected_account]
     write_accounts(accounts)
-    with Path(file_path).open(encoding="utf-8") as f:
-        written_accounts = json.load(f)
+    with Path(file_path).open(encoding="utf-8") as file_obj:
+        written_accounts = json.load(file_obj)
 
     result = sorted(written_accounts, key=itemgetter("id"))
 
-    assert result == [a.model_dump() for a in accounts]
+    assert result == [account.model_dump() for account in accounts]
 
 
 def test_disable_accounts_except(expected_account, another_expected_account):
@@ -117,10 +117,10 @@ def test_find_account(expected_account, another_expected_account):
 def test_find_account_exception(expected_account, another_expected_account):
     accounts = [expected_account, another_expected_account]
 
-    with pytest.raises(AccountNotFoundError) as e:
+    with pytest.raises(AccountNotFoundError) as error:
         find_account(accounts, "another-account-id")
 
-    assert "nother-account-id" in str(e.value)
+    assert "nother-account-id" in str(error.value)
 
 
 def test_find_active_account(expected_account, another_expected_account):
@@ -135,7 +135,7 @@ def test_find_active_account_exception(expected_account, another_expected_accoun
     expected_account.is_active = False
     accounts = [expected_account, another_expected_account]
 
-    with pytest.raises(NoActiveAccountFoundError) as e:
+    with pytest.raises(NoActiveAccountFoundError) as error:
         find_active_account(accounts)
 
-    assert "No active account found. Activate any account first" in str(e.value)
+    assert "No active account found. Activate any account first" in str(error.value)

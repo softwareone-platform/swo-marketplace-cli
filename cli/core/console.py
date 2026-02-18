@@ -7,8 +7,8 @@ from rich.text import Text
 
 
 def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:  # pragma: no cover
-    start_rgb = tuple(int(start_hex[i : i + 2], 16) for i in range(1, 6, 2))
-    end_rgb = tuple(int(end_hex[i : i + 2], 16) for i in range(1, 6, 2))
+    start_rgb = tuple(int(start_hex[index : index + 2], 16) for index in range(1, 6, 2))
+    end_rgb = tuple(int(end_hex[index : index + 2], 16) for index in range(1, 6, 2))
     gradient_colors = [start_hex]
     for sample in range(1, num_samples):
         red = int(start_rgb[0] + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0]))
@@ -39,9 +39,9 @@ def show_banner() -> None:
 
     for line in banner_lines:
         colored_line = Text()
-        for i in range(len(line)):
-            char = line[i : i + 1]
-            char.stylize(colors[i])
+        for index in range(len(line)):
+            char = line[index : index + 1]
+            char.stylize(colors[index])
             colored_line = Text.assemble(colored_line, char)
         console.print(colored_line)
 

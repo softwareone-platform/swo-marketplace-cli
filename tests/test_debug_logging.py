@@ -97,4 +97,4 @@ def test_no_verbose_flags_means_no_debug(caplog, mocker):
         result = runner.invoke(app, ["accounts", "list"])
 
     assert result.exit_code == 0
-    assert len([r for r in caplog.records if r.levelname == "DEBUG"]) == 0
+    assert len([record for record in caplog.records if record.levelname == "DEBUG"]) == 0

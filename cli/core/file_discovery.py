@@ -23,4 +23,4 @@ def get_files_path(files_path: list[str]) -> list[str]:
         else:
             file_paths.extend(glob(file_path))  # noqa: PTH207
 
-    return list(filter(lambda p: p.endswith(".xlsx"), file_paths))
+    return [path_entry for path_entry in file_paths if path_entry.endswith(".xlsx")]
