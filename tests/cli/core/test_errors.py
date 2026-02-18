@@ -20,7 +20,7 @@ def test_wrap_http_error_no_response():
     assert "No response" in str(error.value)
 
 
-def test_wrap_http_error_bad_request_with_field_errors(mocker):
+def test_wrap_http_error_bad_request_fields(mocker):
     response = mocker.Mock(spec=Response)
     response.status_code = 400
     response.json.return_value = {"errors": {"name": ["is required"]}}
@@ -32,7 +32,7 @@ def test_wrap_http_error_bad_request_with_field_errors(mocker):
     assert "name: is required" in str(error.value)
 
 
-def test_wrap_http_error_bad_request_without_field_errors(mocker):
+def test_wrap_http_error_bad_request_no_fields(mocker):
     response = mocker.Mock(spec=Response)
     response.status_code = 400
     response.json.return_value = {"message": "Invalid payload"}

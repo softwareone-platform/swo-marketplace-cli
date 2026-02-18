@@ -21,7 +21,7 @@ def test_get_row_and_column_from_coordinate_valid():
     assert row == 12
 
 
-def test_get_row_and_column_from_coordinate_invalid():
+def test_get_row_and_column_invalid():
     with pytest.raises(ValueError):
         FakeExcelFileManager._get_row_and_column_from_coordinate("")  # noqa: SLF001
 
