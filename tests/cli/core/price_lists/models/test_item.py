@@ -1,8 +1,8 @@
 from cli.core.price_lists.models.item import ItemAction, ItemData, ItemStatus
 
 
-def test_item_action_missing():
-    result = ItemAction(None)
+def test_item_action_from_raw_none():
+    result = ItemAction.from_raw(None)
 
     assert result == ItemAction.SKIP
 
