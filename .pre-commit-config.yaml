@@ -40,8 +40,11 @@ repos:
         args: ["--config-file=pyproject.toml", "."]
         pass_filenames: false
         additional_dependencies:
+          - mpt-api-client==5.0.*
           - pydantic==2.11.*
+          - rich==14.3.*
           - types-openpyxl==3.1.*
           - types-python-dateutil==2.9.*
           - types-requests==2.31.*
+          - typer==0.21.*
           - typing-extensions==4.13.*
