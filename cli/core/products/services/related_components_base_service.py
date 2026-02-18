@@ -25,9 +25,9 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
             try:
                 new_item = self.api.post(json=data_model.to_json())
-            except MPTAPIError as e:
-                errors.append(str(e))
-                self._set_error(str(e), data_model.id)
+            except MPTAPIError as error:
+                errors.append(str(error))
+                self._set_error(str(error), data_model.id)
                 continue
 
             old_id = data_model.id
@@ -50,9 +50,11 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
         while True:
             try:
                 response = self.api.list(query_params=export_query)
-            except MPTAPIError as e:
-                self._set_error(str(e))
-                return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
+            except MPTAPIError as error:
+                self._set_error(str(error))
+                return ServiceResult(
+                    success=False, model=None, errors=[str(error)], stats=self.stats
+                )
 
             self.file_manager.add([
                 self.data_model.from_json(record) for record in response["data"]
@@ -92,16 +94,16 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
             try:
                 action_handler = self._get_update_action_handler(data_model.action)
-            except ValueError as e:
-                errors.append(str(e))
-                self._set_error(str(e), data_model.id)
+            except ValueError as error:
+                errors.append(str(error))
+                self._set_error(str(error), data_model.id)
                 continue
 
             try:
                 action_handler(data_model)
-            except MPTAPIError as e:
-                errors.append(str(e))
-                self._set_error(str(e), data_model.id)
+            except MPTAPIError as error:
+                errors.append(str(error))
+                self._set_error(str(error), data_model.id)
                 continue
 
             self._set_synced(data_model.id, data_model.coordinate)

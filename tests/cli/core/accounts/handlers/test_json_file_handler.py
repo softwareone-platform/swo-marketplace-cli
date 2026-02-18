@@ -54,8 +54,8 @@ def test_write_creates_directory_if_not_exists(tmp_path):
 
     assert no_existing_dir.exists()
     assert file_path.exists()
-    with Path(file_path).open(encoding="utf-8") as f:
-        file_content = json.load(f)
+    with Path(file_path).open(encoding="utf-8") as file_obj:
+        file_content = json.load(file_obj)
     assert file_content == expected_records
 
 
@@ -64,21 +64,21 @@ def test_write_writes_correct_data_to_file(json_file_handler, mock_file_path):
 
     json_file_handler.write(expected_records)  # act
 
-    with Path(mock_file_path).open(encoding="utf-8") as f:
-        file_content = json.load(f)
+    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
+        file_content = json.load(file_obj)
     assert file_content == expected_records
 
 
 def test_write_add_data_to_existing_file(json_file_handler, mock_file_path):
     initial_data = [{"id": "initial_id", "name": "Initial Name"}]
     updated_data = [{"id": "updated_id", "name": "Updated Name"}]
-    with Path(mock_file_path).open("w", encoding="utf-8") as f:
-        json.dump(initial_data, f)
+    with Path(mock_file_path).open("w", encoding="utf-8") as file_obj:
+        json.dump(initial_data, file_obj)
 
     json_file_handler.write(updated_data)  # act
 
-    with Path(mock_file_path).open(encoding="utf-8") as f:
-        file_content = json.load(f)
+    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
+        file_content = json.load(file_obj)
     assert file_content == updated_data
 
 
@@ -87,6 +87,6 @@ def test_write_empty_data(json_file_handler, mock_file_path):
 
     json_file_handler.write(empty_data)  # act
 
-    with Path(mock_file_path).open(encoding="utf-8") as f:
-        file_content = json.load(f)
+    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
+        file_content = json.load(file_obj)
     assert file_content == empty_data

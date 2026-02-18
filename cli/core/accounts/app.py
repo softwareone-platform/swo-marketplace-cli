@@ -66,10 +66,10 @@ def add_account(
         account_service = MPTAccountService(mpt_client)
         try:
             token = account_service.get_authentication(secret)
-        except (MPTAPIError, ValueError) as e:
+        except (MPTAPIError, ValueError) as error:
             console.print(
                 f"Cannot find account for token {secret} on "
-                f"environment {environment}. Exception: {e!s}"
+                f"environment {environment}. Exception: {error!s}"
             )
             raise typer.Exit(code=3)
         account = from_token(token, environment)
@@ -106,8 +106,8 @@ def activate_account(
 
     try:
         account = find_account(accounts, account_id)
-    except AccountNotFoundError as e:
-        console.print(str(e))
+    except AccountNotFoundError as error:
+        console.print(str(error))
         raise typer.Exit(code=3)
 
     with console.status(f"Making account {account.id} ({account.name}) active"):
@@ -132,8 +132,8 @@ def extract_account(
 
     try:
         account = find_account(accounts, account_id)
-    except AccountNotFoundError as e:
-        console.print(str(e))
+    except AccountNotFoundError as error:
+        console.print(str(error))
         raise typer.Exit(code=3)
 
     _ = typer.confirm(
@@ -161,7 +161,7 @@ def list_accounts(
         accounts = get_or_create_accounts()
 
         if active_only:
-            accounts = list(filter(lambda a: a.is_active, accounts))
+            accounts = list(filter(lambda account: account.is_active, accounts))
 
     if not accounts:
         console.print("No account found")
@@ -180,8 +180,8 @@ def get_active_account() -> Account:
     try:
         account = find_active_account(accounts)
         console.print(f"Current active account: {account.id} ({account.name})")
-    except NoActiveAccountFoundError as e:
-        console.print(str(e))
+    except NoActiveAccountFoundError as error:
+        console.print(str(error))
         raise typer.Exit(code=3)
 
     return account

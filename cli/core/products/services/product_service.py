@@ -25,16 +25,16 @@ class ProductService(BaseService):
         headers = {"Content-Type": multipart_payload.content_type}
         try:
             new_product_data = self.api.post(form_payload=multipart_payload, headers=headers)
-        except Exception as e:
-            self._set_error(str(e))
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            self._set_error(str(error))
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         product.id = new_product_data["id"]
         try:
             self.api.update(f"{product.id}/settings", json_payload=product.settings.to_json())
-        except MPTAPIError as e:
-            self._set_error(str(e))
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            self._set_error(str(error))
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         self._set_synced(product.id, product.coordinate)
         return ServiceResult(success=True, model=product, stats=self.stats)
@@ -69,9 +69,9 @@ class ProductService(BaseService):
 
         try:
             exists = self.api.exists({"id": product.id})
-        except Exception as e:
-            self._set_error(str(e))
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            self._set_error(str(error))
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product if exists else None, stats=self.stats)
 
@@ -79,8 +79,8 @@ class ProductService(BaseService):
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
         try:
             product_data = self.api.get(resource_id)
-        except Exception as e:
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         product = self.data_model.from_json(product_data)
         return ServiceResult(success=True, model=product, stats=self.stats)
@@ -131,8 +131,8 @@ class ProductService(BaseService):
 
         try:
             self.api.update(product.id, SettingsData(records=setting_items).to_json())
-        except MPTAPIError as e:
-            self._set_error(str(e))
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            self._set_error(str(error))
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product, stats=self.stats)

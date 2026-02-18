@@ -24,7 +24,7 @@ def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_pr
     result = get_products(mpt_client, 10, 0)
 
     _meta, products = result
-    assert products == [Product.model_validate(p) for p in mpt_products]
+    assert products == [Product.model_validate(product_data) for product_data in mpt_products]
 
 
 def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_response, mpt_products):
@@ -39,7 +39,7 @@ def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_respo
     result = get_products(mpt_client, 10, 0)
 
     _, products = result
-    assert products == [Product.model_validate(p) for p in mpt_products]
+    assert products == [Product.model_validate(product_data) for product_data in mpt_products]
 
 
 def test_get_products_exception(requests_mocker, mpt_client):
@@ -51,10 +51,10 @@ def test_get_products_exception(requests_mocker, mpt_client):
         status=500,
     )
 
-    with pytest.raises(MPTAPIError) as e:
+    with pytest.raises(MPTAPIError) as error:
         get_products(mpt_client, 10, 0)
 
-    assert "Internal Server Error" in str(e.value)
+    assert "Internal Server Error" in str(error.value)
 
 
 def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_response):
@@ -82,10 +82,10 @@ def test_search_uom_by_name_exception(requests_mocker, mpt_client):
         status=500,
     )
 
-    with pytest.raises(MPTAPIError) as e:
+    with pytest.raises(MPTAPIError) as error:
         search_uom_by_name(mpt_client, name)
 
-    assert "Internal Server Error" in str(e.value)
+    assert "Internal Server Error" in str(error.value)
 
 
 def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response, mpt_client):
@@ -98,7 +98,7 @@ def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response
         json=wrap_to_mpt_list_response([]),
     )
 
-    with pytest.raises(MPTAPIError) as e:
+    with pytest.raises(MPTAPIError) as error:
         search_uom_by_name(mpt_client, name)
 
-    assert "is not found" in str(e.value)
+    assert "is not found" in str(error.value)

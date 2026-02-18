@@ -27,9 +27,11 @@ class ItemService(RelatedBaseService):
         while True:
             try:
                 response = self.api.list({"select": select, "offset": offset, "limit": limit})
-            except MPTAPIError as e:
+            except MPTAPIError as error:
                 self.stats.add_error(TAB_PRICE_ITEMS)
-                return ServiceResult(success=False, model=None, errors=[str(e)], stats=self.stats)
+                return ServiceResult(
+                    success=False, model=None, errors=[str(error)], stats=self.stats
+                )
 
             records = [self.data_model.from_json(record) for record in response["data"]]
             self.file_manager.add(records)
@@ -52,8 +54,8 @@ class ItemService(RelatedBaseService):
     def retrieve_from_mpt(self, resource_id: str) -> ServiceResult:
         try:
             response = self.api.get(resource_id)
-        except MPTAPIError as e:
-            return ServiceResult(success=False, errors=[str(e)], model=None, stats=self.stats)
+        except MPTAPIError as error:
+            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         item_model = self.data_model.from_json(response.json())
         return ServiceResult(success=True, model=item_model, stats=self.stats)
@@ -69,9 +71,9 @@ class ItemService(RelatedBaseService):
             try:
                 query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
                 item_data = self.api.list(query_params=query_params)["data"][0]
-            except MPTAPIError as e:
-                errors.append(str(e))
-                self._set_error(str(e), record.id)
+            except MPTAPIError as error:
+                errors.append(str(error))
+                self._set_error(str(error), record.id)
                 continue
 
             # TODO: this logic should be moved to the price list data model creation
@@ -79,7 +81,7 @@ class ItemService(RelatedBaseService):
             try:
                 self.api.update(item_data["id"], record.to_json())
                 self._set_synced(record.id, record.coordinate)
-            except MPTAPIError as e:
-                errors.append(f"Item {record.id}: {e!s}")
-                self._set_error(str(e), record.id)
+            except MPTAPIError as error:
+                errors.append(f"Item {record.id}: {error!s}")
+                self._set_error(str(error), record.id)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)

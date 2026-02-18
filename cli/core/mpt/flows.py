@@ -36,7 +36,7 @@ def get_products(
     json_body = response.json()
     return (
         Meta.model_validate(json_body["$meta"]["pagination"]),
-        [Product.model_validate(p) for p in json_body["data"]],
+        [Product.model_validate(product_data) for product_data in json_body["data"]],
     )
 
 

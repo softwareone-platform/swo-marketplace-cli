@@ -11,8 +11,10 @@ def get_audit_trail(client: Any, record_id: str) -> dict[str, Any]:
         query_string = "render()&select=object,actor,details,documents,request.api.geolocation"
         response = client.get(endpoint + "?" + query_string)
         return response.json()
-    except Exception as e:
-        console.print(f"[red]Failed to retrieve audit trail for record {record_id}: {e!s}[/red]")
+    except Exception as error:
+        console.print(
+            f"[red]Failed to retrieve audit trail for record {record_id}: {error!s}[/red]"
+        )
         raise typer.Exit(1)
 
 
@@ -31,8 +33,10 @@ def get_audit_records_by_object(
         if not records:
             console.print(f"[red]No audit records found for object {object_id}[/red]")
             raise typer.Exit(1)  # noqa: TRY301
-    except Exception as e:
-        console.print(f"[red]Failed to retrieve audit records for object {object_id}: {e!s}[/red]")
+    except Exception as error:
+        console.print(
+            f"[red]Failed to retrieve audit records for object {object_id}: {error!s}[/red]"
+        )
         raise typer.Exit(1)
 
     return records

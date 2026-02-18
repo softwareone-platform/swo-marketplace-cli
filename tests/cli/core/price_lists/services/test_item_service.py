@@ -105,7 +105,7 @@ def test_update_item(mocker, service_context, mpt_item_data, item_data_from_dict
     stats_spy.assert_called_once_with(TAB_PRICE_ITEMS)
 
 
-def test_update_item_error(mocker, service_context):
+def test_update_item_api_list_error(mocker, service_context):
     mocker.patch.object(
         service_context.api,
         "list",
@@ -124,6 +124,26 @@ def test_update_item_error(mocker, service_context):
     api_update_spy.assert_not_called()
     file_handler_mock.assert_called()
     stats_add_synced_spy.assert_not_called()
+
+
+def test_update_item_api_update_error(mocker, service_context, mpt_item_data, item_data_from_dict):
+    mocker.patch.object(item_data_from_dict, "to_update", return_value=True)
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    mocker.patch.object(service_context.api, "list", return_value={"data": [mpt_item_data]})
+    mocker.patch.object(
+        service_context.api,
+        "update",
+        side_effect=MPTAPIError("API Error", "Error updating item"),
+    )
+    file_handler_mock = mocker.patch.object(service_context.file_manager, "write_error")
+
+    result = ItemService(service_context).update()
+
+    assert result.success is False
+    assert any("Item" in item_error for item_error in result.errors)
+    file_handler_mock.assert_called()
 
 
 def test_update_item_not_found(mocker, service_context):
