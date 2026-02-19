@@ -73,7 +73,7 @@ def export(  # noqa: C901
 
             Path(file_path).unlink()
         else:
-            _ = typer.confirm(
+            typer.confirm(
                 f"Do you want to export {product_id} in {out_path}?",
                 abort=True,
             )
@@ -135,7 +135,7 @@ def list_products(
         console.print(table)
 
         if meta.offset + meta.limit < meta.total:
-            _ = typer.confirm("Do you want to fetch next page?", abort=True)
+            typer.confirm("Do you want to fetch next page?", abort=True)
             page += 1
         else:
             has_pages = False
@@ -200,12 +200,12 @@ def sync_product(
                 f"({active_account.name}) because the product ID exists in the SWO Platform?"
             )
 
-        _ = typer.confirm(msg, abort=True)
+        typer.confirm(msg, abort=True)
 
         with console.status("Create product...") as status:
             create_product(container, status)
     else:
-        _ = typer.confirm(
+        typer.confirm(
             f"Do you want to update product {product.id} ({product.name}) "
             f"for account {active_account.id} ({active_account.name})? "
             f"To create new use --force-create or -f options.",

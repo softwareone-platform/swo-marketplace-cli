@@ -76,7 +76,7 @@ def add_account(
 
     accounts = get_or_create_accounts()
     if does_account_exist(accounts, account):
-        _ = typer.confirm(
+        typer.confirm(
             f"Token for account {account.id} ({account.name}) already exists. Replace it?",
             abort=True,
         )
@@ -136,7 +136,7 @@ def extract_account(
         console.print(str(error))
         raise typer.Exit(code=3)
 
-    _ = typer.confirm(
+    typer.confirm(
         f"Do you want to remove {account.id} ({account.name})?",
         abort=True,
     )

@@ -34,7 +34,7 @@ def test_add_account_token_invalid_format(mock_mpt_api_client):
     service = MPTAccountService(client=mock_mpt_api_client)
 
     with pytest.raises(ValueError, match=f"Invalid token format: {secret}"):
-        _ = service.get_authentication(secret)
+        service.get_authentication(secret)
 
 
 def test_get_authentication_value_error(mock_mpt_api_client, mock_mpt_api_tokens):
