@@ -21,7 +21,7 @@ class PriceListData(BaseDataModel):
     notes: str
 
     coordinate: str | None = None
-    default_markup: float | None = None
+    default_markup: float | None = None  # TODO: use Decimal
     external_id: str | None = None
     export_date: dt.date = field(default_factory=dt.date.today)
     created_date: dt.date | None = None

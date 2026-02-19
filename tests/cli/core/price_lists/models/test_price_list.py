@@ -1,4 +1,5 @@
 import datetime as dt
+import math
 
 from cli.core.price_lists.models import PriceListData
 from freezegun import freeze_time
@@ -38,7 +39,7 @@ def test_price_list_data_from_json(mpt_price_list_data):
     assert result.precision == 2
     assert result.notes == "another price list"
     assert result.coordinate is None
-    assert result.default_markup == 42.0
+    assert math.isclose(result.default_markup, 42.0, abs_tol=1e-9)
     assert result.external_id is None
     assert result.type is None
 
@@ -50,5 +51,5 @@ def test_price_list_data_to_json(price_list_data_from_dict):
     assert result["precision"] == 2
     assert result["notes"] == "Note 1"
     assert result["product"] == {"id": "PRD-0232-2541"}
-    assert result["defaultMarkup"] == 10.0
+    assert math.isclose(result["defaultMarkup"], 10.0, abs_tol=1e-9)
     assert "externalId" not in result

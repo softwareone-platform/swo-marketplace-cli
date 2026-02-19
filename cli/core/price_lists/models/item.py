@@ -48,27 +48,27 @@ class ItemData(BaseDataModel):
     erp_id: str | None
     item_id: str
     item_name: str
-    markup: float | None
+    markup: float | None  # TODO: use Decimal
     status: ItemStatus
-    unit_lp: float | None
-    unit_pp: float | None
-    unit_sp: float | None
+    unit_lp: float | None  # TODO: use Decimal
+    unit_pp: float | None  # TODO: use Decimal
+    unit_sp: float | None  # TODO: use Decimal
     vendor_id: str
 
     action: ItemAction = ItemAction.SKIP
     coordinate: str | None = None
     currency: str | None = None
-    lp_x1: float | None = None
-    lp_xm: float | None = None
-    lp_xy: float | None = None
+    lp_x1: float | None = None  # TODO: use Decimal
+    lp_xm: float | None = None  # TODO: use Decimal
+    lp_xy: float | None = None  # TODO: use Decimal
     modified_date: dt.date | None = None
     precision: int | None = None
-    pp_x1: float | None = None
-    pp_xm: float | None = None
-    pp_xy: float | None = None
-    sp_x1: float | None = None
-    sp_xm: float | None = None
-    sp_xy: float | None = None
+    pp_x1: float | None = None  # TODO: use Decimal
+    pp_xm: float | None = None  # TODO: use Decimal
+    pp_xy: float | None = None  # TODO: use Decimal
+    sp_x1: float | None = None  # TODO: use Decimal
+    sp_xm: float | None = None  # TODO: use Decimal
+    sp_xy: float | None = None  # TODO: use Decimal
     type: str | None = None
 
     def is_operations(self) -> bool:
