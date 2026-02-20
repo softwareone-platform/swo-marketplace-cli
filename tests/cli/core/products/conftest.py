@@ -4,89 +4,9 @@ from pathlib import Path
 from unittest.mock import MagicMock, Mock
 
 import pytest
-from cli.core.products.constants import (
-    GENERAL_ACCOUNT_ID,
-    GENERAL_ACCOUNT_NAME,
-    GENERAL_CATALOG_DESCRIPTION,
-    GENERAL_CREATED,
-    GENERAL_EXPORT_DATE,
-    GENERAL_MODIFIED,
-    GENERAL_PRODUCT_DESCRIPTION,
-    GENERAL_PRODUCT_ID,
-    GENERAL_PRODUCT_NAME,
-    GENERAL_PRODUCT_WEBSITE,
-    GENERAL_STATUS,
-    ITEMS_ACTION,
-    ITEMS_CREATED,
-    ITEMS_DESCRIPTION,
-    ITEMS_ERP_ITEM_ID,
-    ITEMS_GROUP_ID,
-    ITEMS_GROUP_NAME,
-    ITEMS_GROUPS_ACTION,
-    ITEMS_GROUPS_CREATED,
-    ITEMS_GROUPS_DEFAULT,
-    ITEMS_GROUPS_DESCRIPTION,
-    ITEMS_GROUPS_DISPLAY_ORDER,
-    ITEMS_GROUPS_ID,
-    ITEMS_GROUPS_LABEL,
-    ITEMS_GROUPS_MODIFIED,
-    ITEMS_GROUPS_MULTIPLE_CHOICES,
-    ITEMS_GROUPS_NAME,
-    ITEMS_GROUPS_REQUIRED,
-    ITEMS_ID,
-    ITEMS_MODIFIED,
-    ITEMS_NAME,
-    ITEMS_QUANTITY_APPLICABLE,
-    ITEMS_STATUS,
-    ITEMS_TERMS_COMMITMENT,
-    ITEMS_TERMS_MODEL,
-    ITEMS_TERMS_PERIOD,
-    ITEMS_UNIT_ID,
-    ITEMS_UNIT_NAME,
-    ITEMS_VENDOR_ITEM_ID,
-    PARAMETERS_ACTION,
-    PARAMETERS_CONSTRAINTS,
-    PARAMETERS_CREATED,
-    PARAMETERS_DESCRIPTION,
-    PARAMETERS_DISPLAY_ORDER,
-    PARAMETERS_EXTERNALID,
-    PARAMETERS_GROUP_ID,
-    PARAMETERS_GROUP_NAME,
-    PARAMETERS_GROUPS_CREATED,
-    PARAMETERS_GROUPS_DEFAULT,
-    PARAMETERS_GROUPS_DESCRIPTION,
-    PARAMETERS_GROUPS_DISPLAY_ORDER,
-    PARAMETERS_GROUPS_ID,
-    PARAMETERS_GROUPS_LABEL,
-    PARAMETERS_GROUPS_MODIFIED,
-    PARAMETERS_GROUPS_NAME,
-    PARAMETERS_ID,
-    PARAMETERS_MODIFIED,
-    PARAMETERS_NAME,
-    PARAMETERS_OPTIONS,
-    PARAMETERS_PHASE,
-    PARAMETERS_TYPE,
-    TEMPLATES_ACTION,
-    TEMPLATES_CONTENT,
-    TEMPLATES_CREATED,
-    TEMPLATES_DEFAULT,
-    TEMPLATES_ID,
-    TEMPLATES_MODIFIED,
-    TEMPLATES_NAME,
-    TEMPLATES_TYPE,
-)
+from cli.core.products import constants as product_constants
+from cli.core.products import models as product_models
 from cli.core.products.containers import ProductContainer
-from cli.core.products.models import (
-    AgreementParametersData,
-    DataActionEnum,
-    ItemActionEnum,
-    ItemData,
-    ItemGroupData,
-    ParameterGroupData,
-    ProductData,
-    SettingsData,
-    TemplateData,
-)
 from cli.core.products.models.enums import ItemTermsModelEnum
 from cli.core.products.models.product import SettingsRecords
 from cli.core.products.services import (
@@ -145,23 +65,32 @@ def product_new_file(tmp_path, product_file_path):
 @pytest.fixture
 def product_file_data():
     return {
-        GENERAL_PRODUCT_ID: {"value": "PRD-1234-1234-1234", "coordinate": "B3"},
-        GENERAL_PRODUCT_NAME: {"value": "Test Product Name", "coordinate": "B4"},
-        GENERAL_ACCOUNT_ID: {"value": "ACC-1234-1234", "coordinate": "B5"},
-        GENERAL_ACCOUNT_NAME: {"value": "Test Account Name", "coordinate": "B6"},
-        GENERAL_EXPORT_DATE: {
+        product_constants.GENERAL_PRODUCT_ID: {"value": "PRD-1234-1234-1234", "coordinate": "B3"},
+        product_constants.GENERAL_PRODUCT_NAME: {"value": "Test Product Name", "coordinate": "B4"},
+        product_constants.GENERAL_ACCOUNT_ID: {"value": "ACC-1234-1234", "coordinate": "B5"},
+        product_constants.GENERAL_ACCOUNT_NAME: {"value": "Test Account Name", "coordinate": "B6"},
+        product_constants.GENERAL_EXPORT_DATE: {
             "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
             "coordinate": "B7",
         },
-        GENERAL_PRODUCT_WEBSITE: {"value": "https://example.com", "coordinate": "B8"},
-        GENERAL_CATALOG_DESCRIPTION: {"value": "Catalog description", "coordinate": "B9"},
-        GENERAL_PRODUCT_DESCRIPTION: {"value": "Product description", "coordinate": "B10"},
-        GENERAL_STATUS: {"value": "Draft", "coordinate": "B11"},
-        GENERAL_CREATED: {
+        product_constants.GENERAL_PRODUCT_WEBSITE: {
+            "value": "https://example.com",
+            "coordinate": "B8",
+        },
+        product_constants.GENERAL_CATALOG_DESCRIPTION: {
+            "value": "Catalog description",
+            "coordinate": "B9",
+        },
+        product_constants.GENERAL_PRODUCT_DESCRIPTION: {
+            "value": "Product description",
+            "coordinate": "B10",
+        },
+        product_constants.GENERAL_STATUS: {"value": "Draft", "coordinate": "B11"},
+        product_constants.GENERAL_CREATED: {
             "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
             "coordinate": "B12",
         },
-        GENERAL_MODIFIED: {
+        product_constants.GENERAL_MODIFIED: {
             "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
             "coordinate": "B13",
         },
@@ -170,7 +99,7 @@ def product_file_data():
 
 @pytest.fixture
 def product_data_from_dict():
-    return ProductData(
+    return product_models.ProductData(
         id="PRD-1234-1234-1234",
         name="Adobe Commerce (CLI Test)",
         account_id="ACC-1234-1234",
@@ -183,14 +112,16 @@ def product_data_from_dict():
         created_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
         updated_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
         coordinate="B3",
-        settings=SettingsData(
+        settings=product_models.SettingsData(
             records=[
                 SettingsRecords(
-                    name="Product ordering", action=DataActionEnum.SKIP, setting_value="Off"
+                    name="Product ordering",
+                    action=product_models.DataActionEnum.SKIP,
+                    setting_value="Off",
                 ),
                 SettingsRecords(
                     name="Change order validation (draft)",
-                    action=DataActionEnum.UPDATE,
+                    action=product_models.DataActionEnum.UPDATE,
                     setting_value="Enabled",
                 ),
             ]
@@ -201,7 +132,7 @@ def product_data_from_dict():
 @pytest.fixture
 @freeze_time("2025-05-30")
 def product_data_from_json(mpt_product_data):
-    return ProductData.from_json(mpt_product_data)
+    return product_models.ProductData.from_json(mpt_product_data)
 
 
 @pytest.fixture
@@ -274,29 +205,29 @@ def mpt_product_data():
 @pytest.fixture
 def item_file_data():
     return {
-        ITEMS_ID: {"value": "PRI-3969-9403-0001-0035", "coordinate": "A325"},
-        ITEMS_NAME: {
+        product_constants.ITEMS_ID: {"value": "PRI-3969-9403-0001-0035", "coordinate": "A325"},
+        product_constants.ITEMS_NAME: {
             "value": "XD for Teams; existing XD customers only.;",
             "coordinate": "B325",
         },
-        ITEMS_ACTION: {"value": "update", "coordinate": "C325"},
-        ITEMS_VENDOR_ITEM_ID: {"value": "30006419CB", "coordinate": "D325"},
-        ITEMS_ERP_ITEM_ID: {"value": "NAV12345", "coordinate": "E325"},
-        ITEMS_DESCRIPTION: {"value": "Description", "coordinate": "F325"},
-        ITEMS_TERMS_MODEL: {"value": "usage", "coordinate": "G325"},
-        ITEMS_TERMS_PERIOD: {"value": "1m", "coordinate": "H325"},
-        ITEMS_TERMS_COMMITMENT: {"value": "1y", "coordinate": "I325"},
-        ITEMS_STATUS: {"value": "Published", "coordinate": "J325"},
-        ITEMS_GROUP_ID: {"value": "IGR-4944-4118-0002", "coordinate": "K325"},
-        ITEMS_GROUP_NAME: {"value": "Default Group", "coordinate": "L325"},
-        ITEMS_UNIT_ID: {"value": "UNT-1916", "coordinate": "M325"},
-        ITEMS_UNIT_NAME: {"value": "User", "coordinate": "N325"},
-        ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "O325"},
-        ITEMS_CREATED: {
+        product_constants.ITEMS_ACTION: {"value": "update", "coordinate": "C325"},
+        product_constants.ITEMS_VENDOR_ITEM_ID: {"value": "30006419CB", "coordinate": "D325"},
+        product_constants.ITEMS_ERP_ITEM_ID: {"value": "NAV12345", "coordinate": "E325"},
+        product_constants.ITEMS_DESCRIPTION: {"value": "Description", "coordinate": "F325"},
+        product_constants.ITEMS_TERMS_MODEL: {"value": "usage", "coordinate": "G325"},
+        product_constants.ITEMS_TERMS_PERIOD: {"value": "1m", "coordinate": "H325"},
+        product_constants.ITEMS_TERMS_COMMITMENT: {"value": "1y", "coordinate": "I325"},
+        product_constants.ITEMS_STATUS: {"value": "Published", "coordinate": "J325"},
+        product_constants.ITEMS_GROUP_ID: {"value": "IGR-4944-4118-0002", "coordinate": "K325"},
+        product_constants.ITEMS_GROUP_NAME: {"value": "Default Group", "coordinate": "L325"},
+        product_constants.ITEMS_UNIT_ID: {"value": "UNT-1916", "coordinate": "M325"},
+        product_constants.ITEMS_UNIT_NAME: {"value": "User", "coordinate": "N325"},
+        product_constants.ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "O325"},
+        product_constants.ITEMS_CREATED: {
             "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "P325",
         },
-        ITEMS_MODIFIED: {
+        product_constants.ITEMS_MODIFIED: {
             "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "Q325",
         },
@@ -305,12 +236,12 @@ def item_file_data():
 
 @pytest.fixture
 def item_data_from_json(mpt_item_data):
-    return ItemData.from_json(mpt_item_data)
+    return product_models.ItemData.from_json(mpt_item_data)
 
 
 @pytest.fixture
 def item_data_from_dict():
-    return ItemData(
+    return product_models.ItemData(
         id="PRI-3969-9403-0001-0035",
         description="Description",
         group_id="IGR-4944-4118-0002",
@@ -324,7 +255,7 @@ def item_data_from_dict():
         unit_coordinate="J38272",
         vendor_id="NAV12345",
         status="Published",
-        action=ItemActionEnum.UPDATE,
+        action=product_models.ItemActionEnum.UPDATE,
         coordinate="A38272",
         item_type="vendor",
     )
@@ -371,20 +302,23 @@ def mpt_item_data():
 @pytest.fixture
 def item_group_file_data():
     return {
-        ITEMS_GROUPS_ID: {"value": "IGR-0232-2541-0001", "coordinate": "A10234"},
-        ITEMS_GROUPS_NAME: {"value": "Items", "coordinate": "B10234"},
-        ITEMS_GROUPS_ACTION: {"value": "-", "coordinate": "C10234"},
-        ITEMS_GROUPS_LABEL: {"value": "Items", "coordinate": "D10234"},
-        ITEMS_GROUPS_DISPLAY_ORDER: {"value": 100, "coordinate": "E10234"},
-        ITEMS_GROUPS_DESCRIPTION: {"value": "Default item group", "coordinate": "F10234"},
-        ITEMS_GROUPS_DEFAULT: {"value": "True", "coordinate": "G10234"},
-        ITEMS_GROUPS_MULTIPLE_CHOICES: {"value": "True", "coordinate": "H10234"},
-        ITEMS_GROUPS_REQUIRED: {"value": "True", "coordinate": "I10234"},
-        ITEMS_GROUPS_CREATED: {
+        product_constants.ITEMS_GROUPS_ID: {"value": "IGR-0232-2541-0001", "coordinate": "A10234"},
+        product_constants.ITEMS_GROUPS_NAME: {"value": "Items", "coordinate": "B10234"},
+        product_constants.ITEMS_GROUPS_ACTION: {"value": "-", "coordinate": "C10234"},
+        product_constants.ITEMS_GROUPS_LABEL: {"value": "Items", "coordinate": "D10234"},
+        product_constants.ITEMS_GROUPS_DISPLAY_ORDER: {"value": 100, "coordinate": "E10234"},
+        product_constants.ITEMS_GROUPS_DESCRIPTION: {
+            "value": "Default item group",
+            "coordinate": "F10234",
+        },
+        product_constants.ITEMS_GROUPS_DEFAULT: {"value": "True", "coordinate": "G10234"},
+        product_constants.ITEMS_GROUPS_MULTIPLE_CHOICES: {"value": "True", "coordinate": "H10234"},
+        product_constants.ITEMS_GROUPS_REQUIRED: {"value": "True", "coordinate": "I10234"},
+        product_constants.ITEMS_GROUPS_CREATED: {
             "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "J10234",
         },
-        ITEMS_GROUPS_MODIFIED: {
+        product_constants.ITEMS_GROUPS_MODIFIED: {
             "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "K10234",
         },
@@ -393,12 +327,12 @@ def item_group_file_data():
 
 @pytest.fixture
 def item_group_data_from_json(mpt_item_group_data):
-    return ItemGroupData.from_json(mpt_item_group_data)
+    return product_models.ItemGroupData.from_json(mpt_item_group_data)
 
 
 @pytest.fixture
 def item_group_data_from_dict():
-    return ItemGroupData(
+    return product_models.ItemGroupData(
         id="IGR-0232-2541-0002",
         coordinate="J2",
         name="Items",
@@ -454,36 +388,39 @@ def mpt_item_group_data():
 @pytest.fixture
 def parameters_file_data():
     return {
-        PARAMETERS_ID: {"value": "PAR-5159-0756-0001", "coordinate": "A325"},
-        PARAMETERS_NAME: {"value": "Agreement type", "coordinate": "B325"},
-        PARAMETERS_EXTERNALID: {"value": "agreementType", "coordinate": "C325"},
-        PARAMETERS_ACTION: {"value": "-", "coordinate": "D325"},
-        PARAMETERS_PHASE: {"value": "Order", "coordinate": "E325"},
-        PARAMETERS_TYPE: {"value": "Choice", "coordinate": "F325"},
-        PARAMETERS_DESCRIPTION: {
+        product_constants.PARAMETERS_ID: {"value": "PAR-5159-0756-0001", "coordinate": "A325"},
+        product_constants.PARAMETERS_NAME: {"value": "Agreement type", "coordinate": "B325"},
+        product_constants.PARAMETERS_EXTERNALID: {"value": "agreementType", "coordinate": "C325"},
+        product_constants.PARAMETERS_ACTION: {"value": "-", "coordinate": "D325"},
+        product_constants.PARAMETERS_PHASE: {"value": "Order", "coordinate": "E325"},
+        product_constants.PARAMETERS_TYPE: {"value": "Choice", "coordinate": "F325"},
+        product_constants.PARAMETERS_DESCRIPTION: {
             "value": "When you are creating a new agreement with SoftwareOne, you have the option "
             "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
             "VIP account to Adobe VIP Marketplace.",
             "coordinate": "G325",
         },
-        PARAMETERS_DISPLAY_ORDER: {"value": 101, "coordinate": "H325"},
-        PARAMETERS_GROUP_ID: {"value": "PGR-5159-0756-0002", "coordinate": "I325"},
-        PARAMETERS_GROUP_NAME: {"value": "Agreement", "coordinate": "J325"},
-        PARAMETERS_OPTIONS: {
+        product_constants.PARAMETERS_DISPLAY_ORDER: {"value": 101, "coordinate": "H325"},
+        product_constants.PARAMETERS_GROUP_ID: {
+            "value": "PGR-5159-0756-0002",
+            "coordinate": "I325",
+        },
+        product_constants.PARAMETERS_GROUP_NAME: {"value": "Agreement", "coordinate": "J325"},
+        product_constants.PARAMETERS_OPTIONS: {
             "value": """{"defaultValue": "Buyer","hintText": "Address.","label": "Address"}""",
             "coordinate": "K325",
         },
-        PARAMETERS_CONSTRAINTS: {
+        product_constants.PARAMETERS_CONSTRAINTS: {
             "value": (
                 """{"hidden": false, "readonly": false, "optional": false, "required": true}"""
             ),
             "coordinate": "L325",
         },
-        PARAMETERS_CREATED: {
+        product_constants.PARAMETERS_CREATED: {
             "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "M325",
         },
-        PARAMETERS_MODIFIED: {
+        product_constants.PARAMETERS_MODIFIED: {
             "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
             "coordinate": "N325",
         },
@@ -492,12 +429,12 @@ def parameters_file_data():
 
 @pytest.fixture
 def parameters_data_from_json(mpt_agreement_parameter_data):
-    return AgreementParametersData.from_json(mpt_agreement_parameter_data)
+    return product_models.AgreementParametersData.from_json(mpt_agreement_parameter_data)
 
 
 @pytest.fixture
 def parameters_data_from_dict():
-    return AgreementParametersData(
+    return product_models.AgreementParametersData(
         id="PAR-0232-2541-0001",
         coordinate="K234",
         name="Agreement type",
@@ -755,18 +692,27 @@ def mpt_subscription_parameter_data():
 @pytest.fixture
 def parameter_group_file_data():
     return {
-        PARAMETERS_GROUPS_ID: {"value": "IGR-3114-5854-0002", "coordinate": "A325"},
-        PARAMETERS_GROUPS_NAME: {"value": "Details", "coordinate": "B325"},
-        PARAMETERS_ACTION: {"value": "-", "coordinate": "C325"},
-        PARAMETERS_GROUPS_LABEL: {"value": "Agreement details", "coordinate": "D325"},
-        PARAMETERS_GROUPS_DISPLAY_ORDER: {"value": "232", "coordinate": "E325"},
-        PARAMETERS_GROUPS_DESCRIPTION: {"value": "Fake Description", "coordinate": "F325"},
-        PARAMETERS_GROUPS_DEFAULT: {"value": "False", "coordinate": "G325"},
-        PARAMETERS_GROUPS_CREATED: {
+        product_constants.PARAMETERS_GROUPS_ID: {
+            "value": "IGR-3114-5854-0002",
+            "coordinate": "A325",
+        },
+        product_constants.PARAMETERS_GROUPS_NAME: {"value": "Details", "coordinate": "B325"},
+        product_constants.PARAMETERS_ACTION: {"value": "-", "coordinate": "C325"},
+        product_constants.PARAMETERS_GROUPS_LABEL: {
+            "value": "Agreement details",
+            "coordinate": "D325",
+        },
+        product_constants.PARAMETERS_GROUPS_DISPLAY_ORDER: {"value": "232", "coordinate": "E325"},
+        product_constants.PARAMETERS_GROUPS_DESCRIPTION: {
+            "value": "Fake Description",
+            "coordinate": "F325",
+        },
+        product_constants.PARAMETERS_GROUPS_DEFAULT: {"value": "False", "coordinate": "G325"},
+        product_constants.PARAMETERS_GROUPS_CREATED: {
             "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "H325",
         },
-        PARAMETERS_GROUPS_MODIFIED: {
+        product_constants.PARAMETERS_GROUPS_MODIFIED: {
             "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
             "coordinate": "I325",
         },
@@ -775,7 +721,7 @@ def parameter_group_file_data():
 
 @pytest.fixture
 def parameter_group_data_from_dict():
-    return ParameterGroupData(
+    return product_models.ParameterGroupData(
         id="PGR-0232-2541-0001",
         coordinate="A2",
         name="Agreement",
@@ -829,31 +775,31 @@ def mpt_parameter_group_data():
 @pytest.fixture
 def template_file_data():
     return {
-        TEMPLATES_ID: {"value": "TPL-0232-2541-0005", "coordinate": "A3"},
-        TEMPLATES_NAME: {"value": "BulkMigrate", "coordinate": "B3"},
-        TEMPLATES_ACTION: {"value": "-", "coordinate": "C3"},
-        TEMPLATES_TYPE: {"value": "OrderCompleted", "coordinate": "D3"},
-        TEMPLATES_DEFAULT: {"value": "False", "coordinate": "E3"},
-        TEMPLATES_CONTENT: {
+        product_constants.TEMPLATES_ID: {"value": "TPL-0232-2541-0005", "coordinate": "A3"},
+        product_constants.TEMPLATES_NAME: {"value": "BulkMigrate", "coordinate": "B3"},
+        product_constants.TEMPLATES_ACTION: {"value": "-", "coordinate": "C3"},
+        product_constants.TEMPLATES_TYPE: {"value": "OrderCompleted", "coordinate": "D3"},
+        product_constants.TEMPLATES_DEFAULT: {"value": "False", "coordinate": "E3"},
+        product_constants.TEMPLATES_CONTENT: {
             "value": "Querying template for Adobe VIP Marketplace",
             "coordinate": "F3",
         },
-        TEMPLATES_CREATED: {
+        product_constants.TEMPLATES_CREATED: {
             "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
             "coordinate": "G3",
         },
-        TEMPLATES_MODIFIED: {"value": None, "coordinate": "H3"},
+        product_constants.TEMPLATES_MODIFIED: {"value": None, "coordinate": "H3"},
     }
 
 
 @pytest.fixture
 def template_data_from_json(mpt_template_data):
-    return TemplateData.from_json(mpt_template_data)
+    return product_models.TemplateData.from_json(mpt_template_data)
 
 
 @pytest.fixture
 def template_data_from_dict():
-    return TemplateData(
+    return product_models.TemplateData(
         id="TPL-0232-2541-0005",
         coordinate="A2",
         name="Change",
