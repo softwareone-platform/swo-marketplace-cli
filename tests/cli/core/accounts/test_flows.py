@@ -8,7 +8,6 @@ from cli.core.accounts.flows import (
     does_account_exist,
     find_account,
     find_active_account,
-    from_token,
     get_or_create_accounts,
     remove_account,
     write_accounts,
@@ -31,7 +30,7 @@ def test_from_token(expected_account):
         token="idt:TKN-1111-1111:secret",  # noqa: S106
     )
 
-    result = from_token(token, "https://example.com")
+    result = Account.from_token(token, "https://example.com")
 
     assert result == expected_account
 
