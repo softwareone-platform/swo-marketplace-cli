@@ -3,20 +3,6 @@ from operator import attrgetter
 from cli.core.accounts.handlers import JsonFileHandler
 from cli.core.accounts.models import Account
 from cli.core.errors import AccountNotFoundError, NoActiveAccountFoundError
-from cli.core.mpt.models import Token
-
-
-def from_token(token: Token, environment: str) -> Account:
-    """Extracts Account from the MPT Token."""
-    return Account(
-        id=token.account.id,
-        name=token.account.name,
-        type=token.account.type,
-        token=token.token,
-        token_id=token.id,
-        environment=environment,
-        is_active=True,
-    )
 
 
 def get_or_create_accounts() -> list[Account]:

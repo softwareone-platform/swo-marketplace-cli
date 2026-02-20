@@ -1,10 +1,9 @@
-import re
 from typing import Annotated
-from urllib.parse import urlsplit, urlunparse
 
 import typer
 from cli.core.accounts.api.account_api_service import MPTAccountService
 from cli.core.accounts.constants import FETCHING, READING, REMOVING, STATUS_MSG
+from cli.core.accounts.url_parser import protocol_and_host
 from cli.core.console import console
 from cli.core.errors import (
     AccountNotFoundError,
@@ -20,30 +19,13 @@ from .flows import (
     does_account_exist,
     find_account,
     find_active_account,
-    from_token,
     get_or_create_accounts,
     remove_account,
     write_accounts,
 )
 from .models import Account
 
-INVALID_ENV_URL_MESSAGE = "Invalid environment URL. Expected scheme://host[:port]"
-PATH_TO_REMOVE_RE = re.compile(r"^/$|^/public/?$|^/public/v1/?$")
-
 app = typer.Typer()
-
-
-def protocol_and_host(environment_url: str):
-    """Composes environment URL from input URL removing useless parts."""
-    split_result = urlsplit(environment_url, scheme="https")
-    if split_result.scheme and split_result.hostname:
-        host = (
-            f"[{split_result.hostname}]" if ":" in split_result.hostname else split_result.hostname
-        )
-        port = f":{split_result.port}" if split_result.port else ""
-        path = PATH_TO_REMOVE_RE.sub("", split_result.path)
-        return urlunparse((split_result.scheme, f"{host}{port}", path, "", "", ""))
-    raise ValueError(INVALID_ENV_URL_MESSAGE)
 
 
 @app.command(name="add")
@@ -72,7 +54,7 @@ def add_account(
                 f"environment {environment}. Exception: {error!s}"
             )
             raise typer.Exit(code=3)
-        account = from_token(token, environment)
+        account = Account.from_token(token, environment)
 
     accounts = get_or_create_accounts()
     if does_account_exist(accounts, account):
