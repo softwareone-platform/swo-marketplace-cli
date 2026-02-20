@@ -1,3 +1,4 @@
+# noqa: WPS204
 from unittest.mock import Mock, call
 
 import pytest
@@ -33,7 +34,7 @@ def test_create(mocker, service_context, mpt_product_data, product_data_from_dic
     api_update_mock = mocker.patch.object(service_context.api, "update")
     write_id_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = ProductService(service_context)
+    service = ProductService(service_context)  # noqa: WPS204
 
     result = service.create()
 
@@ -60,7 +61,7 @@ def test_create_post_error(mocker, service_context, product_data_from_dict):
 
     result = service.create()
 
-    assert result.success is False
+    assert result.success is False  # noqa: WPS204
     assert result.errors == ["API Error with response body Error creating product"]
     assert result.model is None
     stats_spy.assert_called_once_with(TAB_GENERAL)

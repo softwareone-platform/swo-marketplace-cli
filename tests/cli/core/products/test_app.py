@@ -1,3 +1,4 @@
+# noqa: WPS204
 from pathlib import Path
 from unittest.mock import Mock
 from urllib.parse import urljoin
@@ -29,7 +30,7 @@ def test_list_products(
 
     result = runner.invoke(app, ["list"])
 
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.stdout  # noqa: WPS204
     assert mpt_products_response["data"][0]["id"] in result.stdout
 
 

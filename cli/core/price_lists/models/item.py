@@ -107,14 +107,17 @@ class ItemData(BaseDataModel):
     @classmethod
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
+        item_data = json_data["item"]
+        item_terms = item_data["terms"]
+        item_external_ids = item_data["externalIds"]
         return cls(
             id=json_data.get("id", ""),
-            billing_frequency=json_data["item"]["terms"]["period"],
+            billing_frequency=item_terms["period"],
             currency=json_data["priceList"]["currency"],
-            commitment=json_data["item"]["terms"].get("commitment"),
-            erp_id=json_data["item"]["externalIds"].get("operations"),
-            item_id=json_data["item"]["id"],
-            item_name=json_data["item"]["name"],
+            commitment=item_terms.get("commitment"),
+            erp_id=item_external_ids.get("operations"),
+            item_id=item_data["id"],
+            item_name=item_data["name"],
             lp_x1=json_data.get("LPx1"),
             lp_xm=json_data.get("LPxM"),
             lp_xy=json_data.get("LPxY"),
@@ -130,7 +133,7 @@ class ItemData(BaseDataModel):
             unit_lp=json_data.get("unitLP"),
             unit_pp=json_data.get("unitPP"),
             unit_sp=json_data.get("unitSP"),
-            vendor_id=json_data["item"]["externalIds"]["vendor"],
+            vendor_id=item_external_ids["vendor"],
             action=ItemAction.SKIP,
         )
 

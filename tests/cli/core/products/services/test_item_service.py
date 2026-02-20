@@ -1,3 +1,4 @@
+# noqa: WPS204
 from unittest.mock import Mock
 
 import pytest
@@ -36,7 +37,7 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     update_spy = mocker.spy(service_context.api, "update")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = ItemService(service_context)
+    service = ItemService(service_context)  # noqa: WPS204
 
     result = service.update()
 

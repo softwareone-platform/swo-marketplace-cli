@@ -16,9 +16,14 @@ logger = logging.getLogger(__name__)
 class RelatedComponentsBaseService(RelatedBaseService, ABC):
     """Base service for managing related component operations."""
 
+    def _collect_error(self, errors: list[str], error: Exception, data_model_id: str = "") -> None:
+        error_msg = str(error)
+        errors.append(error_msg)
+        self._set_error(error_msg, data_model_id)
+
     @override
     def create(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         collection = {}
         for raw_model_data in self.file_manager.read_data():
             data_model = self.prepare_data_model_to_create(raw_model_data)
@@ -26,8 +31,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             try:
                 new_item = self.api.post(json=data_model.to_json())
             except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._collect_error(errors, error, data_model.id)
                 continue
 
             old_id = data_model.id
@@ -51,10 +55,9 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             try:
                 response = self.api.list(query_params=export_query)
             except MPTAPIError as error:
-                self._set_error(str(error))
-                return ServiceResult(
-                    success=False, model=None, errors=[str(error)], stats=self.stats
-                )
+                errors: list[str] = []
+                self._collect_error(errors, error)
+                return ServiceResult(success=False, model=None, errors=errors, stats=self.stats)
 
             self.file_manager.add([
                 self.data_model.from_json(record) for record in response["data"]
@@ -85,7 +88,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
     @override
     def update(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         for data_model in self.file_manager.read_data():
             data_model.product_id = self.resource_id
             if data_model.to_skip:
@@ -95,15 +98,13 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             try:
                 action_handler = self._get_update_action_handler(data_model.action)
             except ValueError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._collect_error(errors, error, data_model.id)
                 continue
 
             try:
                 action_handler(data_model)
             except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._collect_error(errors, error, data_model.id)
                 continue
 
             self._set_synced(data_model.id, data_model.coordinate)

@@ -1,3 +1,4 @@
+# noqa: WPS204
 from unittest.mock import Mock
 
 import pytest
@@ -30,7 +31,7 @@ def test_export(mocker, service_context, mpt_item_data):
     response_data = {"data": [mpt_item_data], "meta": {"offset": 1, "limit": 100, "total": 1}}
     api_list_mock = mocker.patch.object(service_context.api, "list", side_effect=[response_data])
 
-    result = ItemService(service_context).export()
+    result = ItemService(service_context).export()  # noqa: WPS204
 
     assert result.success is True
     create_tab_mock.assert_called_once()
