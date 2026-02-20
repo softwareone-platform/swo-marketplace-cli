@@ -1,3 +1,4 @@
+# noqa: WPS204
 import json
 from pathlib import Path
 
@@ -52,9 +53,9 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
-    assert result.exit_code == 0, result.stdout
+    assert result.exit_code == 0, result.stdout  # noqa: WPS204
     with Path(account_file_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
+        accounts = json.load(file_obj)  # noqa: WPS204
     assert accounts == [
         {
             "id": "ACC-12345new",
@@ -69,7 +70,7 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
 
 
 def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
-    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
+    mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)  # noqa: WPS204
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
         return_value=new_token,
@@ -77,9 +78,9 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
-    assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
+    assert result.exit_code == 0, result.stdout  # noqa: WPS204
+    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:  # noqa: WPS204
+        accounts = json.load(file_obj)  # noqa: WPS204
     assert accounts == [
         {
             "id": "ACC-12341",

@@ -1,3 +1,4 @@
+# noqa: WPS204
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Self
@@ -65,7 +66,7 @@ def test_create(mocker, service_context, mpt_agreement_parameter_data):
     post_mock = mocker.patch.object(service_context.api, "post", return_value=new_item_mock)
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_mock = mocker.patch.object(service_context.stats, "add_synced")
-    service = FakeRelatedComponentsService(service_context)
+    service = FakeRelatedComponentsService(service_context)  # noqa: WPS204
     prepare_data_model_to_create_spy = mocker.spy(service, "prepare_data_model_to_create")
 
     result = service.create()

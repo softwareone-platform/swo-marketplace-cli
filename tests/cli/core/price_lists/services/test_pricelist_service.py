@@ -1,3 +1,4 @@
+# noqa: WPS204
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.price_lists.api import PriceListAPIService
@@ -32,7 +33,7 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
     )
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = PriceListService(service_context)
+    service = PriceListService(service_context)  # noqa: WPS204
 
     result = service.create()
 

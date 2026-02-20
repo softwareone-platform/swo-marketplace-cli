@@ -31,6 +31,10 @@ DEFAULT_RESULTS: TabResults = {
 }
 
 
+def _new_default_results() -> TabResults:
+    return copy.deepcopy(DEFAULT_RESULTS)
+
+
 class ErrorMessagesCollector:
     """Error messages collector."""
 
@@ -185,29 +189,19 @@ class ProductStatsCollector(StatsCollector):
     """Statistics collector specifically for product synchronization operations."""
 
     def __init__(self) -> None:
-        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        parameters_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        items_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        agreements_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        asset_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        item_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        request_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        subscription_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        item_rows: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        templates: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-
-        tabs = {
-            "General": general,
-            "Parameters Groups": parameters_groups,
-            "Items Groups": items_groups,
-            "Agreements Parameters": agreements_parameters,
-            "Assets Parameters": asset_parameters,
-            "Item Parameters": item_parameters,
-            "Request Parameters": request_parameters,
-            "Subscription Parameters": subscription_parameters,
-            "Items": item_rows,
-            "Templates": templates,
-        }
+        tab_names = (
+            "General",
+            "Parameters Groups",
+            "Items Groups",
+            "Agreements Parameters",
+            "Assets Parameters",
+            "Item Parameters",
+            "Request Parameters",
+            "Subscription Parameters",
+            "Items",
+            "Templates",
+        )
+        tabs = {tab_name: _new_default_results() for tab_name in tab_names}
 
         super().__init__(tabs)
 
@@ -224,12 +218,9 @@ class PriceListStatsCollector(StatsCollector):
     """
 
     def __init__(self) -> None:
-        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        price_items: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-
         tabs = {
-            "General": general,
-            "Price Items": price_items,
+            "General": _new_default_results(),
+            "Price Items": _new_default_results(),
         }
         super().__init__(tabs)
 

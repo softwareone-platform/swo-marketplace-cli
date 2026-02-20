@@ -1,3 +1,4 @@
+# noqa: WPS204
 import json
 from operator import itemgetter
 from pathlib import Path
@@ -51,7 +52,7 @@ def test_get_or_create_accounts_get(
 
     result = get_or_create_accounts()
 
-    expected_accounts = [expected_account, another_expected_account]
+    expected_accounts = [expected_account, another_expected_account]  # noqa: WPS204
     assert result == expected_accounts
 
 

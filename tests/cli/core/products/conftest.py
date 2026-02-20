@@ -104,16 +104,17 @@ from requests import Response
 @pytest.fixture
 def product_container_mock(mocker, account_container_mock):
     container = ProductContainer()
+    parameters_services = [MagicMock(ParametersService) for _ in range(5)]
     container.account_container.override(account_container_mock)
     container.product_service.override(MagicMock(ProductService))
     container.item_service.override(MagicMock(ItemService))
     container.item_group_service.override(MagicMock(ItemGroupService))
     container.parameter_group_service.override(MagicMock(ParameterGroupService))
-    container.agreement_parameters_service.override(MagicMock(ParametersService))
-    container.asset_parameters_service.override(MagicMock(ParametersService))
-    container.item_parameters_service.override(MagicMock(ParametersService))
-    container.request_parameters_service.override(MagicMock(ParametersService))
-    container.subscription_parameters_service.override(MagicMock(ParametersService))
+    container.agreement_parameters_service.override(parameters_services[0])
+    container.asset_parameters_service.override(parameters_services[1])
+    container.item_parameters_service.override(parameters_services[2])
+    container.request_parameters_service.override(parameters_services[3])
+    container.subscription_parameters_service.override(parameters_services[4])
     container.template_service.override(MagicMock(TemplateService))
     mock = mocker.patch("cli.core.products.app.ProductContainer", autospec=True)
     mock.return_value = container
