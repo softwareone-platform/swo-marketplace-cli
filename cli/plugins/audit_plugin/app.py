@@ -4,11 +4,14 @@ import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.console import console
 from cli.core.mpt.client import client_from_account
+from cli.plugins.audit_plugin.api import get_audit_records_by_object, get_audit_trail
+from cli.plugins.audit_plugin.audit_records import (
+    display_audit_records,
+    flatten_dict,
+    format_json_path,
+)
 from rich.panel import Panel
 from rich.table import Table
-
-from .api import get_audit_records_by_object, get_audit_trail
-from .audit_records import display_audit_records, flatten_dict, format_json_path
 
 app = typer.Typer(name="audit", help="Audit commands.")
 
