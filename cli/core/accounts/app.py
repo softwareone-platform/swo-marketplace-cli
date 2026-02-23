@@ -27,6 +27,9 @@ from .models import Account
 
 app = typer.Typer()
 
+NEW_TOKEN_MASK_PREFIX_LENGTH = 22
+TOKEN_MASK_PREFIX_LENGTH = 4
+
 
 @app.command(name="add")
 def add_account(
@@ -205,10 +208,11 @@ def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool =
         token = account.token if is_new_token else f"{account.token_id}:{account.token}"
 
         if to_wrap_secret:
+            visible_token_prefix = token[:TOKEN_MASK_PREFIX_LENGTH]
             if is_new_token:
-                token = f"{token[0:][:22]}*****{token[:4]}"
+                token = f"{token[:NEW_TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
             else:
-                token = f"{token[0:][:4]}*****{token[:4]}"
+                token = f"{token[:TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
 
         return token
 
