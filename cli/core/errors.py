@@ -1,5 +1,6 @@
 from collections.abc import Callable
 from functools import wraps
+from http import HTTPStatus
 from typing import ParamSpec, TypeVar
 
 from mpt_api_client.exceptions import MPTHttpError as APIException
@@ -44,7 +45,7 @@ def wrap_http_error[**CallableParams, RetType](  # noqa: C901
         except RequestException as error:
             if error.response is None:
                 msg = "No response"
-            elif error.response.status_code == 400:
+            elif error.response.status_code == HTTPStatus.BAD_REQUEST:
                 response_body = error.response.json()
 
                 msg = ""
