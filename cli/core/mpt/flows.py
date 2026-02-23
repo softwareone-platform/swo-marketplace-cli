@@ -2,9 +2,8 @@ from functools import cache
 from urllib.parse import quote_plus
 
 from cli.core.errors import MPTAPIError, wrap_http_error
-
-from .client import MPTClient
-from .models import (
+from cli.core.mpt.client import MPTClient
+from cli.core.mpt.models import (
     ListResponse,
     Meta,
     Product,

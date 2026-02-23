@@ -3,6 +3,16 @@ from typing import Annotated
 import typer
 from cli.core.accounts.api.account_api_service import MPTAccountService
 from cli.core.accounts.constants import FETCHING, READING, REMOVING, STATUS_MSG
+from cli.core.accounts.flows import (
+    disable_accounts_except,
+    does_account_exist,
+    find_account,
+    find_active_account,
+    get_or_create_accounts,
+    remove_account,
+    write_accounts,
+)
+from cli.core.accounts.models import Account
 from cli.core.accounts.url_parser import protocol_and_host
 from cli.core.console import console
 from cli.core.errors import (
@@ -13,17 +23,6 @@ from cli.core.errors import (
 from mpt_api_client import MPTClient
 from rich import box
 from rich.table import Table
-
-from .flows import (
-    disable_accounts_except,
-    does_account_exist,
-    find_account,
-    find_active_account,
-    get_or_create_accounts,
-    remove_account,
-    write_accounts,
-)
-from .models import Account
 
 app = typer.Typer()
 
