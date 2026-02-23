@@ -108,7 +108,8 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
             self._set_synced(data_model.id, data_model.coordinate)
 
-        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+        success = not errors
+        return ServiceResult(success=success, errors=errors, model=None, stats=self.stats)
 
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
         """Hook method to customize the data model before creating it.

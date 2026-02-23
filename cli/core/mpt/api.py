@@ -83,7 +83,7 @@ class APIService[APIModel: "BaseModel"](ABC):
         return response_payload
 
     @wrap_http_error
-    def list(self, query_params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def list(self, query_params: dict | None = None) -> dict[str, Any]:
         """List resources with optional query parameters.
 
         Args:

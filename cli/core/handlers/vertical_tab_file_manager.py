@@ -32,9 +32,9 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
 
         """
         data_xlsx = data_model.to_xlsx()
-        row_values = {
-            f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)
-        }
+        row_values = {}
+        for row, field in enumerate(self._fields, 2):
+            row_values[f"B{row}"] = data_xlsx.get(field, "")
         self.file_handler.write([{self._sheet_name: row_values}])
 
     def check_required_tabs(self) -> None:

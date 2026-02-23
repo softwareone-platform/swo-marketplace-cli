@@ -1,7 +1,7 @@
 from typing import Any
 
 
-def set_dict_value(original_dict: dict[str, Any], path: str, new_value: Any) -> dict[str, Any]:
+def set_dict_value(original_dict: dict, path: str, new_value: Any) -> dict:
     """Set a value in a nested dictionary using a dot-separated path.
 
     Args:

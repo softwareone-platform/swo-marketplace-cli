@@ -99,7 +99,9 @@ def diff_by_object_id(
     if positions:
         try:
             pos1, pos2 = map(int, positions.split(","))
-            if not (1 <= pos1 <= len(records) and 1 <= pos2 <= len(records)):
+            is_pos1_valid = 1 <= pos1 <= len(records)
+            is_pos2_valid = 1 <= pos2 <= len(records)
+            if not (is_pos1_valid and is_pos2_valid):
                 raise ValueError  # noqa: TRY301
         except ValueError:
             msg = (

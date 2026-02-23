@@ -76,7 +76,7 @@ class MPTClient(Session):
             The full URL as a string.
 
         """
-        url = url[1:] if url and url[0] == "/" else url
+        url = url.removeprefix("/")
         return urljoin(self.base_url, url, allow_fragments=True)
 
 

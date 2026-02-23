@@ -26,7 +26,7 @@ def flatten_dict(
     return dict(flattened_items)
 
 
-def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
+def format_json_path(path: str, source_trail: dict, target_trail: dict) -> str:
     """Format JSON path with additional context from external IDs if available."""
     if not is_valid_path(path):
         return path
@@ -93,8 +93,9 @@ def display_audit_records(records: list) -> None:
     for idx, record in enumerate(records, 1):
         timestamp = record.get("timestamp", "N/A")
         audit_id = record.get("id", "N/A")
-        actor = record.get("actor", {}).get("name", "N/A")
-        actor_account = record.get("actor", {}).get("account", {}).get("name", "")
+        actor_data = record.get("actor", {})
+        actor = actor_data.get("name", "N/A")
+        actor_account = actor_data.get("account", {}).get("name", "")
         if actor_account:
             actor = f"{actor} ({actor_account})"
         event = record.get("event", "N/A")

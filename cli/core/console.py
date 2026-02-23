@@ -6,20 +6,37 @@ from rich.console import Console
 from rich.text import Text
 
 HEXADECIMAL_BASE = 16
+HEX_COLOR_START_INDEX = 1
+HEX_COLOR_STOP_INDEX = 6
+HEX_COLOR_STEP = 2
+
+
+def _hex_to_rgb(hex_color: str) -> tuple[int, int, int]:
+    rgb_values = [
+        _to_hex_component(hex_color, index)
+        for index in range(HEX_COLOR_START_INDEX, HEX_COLOR_STOP_INDEX, HEX_COLOR_STEP)
+    ]
+    return rgb_values[0], rgb_values[1], rgb_values[2]
+
+
+def _to_hex_component(hex_color: str, index: int) -> int:
+    return int(hex_color[index : index + 2], HEXADECIMAL_BASE)
+
+
+def _blend_channel(start_value: int, end_value: int, sample_ratio: float) -> int:
+    return int(start_value + sample_ratio * (end_value - start_value))
 
 
 def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:  # pragma: no cover
-    start_rgb = tuple(
-        int(start_hex[index : index + 2], HEXADECIMAL_BASE) for index in range(1, 6, 2)
-    )
-    end_rgb = tuple(int(end_hex[index : index + 2], HEXADECIMAL_BASE) for index in range(1, 6, 2))
+    start_rgb = _hex_to_rgb(start_hex)
+    end_rgb = _hex_to_rgb(end_hex)
     gradient_colors = [start_hex]
+    sample_ratio_denominator = num_samples - 1
     for sample in range(1, num_samples):
-        red = int(start_rgb[0] + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0]))
-        green = int(
-            start_rgb[1] + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
-        )
-        blue = int(start_rgb[2] + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2]))
+        sample_ratio = float(sample) / sample_ratio_denominator
+        red = _blend_channel(start_rgb[0], end_rgb[0], sample_ratio)
+        green = _blend_channel(start_rgb[1], end_rgb[1], sample_ratio)
+        blue = _blend_channel(start_rgb[2], end_rgb[2], sample_ratio)
         gradient_colors.append(f"#{red:02X}{green:02X}{blue:02X}")
 
     return gradient_colors
@@ -28,7 +45,9 @@ def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:
 def show_banner() -> None:
     """Display a stylized program banner with a color gradient."""
     program_name = pathlib.Path(sys.argv[0]).name
-    program_name = "".join((program_name[0:3].upper(), program_name[3:7]))
+    prefix = program_name[0:3].upper()
+    suffix = program_name[3:7]
+    program_name = f"{prefix}{suffix}"
     figlet = Figlet("georgia11")
 
     banner_text = figlet.renderText(program_name)

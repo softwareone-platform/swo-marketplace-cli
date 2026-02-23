@@ -16,8 +16,11 @@ class PriceListService(BaseService):
         try:
             new_price_list_data = self.api.post(json=price_list.to_json())
         except MPTAPIError as error:
-            self._set_error(str(error))
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_message = str(error)
+            self._set_error(error_message)
+            return ServiceResult(
+                success=False, errors=[error_message], model=None, stats=self.stats
+            )
 
         price_list.id = new_price_list_data["id"]
         self._set_synced(price_list.id, price_list.coordinate)
@@ -45,8 +48,11 @@ class PriceListService(BaseService):
         try:
             exists = self.api.exists({"id": price_list.id})
         except MPTAPIError as error:
-            self._set_error(str(error))
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_message = str(error)
+            self._set_error(error_message)
+            return ServiceResult(
+                success=False, errors=[error_message], model=None, stats=self.stats
+            )
 
         return ServiceResult(success=True, model=price_list if exists else None, stats=self.stats)
 
@@ -55,7 +61,10 @@ class PriceListService(BaseService):
         try:
             price_list_data = self.api.get(resource_id)
         except MPTAPIError as error:
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_message = str(error)
+            return ServiceResult(
+                success=False, errors=[error_message], model=None, stats=self.stats
+            )
 
         price_list = self.data_model.from_json(price_list_data)
         return ServiceResult(success=True, model=price_list, stats=self.stats)
@@ -68,7 +77,10 @@ class PriceListService(BaseService):
         try:
             self.api.update(price_list.id, price_list.to_json())
         except MPTAPIError as error:
-            self._set_error(str(error))
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_message = str(error)
+            self._set_error(error_message)
+            return ServiceResult(
+                success=False, errors=[error_message], model=None, stats=self.stats
+            )
 
         return ServiceResult(success=True, model=price_list, stats=self.stats)

@@ -29,8 +29,9 @@ class ItemService(RelatedBaseService):
                 response = self.api.list({"select": select, "offset": offset, "limit": limit})
             except MPTAPIError as error:
                 self.stats.add_error(TAB_PRICE_ITEMS)
+                error_message = str(error)
                 return ServiceResult(
-                    success=False, model=None, errors=[str(error)], stats=self.stats
+                    success=False, errors=[error_message], model=None, stats=self.stats
                 )
 
             records = [self.data_model.from_json(record) for record in response["data"]]
@@ -55,7 +56,10 @@ class ItemService(RelatedBaseService):
         try:
             response = self.api.get(resource_id)
         except MPTAPIError as error:
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_message = str(error)
+            return ServiceResult(
+                success=False, errors=[error_message], model=None, stats=self.stats
+            )
 
         item_model = self.data_model.from_json(response.json())
         return ServiceResult(success=True, model=item_model, stats=self.stats)
@@ -84,4 +88,5 @@ class ItemService(RelatedBaseService):
             except MPTAPIError as error:
                 errors.append(f"Item {record.id}: {error!s}")
                 self._set_error(str(error), record.id)
-        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+        success = not errors
+        return ServiceResult(success=success, errors=errors, model=None, stats=self.stats)

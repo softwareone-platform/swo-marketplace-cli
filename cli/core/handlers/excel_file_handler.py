@@ -21,6 +21,8 @@ from openpyxl.worksheet.worksheet import Worksheet
 type SheetData = dict[str, Any]
 type SheetDataGenerator = Generator[SheetData, None, None]
 type StyleData = dict[str, dict[str, NamedStyle]]
+type SheetFields = tuple[str, ...]
+type PatternList = list[Pattern[str]]
 
 
 class ExcelFileHandler(FileHandler):
@@ -191,11 +193,15 @@ class ExcelFileHandler(FileHandler):
         """
         sheet = self._get_worksheet(sheet_name)
         sheet_iter = sheet.iter_rows(min_row=2)
-        return {
-            str(row[0].value): {"value": row[1].value, "coordinate": row[1].coordinate}
-            for row in sheet_iter
-            if fields is None or row[0].value in fields
-        }
+        vertical_data = {}
+        for row in sheet_iter:
+            key = str(row[0].value)
+            if fields is not None and row[0].value not in fields:
+                continue
+            row_value = row[1].value
+            row_coordinate = row[1].coordinate
+            vertical_data[key] = {"value": row_value, "coordinate": row_coordinate}
+        return vertical_data
 
     def get_sheet_next_column(self, sheet_name: str) -> str:
         """Get the next available column letter in the specified sheet.
@@ -222,7 +228,7 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: tuple[str, ...], patterns: list[Pattern[str]]
+        self, sheet_name: str, fields: SheetFields, patterns: PatternList
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure.
 
