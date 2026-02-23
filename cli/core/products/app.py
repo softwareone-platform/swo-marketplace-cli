@@ -17,10 +17,6 @@ from rich.table import Table
 app = typer.Typer()
 
 
-def _offset_by_page(page: int, limit: int) -> int:  # noqa: FURB118
-    return page * limit
-
-
 @app.command("export")
 def export(  # noqa: C901
     product_ids: Annotated[
@@ -124,7 +120,7 @@ def list_products(
     has_pages = True
     page = 0
     while has_pages:
-        offset = _offset_by_page(page, page_size)
+        offset = page * page_size
 
         with console.status(f"Fetching #{page} page  of products"):
             mpt_client = client_from_account(active_account)
