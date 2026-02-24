@@ -3,17 +3,11 @@ from pathlib import Path
 
 import pytest
 from cli.core.accounts.models import Account as CLIAccount
-from mpt_api_client import MPTClient as MPTAPIClient
 
 
 @pytest.fixture
-def mock_mpt_api_client(mocker):
-    return mocker.MagicMock(spec=MPTAPIClient)
-
-
-@pytest.fixture
-def mock_mpt_api_tokens(mock_mpt_api_client):
-    return mock_mpt_api_client.accounts.api_tokens.get.return_value
+def mock_mpt_api_tokens(api_mpt_client):
+    return api_mpt_client.accounts.api_tokens.get.return_value
 
 
 @pytest.fixture

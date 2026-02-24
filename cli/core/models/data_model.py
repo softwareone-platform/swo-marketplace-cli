@@ -25,11 +25,11 @@ class BaseDataModel(ABC):
 
     @classmethod
     @abstractmethod
-    def from_json(cls, json_dict: dict[str, Any]) -> Self:
-        """Create an instance from a JSON-like dictionary.
+    def from_json(cls, json_data: Any) -> Self:
+        """Create an instance from a JSON-like dictionary or API resource object.
 
         Args:
-            json_dict: A dictionary representing JSON data.
+            json_data: A dictionary representing JSON data, or an API resource object.
 
         Returns:
             An instance of the class.

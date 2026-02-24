@@ -5,11 +5,12 @@ import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.accounts.containers import AccountContainer
 from cli.core.console import console
-from cli.core.mpt.client import client_from_account
+from cli.core.mpt.api_client import create_api_mpt_client_from_account
 from cli.core.mpt.flows import get_products
 from cli.core.mpt.models import Account as MPTAccount
 from cli.core.mpt.models import Product as MPTProduct
 from cli.core.products.containers import ProductContainer
+from mpt_api_client import RQLQuery
 from rich import box
 from rich.status import Status
 from rich.table import Table
@@ -116,15 +117,24 @@ def list_products(
 
     """
     active_account = get_active_account()
+    api_mpt_client = create_api_mpt_client_from_account(active_account)
+
+    try:
+        rql_query_obj = RQLQuery.from_string(rql_query) if rql_query else None
+    except Exception as exc:
+        raise typer.BadParameter(
+            f"Invalid RQL query syntax: {rql_query!r}",
+            param_hint="'--query' / '-q'",
+        ) from exc
 
     has_pages = True
     page = 0
+
     while has_pages:
         offset = page * page_size
 
-        with console.status(f"Fetching #{page} page  of products"):
-            mpt_client = client_from_account(active_account)
-            meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
+        with console.status(f"Fetching #{page} page of products"):
+            meta, products = get_products(api_mpt_client, page_size, offset, query=rql_query_obj)
 
         table = _products_table("Products")
         table = _list_products(table, products)

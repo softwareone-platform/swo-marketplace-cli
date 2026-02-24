@@ -3,6 +3,7 @@ from typing import Any, cast, override
 
 from cli.core.models import DataCollectionModel
 from cli.core.models.data_model import DataModel
+from cli.core.mpt.api_client import create_api_mpt_client_from_account
 from cli.core.mpt.flows import search_uom_by_name
 from cli.core.products.models import DataActionEnum, ItemActionEnum, ItemData
 from cli.core.products.services.related_components_base_service import (
@@ -13,12 +14,19 @@ from cli.core.products.services.related_components_base_service import (
 class ItemService(RelatedComponentsBaseService):
     """Service for managing item operations."""
 
+    def _get_api_mpt_client(self):
+        if not hasattr(self, "_mpt_client"):
+            self._mpt_client = create_api_mpt_client_from_account(self.account)
+        return self._mpt_client
+
     @override
     def prepare_data_model_to_create(self, data_model: DataModel) -> DataModel:
+        mpt_client = self._get_api_mpt_client()
+
         data_model = super().prepare_data_model_to_create(data_model)
 
         item_data = cast(ItemData, data_model)
-        item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
+        item_data.unit_id = search_uom_by_name(mpt_client, item_data.unit_name).id
         self.file_manager.write_ids({item_data.unit_coordinate: item_data.unit_id})
 
         item_data.item_type = "operations" if self.account.is_operations() else "vendor"
@@ -57,7 +65,8 @@ class ItemService(RelatedComponentsBaseService):
     def _action_create_item(self, data_model: DataModel):
         item_data = cast(ItemData, data_model)
 
-        item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
+        mpt_client = self._get_api_mpt_client()
+        item_data.unit_id = search_uom_by_name(mpt_client, item_data.unit_name).id
         item_data.item_type = "operations" if self.account.is_operations() else "vendor"
 
         super()._action_create_item(data_model)

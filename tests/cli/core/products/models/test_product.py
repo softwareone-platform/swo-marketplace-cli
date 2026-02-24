@@ -19,6 +19,7 @@ from cli.core.products.constants import (
 from cli.core.products.models import DataActionEnum
 from cli.core.products.models.product import ProductData, SettingsData, SettingsRecords
 from freezegun import freeze_time
+from mpt_api_client.resources.catalog.products import Product
 
 
 def test_product_data_from_dict(product_file_data):
@@ -34,7 +35,7 @@ def test_product_data_from_dict(product_file_data):
 
 def test_product_data_from_json(mpt_product_data):
     with freeze_time("2025-05-30"):
-        result = ProductData.from_json(mpt_product_data)
+        result = ProductData.from_json(Product(mpt_product_data))
 
     assert result.id == "PRD-0232-2541"
     assert result.name == "Adobe VIP Marketplace for Commercial"

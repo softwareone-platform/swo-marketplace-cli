@@ -1,6 +1,5 @@
 from pathlib import Path
 from unittest.mock import Mock
-from urllib.parse import urljoin
 
 import pytest
 from cli.core.models import DataCollectionModel
@@ -8,42 +7,41 @@ from cli.core.products import app as product_app
 from cli.core.products.app import create_product, update_product
 from cli.core.services.service_result import ServiceResult
 from cli.core.stats import ProductStatsCollector
+from mpt_api_client.resources.catalog.products import Product
 from openpyxl.reader.excel import load_workbook
-from requests import Response
 from typer.testing import CliRunner
 
 runner = CliRunner()
 
 
 def test_list_products(
-    active_vendor_account, mocker, requests_mocker, mpt_client, mpt_products_response
+    active_vendor_account, mocker, api_mpt_client, mpt_products_page, mpt_products
 ):
     mocker.patch("cli.core.products.app.get_active_account", return_value=active_vendor_account)
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "catalog/products?limit=10&offset=0",
-        ),
-        json=mpt_products_response,
+    mocker.patch(
+        "cli.core.products.app.create_api_mpt_client_from_account",
+        autospec=True,
+        return_value=api_mpt_client,
     )
+    api_mpt_client.catalog.products.fetch_page.return_value = mpt_products_page
 
     result = runner.invoke(product_app, ["list"])
 
     assert result.exit_code == 0, result.stdout
-    assert mpt_products_response["data"][0]["id"] in result.stdout
+    assert mpt_products[0]["id"] in result.stdout
 
 
 def test_list_products_with_query_and_paging(
-    active_vendor_account, mocker, requests_mocker, mpt_client, mpt_products_response
+    active_vendor_account, mocker, api_mpt_client, mpt_products_page, mpt_products
 ):
     mocker.patch("cli.core.products.app.get_active_account", return_value=active_vendor_account)
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "catalog/products?limit=20&offset=0&eq(product.id,'PRD-1234')",
-        ),
-        json=mpt_products_response,
+    mocker.patch(
+        "cli.core.products.app.create_api_mpt_client_from_account",
+        autospec=True,
+        return_value=api_mpt_client,
     )
+    mock_products_filter = api_mpt_client.catalog.products.filter.return_value
+    mock_products_filter.fetch_page.return_value = mpt_products_page
 
     result = runner.invoke(
         product_app,
@@ -51,7 +49,25 @@ def test_list_products_with_query_and_paging(
     )
 
     assert result.exit_code == 0, result.stdout
-    assert mpt_products_response["data"][0]["id"] in result.stdout
+    assert mpt_products[0]["id"] in result.stdout
+
+
+def test_list_products_invalid_rql_query(active_vendor_account, mocker, api_mpt_client):
+    mocker.patch("cli.core.products.app.get_active_account", return_value=active_vendor_account)
+    mocker.patch(
+        "cli.core.products.app.create_api_mpt_client_from_account",
+        autospec=True,
+        return_value=api_mpt_client,
+    )
+    mocker.patch(
+        "cli.core.products.app.RQLQuery.from_string",
+        autospec=True,
+        side_effect=Exception("Unexpected token"),
+    )
+
+    result = runner.invoke(product_app, ["list", "--query", "invalid!!!"])
+
+    assert result.exit_code == 2
 
 
 def test_sync_not_valid_definition(mocker, product_container_mock):
@@ -202,10 +218,8 @@ def test_sync_product_no_product(mocker, product_new_file, product_container_moc
 
 def test_create_product(
     mocker,
-    product_new_file,
     product_data_from_dict,
     item_data_from_dict,
-    parameter_group_data_from_dict,
     parameters_data_from_dict,
     template_data_from_dict,
     product_container_mock,
@@ -354,6 +368,7 @@ def test_export_product(
     mocker,
     tmp_path,
     account_container_mock,
+    api_mpt_client,
     list_response_mock_data_factory,
     mpt_product_data,
     mpt_item_data,
@@ -366,11 +381,16 @@ def test_export_product(
     mpt_subscription_parameter_data,
     mpt_template_data,
 ):
+    api_mpt_client.catalog.products.get.return_value = Product(mpt_product_data)
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        autospec=True,
+        return_value=api_mpt_client,
+    )
     mocker.patch.object(
         account_container_mock.mpt_client(),
         "get",
         side_effect=[
-            Mock(spec=Response, json=Mock(return_value=mpt_product_data)),
             list_response_mock_data_factory([mpt_item_data]),
             list_response_mock_data_factory([mpt_item_group_data]),
             list_response_mock_data_factory([mpt_parameter_group_data]),

@@ -3,6 +3,7 @@ from unittest.mock import Mock
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
+from cli.core.mpt.models import Uom
 from cli.core.products.api import ItemAPIService
 from cli.core.products.constants import TAB_ITEMS
 from cli.core.products.handlers import ItemExcelFileManager
@@ -166,6 +167,23 @@ def test_set_export_params(service_context, item_data_from_dict):
     result = service.set_export_params()
 
     assert result["product.id"] is not None
+
+
+def test_get_api_mpt_client_cached(mocker, service_context, item_data_from_dict):
+    create_client_mock = mocker.patch(
+        "cli.core.products.services.item_service.create_api_mpt_client_from_account"
+    )
+    mocker.patch(
+        "cli.core.products.services.item_service.search_uom_by_name",
+        return_value=Uom(id="fake_unit_id", name="fake_unit"),
+    )
+    mocker.patch.object(service_context.file_manager, "write_ids")
+    service = ItemService(service_context)
+    service.prepare_data_model_to_create(item_data_from_dict)
+
+    service.prepare_data_model_to_create(item_data_from_dict)  # act
+
+    create_client_mock.assert_called_once()
 
 
 def test_prepare_data_model_to_create(mocker, service_context, item_data_from_dict):

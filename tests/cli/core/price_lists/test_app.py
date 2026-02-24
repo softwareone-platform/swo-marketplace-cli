@@ -1,3 +1,5 @@
+import re
+
 from cli.core.price_lists import app
 from cli.core.price_lists.services import ItemService, PriceListService
 from cli.core.services.service_result import ServiceResult
@@ -5,6 +7,11 @@ from cli.core.stats import PriceListStatsCollector
 from typer.testing import CliRunner
 
 runner = CliRunner()
+
+
+def strip_ansi(text: str) -> str:
+    """Remove ANSI color codes from text."""
+    return re.sub(r"\x1b\[[0-9;]*m", "", text)
 
 
 def test_sync_price_lists_not_files_found(price_list_new_file):
@@ -152,7 +159,7 @@ def test_sync_price_lists_create_error(
     result = runner.invoke(app, ["sync", str(price_list_file_path)], input="y\ny\n")
 
     assert result.exit_code == 4
-    assert "Price list sync FAILED\n" in result.stdout
+    assert "Price list sync FAILED\n" in strip_ansi(result.stdout)
     price_list_service_retrieve_mock.assert_called_once()
     price_list_service_create_mock.assert_called_once()
     item_service_update_spy.assert_not_called()
@@ -232,7 +239,7 @@ def test_export_price_list_no_success(mocker, active_operations_account):
     result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
 
     assert result.exit_code == 4
-    assert "Price list export FAILED" in result.stdout
+    assert "Price list export FAILED" in strip_ansi(result.stdout)
     price_list_service_export_mock.assert_called_once()
     item_service_export_spy.assert_not_called()
 
@@ -257,6 +264,6 @@ def test_export_price_list_item_no_success(
     result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
 
     assert result.exit_code == 4
-    assert "Price list export FAILED" in result.stdout
+    assert "Price list export FAILED" in strip_ansi(result.stdout)
     price_list_service_export_mock.assert_called_once()
     item_service_export_mock.assert_called_once()

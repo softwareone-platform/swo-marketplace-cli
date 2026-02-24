@@ -1,7 +1,5 @@
-from urllib.parse import urljoin
-
 import pytest
-from cli.core.errors import MPTAPIError
+from cli.core.errors import MPTAPIError as LegacyMPTAPIError
 from cli.core.mpt.flows import (
     get_products,
     search_uom_by_name,
@@ -10,82 +8,93 @@ from cli.core.mpt.models import (
     Product,
     Uom,
 )
+from mpt_api_client import RQLQuery
+from mpt_api_client.exceptions import MPTAPIError, MPTHttpError
 
 
-@pytest.mark.parametrize(
-    ("query", "expected_resource"),
-    [
-        (None, "catalog/products?limit=10&offset=0"),
-        (
-            "eq(product.id,'PRD-1234-1234')",
-            "catalog/products?limit=10&offset=0&eq%28product.id%2C%27PRD-1234-1234%27%29",
-        ),
-    ],
-)
-def test_get_products(
-    query, expected_resource, requests_mocker, mpt_client, mpt_products_response, mpt_products
-):
-    requests_mocker.get(urljoin(mpt_client.base_url, expected_resource), json=mpt_products_response)
+def test_get_products(api_mpt_client, mpt_products_page, mpt_products):
+    api_mpt_client.catalog.products.fetch_page.return_value = mpt_products_page
 
-    result = get_products(mpt_client, 10, 0, query=query)
+    result = get_products(api_mpt_client, 10, 0)
 
     _meta, products = result
     assert products == [Product.model_validate(product_data) for product_data in mpt_products]
 
 
-def test_get_products_exception(requests_mocker, mpt_client):
-    requests_mocker.get(
-        urljoin(mpt_client.base_url, "catalog/products?limit=10&offset=0"), status=500
+def test_get_products_with_query(api_mpt_client, mpt_products_page, mpt_products):
+    product_id_rql = "eq(product.id,'PRD-1234-1234')"
+    product_id_query = RQLQuery.from_string(product_id_rql)
+    mock_products_filter = api_mpt_client.catalog.products.filter.return_value
+    mock_products_filter.fetch_page.return_value = mpt_products_page
+
+    result = get_products(api_mpt_client, 10, 0, product_id_query)
+
+    _, products = result
+    assert products == [Product.model_validate(product_data) for product_data in mpt_products]
+
+
+def test_get_products_mpt_api_error(api_mpt_client, mock_mpt_client_error_payload):
+    err_message = mock_mpt_client_error_payload["message"]
+    err_status = mock_mpt_client_error_payload["status"]
+    api_mpt_client.catalog.products.fetch_page.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
     )
 
     with pytest.raises(MPTAPIError) as error:
-        get_products(mpt_client, 10, 0)
+        get_products(api_mpt_client, 10, 0)
 
-    assert "Internal Server Error" in str(error.value)
+    assert err_message in str(error.value)
 
 
-def test_search_uom_by_name(requests_mocker, mpt_client, mpt_uom, mpt_uoms_response):
-    name = "User"
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
-        json=mpt_uoms_response,
+def test_get_products_mpt_http_error(api_mpt_client, mock_mpt_client_error_payload):
+    err_message = mock_mpt_client_error_payload["message"]
+    err_status = mock_mpt_client_error_payload["status"]
+    api_mpt_client.catalog.products.fetch_page.side_effect = MPTHttpError(
+        err_status, err_message, mock_mpt_client_error_payload
     )
 
-    result = search_uom_by_name(mpt_client, name)
+    with pytest.raises(MPTHttpError) as error:
+        get_products(api_mpt_client, 10, 0)
+
+    assert err_message in str(error.value)
+
+
+def test_search_uom_by_name(mocker, api_mpt_client, mpt_uom):
+    name = "User"
+    uom_collection = api_mpt_client.catalog.units_of_measure
+    uom_filter_result = uom_collection.filter.return_value
+    uom_select = uom_filter_result.select.return_value
+    uom_obj = mocker.Mock(spec=["to_dict"])
+    uom_obj.to_dict.return_value = mpt_uom
+    uom_select.iterate.return_value = [uom_obj]
+
+    result = search_uom_by_name(api_mpt_client, name)
 
     assert result == Uom.model_validate(mpt_uom)
 
 
-def test_search_uom_by_name_exception(requests_mocker, mpt_client):
+def test_search_uom_by_name_exception(api_mpt_client, mock_mpt_client_error_payload):
     name = "User"
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
-        status=500,
-    )
+    err_message = mock_mpt_client_error_payload["message"]
+    uom_collection = api_mpt_client.catalog.units_of_measure
+    uom_filter_result = uom_collection.filter.return_value
+    uom_select = uom_filter_result.select.return_value
+    uom_select.iterate.side_effect = LegacyMPTAPIError(err_message, err_message)
 
-    with pytest.raises(MPTAPIError) as error:
-        search_uom_by_name(mpt_client, name)
+    with pytest.raises(LegacyMPTAPIError) as error:
+        search_uom_by_name(api_mpt_client, name)
 
-    assert "Internal Server Error" in str(error.value)
+    assert err_message in str(error.value)
 
 
-def test_search_uom_by_name_not_found(requests_mocker, wrap_to_mpt_list_response, mpt_client):
+def test_search_uom_by_name_not_found(api_mpt_client):
     name = "User"
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            f"catalog/units-of-measure?name={name}&limit=1&offset=0",
-        ),
-        json=wrap_to_mpt_list_response([]),
-    )
+    uom_collection = api_mpt_client.catalog.units_of_measure
+    uom_filter_result = uom_collection.filter.return_value
+    uom_select = uom_filter_result.select.return_value
+    uom_select.iterate.return_value = []
 
-    with pytest.raises(MPTAPIError) as error:
-        search_uom_by_name(mpt_client, name)
+    with pytest.raises(LegacyMPTAPIError) as error:
+        search_uom_by_name(api_mpt_client, name)
 
     assert "is not found" in str(error.value)

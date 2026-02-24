@@ -1,13 +1,14 @@
 import datetime as dt
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Self, override
+from typing import Any, Self, cast, override
 
 from cli.core.models.data_model import BaseDataModel
 from cli.core.nested_dicts import set_dict_value
 from cli.core.products import constants
 from cli.core.products.models.mixins import ActionMixin
 from dateutil import parser
+from mpt_api_client.resources.catalog.products import Product
 
 
 @dataclass
@@ -156,20 +157,20 @@ class ProductData(BaseDataModel):
 
     @classmethod
     @override
-    def from_json(cls, json_data: dict[str, Any]) -> Self:
-        updated = json_data["audit"].get("updated", {}).get("at")
+    def from_json(cls, resource_data: Product) -> Self:
+        updated = resource_data.audit.updated and resource_data.audit.updated.at
         return cls(
-            id=json_data["id"],
-            name=json_data["name"],
-            account_id=json_data["vendor"]["id"],
-            account_name=json_data["vendor"]["name"],
-            short_description=json_data["shortDescription"],
-            long_description=json_data["longDescription"],
-            website=json_data["website"],
-            status=json_data["status"],
-            created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
+            id=resource_data.id,
+            name=cast(str, resource_data.name),
+            account_id=resource_data.vendor.id,
+            account_name=resource_data.vendor.name,
+            short_description=cast(str, resource_data.short_description),
+            long_description=cast(str, resource_data.long_description),
+            website=cast(str, resource_data.website),
+            status=cast("str | None", resource_data.status),
+            created_date=parser.parse(resource_data.audit.created.at).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
-            settings=SettingsData.from_json(json_data["settings"]),
+            settings=SettingsData.from_json(resource_data.settings.to_dict()),
         )
 
     @override
