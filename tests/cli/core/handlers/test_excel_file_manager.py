@@ -6,11 +6,9 @@ from cli.core.handlers.file_manager import ExcelFileManager
 class FakeExcelFileManager(ExcelFileManager):
     _sheet_name = "fake_sheet_name"
 
-    def create_tab(self):
-        pass
+    def create_tab(self): ...
 
-    def write_error(self, error, resource_id=None):
-        pass
+    def write_error(self, error, resource_id=None): ...
 
 
 def test_get_row_and_column_from_coordinate_valid():

@@ -205,28 +205,19 @@ def test_group_property(is_order_request, expected_result, mocker, parameters_da
     assert result == expected_result
 
 
-def test_is_order_request(mocker, parameters_data_from_dict):
-    mocker.patch.object(parameters_data_from_dict, "phase", "Order")
-    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.AGREEMENT)
+@pytest.mark.parametrize(
+    ("phase", "scope", "expected_result"),
+    [
+        ("Order", ParamScopeEnum.AGREEMENT, True),
+        ("Order", ParamScopeEnum.REQUEST, False),
+        ("Order", ParamScopeEnum.ITEM_SCOPE, False),
+        ("Fulfillment", ParamScopeEnum.ITEM_SCOPE, False),
+    ],
+)
+def test_is_order_request(phase, scope, expected_result, parameters_data_from_dict):
+    parameters_data_from_dict.phase = phase
+    parameters_data_from_dict.scope = scope
 
     result = parameters_data_from_dict.is_order_request()
 
-    assert result is True
-
-
-def test_is_order_request_scope_false(mocker, parameters_data_from_dict):
-    mocker.patch.object(parameters_data_from_dict, "phase", "Order")
-    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM_SCOPE)
-
-    result = parameters_data_from_dict.is_order_request()
-
-    assert result is False
-
-
-def test_is_order_request_phase_false(mocker, parameters_data_from_dict):
-    mocker.patch.object(parameters_data_from_dict, "phase", "Fullfillment")
-    mocker.patch.object(parameters_data_from_dict, "scope", ParamScopeEnum.ITEM_SCOPE)
-
-    result = parameters_data_from_dict.is_order_request()
-
-    assert result is False
+    assert result is expected_result

@@ -4,7 +4,7 @@ from urllib.parse import urljoin
 
 import pytest
 from cli.core.models import DataCollectionModel
-from cli.core.products import app
+from cli.core.products import app as product_app
 from cli.core.products.app import create_product, update_product
 from cli.core.services.service_result import ServiceResult
 from cli.core.stats import ProductStatsCollector
@@ -16,9 +16,9 @@ runner = CliRunner()
 
 
 def test_list_products(
-    expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
+    active_vendor_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch("cli.core.products.app.get_active_account", return_value=expected_account)
+    mocker.patch("cli.core.products.app.get_active_account", return_value=active_vendor_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -27,16 +27,16 @@ def test_list_products(
         json=mpt_products_response,
     )
 
-    result = runner.invoke(app, ["list"])
+    result = runner.invoke(product_app, ["list"])
 
     assert result.exit_code == 0, result.stdout
     assert mpt_products_response["data"][0]["id"] in result.stdout
 
 
 def test_list_products_with_query_and_paging(
-    expected_account, mocker, requests_mocker, mpt_client, mpt_products_response
+    active_vendor_account, mocker, requests_mocker, mpt_client, mpt_products_response
 ):
-    mocker.patch("cli.core.products.app.get_active_account", return_value=expected_account)
+    mocker.patch("cli.core.products.app.get_active_account", return_value=active_vendor_account)
     requests_mocker.get(
         urljoin(
             mpt_client.base_url,
@@ -46,7 +46,7 @@ def test_list_products_with_query_and_paging(
     )
 
     result = runner.invoke(
-        app,
+        product_app,
         ["list", "--page", "20", "--query", "eq(product.id,'PRD-1234')"],
     )
 
@@ -62,7 +62,7 @@ def test_sync_not_valid_definition(mocker, product_container_mock):
     )
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", "--dry-run", "some-file"],
     )
 
@@ -74,7 +74,7 @@ def test_sync_with_dry_run(mocker, product_container_mock):
     update_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", "--dry-run", "fake_file.xlsx"],
     )
 
@@ -98,7 +98,7 @@ def test_sync_product_update(mocker, product_container_mock, product_data_from_d
     update_product_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", "fake_file.xlsx"],
         input="y\n",
     )
@@ -125,7 +125,7 @@ def test_sync_product_update_error(mocker, product_container_mock, product_data_
     update_product_mock = mocker.patch("cli.core.products.app.update_product")
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", "fake_file.xlsx"],
         input="y\n",
     )
@@ -156,7 +156,7 @@ def test_sync_product_force_create(
     create_product_mock = mocker.patch("cli.core.products.app.create_product")
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", "--force-create", str(product_new_file)],
         input="y\n",
     )
@@ -187,7 +187,7 @@ def test_sync_product_no_product(mocker, product_new_file, product_container_moc
     create_mock = mocker.patch("cli.core.products.app.create_product")
 
     result = runner.invoke(
-        app,
+        product_app,
         ["sync", str(product_new_file)],
         input="y\n",
     )
@@ -202,8 +202,6 @@ def test_sync_product_no_product(mocker, product_new_file, product_container_moc
 
 def test_create_product(
     mocker,
-    expected_account,
-    mpt_client,
     product_new_file,
     product_data_from_dict,
     item_data_from_dict,
@@ -301,22 +299,21 @@ def test_create_product_error(mocker, product_container_mock):
 def test_export_product_account_not_allowed(account_container_mock, active_vendor_account):
     account_container_mock.account.override(active_vendor_account)
 
-    result = runner.invoke(app, ["export", "fake_id"])
+    result = runner.invoke(product_app, ["export", "fake_id"])
 
     assert result.exit_code == 4, result.stdout
 
 
-def test_export_product_error_exporting_product(account_container_mock, product_container_mock):
+def test_export_product_error_exporting_product(product_container_mock):
     product_container_mock.stats.override(Mock(ProductStatsCollector, has_errors=True))
 
-    result = runner.invoke(app, ["export", "fake_id"], input="y\n")
+    result = runner.invoke(product_app, ["export", "fake_id"], input="y\n")
 
     assert result.exit_code == 3, result.stdout
 
 
 def test_export_product_overwrites_existing_files(
     mocker,
-    operations_account,
     tmp_path,
     product_container_mock,
 ):
@@ -327,7 +324,7 @@ def test_export_product_overwrites_existing_files(
     tmp_file.touch()
 
     result = runner.invoke(
-        app,
+        product_app,
         ["export", product_id, "--out", str(tmp_file)],
         input="y\ny\n",
     )
@@ -387,7 +384,9 @@ def test_export_product(
     )
     product_id = "PRD-0232-2541"
 
-    result = runner.invoke(app, ["export", product_id, "--out", str(tmp_path)], input="y\ny\n")
+    result = runner.invoke(
+        product_app, ["export", product_id, "--out", str(tmp_path)], input="y\ny\n"
+    )
 
     assert result.exit_code == 0, result.stdout
     product_path = tmp_path / f"{product_id}.xlsx"

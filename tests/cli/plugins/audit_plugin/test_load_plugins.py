@@ -4,7 +4,7 @@ from cli.core.plugins import load_plugins
 from cli.swocli import app
 from typer.testing import CliRunner
 
-from tests.cli.plugins import app as plugin_app
+from tests.cli.plugins.audit_plugin.app import app as plugin_app
 
 runner = CliRunner()
 

@@ -6,7 +6,7 @@ from cli.core.mpt.client import MPTClient
 from cli.core.mpt.models import Meta
 
 if TYPE_CHECKING:
-    from cli.core.mpt.models import BaseModel
+    from pydantic import BaseModel
 
 
 class APIService[APIModel: "BaseModel"](ABC):

@@ -157,4 +157,4 @@ def test_compare_audit_trails_no_differences():
     with patch("cli.plugins.audit_plugin.app.console.print") as mock_print:
         compare_audit_trails(source, target)  # act
 
-    mock_print.assert_any_call("\n[green]No differences found between the audit trails[/green]")
+        mock_print.assert_any_call("\n[green]No differences found between the audit trails[/green]")

@@ -1,31 +1,5 @@
+from cli.core.mpt.models.accounts import Account
 from pydantic import BaseModel, Field
-
-
-class Meta(BaseModel):
-    """Model representing pagination metadata."""
-
-    limit: int
-    offset: int
-    total: int
-
-
-type ListResponse[BaseModel] = tuple[Meta, list[BaseModel]]
-
-
-class Account(BaseModel):
-    """Model representing an MPT account."""
-
-    id: str
-    name: str
-    type: str
-
-
-class Token(BaseModel):
-    """Model representing an authentication token."""
-
-    id: str
-    account: Account
-    token: str
 
 
 class Product(BaseModel):
@@ -82,16 +56,3 @@ class Template(BaseModel):
 
     id: str
     name: str
-
-
-class PriceList(BaseModel):
-    """Model representing a price list."""
-
-    id: str
-
-
-class PriceListItem(BaseModel):
-    """Model representing a price list item."""
-
-    id: str
-    catalog_item: MPTItem = Field(alias="item")
