@@ -49,8 +49,7 @@ class ExcelFileManager(ABC):
         """
         self.file_handler.write([{self._sheet_name: id_map}])
 
-    @staticmethod
-    def _get_row_and_column_from_coordinate(coordinate: str) -> tuple[str, int]:
+    def _get_row_and_column_from_coordinate(self, coordinate: str) -> tuple[str, int]:
         """Parses an Excel cell coordinate and returns its column letter and row number.
 
         Args:

@@ -15,7 +15,8 @@ from cli.core.stats import ProductStatsCollector
 
 
 class FakeRelatedComponentsService(RelatedComponentsBaseService):
-    """Fake related components service."""
+    def prepare_data_model_to_create(self, data_model):
+        return data_model
 
 
 class FakeActionEnum(StrEnum):

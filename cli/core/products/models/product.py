@@ -32,9 +32,18 @@ class SettingsRecords(BaseDataModel, ActionMixin):
     @classmethod
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
+        raw_value = json_data["value"]
+        match raw_value:
+            case True:
+                setting_value = "Enabled"
+            case False:
+                setting_value = "Off"
+            case _:
+                setting_value = raw_value
+
         return cls(
             name=json_data["name"],
-            setting_value=cls._parse_json_value(raw_value=json_data["value"]),
+            setting_value=setting_value,
         )
 
     @override
@@ -48,16 +57,6 @@ class SettingsRecords(BaseDataModel, ActionMixin):
             constants.SETTINGS_ACTION: self.action,
             constants.SETTINGS_VALUE: self.setting_value,
         }
-
-    @staticmethod
-    def _parse_json_value(*, raw_value: str | bool) -> str | bool:
-        match raw_value:
-            case True:
-                return "Enabled"
-            case False:
-                return "Off"
-
-        return raw_value
 
 
 @dataclass
@@ -75,7 +74,14 @@ class SettingsData(BaseDataModel):
     @classmethod
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
-        formatted_settings = cls._format_data_from_json(json_data)
+        formatted_settings = {}
+        for key, raw_setting in json_data.items():
+            if isinstance(raw_setting, dict):
+                for sub_key, sub_value in raw_setting.items():
+                    formatted_settings[f"{key}.{sub_key}"] = sub_value
+            else:
+                formatted_settings[key] = raw_setting
+
         records = [
             SettingsRecords.from_json({"name": key, "value": formatted_settings.get(setting_path)})
             for key, setting_path in constants.SETTINGS_API_MAPPING.items()
@@ -101,18 +107,6 @@ class SettingsData(BaseDataModel):
     @override
     def to_xlsx(self) -> dict[str, Any]:
         return {}
-
-    @staticmethod
-    def _format_data_from_json(source_data: dict[str, Any]) -> dict[str, Any]:
-        formatted_data = {}
-        for key, raw_setting in source_data.items():
-            if isinstance(raw_setting, dict):
-                for sub_key, sub_value in raw_setting.items():
-                    formatted_data[f"{key}.{sub_key}"] = sub_value
-            else:
-                formatted_data[key] = raw_setting
-
-        return formatted_data
 
 
 @dataclass
@@ -143,6 +137,8 @@ class ProductData(BaseDataModel):
             if "settings" in row_data
             else SettingsData()
         )
+        icon_path = Path(Path(__file__).parent) / "icons/fake-icon.png"
+        default_icon = Path(icon_path).read_bytes()
         return cls(
             id=row_data[constants.GENERAL_PRODUCT_ID]["value"],
             coordinate=row_data[constants.GENERAL_PRODUCT_ID]["coordinate"],
@@ -155,7 +151,7 @@ class ProductData(BaseDataModel):
             account_name=row_data.get(constants.GENERAL_ACCOUNT_NAME),
             export_date=row_data.get(constants.GENERAL_EXPORT_DATE, {}).get("value"),
             status=row_data[constants.GENERAL_STATUS]["value"],
-            icon=cls._get_default_icon(),
+            icon=default_icon,
         )
 
     @classmethod
@@ -200,8 +196,3 @@ class ProductData(BaseDataModel):
             constants.GENERAL_CREATED: self.created_date,
             constants.GENERAL_MODIFIED: self.updated_date,
         }
-
-    @staticmethod
-    def _get_default_icon() -> bytes:
-        icon_path = Path(Path(__file__).parent) / "icons/fake-icon.png"
-        return Path(icon_path).open("rb").read()
