@@ -3,8 +3,7 @@ from pathlib import Path
 
 import pytest
 import typer
-from cli.core.accounts import app
-from cli.core.accounts.app import get_active_account, protocol_and_host
+from cli.core.accounts.app import app, get_active_account, protocol_and_host
 from cli.core.accounts.handlers import JsonFileHandler
 from cli.core.errors import MPTAPIError
 from cli.core.mpt.models import Account, Token
