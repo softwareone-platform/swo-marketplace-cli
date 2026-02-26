@@ -6,39 +6,29 @@ from cli.core.accounts.handlers.json_file_handler import JsonFileHandler
 
 
 @pytest.fixture
-def mock_file_path(tmp_path):
-    return tmp_path / "fake_accounts.json"
+def json_handler(tmp_path):
+    return JsonFileHandler(file_path=tmp_path / "fake_accounts.json")
 
 
-@pytest.fixture
-def json_file_handler(mock_file_path):
-    return JsonFileHandler(file_path=mock_file_path)
-
-
-@pytest.fixture
-def mock_config_data():
-    return {"key": "value"}
-
-
-def test_read_existing_file(mocker, json_file_handler, mock_config_data):
-    mocker.patch.object(json_file_handler, "exists", return_value=True)
+def test_read_existing_file(mocker, json_handler):
+    mocker.patch.object(json_handler, "exists", return_value=True)
     mock_open = mocker.patch.object(
-        Path, "open", mocker.mock_open(read_data=json.dumps(mock_config_data))
+        Path, "open", mocker.mock_open(read_data=json.dumps([{"key": "value"}]))
     )
 
-    result = json_file_handler.read()
+    result = json_handler.read()
 
-    assert result == mock_config_data
+    assert result == [{"key": "value"}]
     mock_open.assert_called_once()
     mock_open().read.assert_called_once()
 
 
-def test_read_creates_empty_file_when_nonexistent(mocker, json_file_handler):
-    mocker.patch.object(json_file_handler, "exists", return_value=False)
-    mock_create = mocker.patch.object(json_file_handler, "create")
+def test_read_creates_empty_file_when_nonexistent(mocker, json_handler):
+    mocker.patch.object(json_handler, "exists", return_value=False, autospec=True)
+    mock_create = mocker.patch.object(json_handler, "create", autospec=True)
     mocker.patch.object(Path, "open", mocker.mock_open(read_data="[]"))
 
-    result = json_file_handler.read()
+    result = json_handler.read()
 
     assert result == []
     mock_create.assert_called_once()
@@ -46,47 +36,46 @@ def test_read_creates_empty_file_when_nonexistent(mocker, json_file_handler):
 
 def test_write_creates_directory_if_not_exists(tmp_path):
     expected_records = [{"id": "test_id", "name": "Test Name"}]
-    no_existing_dir = tmp_path / "nonexistent_dir"
-    file_path = no_existing_dir / "accounts.json"
-    json_handler = JsonFileHandler(file_path=file_path)
+    nonexistent_dir = tmp_path / "nonexistent_dir"
+    target_file_path = nonexistent_dir / "accounts.json"
+    json_handler = JsonFileHandler(file_path=target_file_path)
 
     json_handler.write(expected_records)  # act
 
-    assert no_existing_dir.exists()
-    assert file_path.exists()
-    with Path(file_path).open(encoding="utf-8") as file_obj:
-        file_content = json.load(file_obj)
-    assert file_content == expected_records
+    assert nonexistent_dir.exists()
+    assert target_file_path.exists()
+    with Path(target_file_path).open(encoding="utf-8") as opened_file:
+        loaded_content = json.load(opened_file)
+    assert loaded_content == expected_records
 
 
-def test_write_writes_correct_data_to_file(json_file_handler, mock_file_path):
+def test_write_writes_correct_data_to_file(json_handler):
     expected_records = [{"id": "test_id", "name": "Test Name"}]
 
-    json_file_handler.write(expected_records)  # act
+    json_handler.write(expected_records)  # act
 
-    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
-        file_content = json.load(file_obj)
-    assert file_content == expected_records
-
-
-def test_write_add_data_to_existing_file(json_file_handler, mock_file_path):
-    initial_data = [{"id": "initial_id", "name": "Initial Name"}]
-    updated_data = [{"id": "updated_id", "name": "Updated Name"}]
-    with Path(mock_file_path).open("w", encoding="utf-8") as file_obj:
-        json.dump(initial_data, file_obj)
-
-    json_file_handler.write(updated_data)  # act
-
-    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
-        file_content = json.load(file_obj)
-    assert file_content == updated_data
+    with Path(json_handler.file_path).open(encoding="utf-8") as opened_file:
+        loaded_content = json.load(opened_file)
+    assert loaded_content == expected_records
 
 
-def test_write_empty_data(json_file_handler, mock_file_path):
-    empty_data = []
+def test_write_add_data_to_existing_file(json_handler):
+    initial_records = [{"id": "initial_id", "name": "Initial Name"}]
+    updated_records = [{"id": "updated_id", "name": "Updated Name"}]
+    json_handler.write(initial_records)
 
-    json_file_handler.write(empty_data)  # act
+    json_handler.write(updated_records)  # act
 
-    with Path(mock_file_path).open(encoding="utf-8") as file_obj:
-        file_content = json.load(file_obj)
-    assert file_content == empty_data
+    with Path(json_handler.file_path).open(encoding="utf-8") as opened_file:
+        loaded_content = json.load(opened_file)
+    assert loaded_content == updated_records
+
+
+def test_write_empty_data(json_handler):
+    empty_records = []
+
+    json_handler.write(empty_records)  # act
+
+    with Path(json_handler.file_path).open(encoding="utf-8") as opened_file:
+        loaded_content = json.load(opened_file)
+    assert loaded_content == empty_records

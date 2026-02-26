@@ -12,43 +12,30 @@ from cli.core.mpt.models import (
 )
 
 
-def test_get_products(requests_mocker, mpt_client, mpt_products_response, mpt_products):
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "catalog/products?limit=10&offset=0",
+@pytest.mark.parametrize(
+    ("query", "expected_resource"),
+    [
+        (None, "catalog/products?limit=10&offset=0"),
+        (
+            "eq(product.id,'PRD-1234-1234')",
+            "catalog/products?limit=10&offset=0&eq%28product.id%2C%27PRD-1234-1234%27%29",
         ),
-        json=mpt_products_response,
-    )
+    ],
+)
+def test_get_products(
+    query, expected_resource, requests_mocker, mpt_client, mpt_products_response, mpt_products
+):
+    requests_mocker.get(urljoin(mpt_client.base_url, expected_resource), json=mpt_products_response)
 
-    result = get_products(mpt_client, 10, 0)
+    result = get_products(mpt_client, 10, 0, query=query)
 
     _meta, products = result
     assert products == [Product.model_validate(product_data) for product_data in mpt_products]
 
 
-def test_get_products_with_query(requests_mocker, mpt_client, mpt_products_response, mpt_products):
-    requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "catalog/products?limit=10&offset=0&eq(product.id,'PRD-1234-1234')",
-        ),
-        json=mpt_products_response,
-    )
-
-    result = get_products(mpt_client, 10, 0)
-
-    _, products = result
-    assert products == [Product.model_validate(product_data) for product_data in mpt_products]
-
-
 def test_get_products_exception(requests_mocker, mpt_client):
     requests_mocker.get(
-        urljoin(
-            mpt_client.base_url,
-            "catalog/products?limit=10&offset=0",
-        ),
-        status=500,
+        urljoin(mpt_client.base_url, "catalog/products?limit=10&offset=0"), status=500
     )
 
     with pytest.raises(MPTAPIError) as error:

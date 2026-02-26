@@ -15,7 +15,7 @@ from cli.core.stats import ProductStatsCollector
 
 
 class FakeRelatedComponentsService(RelatedComponentsBaseService):
-    pass
+    """Fake related components service."""
 
 
 class FakeActionEnum(StrEnum):

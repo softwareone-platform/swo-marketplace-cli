@@ -5,14 +5,12 @@ from cli.core.handlers import FileHandler
 
 
 class FakeFileHandler(FileHandler):
-    def create(self):
-        pass
+    def create(self): ...
 
     def read(self):
         return "fake"
 
-    def write(self, records):
-        pass
+    def write(self, records): ...
 
 
 @pytest.mark.parametrize(

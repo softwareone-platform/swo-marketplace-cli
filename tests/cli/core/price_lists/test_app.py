@@ -15,12 +15,17 @@ def test_sync_price_lists_not_files_found(price_list_new_file):
 
 
 def test_sync_price_lists_multiple_files(
-    mocker, price_list_data_from_json, price_list_new_file, expected_account
+    mocker, price_list_data_from_json, price_list_new_file, active_vendor_account
 ):
-    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
+    mocker.patch(
+        "cli.core.price_lists.app.get_active_account",
+        return_value=active_vendor_account,
+        autospec=True,
+    )
     mocker.patch(
         "cli.core.price_lists.app.get_files_path",
         return_value=[price_list_new_file, price_list_new_file],
+        autospec=True,
     )
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
@@ -52,9 +57,16 @@ def test_sync_price_lists_multiple_files(
 
 
 def test_sync_price_lists_create(
-    mocker, mpt_price_list_data, price_list_data_from_json, price_list_file_path, expected_account
+    mocker,
+    price_list_data_from_json,
+    price_list_file_path,
+    active_vendor_account,
 ):
-    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
+    mocker.patch(
+        "cli.core.price_lists.app.get_active_account",
+        return_value=active_vendor_account,
+        autospec=True,
+    )
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,
@@ -83,10 +95,14 @@ def test_sync_price_lists_create(
 
 
 def test_sync_price_lists_update(
-    mocker, price_list_data_from_json, price_list_file_path, expected_account
+    mocker, price_list_data_from_json, price_list_file_path, active_vendor_account
 ):
     stats = PriceListStatsCollector()
-    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=expected_account)
+    mocker.patch(
+        "cli.core.price_lists.app.get_active_account",
+        return_value=active_vendor_account,
+        autospec=True,
+    )
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,
         "retrieve",
@@ -185,7 +201,11 @@ def test_export_file_exists(mocker, active_operations_account):
 def test_export_price_list_no_operations_account(
     mocker, active_vendor_account, price_list_data_from_json
 ):
-    mocker.patch("cli.core.price_lists.app.get_active_account", return_value=active_vendor_account)
+    mocker.patch(
+        "cli.core.price_lists.app.get_active_account",
+        return_value=active_vendor_account,
+        autospec=True,
+    )
     price_list_service_export_spy = mocker.spy(PriceListService, "export")
     item_service_export_spy = mocker.spy(ItemService, "export")
 

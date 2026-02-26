@@ -19,7 +19,7 @@ from cli.core.mpt.models import Account as MPTAccount
 from cli.core.mpt.models import Token
 
 
-def test_from_token(expected_account):
+def test_from_token(active_vendor_account):
     token = Token(
         id="TKN-1111-1111",
         account=MPTAccount(
@@ -32,7 +32,7 @@ def test_from_token(expected_account):
 
     result = Account.from_token(token, "https://example.com")
 
-    assert result == expected_account
+    assert result == active_vendor_account
 
 
 def test_get_or_create_accounts_create(mocker, tmp_path):
@@ -44,25 +44,27 @@ def test_get_or_create_accounts_create(mocker, tmp_path):
 
 
 def test_get_or_create_accounts_get(
-    mocker, accounts_path, expected_account, another_expected_account
+    mocker, accounts_path, active_vendor_account, inactive_vendor_account
 ):
     mocker.patch.object(JsonFileHandler, "_default_file_path", accounts_path)
 
     result = get_or_create_accounts()
 
-    expected_accounts = [expected_account, another_expected_account]
+    expected_accounts = [active_vendor_account, inactive_vendor_account]
     assert result == expected_accounts
 
 
-def test_does_account_exist(expected_account, another_expected_account):
-    result = does_account_exist([expected_account, another_expected_account], expected_account)
+def test_does_account_exist(active_vendor_account, inactive_vendor_account):
+    result = does_account_exist(
+        [active_vendor_account, inactive_vendor_account], active_vendor_account
+    )
 
     assert result is True
 
 
-def test_doesnot_account_exist(expected_account, another_expected_account):
+def test_doesnot_account_exist(active_vendor_account, inactive_vendor_account):
     result = does_account_exist(
-        [expected_account, another_expected_account],
+        [active_vendor_account, inactive_vendor_account],
         Account(
             id="ACC-4321",
             name="Not exists account",
@@ -77,18 +79,18 @@ def test_doesnot_account_exist(expected_account, another_expected_account):
     assert result is False
 
 
-def test_remove_account(expected_account, another_expected_account):
-    accounts = [expected_account, another_expected_account]
+def test_remove_account(active_vendor_account, inactive_vendor_account):
+    accounts = [active_vendor_account, inactive_vendor_account]
 
-    result = remove_account(accounts, another_expected_account)
+    result = remove_account(accounts, inactive_vendor_account)
 
-    assert result == [expected_account]
+    assert result == [active_vendor_account]
 
 
-def test_write_accounts(mocker, tmp_path, expected_account, another_expected_account):
+def test_write_accounts(mocker, tmp_path, active_vendor_account, inactive_vendor_account):
     file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", file_path)
-    accounts = [expected_account, another_expected_account]
+    accounts = [active_vendor_account, inactive_vendor_account]
     write_accounts(accounts)
     with Path(file_path).open(encoding="utf-8") as file_obj:
         written_accounts = json.load(file_obj)
@@ -98,23 +100,25 @@ def test_write_accounts(mocker, tmp_path, expected_account, another_expected_acc
     assert result == [account.model_dump() for account in accounts]
 
 
-def test_disable_accounts_except(expected_account, another_expected_account):
-    accounts = [expected_account, another_expected_account]
+def test_disable_accounts_except(active_vendor_account, inactive_vendor_account):
+    accounts = [active_vendor_account, inactive_vendor_account]
 
-    disable_accounts_except(accounts, another_expected_account)  # act
+    disable_accounts_except(accounts, inactive_vendor_account)  # act
 
-    assert not expected_account.is_active
-    assert another_expected_account.is_active
-
-
-def test_find_account(expected_account, another_expected_account):
-    result = find_account([expected_account, another_expected_account], expected_account.id)
-
-    assert result == expected_account
+    assert not active_vendor_account.is_active
+    assert inactive_vendor_account.is_active
 
 
-def test_find_account_exception(expected_account, another_expected_account):
-    accounts = [expected_account, another_expected_account]
+def test_find_account(active_vendor_account, inactive_vendor_account):
+    result = find_account(
+        [active_vendor_account, inactive_vendor_account], active_vendor_account.id
+    )
+
+    assert result == active_vendor_account
+
+
+def test_find_account_exception(active_vendor_account, inactive_vendor_account):
+    accounts = [active_vendor_account, inactive_vendor_account]
 
     with pytest.raises(AccountNotFoundError) as error:
         find_account(accounts, "another-account-id")
@@ -122,17 +126,17 @@ def test_find_account_exception(expected_account, another_expected_account):
     assert "nother-account-id" in str(error.value)
 
 
-def test_find_active_account(expected_account, another_expected_account):
-    accounts = [expected_account, another_expected_account]
+def test_find_active_account(active_vendor_account, inactive_vendor_account):
+    accounts = [active_vendor_account, inactive_vendor_account]
 
     result = find_active_account(accounts)
 
-    assert result == expected_account
+    assert result == active_vendor_account
 
 
-def test_find_active_account_exception(expected_account, another_expected_account):
-    expected_account.is_active = False
-    accounts = [expected_account, another_expected_account]
+def test_find_active_account_exception(active_vendor_account, inactive_vendor_account):
+    active_vendor_account.is_active = False
+    accounts = [active_vendor_account, inactive_vendor_account]
 
     with pytest.raises(NoActiveAccountFoundError) as error:
         find_active_account(accounts)

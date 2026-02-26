@@ -879,11 +879,11 @@ def settings_file_data():
 
 @pytest.fixture
 def list_response_mock_data_factory():
-    def _create_data_response(response_items):
+    def factory(response_items):
         response = {
             "$meta": {"pagination": {"offset": 0, "limit": 100, "total": 0}},
             "data": response_items,
         }
         return Mock(spec=Response, json=Mock(return_value=response))
 
-    return _create_data_response
+    return factory

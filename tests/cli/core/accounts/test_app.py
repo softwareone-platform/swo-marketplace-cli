@@ -14,7 +14,7 @@ runner = CliRunner()
 
 
 @pytest.fixture
-def new_token():
+def vendor_token():
     return Token(
         id="TKN-1111-1111",
         account=Account(
@@ -27,35 +27,32 @@ def new_token():
 
 
 @pytest.fixture
-def existing_token():
-    def _wrapper(token):
+def existing_token_factory():
+    def factory(token_value):
         return Token(
             id="TKN-1111-1111",
-            account=Account(
-                id="ACC-12342",
-                name="Account 2",
-                type="Vendor",
-            ),
-            token=token,
+            account=Account(id="ACC-12342", name="Account 2", type="Vendor"),
+            token=token_value,
         )
 
-    return _wrapper
+    return factory
 
 
-def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
+def test_add_account_accounts_file_not_exists(tmp_path, mocker, vendor_token):
     account_file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", account_file_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
-        return_value=new_token,
+        return_value=vendor_token,
+        autospec=True,
     )
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(account_file_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(account_file_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12345new",
             "name": "New Account",
@@ -68,19 +65,20 @@ def test_add_account_accounts_file_not_exists(tmp_path, mocker, new_token):
     ]
 
 
-def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
+def test_add_account_accounts_file_exists(new_accounts_path, mocker, vendor_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
-        return_value=new_token,
+        return_value=vendor_token,
+        autospec=True,
     )
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12341",
             "name": "Account 1",
@@ -111,11 +109,12 @@ def test_add_account_accounts_file_exists(new_accounts_path, mocker, new_token):
     ]
 
 
-def test_add_account_override_environment(new_accounts_path, mocker, new_token):
+def test_add_account_override_environment(new_accounts_path, mocker, vendor_token):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
-        return_value=new_token,
+        return_value=vendor_token,
+        autospec=True,
     )
 
     result = runner.invoke(
@@ -129,9 +128,9 @@ def test_add_account_override_environment(new_accounts_path, mocker, new_token):
     )
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12341",
             "name": "Account 1",
@@ -167,6 +166,7 @@ def test_add_account_token_failed(new_accounts_path, mocker):
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
         side_effect=MPTAPIError("critical error", "you can't perform the operation"),
+        autospec=True,
     )
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"])
@@ -174,19 +174,20 @@ def test_add_account_token_failed(new_accounts_path, mocker):
     assert result.exit_code == 3, result.stdout
 
 
-def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing_token):
+def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing_token_factory):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
-        return_value=existing_token("idt:TKN-1111-1111:secret"),
+        return_value=existing_token_factory("idt:TKN-1111-1111:secret"),
+        autospec=True,
     )
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="N\n")
 
     assert result.exit_code == 1, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12341",
             "name": "Account 1",
@@ -208,19 +209,20 @@ def test_add_existing_account_do_not_replace(new_accounts_path, mocker, existing
     ]
 
 
-def test_add_existing_account_replace(new_accounts_path, mocker, existing_token):
+def test_add_existing_account_replace(new_accounts_path, mocker, existing_token_factory):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
     mocker.patch(
         "cli.core.accounts.api.account_api_service.MPTAccountService.get_authentication",
-        return_value=existing_token("idt:TKN-1111-1111:secret"),
+        return_value=existing_token_factory("idt:TKN-1111-1111:secret"),
+        autospec=True,
     )
 
     result = runner.invoke(app, ["add", "idt:TKN-1111-1111:secret"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12341",
             "name": "Account 1",
@@ -265,9 +267,9 @@ def test_activate_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["activate", "ACC-12342"])
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12341",
             "name": "Account 1",
@@ -320,9 +322,9 @@ def test_remove_account(new_accounts_path, mocker):
     result = runner.invoke(app, ["remove", "ACC-12341"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    assert accounts == [
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    assert loaded_accounts == [
         {
             "id": "ACC-12342",
             "name": "Account 2",
@@ -363,22 +365,21 @@ def test_list_active_account(new_accounts_path, mocker):
     assert "ACC-12342" not in result.stdout
 
 
-def test_get_active_account(new_accounts_path, mocker, expected_account):
+def test_get_active_account(new_accounts_path, mocker, active_vendor_account):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
 
     result = get_active_account()
 
-    assert result == expected_account
+    assert result == active_vendor_account
 
 
-def test_get_active_account_no_active_account(new_accounts_path, mocker, expected_account):
+def test_get_active_account_no_active_account(new_accounts_path, mocker):
     mocker.patch.object(JsonFileHandler, "_default_file_path", new_accounts_path)
-    with Path(new_accounts_path).open(encoding="utf-8") as file_obj:
-        accounts = json.load(file_obj)
-    for account in accounts:
-        account["is_active"] = False
-    with Path(new_accounts_path).open("w", encoding="utf-8") as file_obj:
-        json.dump(accounts, file_obj)
+    with Path(new_accounts_path).open(encoding="utf-8") as opened_file:
+        loaded_accounts = json.load(opened_file)
+    loaded_accounts = [{**account_record, "is_active": False} for account_record in loaded_accounts]
+    with Path(new_accounts_path).open("w", encoding="utf-8") as opened_file:
+        json.dump(loaded_accounts, opened_file)
 
     with pytest.raises(typer.Exit):
         get_active_account()
