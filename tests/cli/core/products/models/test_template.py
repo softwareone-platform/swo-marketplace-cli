@@ -47,35 +47,27 @@ def test_template_data_to_json(template_data_from_dict):
     assert result == {
         "name": "Change",
         "type": "OrderCompleted",
-        "content": r"""## Your order is complete
-
-Your order has completed and your subscriptions are ready for use.
-
-You can continue to use the Adobe Admin Console to assign licenses to users in your organization.
-<br />Your existing username and password for the Adobe Admin Console remain unchanged.
-
-[Adobe Admin Console](https://adminconsole.adobe.com/)
-
-You can view and manage your agreements and subscriptions within the SoftwareOne Marketplace.
-
-***
-
-## Completed steps
-
-We have completed the following steps:
-
-1\. We changed the quantities of any subscriptions you modified in the order.
-
-2\. We created any new subscriptions based on items added to your order.
-
-***
-
-## Need help?
-
-If you have any questions regarding your order, please contact your SoftwareOne account team.
-
-Thanks for choosing SoftwareOne.
-""",
+        "content": (
+            "## Your order is complete\n\n"
+            "Your order has completed and your subscriptions are ready for use.\n\n"
+            "You can continue to use the Adobe Admin Console to assign licenses to users in your "
+            "organization.\n"
+            "<br />Your existing username and password for the Adobe Admin Console remain "
+            "unchanged.\n\n"
+            "[Adobe Admin Console](https://adminconsole.adobe.com/)\n\n"
+            "You can view and manage your agreements and subscriptions within the SoftwareOne "
+            "Marketplace.\n\n"
+            "***\n\n"
+            "## Completed steps\n\n"
+            "We have completed the following steps:\n\n"
+            "1\\. We changed the quantities of any subscriptions you modified in the order.\n\n"
+            "2\\. We created any new subscriptions based on items added to your order.\n\n"
+            "***\n\n"
+            "## Need help?\n\n"
+            "If you have any questions regarding your order, please contact your SoftwareOne "
+            "account team.\n\n"
+            "Thanks for choosing SoftwareOne.\n"
+        ),
         "default": False,
     }
 

@@ -51,15 +51,17 @@ def test_item_group_data_to_json(item_group_data_from_dict):
     assert result == {
         "name": "Items",
         "label": "Select items",
-        "description": """About this step:
-1. If you are creating a Change order for an existing agreement, you may add items or increase
-the quantities of existing subscriptions.
-2. If you are creating a Purchase order for a new cloud account, you may add new items and set the
-quantities of those items.
-3. If you are creating a Purchase order to migrate from Adobe VIP, the items will be added for you.
-You may not add items or adjust the quantity of items. You will not be billed for this order until
-your anniversary date since these items have already been paid for under the Adobe VIP program for
-the current term.""",
+        "description": (
+            "About this step:\n"
+            "1. If you are creating a Change order for an existing agreement, you may add items "
+            "or increase\nthe quantities of existing subscriptions.\n"
+            "2. If you are creating a Purchase order for a new cloud account, you may add new "
+            "items and set the\nquantities of those items.\n"
+            "3. If you are creating a Purchase order to migrate from Adobe VIP, the items will "
+            "be added for you.\nYou may not add items or adjust the quantity of items. You will "
+            "not be billed for this order until\nyour anniversary date since these items have "
+            "already been paid for under the Adobe VIP program for\nthe current term."
+        ),
         "displayOrder": 10,
         "default": True,
         "multiple": True,
