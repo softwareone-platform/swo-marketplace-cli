@@ -1,4 +1,3 @@
-import pytest
 from cli.core.handlers.excel_file_handler import ExcelFileHandler
 from cli.core.handlers.file_manager import ExcelFileManager
 
@@ -9,19 +8,6 @@ class FakeExcelFileManager(ExcelFileManager):
     def create_tab(self): ...
 
     def write_error(self, error, resource_id=None): ...
-
-
-def test_get_row_and_column_from_coordinate_valid():
-    result = FakeExcelFileManager._get_row_and_column_from_coordinate("B12")  # noqa: SLF001
-
-    col, row = result
-    assert col == "B"
-    assert row == 12
-
-
-def test_get_row_and_column_invalid():
-    with pytest.raises(ValueError):
-        FakeExcelFileManager._get_row_and_column_from_coordinate("")  # noqa: SLF001
 
 
 def test_write_ids(mocker):

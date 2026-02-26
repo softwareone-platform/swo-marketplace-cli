@@ -87,10 +87,10 @@ class ErrorMessagesCollector:
 class StatsCollector(ABC):
     """Abstract base class for collecting and managing operation statistics."""
 
-    _stat_id: str | None = None
     errors = ErrorMessagesCollector()
 
     def __init__(self, tabs: dict[str, TabResults]) -> None:
+        self._stat_id: str | None = None
         self._has_error = False
         self._tab_aliases = tabs
 
