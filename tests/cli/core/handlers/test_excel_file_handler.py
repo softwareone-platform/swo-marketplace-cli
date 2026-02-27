@@ -177,6 +177,32 @@ def test_get_data_from_vertical_sheet_by_fields(excel_file_handler):
     assert result == {"Field1": {"value": "Value1", "coordinate": "B2"}}
 
 
+def test_clean_worksheets_by_sheet_name(excel_file_handler):
+    excel_file_handler.write_cell("VerticalSheet", row=2, col=3, cell_value="V")
+    excel_file_handler.write_cell("HorizontalSheet", row=2, col=3, cell_value="H")
+    clean_worksheets_attr = "_clean_worksheets"
+    worksheets_cache_attr = "_worksheets_cache"
+    clean_worksheets = getattr(excel_file_handler, clean_worksheets_attr)
+    worksheets_cache = getattr(excel_file_handler, worksheets_cache_attr)
+
+    clean_worksheets("VerticalSheet")  # act
+
+    assert "VerticalSheet" not in worksheets_cache
+    assert "HorizontalSheet" in worksheets_cache
+
+
+def test_clean_worksheets_all(excel_file_handler):
+    excel_file_handler.write_cell("VerticalSheet", row=2, col=3, cell_value="V")
+    excel_file_handler.write_cell("HorizontalSheet", row=2, col=3, cell_value="H")
+    clean_worksheets_attr = "_clean_worksheets"
+    worksheets_cache_attr = "_worksheets_cache"
+    clean_worksheets = getattr(excel_file_handler, clean_worksheets_attr)
+
+    clean_worksheets()  # act
+
+    assert getattr(excel_file_handler, worksheets_cache_attr) == {}
+
+
 def test_get_values_for_dynamic_sheet(excel_file_handler):
     fields = ["Header1"]
     patterns = [re.compile(r"Value\d+")]

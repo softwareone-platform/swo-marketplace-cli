@@ -4,7 +4,7 @@ from http import HTTPStatus
 from typing import ParamSpec, TypeVar
 
 from mpt_api_client.exceptions import MPTHttpError as APIException
-from requests import RequestException
+from requests import RequestException, Response
 
 CallableParams = ParamSpec("CallableParams")
 RetType = TypeVar("RetType")
@@ -25,7 +25,27 @@ class MPTAPIError(CLIError):
         return f"{self._request_msg} with response body {self._response_body}"
 
 
-def wrap_http_error[**CallableParams, RetType](  # noqa: C901
+def _parse_bad_request_message(response: Response) -> str:
+    try:
+        response_body = response.json()
+    except ValueError:
+        return str(response.content)
+
+    response_errors = response_body.get("errors", {}) if isinstance(response_body, dict) else {}
+    if not isinstance(response_errors, dict) or not response_errors:
+        return str(response.content)
+
+    return "\n".join(
+        (
+            f"{field}: {error_details[0]}"
+            if isinstance(error_details, (list, tuple)) and error_details
+            else f"{field}: {error_details}"
+        )
+        for field, error_details in response_errors.items()
+    )
+
+
+def wrap_http_error[**CallableParams, RetType](
     func: Callable[CallableParams, RetType],
 ) -> Callable[CallableParams, RetType]:
     """Decorator to wrap HTTP request functions and handle RequestException.
@@ -45,18 +65,13 @@ def wrap_http_error[**CallableParams, RetType](  # noqa: C901
         except RequestException as error:
             if error.response is None:
                 msg = "No response"
-            elif error.response.status_code == HTTPStatus.BAD_REQUEST:
-                response_body = error.response.json()
+                raise MPTAPIError(str(error), msg) from error
 
-                msg = ""
-                if "errors" in response_body:
-                    for field, error_details in response_body["errors"].items():
-                        msg += f"{field}: {error_details[0]}\n"
-                else:
-                    msg = str(error.response.content)
-            else:
+            if error.response.status_code != HTTPStatus.BAD_REQUEST:
                 msg = str(error.response.content)
+                raise MPTAPIError(str(error), msg) from error
 
+            msg = _parse_bad_request_message(error.response)
             raise MPTAPIError(str(error), msg) from error
 
     return _wrapper

@@ -17,3 +17,12 @@ def test_set_dict_value_same_leaf():
     result = set_dict_value(original_dict, path, "test")
 
     assert result == {"a": {"b": {"c": "old_value", "d": "test"}}}
+
+
+def test_set_dict_value_overwrites_falsy_value():
+    original_dict = {"a": 0}
+    path = "a.b"
+
+    result = set_dict_value(original_dict, path, "test")
+
+    assert result == {"a": {"b": "test"}}

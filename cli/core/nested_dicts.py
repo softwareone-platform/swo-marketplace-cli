@@ -15,12 +15,15 @@ def set_dict_value(original_dict: dict[str, Any], path: str, new_value: Any) -> 
     """
     path_list = path.split(".", 1)
     if len(path_list) == 1:
-        original_dict[path_list[0]] = new_value
-    else:
-        current, next_path = path_list[0], path_list[-1]
-        if current in original_dict:
-            original_dict[current] = set_dict_value(original_dict[current], next_path, new_value)
-        else:
-            original_dict[current] = set_dict_value({}, next_path, new_value)
+        original_dict.update({path_list[0]: new_value})
+        return original_dict
 
+    current, next_path = path_list[0], path_list[-1]
+    if current in original_dict:
+        current_value = original_dict.get(current)
+        next_dict = current_value if isinstance(current_value, dict) else {}
+    else:
+        next_dict = {}
+
+    original_dict.update({current: set_dict_value(next_dict, next_path, new_value)})
     return original_dict
