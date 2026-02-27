@@ -70,8 +70,9 @@ class ErrorMessagesCollector:
         msg = ""
         for section_name, section in self._sections.items():
             msg = f"{msg}{section_name}:"
-            if "" in section:
-                msg = f"{msg} {', '.join(section[''])}\n"
+            section_messages = section.get("", [])
+            if section_messages:
+                msg = f"{msg} {', '.join(section_messages)}\n"
             else:
                 msg += "\n"
 

@@ -58,8 +58,8 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
             formatted_path = format_json_path(key, source_trail, target_trail)
             table.add_row(
                 formatted_path,
-                str(source_value) if source_value is not None else "[red]<missing>[/red]",
-                str(target_value) if target_value is not None else "[red]<missing>[/red]",
+                "[red]<missing>[/red]" if source_value is None else str(source_value),
+                "[red]<missing>[/red]" if target_value is None else str(target_value),
             )
 
     if differences_found:
