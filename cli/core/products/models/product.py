@@ -75,16 +75,19 @@ class SettingsData(BaseDataModel):
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
         formatted_settings = {}
-        for key, raw_setting in json_data.items():
+        for setting_key, raw_setting in json_data.items():
             if isinstance(raw_setting, dict):
                 for sub_key, sub_value in raw_setting.items():
-                    formatted_settings[f"{key}.{sub_key}"] = sub_value
+                    formatted_settings[f"{setting_key}.{sub_key}"] = sub_value
             else:
-                formatted_settings[key] = raw_setting
+                formatted_settings[setting_key] = raw_setting
 
         records = [
-            SettingsRecords.from_json({"name": key, "value": formatted_settings.get(setting_path)})
-            for key, setting_path in constants.SETTINGS_API_MAPPING.items()
+            SettingsRecords.from_json({
+                "name": setting_name,
+                "value": formatted_settings.get(setting_path),
+            })
+            for setting_name, setting_path in constants.SETTINGS_API_MAPPING.items()
         ]
         return cls(records=records)
 
