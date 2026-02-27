@@ -3,6 +3,7 @@ import responses
 from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
 from cli.core.mpt.client import MPTClient
+from mpt_api_client import MPTClient as MPTAPIClient
 
 
 @pytest.fixture
@@ -15,6 +16,19 @@ def requests_mocker():
 @pytest.fixture
 def mpt_client():
     return MPTClient("https://example.com", "token")
+
+
+@pytest.fixture
+def api_mpt_client(mocker):
+    return mocker.MagicMock(spec=MPTAPIClient)
+
+
+@pytest.fixture
+def mock_mpt_client_error_payload():
+    return {
+        "status": 500,
+        "message": "Internal Server Error",
+    }
 
 
 @pytest.fixture

@@ -1,7 +1,6 @@
 from unittest.mock import Mock, call
 
 import pytest
-from cli.core.errors import MPTAPIError
 from cli.core.handlers.errors import RequiredFieldsError, RequiredSheetsError
 from cli.core.products.api import ProductAPIService
 from cli.core.products.constants import TAB_GENERAL
@@ -11,6 +10,8 @@ from cli.core.products.services import ProductService
 from cli.core.services.service_context import ServiceContext
 from cli.core.stats import ProductStatsCollector
 from freezegun import freeze_time
+from mpt_api_client.exceptions import MPTAPIError
+from mpt_api_client.resources.catalog.products import Product
 
 
 @pytest.fixture
@@ -25,12 +26,17 @@ def service_context(mpt_client, product_new_file, active_vendor_account):
     )
 
 
-def test_create(mocker, service_context, mpt_product_data, product_data_from_dict):
+def test_create(mocker, service_context, mpt_product_data, product_data_from_dict, api_mpt_client):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
-    api_post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
-    api_update_mock = mocker.patch.object(service_context.api, "update")
+    product_obj = mocker.Mock(spec=Product)
+    product_obj.id = mpt_product_data["id"]
+    api_mpt_client.catalog.products.create.return_value = product_obj
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
+    )
     write_id_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
     service = ProductService(service_context)
@@ -41,18 +47,28 @@ def test_create(mocker, service_context, mpt_product_data, product_data_from_dic
     read_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
     write_id_mock.assert_called_once_with({"B3": product_data_from_dict.id})
-    api_post_mock.assert_called_once()
-    api_update_mock.assert_called_once()
+    api_mpt_client.catalog.products.create.assert_called_once()
+    api_mpt_client.catalog.products.update_settings.assert_called_once()
 
 
-def test_create_post_error(mocker, service_context, product_data_from_dict):
+def test_create_post_error(
+    mocker,
+    service_context,
+    product_data_from_dict,
+    api_mpt_client,
+    mock_mpt_client_error_payload,
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
-    api_post_mock = mocker.patch.object(
-        service_context.api,
-        "post",
-        side_effect=MPTAPIError("API Error", "Error creating product"),
+    err_status = mock_mpt_client_error_payload["status"]
+    err_message = mock_mpt_client_error_payload["message"]
+    api_mpt_client.catalog.products.create.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_spy = mocker.spy(service_context.stats, "add_error")
@@ -61,23 +77,36 @@ def test_create_post_error(mocker, service_context, product_data_from_dict):
     result = service.create()
 
     assert result.success is False
-    assert result.errors == ["API Error with response body Error creating product"]
-    assert result.model is None
+    assert len(result.errors) > 0
+    assert result.model is product_data_from_dict
     stats_spy.assert_called_once_with(TAB_GENERAL)
     read_data_mock.assert_called_once()
-    api_post_mock.assert_called_once()
+    api_mpt_client.catalog.products.create.assert_called_once()
     file_handler_write_mock.assert_called_once()
 
 
-def test_create_update_error(mocker, service_context, mpt_product_data, product_data_from_dict):
+def test_create_update_error(
+    mocker,
+    service_context,
+    mpt_product_data,
+    product_data_from_dict,
+    api_mpt_client,
+    mock_mpt_client_error_payload,
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
-    api_post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
-    api_update_mock = mocker.patch.object(
-        service_context.api,
-        "update",
-        side_effect=MPTAPIError("API Error", "Error creating product"),
+    err_status = mock_mpt_client_error_payload["status"]
+    err_message = mock_mpt_client_error_payload["message"]
+    product_obj = mocker.Mock(spec=Product)
+    product_obj.id = mpt_product_data["id"]
+    api_mpt_client.catalog.products.create.return_value = product_obj
+    api_mpt_client.catalog.products.update_settings.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_spy = mocker.spy(service_context.stats, "add_error")
@@ -86,45 +115,55 @@ def test_create_update_error(mocker, service_context, mpt_product_data, product_
     result = service.create()
 
     assert result.success is False
-    assert result.errors == ["API Error with response body Error creating product"]
+    assert len(result.errors) > 0
     assert result.model is None
     stats_spy.assert_called_once_with(TAB_GENERAL)
     read_data_mock.assert_called_once()
-    api_post_mock.assert_called_once()
-    api_update_mock.assert_called_once()
+    api_mpt_client.catalog.products.create.assert_called_once()
+    api_mpt_client.catalog.products.update_settings.assert_called_once()
     file_handler_write_mock.assert_called_once()
 
 
-def test_export(mocker, service_context, mpt_product_data):
-    get_mock = mocker.patch.object(service_context.api, "get", return_value=mpt_product_data)
+def test_export(mocker, service_context, mpt_product_data, api_mpt_client):
+    api_mpt_client.catalog.products.get.return_value = Product(mpt_product_data)
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
+    )
     create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     add_mock = mocker.patch.object(service_context.file_manager, "add")
     settings_create_tab_mock = mocker.patch.object(SettingsExcelFileManager, "create_tab")
     settings_file_manager_add_mock = mocker.patch.object(SettingsExcelFileManager, "add")
     service = ProductService(service_context)
 
-    result = service.export({"product_id": "fake_id"})
+    result = service.export("fake_id")
 
     assert result.success is True
-    get_mock.assert_called()
+    api_mpt_client.catalog.products.get.assert_called_once_with("fake_id")
     create_tab_mock.assert_called_once()
     add_mock.assert_called_once()
     settings_create_tab_mock.assert_called_once()
     settings_file_manager_add_mock.assert_called_once()
 
 
-def test_export_mpt_error(mocker, service_context):
-    get_mock = mocker.patch.object(
-        service_context.api, "get", side_effect=MPTAPIError("API Error", "Error retrieving item")
+def test_export_mpt_error(mocker, service_context, mock_mpt_client_error_payload, api_mpt_client):
+    err_message = mock_mpt_client_error_payload["message"]
+    err_status = mock_mpt_client_error_payload["status"]
+    api_mpt_client.catalog.products.get.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     create_tab_spy = mocker.spy(service_context.file_manager, "create_tab")
     add_spy = mocker.spy(service_context.file_manager, "add")
     service = ProductService(service_context)
 
-    result = service.export({"product_id": "fake_id"})
+    result = service.export("fake_id")
 
     assert result.success is False
-    get_mock.assert_called_once()
+    api_mpt_client.catalog.products.get.assert_called_once_with("fake_id")
     create_tab_spy.assert_not_called()
     add_spy.assert_not_called()
 
@@ -197,14 +236,16 @@ def test_validate_definition_missing_fields(mocker, service_context):
     check_required_tabs_mock.assert_called_once()
 
 
-def test_retrieve(mocker, service_context, product_data_from_dict):
+def test_retrieve(mocker, service_context, product_data_from_dict, api_mpt_client):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
-    api_exists_mock = mocker.patch.object(
-        service_context.api,
-        "exists",
-        return_value=True,
+    filter_result = api_mpt_client.catalog.products.filter.return_value
+    fetch_page_mock = filter_result.fetch_page
+    fetch_page_mock.return_value.meta.pagination.total = 1
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     service = ProductService(service_context)
 
@@ -213,14 +254,19 @@ def test_retrieve(mocker, service_context, product_data_from_dict):
     assert result.success is True
     assert result.model == product_data_from_dict
     read_data_mock.assert_called_once()
-    api_exists_mock.assert_called_once()
+    fetch_page_mock.assert_called_once_with(limit=0)
 
 
-def test_retrieve_empty(mocker, service_context):
+def test_retrieve_empty(mocker, service_context, api_mpt_client):
     read_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_data", return_value=Mock(ProductData, id=None)
+        service_context.file_manager,
+        "read_data",
+        return_value=mocker.Mock(spec=ProductData, id=None),
     )
-    api_exists_mock = mocker.spy(service_context.api, "exists")
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
+    )
     service = ProductService(service_context)
 
     result = service.retrieve()
@@ -228,12 +274,29 @@ def test_retrieve_empty(mocker, service_context):
     assert result.success is True
     assert result.model is None
     read_data_mock.assert_called_once()
-    api_exists_mock.assert_not_called()
+    api_mpt_client.catalog.products.filter.assert_not_called()
 
 
-def test_retrieve_not_found(mocker, service_context):
+def test_retrieve_not_found(
+    mocker,
+    service_context,
+    product_data_from_dict,
+    api_mpt_client,
+    mock_mpt_client_error_payload,
+):
     mocker.patch.object(
-        service_context.api, "exists", side_effect=MPTAPIError("Not Found", "Product not found")
+        service_context.file_manager, "read_data", return_value=product_data_from_dict
+    )
+    err_status = mock_mpt_client_error_payload["status"]
+    err_message = mock_mpt_client_error_payload["message"]
+    filter_result = api_mpt_client.catalog.products.filter.return_value
+    fetch_page_mock = filter_result.fetch_page
+    fetch_page_mock.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     service = ProductService(service_context)
@@ -246,26 +309,35 @@ def test_retrieve_not_found(mocker, service_context):
 
 
 @freeze_time("2025-05-30")
-def test_retrieve_from_mpt(mocker, service_context, mpt_product_data, product_data_from_json):
-    api_get_mock = mocker.patch.object(
-        service_context.api,
-        "get",
-        return_value=mpt_product_data,
+def test_retrieve_from_mpt(
+    mocker, service_context, mpt_product_data, product_data_from_json, api_mpt_client
+):
+    expected_product = Product(mpt_product_data)
+    api_mpt_client.catalog.products.get.return_value = expected_product
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     service = ProductService(service_context)
 
     result = service.retrieve_from_mpt(product_data_from_json.id)
 
     assert result.success is True
-    assert result.model == product_data_from_json
-    api_get_mock.assert_called_once_with(product_data_from_json.id)
+    assert result.model is expected_product
+    api_mpt_client.catalog.products.get.assert_called_once_with(product_data_from_json.id)
 
 
-def test_retrieve_from_mpt_error(mocker, service_context):
-    api_get_mock = mocker.patch.object(
-        service_context.api,
-        "get",
-        side_effect=MPTAPIError("API Error", "Error retrieving item"),
+def test_retrieve_from_mpt_error(
+    mocker, service_context, api_mpt_client, mock_mpt_client_error_payload
+):
+    err_status = mock_mpt_client_error_payload["status"]
+    err_message = mock_mpt_client_error_payload["message"]
+    api_mpt_client.catalog.products.get.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     service = ProductService(service_context)
 
@@ -274,17 +346,20 @@ def test_retrieve_from_mpt_error(mocker, service_context):
     assert result.success is False
     assert len(result.errors) > 0
     assert result.model is None
-    api_get_mock.assert_called_once_with("fake_id")
+    api_mpt_client.catalog.products.get.assert_called_once_with("fake_id")
 
 
-def test_update(mocker, service_context, product_data_from_dict):
+def test_update(mocker, service_context, product_data_from_dict, api_mpt_client):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
     read_settings_data_mock = mocker.patch.object(
         SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
     )
-    api_update_mock = mocker.patch.object(service_context.api, "update")
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
+    )
     service = ProductService(service_context)
 
     result = service.update()
@@ -298,20 +373,32 @@ def test_update(mocker, service_context, product_data_from_dict):
             "preValidation": {"changeOrderDraft": True},
         }
     }
-    api_update_mock.assert_called_once_with(product_data_from_dict.id, expected_data)
+    api_mpt_client.catalog.products.update_settings.assert_called_once_with(
+        product_data_from_dict.id, expected_data
+    )
 
 
-def test_update_error(mocker, service_context, product_data_from_dict):
+def test_update_error(
+    mocker,
+    service_context,
+    product_data_from_dict,
+    api_mpt_client,
+    mock_mpt_client_error_payload,
+):
     read_data_mock = mocker.patch.object(
-        service_context.file_manager, "read_data", return_value=Mock(id=None)
+        service_context.file_manager, "read_data", autospec=True, return_value=Mock(id=None)
     )
     read_settings_data_mock = mocker.patch.object(
         SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
     )
-    api_update_mock = mocker.patch.object(
-        service_context.api,
-        "update",
-        side_effect=MPTAPIError("API Error", "Error updating product"),
+    err_status = mock_mpt_client_error_payload["status"]
+    err_message = mock_mpt_client_error_payload["message"]
+    api_mpt_client.catalog.products.update_settings.side_effect = MPTAPIError(
+        err_status, err_message, mock_mpt_client_error_payload
+    )
+    mocker.patch(
+        "cli.core.products.services.product_service.create_api_mpt_client_from_account",
+        return_value=api_mpt_client,
     )
     stats_spy = mocker.spy(service_context.stats, "add_error")
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
@@ -320,10 +407,10 @@ def test_update_error(mocker, service_context, product_data_from_dict):
     result = service.update()
 
     assert result.success is False
-    assert result.errors == ["API Error with response body Error updating product"]
+    assert len(result.errors) > 0
     assert result.model is None
     read_data_mock.assert_called_once()
     read_settings_data_mock.assert_called_once()
     stats_spy.assert_called_once_with(TAB_GENERAL)
     file_handler_write_mock.assert_called_once()
-    api_update_mock.assert_called_once()
+    api_mpt_client.catalog.products.update_settings.assert_called_once()

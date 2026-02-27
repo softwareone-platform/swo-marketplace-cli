@@ -18,7 +18,52 @@ from cli.core.products.services import (
     TemplateService,
 )
 from freezegun import freeze_time
+from mpt_api_client.models import Collection
+from mpt_api_client.models.meta import Pagination
+from mpt_api_client.resources.catalog.products import Product
 from requests import Response
+
+
+@pytest.fixture
+def mpt_products():
+    return [
+        {
+            "id": "PRD-1234-1234",
+            "name": "Adobe for Commercial",
+            "status": "Published",
+            "vendor": {
+                "id": "ACC-4321",
+                "name": "Adobe",
+                "type": "Vendor",
+            },
+        },
+        {
+            "id": "PRD-4321-4321",
+            "name": "Azure CSP Commercial",
+            "status": "Draft",
+            "vendor": {
+                "id": "ACC-1234",
+                "name": "Microsoft",
+                "type": "Vendor",
+            },
+        },
+    ]
+
+
+@pytest.fixture
+def wrap_to_mpt_page(mocker):
+    def wrapper(page_response):
+        mock_page = mocker.MagicMock(spec=Collection())
+        mock_page.meta.pagination = Pagination(limit=10, offset=0, total=len(page_response))
+        mock_page.to_list.return_value = page_response
+        return mock_page
+
+    return wrapper
+
+
+@pytest.fixture
+def mpt_products_page(wrap_to_mpt_page, mpt_products):
+    return wrap_to_mpt_page(mpt_products)
 
 
 @pytest.fixture
@@ -132,7 +177,7 @@ def product_data_from_dict():
 @pytest.fixture
 @freeze_time("2025-05-30")
 def product_data_from_json(mpt_product_data):
-    return product_models.ProductData.from_json(mpt_product_data)
+    return product_models.ProductData.from_json(Product(mpt_product_data))
 
 
 @pytest.fixture
