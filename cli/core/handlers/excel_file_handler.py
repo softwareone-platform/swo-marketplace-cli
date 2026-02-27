@@ -335,10 +335,11 @@ class ExcelFileHandler(FileHandler):
         sheet[coordinate] = cell_value
 
     def _clean_worksheets(self, sheet_name: str | None = None) -> None:
-        if sheet_name is not None:
-            self._worksheets_cache.pop(sheet_name, None)
-        else:
+        if sheet_name is None:
             self._worksheets_cache = {}
+            return
+
+        self._worksheets_cache.pop(sheet_name, None)
 
     def _get_fields_from_horizontal_worksheet(self, worksheet_name: str, max_row: int) -> list[str]:
         return list(

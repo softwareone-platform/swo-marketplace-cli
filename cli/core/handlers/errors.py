@@ -4,8 +4,8 @@ class ExcelFileHandlerError(Exception):
     _default_message = "Excel file handler error"
 
     def __init__(self, message: str | None = None, details: list | None = None):
-        self.message = message if message is not None else self._default_message
-        self.details = details if details is not None else []
+        self.message = self._default_message if message is None else message
+        self.details = [] if details is None else details
 
 
 class RequiredSheetsError(ExcelFileHandlerError):
