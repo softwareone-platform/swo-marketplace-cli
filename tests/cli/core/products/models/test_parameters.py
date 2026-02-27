@@ -120,24 +120,29 @@ def test_parameters_data_to_json(parameters_data_from_dict):
                 {
                     "label": "Create account",
                     "value": "New",
-                    "description": """
-                    Create a new Adobe VIP Marketplace account if you have never purchased Adobe
-       products before, or if you wish to set up a new account in addition to an account you may
-       already have. You will need to provide details such as your company address and contacts,
-       and you will be required to accept both the Adobe Terms and Conditions as well as
-       SoftwareOne\u0027s terms and conditions.""",
+                    "description": (
+                        "Create a new Adobe VIP Marketplace account if you have never purchased "
+                        "Adobe products before, or if you wish to set up a new account in "
+                        "addition to an account you may already have. You will need to provide "
+                        "details such as your company address and contacts, and you will be "
+                        "required to accept both the Adobe Terms and Conditions as well as "
+                        "SoftwareOne\\u0027s terms and conditions."
+                    ),
                 },
                 {
                     "label": "Migrate account",
                     "value": "Migrate",
-                    "description": """Migrate from Adobe VIP if you are currently purchasing
-                    products under the Adobe VIP licensing program. This comes with several
-                    advantages including the ability to self-service manage your subscriptions
-                    within the SoftwareOne Marketplace. You will need to provide details such as
-                    your company address and contacts, and you will be required to accept  both the
-                    Adobe Terms and Conditions as well as SoftwareOne\u0027s terms and
-                    conditions.\n\n Note: If you are purchasing Adobe products under a different
-                    licensing program such as CLP or TLP, you cannot use this option.""",
+                    "description": (
+                        "Migrate from Adobe VIP if you are currently purchasing products under the "
+                        "Adobe VIP licensing program. This comes with several advantages including "
+                        "the ability to self-service manage your subscriptions within the "
+                        "SoftwareOne Marketplace. You will need to provide details such as your "
+                        "company address and contacts, and you will be required to accept both the "
+                        "Adobe Terms and Conditions as well as SoftwareOne\\u0027s terms and "
+                        "conditions.\n\n Note: If you are purchasing Adobe products under a "
+                        "different licensing program such as CLP or TLP, you cannot use this "
+                        "option."
+                    ),
                 },
             ],
             "defaultValue": None,
