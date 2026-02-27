@@ -1,7 +1,6 @@
 import re
 from collections.abc import Generator
 from pathlib import Path
-from re import Pattern
 from typing import Any
 
 import openpyxl
@@ -222,7 +221,7 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: tuple[str, ...], patterns: list[Pattern[str]]
+        self, sheet_name: str, fields: tuple[str, ...], patterns: list[re.Pattern[str]]
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure.
 
