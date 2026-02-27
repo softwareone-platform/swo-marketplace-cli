@@ -235,12 +235,12 @@ class ExcelFileHandler(FileHandler):
         """
         ws = self._get_worksheet(sheet_name)
         column_map = {}
-        for index, column in enumerate(ws["1"]):
+        for header_index, column in enumerate(ws["1"]):
             if column.value and (
                 column.value in fields
                 or any(re.match(pattern, column.value) for pattern in patterns)
             ):
-                column_map[index] = column.value
+                column_map[header_index] = column.value
 
         for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
             if all(cell.value is None for cell in row):
@@ -248,10 +248,10 @@ class ExcelFileHandler(FileHandler):
 
             yield {
                 column_name: {
-                    "value": row[index].value,
-                    "coordinate": f"{row[index].column_letter}{row[index].row}",  # type: ignore[union-attr]
+                    "value": row[column_index].value,
+                    "coordinate": f"{row[column_index].column_letter}{row[column_index].row}",  # type: ignore[union-attr]
                 }
-                for index, column_name in column_map.items()
+                for column_index, column_name in column_map.items()
             }
 
     def merge_cells(self, sheet_name: str, range_string: str) -> None:
