@@ -1,6 +1,7 @@
 from collections.abc import Callable
 from typing import Any, cast, override
 
+from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
 from cli.core.models.data_model import DataModel
 from cli.core.mpt.flows import search_uom_by_name
@@ -18,6 +19,8 @@ class ItemService(RelatedComponentsBaseService):
         data_model = super().prepare_data_model_to_create(data_model)
 
         item_data = cast(ItemData, data_model)
+        if not item_data.unit_name:
+            raise MPTAPIError("Unit of measure name is required.", "400 bad request")
         item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
         self.file_manager.write_ids({item_data.unit_coordinate: item_data.unit_id})
 
@@ -56,7 +59,8 @@ class ItemService(RelatedComponentsBaseService):
 
     def _action_create_item(self, data_model: DataModel):
         item_data = cast(ItemData, data_model)
-
+        if not item_data.unit_name:
+            raise MPTAPIError("Unit of measure name is required.", "400 bad request")
         item_data.unit_id = search_uom_by_name(self.api.client, item_data.unit_name).id
         item_data.item_type = "operations" if self.account.is_operations() else "vendor"
 

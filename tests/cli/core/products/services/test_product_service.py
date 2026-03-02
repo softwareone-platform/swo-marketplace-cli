@@ -14,11 +14,11 @@ from freezegun import freeze_time
 
 
 @pytest.fixture
-def service_context(mpt_client, product_new_file, active_vendor_account):
+def service_context(mock_mpt_api_client, product_new_file, active_vendor_account):
     stats = ProductStatsCollector()
     return ServiceContext(
         account=active_vendor_account,
-        api=ProductAPIService(mpt_client),
+        api=ProductAPIService(mock_mpt_api_client),
         data_model=ProductData,
         file_manager=ProductExcelFileManager(product_new_file),
         stats=stats,

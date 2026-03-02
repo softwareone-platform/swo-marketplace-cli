@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.price_lists.api import PriceListItemAPIService
@@ -13,11 +11,13 @@ from requests import Response
 
 
 @pytest.fixture
-def service_context(mpt_client, price_list_file_path, active_vendor_account, item_data_from_dict):
+def service_context(
+    mock_mpt_api_client, price_list_file_path, active_vendor_account, item_data_from_dict
+):
     stats = PriceListStatsCollector()
     return ServiceContext(
         account=active_vendor_account,
-        api=PriceListItemAPIService(mpt_client, item_data_from_dict.id),
+        api=PriceListItemAPIService(mock_mpt_api_client, item_data_from_dict.id),
         data_model=ItemData,
         file_manager=PriceListItemExcelFileManager(price_list_file_path),
         stats=stats,
@@ -57,7 +57,7 @@ def test_retrieve_from_mpt(mocker, service_context, mpt_item_data, item_data_fro
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
-        return_value=Mock(spec=Response, json=Mock(return_value=mpt_item_data)),
+        return_value=mocker.Mock(spec=Response, json=mocker.Mock(return_value=mpt_item_data)),
     )
     service = ItemService(service_context)
 

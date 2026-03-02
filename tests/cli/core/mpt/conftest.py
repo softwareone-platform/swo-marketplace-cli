@@ -5,7 +5,7 @@ import pytest
 def wrap_to_mpt_list_response():
     def wrapper(list_response):
         return {
-            "data": list_response,
+            "resources": list_response,
             "$meta": {
                 "pagination": {
                     "limit": 10,

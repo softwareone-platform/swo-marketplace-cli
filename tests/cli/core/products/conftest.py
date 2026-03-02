@@ -252,6 +252,7 @@ def item_data_from_dict():
         product_id="PRD-0232-2541",
         quantity_not_applicable=True,
         unit_id="UNT-1916",
+        unit_name="User",
         unit_coordinate="J38272",
         vendor_id="NAV12345",
         status="Published",

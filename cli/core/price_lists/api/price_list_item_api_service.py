@@ -13,5 +13,9 @@ class PriceListItemAPIService(APIService):
         self._price_list_id = price_list_id
 
     @property
+    def api_collection(self):
+        return self._client.catalog.price_lists.items(self._price_list_id)
+
+    @property
     def url(self) -> str:
         return self._base_url.format(price_list_id=self._price_list_id)

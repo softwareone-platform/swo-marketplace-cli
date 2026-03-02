@@ -7,3 +7,7 @@ class ParametersAPIService(RelatedAPIService):
 
     _base_url = "/catalog/products/{resource_id}/parameters"
     _api_model = Parameter
+
+    @property
+    def api_collection(self):
+        return self._client.catalog.products.parameters(self.resource_id)

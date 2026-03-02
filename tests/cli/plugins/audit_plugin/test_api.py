@@ -1,25 +1,21 @@
-from unittest.mock import Mock
-
 import pytest
+from cli.core.mpt.client import MPTClient
 from cli.plugins.audit_plugin.api import (
     get_audit_records_by_object,
     get_audit_trail,
 )
+from requests import Response
 from typer import Exit
 
 
 @pytest.fixture
-def mock_client():
-    client = Mock()
-    client.get = Mock()
-    return client
+def mock_client(mocker):
+    return mocker.Mock(spec=MPTClient)
 
 
 @pytest.fixture
-def mock_response():
-    response = Mock()
-    response.json = Mock()
-    return response
+def mock_response(mocker):
+    return mocker.Mock(spec=Response)
 
 
 class TestGetAuditTrail:

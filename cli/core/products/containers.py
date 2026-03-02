@@ -66,18 +66,17 @@ class ProductContainer(containers.DeclarativeContainer):
 
     account_container = providers.Container(AccountContainer)
     _account = providers.Factory(account_container.account)
-    _mpt_client = providers.Factory(account_container.mpt_client)
+    _api_mpt_client = providers.Factory(account_container.api_mpt_client)
     resource_id = providers.Dependency(instance_of=str, default="")
     file_path = providers.Dependency(instance_of=str)
     stats = providers.Dependency(instance_of=ProductStatsCollector, default=ProductStatsCollector())
-
     _apis = providers.Dict(
-        product=providers.Factory(ProductAPIService, _mpt_client),
-        items=providers.Factory(ItemAPIService, _mpt_client, resource_id),
-        item_group=providers.Factory(ItemGroupAPIService, _mpt_client, resource_id),
-        parameter_group=providers.Factory(ParameterGroupAPIService, _mpt_client, resource_id),
-        parameters=providers.Factory(ParametersAPIService, _mpt_client, resource_id),
-        template=providers.Factory(TemplateAPIService, _mpt_client, resource_id),
+        product=providers.Factory(ProductAPIService, _api_mpt_client),
+        items=providers.Factory(ItemAPIService, _api_mpt_client, resource_id),
+        item_group=providers.Factory(ItemGroupAPIService, _api_mpt_client, resource_id),
+        parameter_group=providers.Factory(ParameterGroupAPIService, _api_mpt_client, resource_id),
+        parameters=providers.Factory(ParametersAPIService, _api_mpt_client, resource_id),
+        template=providers.Factory(TemplateAPIService, _api_mpt_client, resource_id),
     )
 
     _file_managers = providers.Dict(

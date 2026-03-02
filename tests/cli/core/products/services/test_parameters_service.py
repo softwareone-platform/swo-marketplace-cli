@@ -9,10 +9,10 @@ from cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture
-def service_context(mpt_client, product_file_path, active_vendor_account):
+def service_context(mock_mpt_api_client, product_file_path, active_vendor_account):
     return ServiceContext(
         account=active_vendor_account,
-        api=ParametersAPIService(mpt_client, resource_id="test-product-id"),
+        api=ParametersAPIService(mock_mpt_api_client, resource_id="test-product-id"),
         data_model=AgreementParametersData,
         file_manager=AgreementParametersExcelFileManager(product_file_path),
         stats=ProductStatsCollector(),
