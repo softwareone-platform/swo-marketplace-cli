@@ -69,7 +69,7 @@ class TemplateData(BaseDataModel, ActionMixin):
             constants.TEMPLATES_NAME: self.name,
             constants.TEMPLATES_ACTION: self.action,
             constants.TEMPLATES_TYPE: self.type,
-            constants.TEMPLATES_DEFAULT: str(self.default) if self.default is not None else None,
+            constants.TEMPLATES_DEFAULT: None if self.default is None else str(self.default),
             constants.TEMPLATES_CONTENT: self.template_content,
             constants.TEMPLATES_CREATED: self.created_date,
             constants.TEMPLATES_MODIFIED: self.updated_date,
