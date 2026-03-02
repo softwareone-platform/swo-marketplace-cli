@@ -5,7 +5,7 @@ import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.console import console
 from cli.core.file_discovery import get_files_path
-from cli.core.mpt.client import client_from_account
+from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.price_lists.api import PriceListAPIService
 from cli.core.price_lists.api.price_list_item_api_service import PriceListItemAPIService
 from cli.core.price_lists.handlers import (
@@ -49,13 +49,13 @@ def sync_price_lists(  # noqa: C901
     )
 
     active_account = get_active_account()
-    mpt_client = client_from_account(active_account)
+    mpt_client = create_api_mpt_client_from_account(active_account)
     stats = PriceListStatsCollector()
     has_error = False
     for file_path in file_paths:
         service_context = ServiceContext(
             account=active_account,
-            api=PriceListAPIService(mpt_client),
+            api=PriceListAPIService(mpt_client.catalog.price_lists),
             data_model=PriceListData,
             file_manager=PriceListExcelFileManager(file_path),
             stats=stats,
@@ -91,7 +91,10 @@ def sync_price_lists(  # noqa: C901
         price_list_item_service = ItemService(
             ServiceContext(
                 account=active_account,
-                api=PriceListItemAPIService(mpt_client, price_list_id=price_list.id),
+                api=PriceListItemAPIService(
+                    mpt_client.catalog.price_lists.items(price_list.id),
+                    price_list_id=price_list.id,
+                ),
                 data_model=ItemData,
                 file_manager=PriceListItemExcelFileManager(file_path),
                 stats=stats,
@@ -142,7 +145,7 @@ def export(  # noqa: C901
         raise typer.Exit(code=4)
 
     out_path = out_path if out_path is not None else str(Path.cwd())
-    mpt_client = client_from_account(active_account)
+    mpt_client = create_api_mpt_client_from_account(active_account)
     stats = PriceListStatsCollector()
     has_error = False
     for price_list_id in price_list_ids:
@@ -164,7 +167,7 @@ def export(  # noqa: C901
 
         price_list_service_context = ServiceContext(
             account=active_account,
-            api=PriceListAPIService(mpt_client),
+            api=PriceListAPIService(mpt_client.catalog.price_lists),
             data_model=PriceListData,
             file_manager=PriceListExcelFileManager(str(file_path)),
             stats=stats,
@@ -178,7 +181,10 @@ def export(  # noqa: C901
 
         item_service_context = ServiceContext(
             account=active_account,
-            api=PriceListItemAPIService(mpt_client, price_list_id),
+            api=PriceListItemAPIService(
+                mpt_client.catalog.price_lists.items(price_list_id),
+                price_list_id,
+            ),
             data_model=ItemData,
             file_manager=PriceListItemExcelFileManager(str(file_path)),
             stats=stats,

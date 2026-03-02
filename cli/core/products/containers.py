@@ -66,18 +66,51 @@ class ProductContainer(containers.DeclarativeContainer):
 
     account_container = providers.Container(AccountContainer)
     _account = providers.Factory(account_container.account)
-    _mpt_client = providers.Factory(account_container.mpt_client)
+    _api_mpt_client = providers.Factory(account_container.api_mpt_client)
     resource_id = providers.Dependency(instance_of=str, default="")
     file_path = providers.Dependency(instance_of=str)
     stats = providers.Dependency(instance_of=ProductStatsCollector, default=ProductStatsCollector())
-
+    _product_collection_service = providers.Callable(
+        lambda mpt_client: mpt_client.catalog.products, _api_mpt_client
+    )
+    _items_collection_service = providers.Callable(
+        lambda mpt_client: mpt_client.catalog.items, _api_mpt_client
+    )
+    _item_group_collection_service = providers.Callable(
+        lambda mpt_client, resource_id: mpt_client.catalog.products.item_groups(resource_id),
+        _api_mpt_client,
+        resource_id,
+    )
+    _parameter_group_collection_service = providers.Callable(
+        lambda mpt_client, resource_id: mpt_client.catalog.products.parameter_groups(resource_id),
+        _api_mpt_client,
+        resource_id,
+    )
+    _parameters_collection_service = providers.Callable(
+        lambda mpt_client, resource_id: mpt_client.catalog.products.parameters(resource_id),
+        _api_mpt_client,
+        resource_id,
+    )
+    _template_collection_service = providers.Callable(
+        lambda mpt_client, resource_id: mpt_client.catalog.products.templates(resource_id),
+        _api_mpt_client,
+        resource_id,
+    )
     _apis = providers.Dict(
-        product=providers.Factory(ProductAPIService, _mpt_client),
-        items=providers.Factory(ItemAPIService, _mpt_client, resource_id),
-        item_group=providers.Factory(ItemGroupAPIService, _mpt_client, resource_id),
-        parameter_group=providers.Factory(ParameterGroupAPIService, _mpt_client, resource_id),
-        parameters=providers.Factory(ParametersAPIService, _mpt_client, resource_id),
-        template=providers.Factory(TemplateAPIService, _mpt_client, resource_id),
+        product=providers.Factory(ProductAPIService, _product_collection_service),
+        items=providers.Factory(
+            ItemAPIService, _items_collection_service, _api_mpt_client, resource_id
+        ),
+        item_group=providers.Factory(
+            ItemGroupAPIService, _item_group_collection_service, resource_id
+        ),
+        parameter_group=providers.Factory(
+            ParameterGroupAPIService, _parameter_group_collection_service, resource_id
+        ),
+        parameters=providers.Factory(
+            ParametersAPIService, _parameters_collection_service, resource_id
+        ),
+        template=providers.Factory(TemplateAPIService, _template_collection_service, resource_id),
     )
 
     _file_managers = providers.Dict(

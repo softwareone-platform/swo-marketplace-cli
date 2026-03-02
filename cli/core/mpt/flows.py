@@ -1,17 +1,14 @@
-from functools import cache
-from urllib.parse import quote_plus
-
-from cli.core.errors import MPTAPIError, wrap_http_error
-from cli.core.mpt.client import MPTClient
+from cli.core.errors import MPTAPIError, wrap_mpt_api_error
 from cli.core.mpt.models import (
     ListResponse,
     Meta,
     Product,
     Uom,
 )
+from mpt_api_client import MPTClient, RQLQuery
 
 
-@wrap_http_error
+@wrap_mpt_api_error
 def get_products(
     mpt_client: MPTClient, limit: int, offset: int, query: str | None = None
 ) -> ListResponse[Product]:
@@ -27,20 +24,20 @@ def get_products(
         A tuple containing pagination metadata and a list of Product objects.
 
     """
-    url = f"/catalog/products?limit={quote_plus(str(limit))}&offset={quote_plus(str(offset))}"
+    product_collection = mpt_client.catalog.products
     if query:
-        url = f"{url}&{quote_plus(query)}"
-    response = mpt_client.get(url)
-    response.raise_for_status()
-    json_body = response.json()
+        product_collection = product_collection.filter(RQLQuery.from_string(query))
+    product_response = product_collection.fetch_page(limit=limit, offset=offset)
+    if product_response.meta is None or product_response.meta.pagination is None:
+        raise MPTAPIError("Missing pagination metadata in product response.", "Invalid response")
+    pagination = product_response.meta.pagination
     return (
-        Meta.model_validate(json_body["$meta"]["pagination"]),
-        [Product.model_validate(product_data) for product_data in json_body["data"]],
+        Meta(limit=pagination.limit, offset=pagination.offset, total=pagination.total),
+        [Product.model_validate(resource.to_dict()) for resource in product_response.resources],
     )
 
 
-@cache
-@wrap_http_error
+@wrap_mpt_api_error
 def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
     """Searches for a unit of measure by name using the MPT Platform.
 
@@ -55,11 +52,11 @@ def search_uom_by_name(mpt_client: MPTClient, uom_name: str) -> Uom:
         MPTAPIError: If the unit of measure is not found.
 
     """
-    response = mpt_client.get(f"/catalog/units-of-measure?name={uom_name}&limit=1&offset=0")
-    response.raise_for_status()
+    uom_collection = mpt_client.catalog.units_of_measure.filter(RQLQuery(name=uom_name))
 
-    response_data = response.json()["data"]
-    if not response_data:
+    collection_page = uom_collection.fetch_page(limit=1, offset=0)
+
+    if not collection_page.resources:
         raise MPTAPIError(f"Unit of measure by name '{uom_name}' is not found.", "404 not found")
 
-    return Uom.model_validate(response_data[0])
+    return Uom.model_validate(collection_page.resources[0].to_dict())

@@ -31,6 +31,7 @@ class ProductService(BaseService):
 
         product.id = new_product_data["id"]
         try:
+            # TODO: Handle this gracefully using update_settings function
             self.api.update(f"{product.id}/settings", json_payload=product.settings.to_json())
         except MPTAPIError as error:
             self._set_error(str(error))

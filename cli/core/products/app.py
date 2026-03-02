@@ -5,10 +5,10 @@ import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.accounts.containers import AccountContainer
 from cli.core.console import console
-from cli.core.mpt.client import client_from_account
 from cli.core.mpt.flows import get_products
 from cli.core.mpt.models import Account as MPTAccount
 from cli.core.mpt.models import Product as MPTProduct
+from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.products.containers import ProductContainer
 from rich import box
 from rich.status import Status
@@ -123,7 +123,7 @@ def list_products(
         offset = page * page_size
 
         with console.status(f"Fetching #{page} page  of products"):
-            mpt_client = client_from_account(active_account)
+            mpt_client = create_api_mpt_client_from_account(active_account)
             meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
 
         table = _products_table("Products")
