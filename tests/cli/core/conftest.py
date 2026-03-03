@@ -2,7 +2,8 @@ import pytest
 import responses
 from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
-from cli.core.mpt.client import MPTClient
+from cli.core.mpt.client import MPTClient as LegacyMPTClient
+from mpt_api_client import MPTClient
 
 
 @pytest.fixture
@@ -14,7 +15,20 @@ def requests_mocker():
 
 @pytest.fixture
 def mpt_client():
-    return MPTClient("https://example.com", "token")
+    return LegacyMPTClient("https://example.com", "token")
+
+
+@pytest.fixture
+def mock_mpt_api_client(mocker):
+    return mocker.MagicMock(spec=MPTClient)
+
+
+@pytest.fixture
+def mock_mpt_client_error_payload():
+    return {
+        "status": 500,
+        "message": "Internal Server Error",
+    }
 
 
 @pytest.fixture
@@ -82,7 +96,8 @@ def active_vendor_account():
 def account_container_mock(mocker, active_operations_account):
     container = AccountContainer()
     container.account.override(mocker.MagicMock(return_value=active_operations_account))
-    container.mpt_client.override(mocker.MagicMock(MPTClient))
+    container.mpt_client.override(mocker.MagicMock(spec=LegacyMPTClient))
+    container.api_mpt_client.override(mocker.MagicMock(spec=MPTClient))
     mock = mocker.patch("cli.core.products.app.AccountContainer", autospec=True)
     mock.return_value = container
 

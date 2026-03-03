@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum
 from typing import Any, Self
-from unittest.mock import Mock
 
 import pytest
 from cli.core.errors import MPTAPIError
@@ -49,12 +48,18 @@ class FakeDataModel(BaseDataModel):
 
 
 @pytest.fixture
-def service_context(active_vendor_account):
+def service_context(mocker, active_vendor_account):
+    api = mocker.Mock(spec_set=["post", "list", "update", "get", "create", "resource_id"])
+    api.resource_id = "fake_resource_id"
+    file_manager = mocker.Mock(
+        spec_set=["tab_name", "read_data", "write_ids", "write_error", "create_tab", "add"]
+    )
+    file_manager.tab_name = "fake_tab_name"
     return ServiceContext(
         account=active_vendor_account,
-        api=Mock(),
+        api=api,
         data_model=FakeDataModel,
-        file_manager=Mock(tab_name="fake_tab_name"),
+        file_manager=file_manager,
         stats=ProductStatsCollector(),
     )
 
@@ -81,7 +86,7 @@ def test_create(mocker, service_context, mpt_agreement_parameter_data):
 
 
 def test_create_api_error(mocker, service_context, parameters_data_from_dict):
-    mocker.patch.object(service_context.file_manager, "read_data", return_value=[Mock()])
+    mocker.patch.object(service_context.file_manager, "read_data", return_value=[FakeDataModel()])
     post_mock = mocker.patch.object(
         service_context.api,
         "post",

@@ -1,5 +1,3 @@
-from unittest.mock import Mock
-
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.price_lists.api import PriceListItemAPIService
@@ -57,7 +55,7 @@ def test_retrieve_from_mpt(mocker, service_context, mpt_item_data, item_data_fro
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
-        return_value=Mock(spec=Response, json=Mock(return_value=mpt_item_data)),
+        return_value=mocker.Mock(spec=Response, json=mocker.Mock(return_value=mpt_item_data)),
     )
     service = ItemService(service_context)
 

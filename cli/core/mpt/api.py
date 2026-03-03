@@ -1,9 +1,9 @@
+import json as json_module
 from abc import ABC
 from typing import TYPE_CHECKING, Any
 
-from cli.core.errors import MPTAPIError, wrap_http_error
-from cli.core.mpt.client import MPTClient
-from cli.core.mpt.models import Meta
+from cli.core.errors import MPTAPIError, wrap_mpt_api_error
+from mpt_api_client import RQLQuery
 
 if TYPE_CHECKING:
     from pydantic import BaseModel
@@ -24,8 +24,8 @@ class APIService[APIModel: "BaseModel"](ABC):
     _base_url: str
     _api_model: APIModel
 
-    def __init__(self, client: MPTClient):
-        self.client = client
+    def __init__(self, api_collection_service: Any):
+        self._api_collection_service = api_collection_service
 
     @property
     def api_model(self) -> APIModel:
@@ -35,7 +35,7 @@ class APIService[APIModel: "BaseModel"](ABC):
     def url(self) -> str:
         return self._base_url
 
-    @wrap_http_error
+    @wrap_mpt_api_error
     def exists(self, query_params: dict[str, Any] | None = None) -> bool:
         """Check if any resources exist matching the given parameters.
 
@@ -46,13 +46,15 @@ class APIService[APIModel: "BaseModel"](ABC):
             True if at least one resource exists, False otherwise.
 
         """
-        query_params = query_params or {}
-        query_params["limit"] = 0
-        response = self.client.get(f"{self.url}", params=query_params)
-        response.raise_for_status()
-        return response.json()["$meta"]["pagination"]["total"] > 0
+        service = self._api_collection_service
+        if query_params:
+            service = service.filter(RQLQuery(**query_params))
+        service_collection_data = service.fetch_page(limit=0)
+        if service_collection_data.meta is None or service_collection_data.meta.pagination is None:
+            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
+        return service_collection_data.meta.pagination.total > 0
 
-    @wrap_http_error
+    @wrap_mpt_api_error
     def get(
         self,
         resource_id: str,
@@ -71,18 +73,15 @@ class APIService[APIModel: "BaseModel"](ABC):
             MPTAPIError: If the resource is not found.
 
         """
-        query_params = query_params or {}
-        response = self.client.get(f"{self.url}/{resource_id}", params=query_params)
-        response.raise_for_status()
-        response_payload = response.json()
-        if not response_payload:
+        select_value = (query_params or {}).get("select")
+        resource_data = self._api_collection_service.get(resource_id, select=select_value)
+        if not resource_data:
             raise MPTAPIError(
                 f"Resource with ID {resource_id} not found at {self.url}", "404 not found"
             )
-        self.api_model.model_validate(response_payload)
-        return response_payload
+        return resource_data.to_dict()
 
-    @wrap_http_error
+    @wrap_mpt_api_error
     def list(self, query_params: dict[str, Any] | None = None) -> dict[str, Any]:
         """List resources with optional query parameters.
 
@@ -93,17 +92,34 @@ class APIService[APIModel: "BaseModel"](ABC):
             A dictionary containing meta information and the list of resources.
 
         """
-        query_params = query_params or {}
-        response = self.client.get(self.url, params=query_params)
-        response.raise_for_status()
-        json_body = response.json()
-        meta = Meta.model_validate(json_body["$meta"]["pagination"])
-        return {"meta": meta.model_dump(), "data": json_body["data"]}
+        query_params = dict(query_params or {})
+        limit = query_params.pop("limit", 100)
+        offset = query_params.pop("offset", 0)
+        select = query_params.pop("select", None)
+        service = self._api_collection_service
 
-    @wrap_http_error
+        if query_params:
+            service = service.filter(RQLQuery(**query_params))
+        if select:
+            service = service.select(select)
+
+        collection = service.fetch_page(limit=limit, offset=offset)
+        if collection.meta is None or collection.meta.pagination is None:
+            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
+        pagination = collection.meta.pagination
+        return {
+            "meta": {
+                "limit": pagination.limit,
+                "offset": pagination.offset,
+                "total": pagination.total,
+            },
+            "data": [resource.to_dict() for resource in collection.resources],
+        }
+
+    @wrap_mpt_api_error
     def post(
         self,
-        form_payload: dict[str, Any] | None = None,
+        form_payload: Any | None = None,
         json: dict[str, Any] | None = None,
         headers: dict[str, Any] | None = None,
     ) -> dict[str, Any]:
@@ -119,11 +135,22 @@ class APIService[APIModel: "BaseModel"](ABC):
 
         """
         headers = headers or {}
-        response = self.client.post(self.url, data=form_payload, json=json, headers=headers)
-        response.raise_for_status()
-        return self.api_model.model_validate(response.json(), by_alias=True).model_dump()
 
-    @wrap_http_error
+        if form_payload is None:
+            created_resource = self._api_collection_service.create(json)
+        else:
+            json_data = None
+            file_data = None
+            for form_value in form_payload.fields.values():
+                if isinstance(form_value, tuple):
+                    file_data = form_value
+                elif isinstance(form_value, str):
+                    json_data = json_module.loads(form_value)
+            created_resource = self._api_collection_service.create(json_data, file=file_data)
+
+        return created_resource.to_dict()
+
+    @wrap_mpt_api_error
     def post_action(self, resource_id: str, action: str) -> None:
         """Perform an action on a specific resource.
 
@@ -132,10 +159,12 @@ class APIService[APIModel: "BaseModel"](ABC):
             action: The action to perform.
 
         """
-        response = self.client.post(f"{self.url}/{resource_id}/{action}")
-        response.raise_for_status()
+        action_handler = getattr(self._api_collection_service, action, None)
+        if action_handler is None:
+            raise MPTAPIError(f"Unsupported action '{action}' at {self.url}", "400 bad request")
+        return action_handler(resource_id)
 
-    @wrap_http_error
+    @wrap_mpt_api_error
     def update(self, resource_id: str, json_payload: dict[str, Any]) -> None:
         """Update a resource by its ID.
 
@@ -144,15 +173,26 @@ class APIService[APIModel: "BaseModel"](ABC):
             json_payload: The data to update the resource with.
 
         """
-        response = self.client.put(f"{self.url}/{resource_id}", json=json_payload)
-        response.raise_for_status()
+        if "/" in resource_id:
+            base_id, sub_resource = resource_id.split("/", 1)
+            updater = getattr(self._api_collection_service, f"update_{sub_resource}", None)
+            if updater is None:
+                raise MPTAPIError(
+                    f"Unsupported sub-resource update '{sub_resource}' at {self.url}",
+                    "400 bad request",
+                )
+            updated_resource = updater(base_id, json_payload)
+        else:
+            updated_resource = self._api_collection_service.update(resource_id, json_payload)
+
+        return updated_resource.to_dict()
 
 
 class RelatedAPIService(APIService, ABC):
     """Abstract base class for related API service operations."""
 
-    def __init__(self, client, resource_id: str):
-        super().__init__(client)
+    def __init__(self, collection_service: Any, resource_id: str):
+        super().__init__(collection_service)
         self.resource_id = resource_id
 
     @property
