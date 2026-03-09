@@ -10,11 +10,11 @@ from cli.core.stats import PriceListStatsCollector
 
 
 @pytest.fixture
-def service_context(mpt_client, price_list_new_file, active_vendor_account):
+def service_context(mock_mpt_api_client, price_list_new_file, active_vendor_account):
     stats = PriceListStatsCollector()
     return ServiceContext(
         account=active_vendor_account,
-        api=PriceListAPIService(mpt_client),
+        api=PriceListAPIService(mock_mpt_api_client),
         data_model=PriceListData,
         file_manager=PriceListExcelFileManager(price_list_new_file),
         stats=stats,

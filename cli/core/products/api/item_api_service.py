@@ -7,3 +7,7 @@ class ItemAPIService(RelatedAPIService):
 
     _base_url = "/catalog/items"
     _api_model = MPTItem
+
+    @property
+    def api_collection(self):
+        return self._client.catalog.items

@@ -1,8 +1,7 @@
-from unittest.mock import Mock
-
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
+from cli.core.mpt.models import Uom
 from cli.core.products.api import ItemAPIService
 from cli.core.products.constants import TAB_ITEMS
 from cli.core.products.handlers import ItemExcelFileManager
@@ -13,10 +12,10 @@ from cli.core.stats import ProductStatsCollector
 
 
 @pytest.fixture
-def service_context(mpt_client, product_file_path, active_vendor_account, item_data_from_dict):
+def service_context(mock_mpt_api_client, product_file_path, active_vendor_account):
     return ServiceContext(
         account=active_vendor_account,
-        api=ItemAPIService(mpt_client, resource_id="test-product-id"),
+        api=ItemAPIService(mock_mpt_api_client, resource_id="test-product-id"),
         data_model=ItemData,
         file_manager=ItemExcelFileManager(product_file_path),
         stats=ProductStatsCollector(),
@@ -31,7 +30,7 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
     search_uom_by_name_mock = mocker.patch(
         "cli.core.products.services.item_service.search_uom_by_name",
-        return_value=Mock(id="fake_unit_id"),
+        return_value=Uom(id="fake_unit_id", name="User"),
     )
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     update_spy = mocker.spy(service_context.api, "update")
@@ -50,6 +49,24 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     stats_spy.assert_called_once_with(TAB_ITEMS)
 
 
+def test_update_item_create_missing_unit_name(mocker, service_context, item_data_from_dict):
+    item_data_from_dict.action = ItemActionEnum.CREATE
+    item_data_from_dict.unit_name = None
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=[item_data_from_dict]
+    )
+    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    add_error_spy = mocker.spy(service_context.stats, "add_error")
+    service = ItemService(service_context)
+
+    result = service.update()
+
+    assert result.success is False
+    assert service_context.stats.tabs["Items"]["error"] == 1
+    write_error_mock.assert_called_once()
+    add_error_spy.assert_called_once_with(TAB_ITEMS)
+
+
 def test_update_item_create_error(mocker, service_context, item_data_from_dict):
     item_data_from_dict.action = ItemActionEnum.CREATE
     mocker.patch.object(
@@ -60,7 +77,7 @@ def test_update_item_create_error(mocker, service_context, item_data_from_dict):
     )
     search_uom_by_name_mock = mocker.patch(
         "cli.core.products.services.item_service.search_uom_by_name",
-        return_value=Mock(id="fake_unit_id"),
+        return_value=Uom(id="fake_unit_id", name="User"),
     )
     write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     update_spy = mocker.spy(service_context.api, "update")
@@ -171,7 +188,7 @@ def test_set_export_params(service_context, item_data_from_dict):
 def test_prepare_data_model_to_create(mocker, service_context, item_data_from_dict):
     search_uom_by_name_mock = mocker.patch(
         "cli.core.products.services.item_service.search_uom_by_name",
-        return_value=Mock(id="fake_unit_id"),
+        return_value=Uom(id="fake_unit_id", name="User"),
     )
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     service = ItemService(service_context)
@@ -183,3 +200,13 @@ def test_prepare_data_model_to_create(mocker, service_context, item_data_from_di
     assert result.product_id == "test-product-id"
     search_uom_by_name_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({item_data_from_dict.unit_coordinate: "fake_unit_id"})
+
+
+def test_prepare_data_model_no_unit_name(service_context, item_data_from_dict):
+    item_data_from_dict.unit_name = None
+    service = ItemService(service_context)
+
+    with pytest.raises(MPTAPIError) as error:
+        service.prepare_data_model_to_create(item_data_from_dict)
+
+    assert "Unit of measure name is required" in str(error.value)

@@ -7,3 +7,7 @@ class ProductAPIService(APIService):
 
     _base_url: str = "/catalog/products"
     _api_model = Product
+
+    @property
+    def api_collection(self):
+        return self._client.catalog.products

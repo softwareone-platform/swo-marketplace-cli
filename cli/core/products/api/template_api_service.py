@@ -7,3 +7,7 @@ class TemplateAPIService(RelatedAPIService):
 
     _base_url = "/catalog/products/{resource_id}/templates"
     _api_model = Template
+
+    @property
+    def api_collection(self):
+        return self._client.catalog.products.templates(self.resource_id)
