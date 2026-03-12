@@ -13,6 +13,7 @@ from cli.core.accounts.flows import (
     write_accounts,
 )
 from cli.core.accounts.models import Account
+from cli.core.accounts.table_formatters import wrap_account_type, wrap_active, wrap_token
 from cli.core.accounts.url_parser import protocol_and_host
 from cli.core.console import console
 from cli.core.errors import (
@@ -25,9 +26,6 @@ from rich import box
 from rich.table import Table
 
 app = typer.Typer()
-
-NEW_TOKEN_MASK_PREFIX_LENGTH = 22
-TOKEN_MASK_PREFIX_LENGTH = 4
 
 
 @app.command(name="add")
@@ -184,45 +182,15 @@ def _account_table(title: str) -> Table:
     return table
 
 
-def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:  # noqa: C901
-    def _wrap_account_type(account_type: str) -> str:  # pragma: no cover
-        match account_type:
-            case "Vendor":
-                return f"[cyan]{account_type}"
-            case "Operations":
-                return f"[white]{account_type}"
-            case "Client":
-                return f"[magenta]{account_type}"
-            case _:
-                return account_type
-
-    def _wrap_active(*, is_active: bool) -> str:  # pragma: no cover
-        if is_active:
-            return "[red bold]\u2714"
-        return ""
-
-    def _wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
-        is_new_token = "idt:TKN-" in account.token
-
-        token = account.token if is_new_token else f"{account.token_id}:{account.token}"
-
-        if to_wrap_secret:
-            visible_token_prefix = token[:TOKEN_MASK_PREFIX_LENGTH]
-            if is_new_token:
-                token = f"{token[:NEW_TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
-            else:
-                token = f"{token[:TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
-
-        return token
-
+def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:
     for account in accounts:
         table.add_row(
             account.id,
             account.name,
-            _wrap_account_type(account.type),
-            _wrap_token(account, to_wrap_secret=wrap_secret),
+            wrap_account_type(account.type),
+            wrap_token(account, to_wrap_secret=wrap_secret),
             account.environment,
-            _wrap_active(is_active=account.is_active),
+            wrap_active(is_active=account.is_active),
         )
 
     return table
