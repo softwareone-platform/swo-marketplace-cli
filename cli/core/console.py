@@ -43,10 +43,8 @@ def show_banner() -> None:
 
     for line in banner_lines:
         colored_line = Text()
-        for index in range(len(line)):
-            char = line[index : index + 1]
-            char.stylize(colors[index])
-            colored_line = Text.assemble(colored_line, char)
+        for index, char in enumerate(line.plain):
+            colored_line = Text.assemble(colored_line, Text(char, style=colors[index]))
         console.print(colored_line)
 
 
