@@ -6,10 +6,10 @@ from cli.core.accounts.app import get_active_account
 from cli.core.accounts.containers import AccountContainer
 from cli.core.console import console
 from cli.core.mpt.flows import get_products
-from cli.core.mpt.models import Account as MPTAccount
 from cli.core.mpt.models import Product as MPTProduct
 from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.products.containers import ProductContainer
+from cli.core.products.table_formatters import wrap_product_status, wrap_vendor
 from rich import box
 from rich.status import Status
 from rich.table import Table
@@ -336,29 +336,13 @@ def _products_table(title: str) -> Table:
 
 
 # TODO: move to to_table()
-def _list_products(table: Table, products: list[MPTProduct]) -> Table:  # noqa: C901
-    def _wrap_product_status(status: str) -> str:  # pragma: no cover
-        match status:
-            case "Draft":
-                return f"[white]{status}"
-            case "Pending":
-                return f"[blue]{status}"
-            case "Published":
-                return f"[green bold]{status}"
-            case "Unpublished":
-                return f"[red]{status}"
-            case _:
-                return status
-
-    def _wrap_vendor(vendor: MPTAccount) -> str:  # pragma: no cover
-        return f"{vendor.id} ({vendor.name})"
-
+def _list_products(table: Table, products: list[MPTProduct]) -> Table:
     for product in products:
         table.add_row(
             product.id,
             product.name,
-            _wrap_product_status(product.status),
-            _wrap_vendor(product.vendor),
+            wrap_product_status(product.status),
+            wrap_vendor(product.vendor),
         )
 
     return table
