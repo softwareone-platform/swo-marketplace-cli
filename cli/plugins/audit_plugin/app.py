@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Annotated, Any
 
 import typer
 from cli.core.accounts.app import get_active_account
@@ -70,13 +70,18 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
 
 @app.command()
 def diff_by_object_id(
-    object_id: str = typer.Argument(
-        ..., help="Object ID to fetch and compare all audit records for"
-    ),
-    positions: str | None = typer.Option(
-        None, "--positions", help="Positions to compare (e.g. '1,3')"
-    ),
-    limit: int = typer.Option(10, "--limit", help="Maximum number of audit records to retrieve"),
+    object_id: Annotated[
+        str,
+        typer.Argument(..., help="Object ID to fetch and compare all audit records for"),
+    ],
+    positions: Annotated[
+        str | None,
+        typer.Option("--positions", help="Positions to compare (e.g. '1,3')"),
+    ] = None,
+    limit: Annotated[
+        int,
+        typer.Option("--limit", help="Maximum number of audit records to retrieve"),
+    ] = 10,
 ) -> None:
     """Compare audit trails for a specific object. Prints the comparison result to the console.
 
@@ -123,8 +128,8 @@ def diff_by_object_id(
 
 @app.command()
 def diff_by_records_id(
-    source: str = typer.Argument(..., help="ID of the source audit record"),
-    target: str = typer.Argument(..., help="ID of the target audit record"),
+    source: Annotated[str, typer.Argument(..., help="ID of the source audit record")],
+    target: Annotated[str, typer.Argument(..., help="ID of the target audit record")],
 ) -> None:
     """Compare audit trails between two specific audit record IDs.
 
