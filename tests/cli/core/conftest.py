@@ -2,7 +2,6 @@ import pytest
 import responses
 from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
-from cli.core.mpt.client import MPTClient as LegacyMPTClient
 from mpt_api_client import MPTClient
 
 
@@ -11,11 +10,6 @@ def requests_mocker():
     """Allow mocking of http calls made with requests."""
     with responses.RequestsMock() as rsps:
         yield rsps
-
-
-@pytest.fixture
-def mpt_client():
-    return LegacyMPTClient("https://example.com", "token")
 
 
 @pytest.fixture
@@ -96,7 +90,6 @@ def active_vendor_account():
 def account_container_mock(mocker, active_operations_account):
     container = AccountContainer()
     container.account.override(mocker.MagicMock(return_value=active_operations_account))
-    container.mpt_client.override(mocker.MagicMock(spec=LegacyMPTClient))
     container.api_mpt_client.override(mocker.MagicMock(spec=MPTClient))
     mock = mocker.patch("cli.core.products.app.AccountContainer", autospec=True)
     mock.return_value = container

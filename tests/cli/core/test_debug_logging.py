@@ -21,13 +21,8 @@ def mock_basic_config(**kwargs):
         root_logger.debug("Test debug message")
 
 
-def test_log_file_writes_to_file(tmp_path, mocker, active_vendor_account):
+def test_log_file_writes_to_file(tmp_path, mocker):
     mocker.patch("cli.core.accounts.app.list_accounts", return_value=[], autospec=True)
-    mocker.patch(
-        "cli.core.mpt.client.client_from_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
     log_file = tmp_path / "test.log"
     mocker.patch("logging.basicConfig", side_effect=mock_basic_config, autospec=True)
 
@@ -47,13 +42,8 @@ def test_verbose_and_log_file_are_exclusive():
     assert "Cannot use both --verbose and --log-file together" in result.stdout
 
 
-def test_log_file_creates_parent_directories(tmp_path, mocker, active_vendor_account):
+def test_log_file_creates_parent_directories(tmp_path, mocker):
     mocker.patch("cli.core.accounts.app.list_accounts", return_value=[], autospec=True)
-    mocker.patch(
-        "cli.core.mpt.client.client_from_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
     mocker.patch("logging.basicConfig", side_effect=mock_basic_config, autospec=True)
     nested_log_file = tmp_path / "nested" / "dir" / "test.log"
 
