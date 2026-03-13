@@ -1,4 +1,3 @@
-import copy
 from abc import ABC, abstractmethod
 from typing import TypedDict
 
@@ -23,12 +22,14 @@ class TabResults(TypedDict):
     skipped: int
 
 
-DEFAULT_RESULTS: TabResults = {
-    "synced": 0,
-    "error": 0,
-    "total": 0,
-    "skipped": 0,
-}
+def default_results() -> TabResults:
+    """Create a fresh statistics container."""
+    return {
+        "synced": 0,
+        "error": 0,
+        "total": 0,
+        "skipped": 0,
+    }
 
 
 class ErrorMessagesCollector:
@@ -186,16 +187,16 @@ class ProductStatsCollector(StatsCollector):
     """Statistics collector specifically for product synchronization operations."""
 
     def __init__(self) -> None:
-        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        parameters_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        items_groups: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        agreements_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        asset_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        item_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        request_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        subscription_parameters: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        item_rows: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        templates: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        general: TabResults = default_results()
+        parameters_groups: TabResults = default_results()
+        items_groups: TabResults = default_results()
+        agreements_parameters: TabResults = default_results()
+        asset_parameters: TabResults = default_results()
+        item_parameters: TabResults = default_results()
+        request_parameters: TabResults = default_results()
+        subscription_parameters: TabResults = default_results()
+        item_rows: TabResults = default_results()
+        templates: TabResults = default_results()
 
         tabs = {
             "General": general,
@@ -225,8 +226,8 @@ class PriceListStatsCollector(StatsCollector):
     """
 
     def __init__(self) -> None:
-        general: TabResults = copy.deepcopy(DEFAULT_RESULTS)
-        price_items: TabResults = copy.deepcopy(DEFAULT_RESULTS)
+        general: TabResults = default_results()
+        price_items: TabResults = default_results()
 
         tabs = {
             "General": general,

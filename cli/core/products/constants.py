@@ -1,3 +1,5 @@
+from types import MappingProxyType
+
 ID_COLUMN_NAME = "ID"
 ACTION_COLUMN_NAME = "Action"
 CREATED_COLUMN_NAME = "Created"
@@ -271,7 +273,7 @@ SETTINGS_REQUIRED_FIELDS = (
     SETTINGS_SETTING,
     SETTINGS_VALUE,
 )
-SETTINGS_API_MAPPING = {
+SETTINGS_API_MAPPING = MappingProxyType({
     "Change order validation (draft)": "preValidation.changeOrderDraft",
     "Item selection validation": "itemSelection",
     "Order queue changes notification": "orderQueueChanges",
@@ -283,7 +285,7 @@ SETTINGS_API_MAPPING = {
     "Purchase order validation (draft)": "preValidation.purchaseOrderDraft",
     "Purchase order validation (query)": "preValidation.purchaseOrderQuery",
     "Termination order validation (draft)": "preValidation.terminationOrder",
-}
+})
 SETTINGS_FIELDS = (
     SETTINGS_SETTING,
     SETTINGS_ACTION,
@@ -291,7 +293,7 @@ SETTINGS_FIELDS = (
 )
 
 
-REQUIRED_FIELDS_BY_TAB = {
+REQUIRED_FIELDS_BY_TAB = MappingProxyType({
     TAB_GENERAL: GENERAL_REQUIRED_FIELDS,
     TAB_PARAMETERS_GROUPS: PARAMETERS_GROUPS_REQUIRED_FIELDS,
     TAB_ITEMS_GROUPS: ITEMS_GROUPS_REQUIRED_FIELDS,
@@ -302,8 +304,8 @@ REQUIRED_FIELDS_BY_TAB = {
     TAB_ITEMS: ITEMS_REQUIRED_FIELDS,
     TAB_TEMPLATES: TEMPLATES_REQUIRED_FIELDS,
     TAB_SETTINGS: SETTINGS_REQUIRED_FIELDS,
-}
+})
 
-REQUIRED_FIELDS_WITH_VALUES_BY_TAB = {
+REQUIRED_FIELDS_WITH_VALUES_BY_TAB = MappingProxyType({
     TAB_GENERAL: GENERAL_REQUIRED_FIELDS_WITH_VALUES,
-}
+})

@@ -1,3 +1,5 @@
+from collections.abc import Mapping
+from types import MappingProxyType
 from typing import Any
 
 ERROR_COLUMN_NAME = "Error"
@@ -8,7 +10,7 @@ REQUIRED_TABS = (
     TAB_PRICE_ITEMS,
 )
 
-REQUIRED_FIELDS_BY_TAB: dict[str, Any] = {}
+REQUIRED_FIELDS_BY_TAB: Mapping[str, Any] = MappingProxyType({})
 
 GENERAL_PRICELIST_ID = "Pricelist ID"
 GENERAL_CURRENCY = "Currency"
