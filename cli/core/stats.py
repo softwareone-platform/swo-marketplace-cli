@@ -68,22 +68,21 @@ class ErrorMessagesCollector:
         return self._is_empty
 
     def __str__(self) -> str:
-        msg = ""
+        lines: list[str] = []
         for section_name, section in self._sections.items():
-            msg = f"{msg}{section_name}:"
             section_messages = section.get("", [])
             if section_messages:
-                msg = f"{msg} {', '.join(section_messages)}\n"
+                lines.append(f"{section_name}: {', '.join(section_messages)}")
             else:
-                msg += "\n"
+                lines.append(f"{section_name}:")
 
             for item_name, item_messages in section.items():
                 if not item_name:
                     continue
 
-                msg = f"{msg}\t\t{item_name}: {', '.join(item_messages)}"
+                lines.append(f"\t\t{item_name}: {', '.join(item_messages)}")
 
-        return msg
+        return "\n".join(lines)
 
 
 class StatsCollector(ABC):

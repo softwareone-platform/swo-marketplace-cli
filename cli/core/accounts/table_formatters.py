@@ -29,9 +29,10 @@ def wrap_token(account: Account, *, to_wrap_secret: bool) -> str:
 
     if to_wrap_secret:
         visible_token_prefix = token[:TOKEN_MASK_PREFIX_LENGTH]
+        token_tail = f"*****{visible_token_prefix}"
         if is_new_token:
-            token = f"{token[:NEW_TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
+            token = "".join((token[:NEW_TOKEN_MASK_PREFIX_LENGTH], token_tail))
         else:
-            token = f"{token[:TOKEN_MASK_PREFIX_LENGTH]}*****{visible_token_prefix}"
+            token = "".join((token[:TOKEN_MASK_PREFIX_LENGTH], token_tail))
 
     return token

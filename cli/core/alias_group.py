@@ -31,7 +31,8 @@ class AliasTyperGroup(TyperGroup):
         if len(matches) == 1:
             return click.Group.get_command(self, ctx, matches[0])
 
-        ctx.fail(f"Too many matches: {', '.join(sorted(matches))}")
+        commands = ", ".join(sorted(matches))
+        ctx.fail(f"Too many matches: {commands}")
         return None
 
     def resolve_command(

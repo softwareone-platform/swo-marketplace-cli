@@ -6,10 +6,11 @@ from cli.core.console import console
 
 def get_audit_trail(client: Any, record_id: str) -> dict[str, Any]:
     """Retrieve audit trail for a specific record."""
+    endpoint = f"/audit/records/{record_id}"
+    query_string = "render()&select=object,actor,details,documents,request.api.geolocation"
+
     try:
-        endpoint = f"/audit/records/{record_id}"
-        query_string = "render()&select=object,actor,details,documents,request.api.geolocation"
-        response = client.get(endpoint + "?" + query_string)
+        response = client.get(f"{endpoint}?{query_string}")
         return response.json()
     except Exception as error:
         console.print(
@@ -22,13 +23,14 @@ def get_audit_records_by_object(
     client: Any, object_id: str, limit: int = 10
 ) -> list[dict[str, Any]]:
     """Retrieve all audit records for a specific object."""
+    endpoint = "/audit/records"
+    query_string = (
+        "render()&select=object,actor,details,documents,request.api.geolocation"
+        f"&eq(object.id,'{object_id}')&order=-timestamp&limit={limit}"
+    )
+
     try:
-        endpoint = "/audit/records"
-        query_string = (
-            "render()&select=object,actor,details,documents,request.api.geolocation"
-            f"&eq(object.id,'{object_id}')&order=-timestamp&limit={limit}"
-        )
-        response = client.get(endpoint + "?" + query_string)
+        response = client.get(f"{endpoint}?{query_string}")
         records = response.json().get("data", [])
         if not records:
             console.print(f"[red]No audit records found for object {object_id}[/red]")
