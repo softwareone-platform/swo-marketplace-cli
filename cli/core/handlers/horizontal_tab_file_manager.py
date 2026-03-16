@@ -82,8 +82,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             if row[self._id_field]["value"] == resource_id
         )
         try:
-            coordinate = item_row[ERROR_COLUMN_NAME]["coordinate"]
-            column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
+            column_letter, row_number = self._resolve_error_cell_position(item_row)
         except (KeyError, ValueError):
             column_letter = self.file_handler.get_sheet_next_column(self._sheet_name)
             coordinate = next(iter(item_row.values()))["coordinate"]
@@ -92,13 +91,15 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
 
+    def _get_currency_and_precision(self, record: DataModel) -> tuple[str | None, int | None]:
+        return record.currency, record.precision  # type: ignore[attr-defined]
+
     def _get_style(self, record: DataModel, cell_value: Any) -> NamedStyle | None:
         if not isinstance(cell_value, float):
             return None
 
         try:
-            currency = record.currency  # type: ignore[attr-defined]
-            precision = record.precision  # type: ignore[attr-defined]
+            currency, precision = self._get_currency_and_precision(record)
         except AttributeError:
             return None
 
@@ -106,6 +107,10 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             return None
 
         return get_number_format_style(currency, precision)
+
+    def _resolve_error_cell_position(self, item_row: dict[str, Any]) -> tuple[str, int]:
+        coordinate = item_row[ERROR_COLUMN_NAME]["coordinate"]
+        return self._get_row_and_column_from_coordinate(coordinate)
 
     @abstractmethod
     def _read_data(self) -> Generator[dict[str, Any], None, None]:

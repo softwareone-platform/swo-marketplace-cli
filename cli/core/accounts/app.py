@@ -161,10 +161,11 @@ def get_active_account() -> Account:
 
     try:
         account = find_active_account(accounts)
-        console.print(f"Current active account: {account.id} ({account.name})")
     except NoActiveAccountFoundError as error:
         console.print(str(error))
         raise typer.Exit(code=3)
+    else:
+        console.print(f"Current active account: {account.id} ({account.name})")
 
     return account
 

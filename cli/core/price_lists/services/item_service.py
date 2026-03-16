@@ -25,8 +25,9 @@ class ItemService(RelatedBaseService):
         limit = 100
         select = "audit,item.terms,priceList.precision,priceList.currency"
         while True:
+            query_params = {"select": select, "offset": offset, "limit": limit}
             try:
-                response = self.api.list({"select": select, "offset": offset, "limit": limit})
+                response = self.api.list(query_params)
             except MPTAPIError as error:
                 self.stats.add_error(TAB_PRICE_ITEMS)
                 return ServiceResult(
@@ -62,14 +63,14 @@ class ItemService(RelatedBaseService):
 
     @override
     def update(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         for record in self.file_manager.read_data():
             if not record.to_update():
                 self._set_skipped()
                 continue
 
+            query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
             try:
-                query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
                 item_data = self.api.list(query_params=query_params)["data"][0]
             except MPTAPIError as error:
                 errors.append(str(error))
@@ -80,8 +81,10 @@ class ItemService(RelatedBaseService):
             record.type = "operations" if self.account.is_operations() else "vendor"
             try:
                 self.api.update(item_data["id"], record.to_json())
-                self._set_synced(record.id, record.coordinate)
             except MPTAPIError as error:
                 errors.append(f"Item {record.id}: {error!s}")
                 self._set_error(str(error), record.id)
-        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+                continue
+
+            self._set_synced(record.id, record.coordinate)
+        return ServiceResult(success=not errors, errors=errors, model=None, stats=self.stats)
