@@ -1,11 +1,17 @@
 import pytest
-from cli.core.mpt.client import MPTClient
 from cli.plugins.audit_plugin.api import (
     get_audit_records_by_object,
     get_audit_trail,
 )
-from requests import Response
+from mpt_api_client import MPTClient, RQLQuery
+from mpt_api_client.models.model import Model
 from typer import Exit
+
+
+def _mock_record(mocker, record_data: dict):
+    record = mocker.MagicMock(spec=Model)
+    record.to_dict.return_value = record_data
+    return record
 
 
 @pytest.fixture
@@ -13,104 +19,89 @@ def mock_client(mocker):
     return mocker.Mock(spec=MPTClient)
 
 
-@pytest.fixture
-def mock_response(mocker):
-    return mocker.Mock(spec=Response)
+def test_get_audit_trail_successful_retrieval(mock_client, mocker):
+    expected_record = {
+        "id": "audit123",
+        "object": {"id": "obj123"},
+        "actor": {"name": "Test User"},
+    }
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.select.return_value
+    chain.fetch_page.return_value = [_mock_record(mocker, expected_record)]
+
+    result = get_audit_trail(mock_client, "audit123")
+
+    select_fields = ["object", "actor", "details", "documents", "request.api.geolocation"]
+    assert result == expected_record
+    records_options.assert_called_once_with(render=True)
+    records_options.return_value.filter.assert_called_once_with(RQLQuery(id="audit123"))
+    filtered.select.assert_called_once_with(*select_fields)
+    chain.fetch_page.assert_called_once_with(limit=1)
 
 
-class TestGetAuditTrail:
-    def test_successful_retrieval(self, mock_client, mock_response):
-        expected_data = {
-            "id": "audit123",
-            "object": {"id": "obj123"},
-            "actor": {"name": "Test User"},
-        }
-        mock_response.json.return_value = expected_data
-        mock_client.get.return_value = mock_response
+def test_get_audit_trail_no_record_found(mock_client):
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.select.return_value
+    chain.fetch_page.return_value = []
 
-        result = get_audit_trail(mock_client, "audit123")
-
-        assert result == expected_data
-        mock_client.get.assert_called_once()
-        called_endpoint = mock_client.get.call_args[0][0]
-        assert "/audit/records/audit123" in called_endpoint
-        assert "render()" in called_endpoint
-        assert "select=object,actor,details,documents,request.api.geolocation" in called_endpoint
-
-    def test_api_error(self, mock_client):
-        mock_client.get.side_effect = Exception("API Error")
-
-        with pytest.raises(Exit):
-            get_audit_trail(mock_client, "audit123")
-
-        mock_client.get.assert_called_once()
-
-    def test_json_decode_error(self, mock_client, mock_response):
-        mock_response.json.side_effect = ValueError("Invalid JSON")
-        mock_client.get.return_value = mock_response
-
-        with pytest.raises(Exit):
-            get_audit_trail(mock_client, "audit123")
+    with pytest.raises(Exit):
+        get_audit_trail(mock_client, "audit123")
 
 
-class TestGetAuditRecordsByObject:
-    def test_successful_retrieval(self, mock_client, mock_response):
-        expected_data = {
-            "data": [
-                {
-                    "id": "audit1",
-                    "object": {"id": "obj123"},
-                    "timestamp": "2024-01-01T10:00:00Z",
-                },
-                {
-                    "id": "audit2",
-                    "object": {"id": "obj123"},
-                    "timestamp": "2024-01-01T11:00:00Z",
-                },
-            ]
-        }
-        mock_response.json.return_value = expected_data
-        mock_client.get.return_value = mock_response
+def test_get_audit_trail_api_error(mock_client):
+    mock_client.audit.records.options.side_effect = Exception("API Error")
 
-        result = get_audit_records_by_object(mock_client, "obj123", limit=10)
+    with pytest.raises(Exit):
+        get_audit_trail(mock_client, "audit123")
 
-        assert result == expected_data["data"]
-        mock_client.get.assert_called_once()
-        called_endpoint = mock_client.get.call_args[0][0]
-        assert "/audit/records" in called_endpoint
-        assert "render()" in called_endpoint
-        assert "eq(object.id,'obj123')" in called_endpoint
-        assert "limit=10" in called_endpoint
 
-    def test_no_records_found(self, mock_client, mock_response):
-        mock_response.json.return_value = {"data": []}
-        mock_client.get.return_value = mock_response
+def test_get_audit_records_by_object_retrieval(mock_client, mocker):
+    expected_records = [
+        {"id": "audit1", "object": {"id": "obj123"}, "timestamp": "2024-01-01T10:00:00Z"},
+        {"id": "audit2", "object": {"id": "obj123"}, "timestamp": "2024-01-01T11:00:00Z"},
+    ]
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.order_by.return_value.select.return_value
+    chain.fetch_page.return_value = [_mock_record(mocker, rec) for rec in expected_records]
 
-        with pytest.raises(Exit):
-            get_audit_records_by_object(mock_client, "obj123")
+    result = get_audit_records_by_object(mock_client, "obj123", limit=10)
 
-        mock_client.get.assert_called_once()
+    select_fields = ["object", "actor", "details", "documents", "request.api.geolocation"]
+    assert result == expected_records
+    records_options.assert_called_once_with(render=True)
+    records_options.return_value.filter.assert_called_once_with(RQLQuery(object__id="obj123"))
+    filtered.order_by.assert_called_once_with("-timestamp")
+    filtered.order_by.return_value.select.assert_called_once_with(*select_fields)
+    chain.fetch_page.assert_called_once_with(limit=10)
 
-    def test_api_error(self, mock_client):
-        mock_client.get.side_effect = Exception("API Error")
 
-        with pytest.raises(Exit):
-            get_audit_records_by_object(mock_client, "obj123")
+def test_get_audit_records_by_object_empty(mock_client):
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.order_by.return_value.select.return_value
+    chain.fetch_page.return_value = []
 
-        mock_client.get.assert_called_once()
+    with pytest.raises(Exit):
+        get_audit_records_by_object(mock_client, "obj123")
 
-    def test_json_decode_error(self, mock_client, mock_response):
-        mock_response.json.side_effect = ValueError("Invalid JSON")
-        mock_client.get.return_value = mock_response
 
-        with pytest.raises(Exit):
-            get_audit_records_by_object(mock_client, "obj123")
+def test_get_audit_records_by_object_api_error(mock_client):
+    mock_client.audit.records.options.side_effect = Exception("API Error")
 
-    def test_custom_limit(self, mock_client, mock_response):
-        mock_response.json.return_value = {"data": [{"id": "audit1"}]}
-        mock_client.get.return_value = mock_response
+    with pytest.raises(Exit):
+        get_audit_records_by_object(mock_client, "obj123")
 
-        get_audit_records_by_object(mock_client, "obj123", limit=5)  # act
 
-        called_endpoint = mock_client.get.call_args[0][0]
-        assert "limit=5" in called_endpoint
+def test_get_audit_records_by_object_custom_limit(mock_client, mocker):
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.order_by.return_value.select.return_value
+    chain.fetch_page.return_value = [_mock_record(mocker, {"id": "audit1"})]
+
+    result = get_audit_records_by_object(mock_client, "obj123", limit=5)
+
+    chain.fetch_page.assert_called_once_with(limit=5)
+    assert result == [{"id": "audit1"}]

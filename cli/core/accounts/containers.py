@@ -1,5 +1,4 @@
 from cli.core.accounts.app import get_active_account
-from cli.core.mpt.client import client_from_account
 from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from dependency_injector import containers, providers
 
@@ -16,5 +15,4 @@ class AccountContainer(containers.DeclarativeContainer):
     """
 
     account = providers.Singleton(get_active_account)
-    mpt_client = providers.Singleton(client_from_account, account)
     api_mpt_client = providers.Singleton(create_api_mpt_client_from_account, account)
