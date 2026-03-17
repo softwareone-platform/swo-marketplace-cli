@@ -74,22 +74,15 @@ class SettingsData(BaseDataModel):
     @classmethod
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
-        formatted_settings = {}
-        for setting_key, raw_setting in json_data.items():
-            if isinstance(raw_setting, dict):
-                for sub_key, sub_value in raw_setting.items():
-                    formatted_settings[f"{setting_key}.{sub_key}"] = sub_value
-            else:
-                formatted_settings[setting_key] = raw_setting
-
-        records = [
-            SettingsRecords.from_json({
-                "name": setting_name,
-                "value": formatted_settings.get(setting_path),
-            })
-            for setting_name, setting_path in constants.SETTINGS_API_MAPPING.items()
-        ]
-        return cls(records=records)
+        return cls(
+            records=[
+                SettingsRecords.from_json({
+                    "name": setting_name,
+                    "value": cls._flatten_settings(json_data).get(setting_path),
+                })
+                for setting_name, setting_path in constants.SETTINGS_API_MAPPING.items()
+            ]
+        )
 
     @override
     def to_json(self) -> dict[str, Any]:
@@ -110,6 +103,17 @@ class SettingsData(BaseDataModel):
     @override
     def to_xlsx(self) -> dict[str, Any]:
         return {}
+
+    @classmethod
+    def _flatten_settings(cls, json_data: dict[str, Any]) -> dict[str, Any]:
+        formatted_settings = {}
+        for setting_key, raw_setting in json_data.items():
+            if isinstance(raw_setting, dict):
+                for sub_key, sub_value in raw_setting.items():
+                    formatted_settings[f"{setting_key}.{sub_key}"] = sub_value
+            else:
+                formatted_settings[setting_key] = raw_setting
+        return formatted_settings
 
 
 @dataclass

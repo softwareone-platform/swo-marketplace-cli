@@ -1,7 +1,7 @@
 import logging
 from abc import ABC
 from collections.abc import Callable
-from typing import override
+from typing import Any, override
 
 from cli.core.errors import MPTAPIError
 from cli.core.models import DataCollectionModel
@@ -18,22 +18,12 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
 
     @override
     def create(self) -> ServiceResult:
-        errors = []
-        collection = {}
+        errors: list[str] = []
+        collection: dict[str, Any] = {}
         for raw_model_data in self.file_manager.read_data():
             data_model = self.prepare_data_model_to_create(raw_model_data)
-
-            try:
-                new_item = self.api.post(json=data_model.to_json())
-            except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+            if self._add_created_item(collection, data_model, errors):
                 continue
-
-            old_id = data_model.id
-            data_model.id = new_item["id"]
-            collection[old_id] = data_model
-            self._set_synced(new_item["id"], data_model.coordinate)
 
         return ServiceResult(
             success=len(errors) == 0,
@@ -92,18 +82,10 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
                 self._set_skipped()
                 continue
 
-            try:
-                action_handler = self._get_update_action_handler(data_model.action)
-            except ValueError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
-                continue
-
-            try:
-                action_handler(data_model)
-            except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+            error_msg = self._handle_update_model(data_model)
+            if error_msg is not None:
+                errors.append(error_msg)
+                self._set_error(error_msg, data_model.id)
                 continue
 
             self._set_synced(data_model.id, data_model.coordinate)
@@ -123,6 +105,23 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
              DataModel: The data model to create
         """
         return data_model
+
+    def _add_created_item(
+        self, collection: dict[str, DataModel], data_model: Any, errors: list[str]
+    ) -> bool:
+        try:
+            new_item = self.api.post(json=data_model.to_json())
+        except MPTAPIError as error:
+            error_msg = str(error)
+            errors.append(error_msg)
+            self._set_error(error_msg, data_model.id)
+            return True
+
+        old_id = data_model.id
+        data_model.id = new_item["id"]
+        collection[old_id] = data_model
+        self._set_synced(new_item["id"], data_model.coordinate)
+        return False
 
     def _action_create_item(self, data_model: DataModel):
         """Creates the item in the API.
@@ -188,3 +187,14 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             return self._action_update_item
 
         raise ValueError(f"Invalid action: {model_action}")
+
+    def _handle_update_model(self, data_model: Any) -> str | None:
+        try:
+            action_handler = self._get_update_action_handler(data_model.action)
+        except ValueError as error:
+            return str(error)
+        try:
+            action_handler(data_model)
+        except MPTAPIError as error:
+            return str(error)
+        return None

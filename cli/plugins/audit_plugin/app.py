@@ -14,9 +14,11 @@ from rich.panel import Panel
 from rich.table import Table
 
 app = typer.Typer(name="audit", help="Audit commands.")
+type TrailData = dict[str, Any]
+type TrailValues = dict[str, Any]
 
 
-def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
+def compare_audit_trails(source_trail: TrailData, target_trail: TrailData) -> None:
     """Compare two audit trails and display the differences. Prints the differences to the console.
 
     Args:
@@ -24,48 +26,17 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
         target_trail: The target audit trail as a dictionary.
 
     """
-    source_object_id = source_trail.get("object", {}).get("id")
-    target_object_id = target_trail.get("object", {}).get("id")
-
-    if source_object_id != target_object_id:
+    source_object_id = _AuditDiffOps.object_id(source_trail)
+    if source_object_id != _AuditDiffOps.object_id(target_trail):
         console.print("[red]Cannot compare different objects[/red]")
         raise typer.Exit(1)
 
-    panel = Panel(
-        f"Comparing audit trails...\n"
-        f"Object ID: {source_object_id}\n"
-        f"Source Timestamp: {source_trail.get('timestamp')}\n"
-        f"Target Timestamp: {target_trail.get('timestamp')}"
-    )
-    console.print(panel)
-
-    source_flat = flatten_dict(source_trail)
-    target_flat = flatten_dict(target_trail)
-    all_keys = set(source_flat.keys()) | set(target_flat.keys())
-
-    table = Table(title="Audit Trail Differences")
-    table.add_column("Path", style="cyan")
-    table.add_column("Source Value", style="green")
-    table.add_column("Target Value", style="yellow")
-
-    differences_found = False
-
-    for key in sorted(all_keys):
-        source_value = source_flat.get(key)
-        target_value = target_flat.get(key)
-        if source_value != target_value:
-            differences_found = True
-            formatted_path = format_json_path(key, source_trail, target_trail)
-            table.add_row(
-                formatted_path,
-                "[red]<missing>[/red]" if source_value is None else str(source_value),
-                "[red]<missing>[/red]" if target_value is None else str(target_value),
-            )
-
-    if differences_found:
-        console.print(table)
-    else:
+    _AuditDiffOps.print_compare_panel(source_object_id, source_trail, target_trail)
+    table = _AuditDiffOps.comparison_table(source_trail, target_trail)
+    if table is None:
         console.print("\n[green]No differences found between the audit trails[/green]")
+    else:
+        console.print(table)
 
 
 @app.command()
@@ -100,29 +71,7 @@ def diff_by_object_id(
         raise typer.Exit(1)
 
     display_audit_records(records)
-
-    if positions:
-        try:
-            pos1, pos2 = map(int, positions.split(","))
-            if not (1 <= pos1 <= len(records) and 1 <= pos2 <= len(records)):
-                raise ValueError  # noqa: TRY301
-        except ValueError:
-            msg = (
-                "[red]Invalid positions. Please specify two numbers "
-                f"between 1 and {len(records)}[/red]"
-            )
-            console.print(msg)
-            raise typer.Exit(1)
-
-        source_trail = records[pos1 - 1]
-        target_trail = records[pos2 - 1]
-    else:
-        source_trail = records[0]
-        target_trail = records[1]
-        console.print(
-            "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
-        )
-
+    source_trail, target_trail = _AuditDiffOps.select_records(records, positions)
     compare_audit_trails(source_trail, target_trail)
 
 
@@ -150,6 +99,107 @@ def diff_by_records_id(
 def main() -> None:  # pragma: no cover
     """Entry point for the audit CLI application."""
     app()
+
+
+class _AuditDiffOps:
+    @classmethod
+    def comparison_row(
+        cls,
+        key: str,
+        source_value: Any,
+        target_value: Any,
+        source_trail: TrailData,
+        target_trail: TrailData,
+    ) -> tuple[str, str, str]:
+        return (
+            format_json_path(key, source_trail, target_trail),
+            "[red]<missing>[/red]" if source_value is None else str(source_value),
+            "[red]<missing>[/red]" if target_value is None else str(target_value),
+        )
+
+    @classmethod
+    def comparison_rows(
+        cls,
+        source_trail: TrailData,
+        target_trail: TrailData,
+    ) -> list[tuple[str, str, str]]:
+        source_flat = flatten_dict(source_trail)
+        target_flat = flatten_dict(target_trail)
+        return [
+            cls.comparison_row(
+                key, source_flat.get(key), target_flat.get(key), source_trail, target_trail
+            )
+            for key in cls.sorted_keys(source_flat, target_flat)
+            if source_flat.get(key) != target_flat.get(key)
+        ]
+
+    @classmethod
+    def comparison_table(cls, source_trail: TrailData, target_trail: TrailData) -> Table | None:
+        table = Table(title="Audit Trail Differences")
+        table.add_column("Path", style="cyan")
+        table.add_column("Source Value", style="green")
+        table.add_column("Target Value", style="yellow")
+
+        rows = cls.comparison_rows(source_trail, target_trail)
+        if not rows:
+            return None
+        for row in rows:
+            table.add_row(*row)
+        return table
+
+    @classmethod
+    def object_id(cls, trail: TrailData) -> str | None:
+        return trail.get("object", {}).get("id")
+
+    @classmethod
+    def parse_positions(cls, positions: str, records_len: int) -> tuple[int, int]:
+        pos1, pos2 = map(int, positions.split(","))
+        first_position_valid = 1 <= pos1 <= records_len
+        second_position_valid = 1 <= pos2 <= records_len
+        if not (first_position_valid and second_position_valid):
+            raise ValueError
+        return pos1, pos2
+
+    @classmethod
+    def print_compare_panel(
+        cls,
+        source_object_id: str | None,
+        source_trail: TrailData,
+        target_trail: TrailData,
+    ) -> None:
+        console.print(
+            Panel(
+                f"Comparing audit trails...\n"
+                f"Object ID: {source_object_id}\n"
+                f"Source Timestamp: {source_trail.get('timestamp')}\n"
+                f"Target Timestamp: {target_trail.get('timestamp')}"
+            )
+        )
+
+    @classmethod
+    def select_records(
+        cls, records: list[TrailData], positions: str | None
+    ) -> tuple[TrailData, TrailData]:
+        if positions is None:
+            console.print(
+                "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
+            )
+            return records[0], records[1]
+        try:
+            pos1, pos2 = cls.parse_positions(positions, len(records))
+        except ValueError:
+            console.print(
+                "[red]Invalid positions. Please specify two numbers "
+                f"between 1 and {len(records)}[/red]"
+            )
+            raise typer.Exit(1)
+        return records[pos1 - 1], records[pos2 - 1]
+
+    @classmethod
+    def sorted_keys(cls, source_flat: TrailValues, target_flat: TrailValues) -> list[str]:
+        all_keys = set(source_flat.keys())
+        all_keys.update(target_flat.keys())
+        return sorted(all_keys)
 
 
 if __name__ == "__main__":
