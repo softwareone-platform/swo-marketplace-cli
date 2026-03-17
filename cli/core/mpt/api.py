@@ -8,6 +8,8 @@ from mpt_api_client import MPTClient, RQLQuery
 if TYPE_CHECKING:
     from pydantic import BaseModel
 
+QueryParams = dict[str, Any]
+
 
 class APIService[APIModel: "BaseModel"](ABC):
     """Abstract base class for API service operations.
@@ -91,7 +93,7 @@ class APIService[APIModel: "BaseModel"](ABC):
         return resource_data.to_dict()
 
     @wrap_mpt_api_error
-    def list(self, query_params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def list(self, query_params: QueryParams | None = None) -> dict[str, Any]:
         """List resources with optional query parameters.
 
         Args:
@@ -101,29 +103,13 @@ class APIService[APIModel: "BaseModel"](ABC):
             A dictionary containing meta information and the list of resources.
 
         """
-        query_params = dict(query_params or {})
-        limit = query_params.pop("limit", 100)
-        offset = query_params.pop("offset", 0)
-        select = query_params.pop("select", None)
-        service = self.api_collection
-
-        if query_params:
-            service = service.filter(RQLQuery(**query_params))
-        if select:
-            service = service.select(select)
-
-        collection = service.fetch_page(limit=limit, offset=offset)
-        if collection.meta is None or collection.meta.pagination is None:
-            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
-        pagination = collection.meta.pagination
-        return {
-            "meta": {
-                "limit": pagination.limit,
-                "offset": pagination.offset,
-                "total": pagination.total,
-            },
-            "data": [resource.to_dict() for resource in collection.resources],
-        }
+        list_query_params = self._extract_list_query_params(query_params)
+        service = self._apply_list_filters(list_query_params)
+        collection = service.fetch_page(
+            limit=list_query_params["limit"],
+            offset=list_query_params["offset"],
+        )
+        return self._list_response(collection)
 
     @wrap_mpt_api_error
     def post(
@@ -195,6 +181,36 @@ class APIService[APIModel: "BaseModel"](ABC):
             updated_resource = self.api_collection.update(resource_id, json_payload)
 
         return updated_resource.to_dict()
+
+    def _apply_list_filters(self, query_params: QueryParams) -> Any:
+        service = self.api_collection
+        if query_params["filters"]:
+            service = service.filter(RQLQuery(**query_params["filters"]))
+        if query_params["select"] is not None:
+            service = service.select(query_params["select"])
+        return service
+
+    def _extract_list_query_params(self, query_params: QueryParams | None) -> QueryParams:
+        list_query_params = dict(query_params or {})
+        return {
+            "filters": list_query_params,
+            "limit": list_query_params.pop("limit", 100),
+            "offset": list_query_params.pop("offset", 0),
+            "select": list_query_params.pop("select", None),
+        }
+
+    def _list_response(self, collection: Any) -> dict[str, Any]:
+        if collection.meta is None or collection.meta.pagination is None:
+            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
+        pagination = collection.meta.pagination
+        return {
+            "meta": {
+                "limit": pagination.limit,
+                "offset": pagination.offset,
+                "total": pagination.total,
+            },
+            "data": [resource.to_dict() for resource in collection.resources],
+        }
 
 
 class RelatedAPIService(APIService, ABC):

@@ -42,10 +42,11 @@ def add_account(
     ] = "https://api.platform.softwareone.com",
 ):
     """Add an account to work with the SoftwareOne Marketplace."""
+    account_service = MPTAccountService(
+        MPTClient.from_config(api_token=secret, base_url=environment)
+    )
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
-        mpt_client = MPTClient.from_config(api_token=secret, base_url=environment)
-        account_service = MPTAccountService(mpt_client)
         try:
             token = account_service.get_authentication(secret)
         except (MPTAPIError, ValueError) as error:
@@ -54,7 +55,7 @@ def add_account(
                 f"environment {environment}. Exception: {error!s}"
             )
             raise typer.Exit(code=3)
-        account = Account.from_token(token, environment)
+    account = Account.from_token(token, environment)
 
     accounts = get_or_create_accounts()
     if does_account_exist(accounts, account):
@@ -70,9 +71,7 @@ def add_account(
 
         write_accounts(accounts)
 
-    table = _account_table("Account has been added")
-    table = _list_accounts(table, [account])
-    console.print(table)
+    console.print(_list_accounts(_account_table("Account has been added"), [account]))
 
 
 @app.command(name="activate")

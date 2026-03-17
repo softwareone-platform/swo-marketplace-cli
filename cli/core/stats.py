@@ -68,21 +68,25 @@ class ErrorMessagesCollector:
         return self._is_empty
 
     def __str__(self) -> str:
-        lines: list[str] = []
-        for section_name, section in self._sections.items():
-            section_messages = section.get("", [])
-            if section_messages:
-                lines.append(f"{section_name}: {', '.join(section_messages)}")
-            else:
-                lines.append(f"{section_name}:")
+        return "\n".join(
+            line
+            for section_name, section in self._sections.items()
+            for line in self._section_to_lines(section_name, section)
+        )
 
-            for item_name, item_messages in section.items():
-                if not item_name:
-                    continue
-
-                lines.append(f"\t\t{item_name}: {', '.join(item_messages)}")
-
-        return "\n".join(lines)
+    def _section_to_lines(self, section_name: str, section: dict[str, list[str]]) -> list[str]:
+        section_messages = section.get("", [])
+        lines = [
+            f"{section_name}: {', '.join(section_messages)}"
+            if section_messages
+            else f"{section_name}:"
+        ]
+        lines.extend(
+            f"\t\t{item_name}: {', '.join(item_messages)}"
+            for item_name, item_messages in section.items()
+            if item_name
+        )
+        return lines
 
 
 class StatsCollector(ABC):
@@ -186,31 +190,18 @@ class ProductStatsCollector(StatsCollector):
     """Statistics collector specifically for product synchronization operations."""
 
     def __init__(self) -> None:
-        general: TabResults = default_results()
-        parameters_groups: TabResults = default_results()
-        items_groups: TabResults = default_results()
-        agreements_parameters: TabResults = default_results()
-        asset_parameters: TabResults = default_results()
-        item_parameters: TabResults = default_results()
-        request_parameters: TabResults = default_results()
-        subscription_parameters: TabResults = default_results()
-        item_rows: TabResults = default_results()
-        templates: TabResults = default_results()
-
-        tabs = {
-            "General": general,
-            "Parameters Groups": parameters_groups,
-            "Items Groups": items_groups,
-            "Agreements Parameters": agreements_parameters,
-            "Assets Parameters": asset_parameters,
-            "Item Parameters": item_parameters,
-            "Request Parameters": request_parameters,
-            "Subscription Parameters": subscription_parameters,
-            "Items": item_rows,
-            "Templates": templates,
-        }
-
-        super().__init__(tabs)
+        super().__init__({
+            "General": default_results(),
+            "Parameters Groups": default_results(),
+            "Items Groups": default_results(),
+            "Agreements Parameters": default_results(),
+            "Assets Parameters": default_results(),
+            "Item Parameters": default_results(),
+            "Request Parameters": default_results(),
+            "Subscription Parameters": default_results(),
+            "Items": default_results(),
+            "Templates": default_results(),
+        })
 
     def _get_table_title(self) -> str:
         status = "[red bold]FAILED" if self.has_errors else "[green bold]SUCCEED"
