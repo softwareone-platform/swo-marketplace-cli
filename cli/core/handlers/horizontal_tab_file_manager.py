@@ -34,18 +34,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         for row, record in enumerate(
             records, self.file_handler.get_sheet_next_row(self._sheet_name)
         ):
-            item_xlsx = record.to_xlsx()
-            for col, field in enumerate(self._fields, 1):
-                cell_value = item_xlsx.get(field, "")
-                style = self._get_style(record, cell_value)
-                self.file_handler.write_cell(
-                    self._sheet_name,
-                    col=col,
-                    row=row,
-                    cell_value=cell_value,
-                    data_validation=self._data_validation_map.get(field, None),
-                    style=style,
-                )
+            self._add_record_row(record, row)
 
         self.file_handler.save()
 
@@ -90,6 +79,19 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             self.file_handler.write([{self._sheet_name: {f"{column_letter}1": ERROR_COLUMN_NAME}}])
 
         self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
+
+    def _add_record_row(self, record: DataModel, row: int) -> None:
+        item_xlsx = record.to_xlsx()
+        for col, field in enumerate(self._fields, 1):
+            cell_value = item_xlsx.get(field, "")
+            self.file_handler.write_cell(
+                self._sheet_name,
+                col=col,
+                row=row,
+                cell_value=cell_value,
+                data_validation=self._data_validation_map.get(field, None),
+                style=self._get_style(record, cell_value),
+            )
 
     def _get_currency_and_precision(self, record: DataModel) -> tuple[str | None, int | None]:
         return record.currency, record.precision  # type: ignore[attr-defined]

@@ -32,9 +32,9 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
 
         """
         data_xlsx = data_model.to_xlsx()
-        row_values = {
-            f"B{row}": data_xlsx.get(field, "") for row, field in enumerate(self._fields, 2)
-        }
+        row_values = {}
+        for row, field in enumerate(self._fields, 2):
+            row_values[f"B{row}"] = data_xlsx.get(field, "")
         self.file_handler.write([{self._sheet_name: row_values}])
 
     def check_required_tabs(self) -> None:
@@ -80,10 +80,11 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
     @override
     def write_error(self, error: str, resource_id: str | None = None) -> None:
         row_data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
-        try:
-            coordinate = row_data[ERROR_COLUMN_NAME]["coordinate"]
+        error_cell = row_data.get(ERROR_COLUMN_NAME)
+        if error_cell and "coordinate" in error_cell:
+            coordinate = error_cell["coordinate"]
             column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
-        except KeyError:
+        else:
             column_letter = self.file_handler.get_sheet_next_column(self._sheet_name)
             coordinate = next(iter(row_data.values()))["coordinate"]
             _, row_number = self._get_row_and_column_from_coordinate(coordinate)

@@ -20,6 +20,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 type SheetData = dict[str, Any]
 type SheetDataGenerator = Generator[SheetData, None, None]
 type StyleData = dict[str, dict[str, NamedStyle]]
+type RegexPatterns = list[re.Pattern[str]]
 
 
 class ExcelFileHandler(FileHandler):
@@ -188,13 +189,17 @@ class ExcelFileHandler(FileHandler):
             A dictionary where keys are field names and values are dictionaries containing
                 cell values and coordinates.
         """
-        sheet = self._get_worksheet(sheet_name)
-        sheet_iter = sheet.iter_rows(min_row=2)
-        return {
-            str(row[0].value): {"value": row[1].value, "coordinate": row[1].coordinate}
-            for row in sheet_iter
-            if fields is None or row[0].value in fields
-        }
+        vertical_sheet_data = {}
+        for row in self._get_worksheet(sheet_name).iter_rows(min_row=2):
+            if fields is not None and row[0].value not in fields:
+                continue
+
+            vertical_sheet_data[str(row[0].value)] = {
+                "value": row[1].value,
+                "coordinate": row[1].coordinate,
+            }
+
+        return vertical_sheet_data
 
     def get_sheet_next_column(self, sheet_name: str) -> str:
         """Get the next available column letter in the specified sheet.
@@ -221,7 +226,7 @@ class ExcelFileHandler(FileHandler):
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: tuple[str, ...], patterns: list[re.Pattern[str]]
+        self, sheet_name: str, fields: tuple[str, ...], patterns: RegexPatterns
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure.
 
@@ -233,16 +238,9 @@ class ExcelFileHandler(FileHandler):
         Yields:
             Tuples containing cell coordinate, column name, and cell value
         """
-        ws = self._get_worksheet(sheet_name)
-        column_map = {}
-        for header_index, column in enumerate(ws["1"]):
-            if column.value and (
-                column.value in fields
-                or any(re.match(pattern, column.value) for pattern in patterns)
-            ):
-                column_map[header_index] = column.value
-
-        for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
+        worksheet = self._get_worksheet(sheet_name)
+        column_map = self._get_dynamic_column_map(worksheet, fields, patterns)
+        for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row):
             if all(cell.value is None for cell in row):
                 continue
 
@@ -288,13 +286,7 @@ class ExcelFileHandler(FileHandler):
         """
         for sheet in sheet_rows:
             for sheet_name, cells in sheet.items():
-                try:
-                    worksheet = self._get_worksheet(sheet_name)
-                except KeyError:
-                    worksheet = self._workbook.create_sheet(title=sheet_name)
-
-                for coordinate, cell_value in cells.items():
-                    worksheet[coordinate] = cell_value
+                self._write_cells(self._get_or_create_worksheet(sheet_name), cells)
 
         self.save()
 
@@ -351,8 +343,32 @@ class ExcelFileHandler(FileHandler):
             next(self._get_worksheet(worksheet_name).iter_cols(max_col=max_col, values_only=True))  # type: ignore[arg-type]
         )
 
+    def _get_dynamic_column_map(
+        self, worksheet: Worksheet, fields: tuple[str, ...], patterns: RegexPatterns
+    ) -> dict[int, Any]:
+        column_map = {}
+        for header_index, column in enumerate(worksheet["1"]):
+            if column.value and (
+                column.value in fields
+                or any(re.match(pattern, column.value) for pattern in patterns)
+            ):
+                column_map[header_index] = column.value
+        return column_map
+
+    def _get_or_create_worksheet(self, sheet_name: str) -> Worksheet:
+        try:
+            return self._get_worksheet(sheet_name)
+        except KeyError:
+            worksheet = self._workbook.create_sheet(title=sheet_name)
+            self._worksheets_cache[sheet_name] = worksheet
+            return worksheet
+
     def _get_worksheet(self, sheet_name: str) -> Worksheet:
         if self._worksheets_cache.get(sheet_name) is None:
             self._worksheets_cache[sheet_name] = self._workbook[sheet_name]
 
         return self._worksheets_cache[sheet_name]
+
+    def _write_cells(self, worksheet: Worksheet, cells: dict[str, Any]) -> None:
+        for coordinate, cell_value in cells.items():
+            worksheet[coordinate] = cell_value
