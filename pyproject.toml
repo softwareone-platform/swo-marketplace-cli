@@ -25,12 +25,12 @@ classifiers = [
 ]
 dependencies = [
     "dependency-injector==4.49.*",
-    "mpt-api-client==5.3.*",
+    "mpt-api-client==5.4.*",
     "openpyxl==3.1.*",
     "pydantic==2.12.*",
     "pyfiglet==1.0.*",
     "python-dateutil==2.9.*",
-    "requests==2.32.*",
+    "requests==2.33.*",
     "requests-toolbelt==1.0.*",
     "typer==0.24.*",
 ]
