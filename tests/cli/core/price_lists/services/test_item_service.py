@@ -7,8 +7,6 @@ from cli.core.price_lists.models import ItemData
 from cli.core.price_lists.services import ItemService
 from cli.core.services.service_context import ServiceContext
 from cli.core.stats import PriceListStatsCollector
-from requests import Response
-
 
 @pytest.fixture
 def service_context(
@@ -57,7 +55,7 @@ def test_retrieve_from_mpt(mocker, service_context, mpt_item_data, item_data_fro
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
-        return_value=mocker.Mock(spec=Response, json=mocker.Mock(return_value=mpt_item_data)),
+        return_value=mpt_item_data,
     )
     service = ItemService(service_context)
 

@@ -57,7 +57,7 @@ class ItemService(RelatedBaseService):
         except MPTAPIError as error:
             return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
-        item_model = self.data_model.from_json(response.json())
+        item_model = self.data_model.from_json(response)
         return ServiceResult(success=True, model=item_model, stats=self.stats)
 
     @override
