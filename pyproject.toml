@@ -25,7 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "dependency-injector==4.49.*",
-    "mpt-api-client==5.3.*",
+    "mpt-api-client==5.4.*",
     "openpyxl==3.1.*",
     "pydantic==2.12.*",
     "pyfiglet==1.0.*",
