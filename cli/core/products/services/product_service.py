@@ -26,7 +26,7 @@ class ProductService(BaseService):
         try:
             new_product_data = self.api.post(form_payload=multipart_payload, headers=headers)
         except MPTAPIError as error:
-            self._set_error(str(error))
+            self._set_error(error)
             return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         product.id = new_product_data["id"]
@@ -34,7 +34,7 @@ class ProductService(BaseService):
             # TODO: Handle this gracefully using update_settings function
             self.api.update(f"{product.id}/settings", json_payload=product.settings.to_json())
         except MPTAPIError as error:
-            self._set_error(str(error))
+            self._set_error(error)
             return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         self._set_synced(product.id, product.coordinate)
@@ -71,7 +71,7 @@ class ProductService(BaseService):
         try:
             exists = self.api.exists({"id": product.id})
         except MPTAPIError as error:
-            self._set_error(str(error))
+            self._set_error(error)
             return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product if exists else None, stats=self.stats)
@@ -133,7 +133,7 @@ class ProductService(BaseService):
         try:
             self.api.update(product.id, SettingsData(records=setting_items).to_json())
         except MPTAPIError as error:
-            self._set_error(str(error))
+            self._set_error(error)
             return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product, stats=self.stats)

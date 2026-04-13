@@ -27,7 +27,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
                 new_item = self.api.post(json=data_model.to_json())
             except MPTAPIError as error:
                 errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._set_error(error, data_model.id)
                 continue
 
             old_id = data_model.id
@@ -51,7 +51,7 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
             try:
                 response = self.api.list(query_params=export_query)
             except MPTAPIError as error:
-                self._set_error(str(error))
+                self._set_error(error)
                 return ServiceResult(
                     success=False, model=None, errors=[str(error)], stats=self.stats
                 )
@@ -96,14 +96,14 @@ class RelatedComponentsBaseService(RelatedBaseService, ABC):
                 action_handler = self._get_update_action_handler(data_model.action)
             except ValueError as error:
                 errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._set_error(error, data_model.id)
                 continue
 
             try:
                 action_handler(data_model)
             except MPTAPIError as error:
                 errors.append(str(error))
-                self._set_error(str(error), data_model.id)
+                self._set_error(error, data_model.id)
                 continue
 
             self._set_synced(data_model.id, data_model.coordinate)
