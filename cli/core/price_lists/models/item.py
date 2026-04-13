@@ -107,14 +107,15 @@ class ItemData(BaseDataModel):
     @classmethod
     @override
     def from_json(cls, json_data: dict[str, Any]) -> Self:
+        item_data = json_data["item"]
         return cls(
             id=json_data.get("id", ""),
-            billing_frequency=json_data["item"]["terms"]["period"],
+            billing_frequency=item_data["terms"]["period"],
             currency=json_data["priceList"]["currency"],
-            commitment=json_data["item"]["terms"].get("commitment"),
-            erp_id=json_data["item"]["externalIds"].get("operations"),
-            item_id=json_data["item"]["id"],
-            item_name=json_data["item"]["name"],
+            commitment=item_data["terms"].get("commitment"),
+            erp_id=item_data["externalIds"].get("operations"),
+            item_id=item_data["id"],
+            item_name=item_data["name"],
             lp_x1=json_data.get("LPx1"),
             lp_xm=json_data.get("LPxM"),
             lp_xy=json_data.get("LPxY"),

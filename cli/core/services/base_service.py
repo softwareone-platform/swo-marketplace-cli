@@ -70,8 +70,8 @@ class Service(ABC):
         """Override this method to set the export parameters."""
         return {}
 
-    def _set_error(self, error: str, resource_id: str | None = None) -> None:
-        self.file_manager.write_error(error, resource_id)
+    def _set_error(self, error: Exception, resource_id: str | None = None) -> None:
+        self.file_manager.write_error(str(error), resource_id)
         self.stats.add_error(self.file_manager.tab_name)
 
     def _set_synced(self, resource_id: str, item_coordinate: str) -> None:

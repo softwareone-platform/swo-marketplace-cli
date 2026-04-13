@@ -73,7 +73,7 @@ class ItemService(RelatedBaseService):
                 item_data = self.api.list(query_params=query_params)["data"][0]
             except MPTAPIError as error:
                 errors.append(str(error))
-                self._set_error(str(error), record.id)
+                self._set_error(error, record.id)
                 continue
 
             # TODO: this logic should be moved to the price list data model creation
@@ -83,5 +83,5 @@ class ItemService(RelatedBaseService):
                 self._set_synced(record.id, record.coordinate)
             except MPTAPIError as error:
                 errors.append(f"Item {record.id}: {error!s}")
-                self._set_error(str(error), record.id)
+                self._set_error(error, record.id)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
