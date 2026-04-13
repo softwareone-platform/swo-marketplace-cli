@@ -31,15 +31,15 @@ class ExcelFileHandler(FileHandler):
         self._worksheets_cache: dict[str, Worksheet] = {}
 
     @property
-    def _workbook(self) -> Workbook:
+    def sheet_names(self) -> list[str]:
+        return self.workbook.sheetnames
+
+    @property
+    def workbook(self) -> Workbook:
         if self._workbook_cache is None:
             self._workbook_cache = load_workbook(self.file_path)
 
         return self._workbook_cache
-
-    @property
-    def sheet_names(self) -> list[str]:
-        return self._workbook.sheetnames
 
     @classmethod
     def normalize_file_path(cls, file_path: str) -> Path:
@@ -262,7 +262,7 @@ class ExcelFileHandler(FileHandler):
             range_string: The cell range to merge (e.g., "A1:B2").
 
         """
-        self._workbook[sheet_name].merge_cells(range_string)
+        self.workbook[sheet_name].merge_cells(range_string)
 
     def read(self) -> list[Any]:
         """
@@ -275,7 +275,7 @@ class ExcelFileHandler(FileHandler):
 
     def save(self) -> None:
         """Saves the current workbook to the file path and cleans worksheet cache."""
-        self._workbook.save(self.file_path)
+        self.workbook.save(self.file_path)
         self._clean_worksheets()
 
     def write(self, sheet_rows: list[SheetData]) -> None:
@@ -291,7 +291,7 @@ class ExcelFileHandler(FileHandler):
                 try:
                     worksheet = self._get_worksheet(sheet_name)
                 except KeyError:
-                    worksheet = self._workbook.create_sheet(title=sheet_name)
+                    worksheet = self.workbook.create_sheet(title=sheet_name)
 
                 for coordinate, cell_value in cells.items():
                     worksheet[coordinate] = cell_value
@@ -321,7 +321,7 @@ class ExcelFileHandler(FileHandler):
         try:
             sheet = self._get_worksheet(sheet_name)
         except KeyError:
-            sheet = self._workbook.create_sheet(title=sheet_name)
+            sheet = self.workbook.create_sheet(title=sheet_name)
 
         coordinate = f"{get_column_letter(col)}{row}"
         if style is not None:
@@ -353,6 +353,6 @@ class ExcelFileHandler(FileHandler):
 
     def _get_worksheet(self, sheet_name: str) -> Worksheet:
         if self._worksheets_cache.get(sheet_name) is None:
-            self._worksheets_cache[sheet_name] = self._workbook[sheet_name]
+            self._worksheets_cache[sheet_name] = self.workbook[sheet_name]
 
         return self._worksheets_cache[sheet_name]
