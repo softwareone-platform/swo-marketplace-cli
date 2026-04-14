@@ -18,12 +18,12 @@ class ExcelFileManager(ABC):
     _sheet_name: str
     _data_validation_map: ClassVar[Mapping[str, DataValidation]] = {}
 
+    def __init__(self, file_path: str):
+        self.file_handler = ExcelFileHandler(Path(file_path))
+
     @property
     def tab_name(self) -> str:
         return self._sheet_name
-
-    def __init__(self, file_path: str):
-        self.file_handler = ExcelFileHandler(Path(file_path))
 
     @abstractmethod
     def create_tab(self) -> None:

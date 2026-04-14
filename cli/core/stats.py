@@ -155,10 +155,6 @@ class StatsCollector(ABC):
         self._tab_aliases[tab_name]["skipped"] += 1
         self._tab_aliases[tab_name]["total"] += 1
 
-    @abstractmethod
-    def _get_table_title(self) -> str:
-        raise NotImplementedError
-
     def to_table(self) -> Table:
         """Generate a rich Table representation of the collected stats.
 
@@ -180,6 +176,10 @@ class StatsCollector(ABC):
                 f"[white]{tab_stats['skipped']}",
             )
         return table
+
+    @abstractmethod
+    def _get_table_title(self) -> str:
+        raise NotImplementedError
 
 
 class ProductStatsCollector(StatsCollector):
