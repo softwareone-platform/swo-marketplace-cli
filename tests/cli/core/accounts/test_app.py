@@ -351,7 +351,7 @@ def test_list_accounts(new_accounts_path, mocker):
     result = runner.invoke(app, ["list"])
 
     assert result.exit_code == 0, result.stdout
-    assert all((account in result.stdout) for account in ["ACC-12341", "ACC-12342"]), result.stdout
+    assert all((account in result.stdout) for account in ("ACC-12341", "ACC-12342")), result.stdout
 
 
 def test_list_active_account(new_accounts_path, mocker):

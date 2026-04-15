@@ -14,6 +14,11 @@ def error_factory():
     return _build_runtime_error
 
 
+@pytest.fixture
+def http_error_callable(mocker):
+    return mocker.Mock(side_effect=MPTHttpError(500, "err", "boom"))
+
+
 def test_http_wrapper_get_from_class(error_factory):
     wrapper = HttpErrorWrapper(lambda *_args, **_kwargs: None, error_factory)
 
@@ -39,9 +44,9 @@ def test_api_wrapper_get_from_instance(error_factory):
     assert result() == "bound"
 
 
-def test_api_wrapper_raises_factory_error(error_factory):
+def test_api_wrapper_raises_factory_error(error_factory, http_error_callable):
     wrapper = ApiErrorWrapper(
-        lambda *_args, **_kwargs: (_ for _ in ()).throw(MPTHttpError(500, "err", "boom")),
+        http_error_callable,
         error_factory,
     )
 

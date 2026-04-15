@@ -35,7 +35,7 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     base_path, index_str = array_path.split("[")
     index = int(index_str)
 
-    for trail in [source_trail, target_trail]:
+    for trail in (source_trail, target_trail):
         current_node: Any | None = trail
         for part in base_path.split("."):
             if not isinstance(current_node, dict) or part not in current_node:
