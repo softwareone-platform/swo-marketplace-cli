@@ -10,7 +10,7 @@ def get_audit_trail(client: MPTClient, record_id: str) -> dict[str, Any]:
     try:
         # TODO: Using select instead of get because render() query string isn't working with get().
         select_fields = ["object", "actor", "details", "documents", "request.api.geolocation"]
-        audit_collection = client.audit.records.options(render=True)
+        audit_collection = client.audit.records.options(render=True)  # type: ignore[attr-defined]
         audit_collection_filtered = audit_collection.filter(RQLQuery(id=record_id))
         records = audit_collection_filtered.select(*select_fields).fetch_page(limit=1)
     except Exception as error:

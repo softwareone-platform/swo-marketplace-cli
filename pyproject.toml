@@ -121,7 +121,7 @@ select = ["AAA", "E999", "WPS"]
 show-source = true
 statistics = false
 per-file-ignores = [
-  "*.py:WPS210,WPS211,WPS213,WPS214,WPS218,WPS221,WPS229,WPS231,WPS232,WPS234,WPS235,WPS237,WPS327,WPS332,WPS335,WPS336,WPS339,WPS342,WPS349,WPS432",
+  "*.py:WPS210,WPS211,WPS213,WPS214,WPS218,WPS221,WPS229,WPS231,WPS232,WPS235,WPS237,WPS335,WPS339,WPS342,WPS432",
   "tests/**:WPS202,WPS204,WPS210,WPS211,WPS213,WPS218,WPS221,WPS235,WPS335,WPS339,WPS342,WPS432"
 ]
 
@@ -242,5 +242,6 @@ explicit_package_bases = true
 module = [
   "gunicorn.*",
   "pyfiglet.*",
+  "dependency_injector.*"
 ]
 ignore_missing_imports = true

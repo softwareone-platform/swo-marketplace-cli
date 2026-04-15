@@ -28,7 +28,7 @@ def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:
 def show_banner() -> None:
     """Display a stylized program banner with a color gradient."""
     program_name = pathlib.Path(sys.argv[0]).name
-    program_name = "".join((program_name[0:3].upper(), program_name[3:7]))
+    program_name = "".join((program_name[:3].upper(), program_name[3:7]))
     figlet = Figlet("georgia11")
 
     banner_text = figlet.renderText(program_name)
