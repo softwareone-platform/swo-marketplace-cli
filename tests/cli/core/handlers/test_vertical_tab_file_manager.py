@@ -4,6 +4,7 @@ from typing import Any, Self
 from unittest.mock import Mock, call
 
 import pytest
+from cli.core.handlers.excel_file_handler import CellPosition
 from cli.core.handlers.excel_styles import general_tab_title_style
 from cli.core.handlers.vertical_tab_file_manager import VerticalTabFileManager
 from cli.core.models import BaseDataModel
@@ -92,7 +93,10 @@ def test_create_tab(mocker, file_manager):
 
     exists_mock.assert_called_once()
     write_cell_mock.assert_called_once_with(
-        "FakeSheet", 1, 1, "General Information", style=general_tab_title_style
+        "FakeSheet",
+        CellPosition(col=1, row=1),
+        "General Information",
+        style=general_tab_title_style,
     )
     merge_cell_mock.assert_called_once_with("FakeSheet", "A1:B1")
     write_mock.assert_has_calls([

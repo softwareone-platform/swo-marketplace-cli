@@ -2,6 +2,7 @@ from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
+from cli.core.handlers.excel_file_handler import CellPosition
 from cli.core.handlers.excel_styles import general_tab_title_style
 from cli.core.handlers.file_manager import ExcelFileManager
 
@@ -60,7 +61,10 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             self.file_handler.create()
 
         self.file_handler.write_cell(
-            self._sheet_name, 1, 1, "General Information", style=general_tab_title_style
+            self._sheet_name,
+            CellPosition(col=1, row=1),
+            "General Information",
+            style=general_tab_title_style,
         )
         self.file_handler.merge_cells(self._sheet_name, "A1:B1")
 

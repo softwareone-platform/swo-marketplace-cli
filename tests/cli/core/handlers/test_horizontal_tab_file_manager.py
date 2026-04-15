@@ -4,6 +4,7 @@ from types import MappingProxyType
 from typing import Any, ClassVar, Self, override
 
 import pytest
+from cli.core.handlers.excel_file_handler import CellPosition
 from cli.core.handlers.excel_styles import (
     horizontal_tab_style,
     number_format_style,
@@ -84,24 +85,21 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
     write_cell_mock.assert_has_calls([
         mocker.call(
             "FakeSheet",
-            col=1,
-            row=2,
+            position=CellPosition(col=1, row=2),
             cell_value="fake_id",
             data_validation=None,
             style=None,
         ),
         mocker.call(
             "FakeSheet",
-            col=2,
-            row=2,
+            position=CellPosition(col=2, row=2),
             cell_value=22.5,
             data_validation=None,
             style=expected_style,
         ),
         mocker.call(
             "FakeSheet",
-            col=3,
-            row=2,
+            position=CellPosition(col=3, row=2),
             cell_value="fake field value",
             data_validation=mocker.ANY,
             style=None,
@@ -128,16 +126,14 @@ def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
     write_cell_mock.assert_has_calls([
         mocker.call(
             "FakeSheet",
-            col=1,
-            row=2,
+            position=CellPosition(col=1, row=2),
             cell_value="fake_id",
             data_validation=None,
             style=None,
         ),
         mocker.call(
             "FakeSheet",
-            col=2,
-            row=2,
+            position=CellPosition(col=2, row=2),
             cell_value=22.5,
             data_validation=None,
             style=None,
@@ -156,11 +152,24 @@ def test_create_tab(mocker, fake_horizontal_tab_file_manager):
     exists_mock.assert_called_once()
     create_mock.assert_called_once()
     write_cell_mock.assert_has_calls([
-        mocker.call("FakeSheet", row=1, col=1, cell_value="ID", style=horizontal_tab_style),
         mocker.call(
-            "FakeSheet", row=1, col=2, cell_value="styled_field", style=horizontal_tab_style
+            "FakeSheet",
+            position=CellPosition(col=1, row=1),
+            cell_value="ID",
+            style=horizontal_tab_style,
         ),
-        mocker.call("FakeSheet", row=1, col=3, cell_value="field2", style=horizontal_tab_style),
+        mocker.call(
+            "FakeSheet",
+            position=CellPosition(col=2, row=1),
+            cell_value="styled_field",
+            style=horizontal_tab_style,
+        ),
+        mocker.call(
+            "FakeSheet",
+            position=CellPosition(col=3, row=1),
+            cell_value="field2",
+            style=horizontal_tab_style,
+        ),
     ])
 
 

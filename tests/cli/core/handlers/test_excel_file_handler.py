@@ -8,7 +8,7 @@ from cli.core.handlers.errors import (
     RequiredFieldValuesError,
     RequiredSheetsError,
 )
-from cli.core.handlers.excel_file_handler import ExcelFileHandler
+from cli.core.handlers.excel_file_handler import CellPosition, ExcelFileHandler
 from openpyxl.styles import NamedStyle
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.datavalidation import DataValidation
@@ -178,8 +178,9 @@ def test_get_data_from_vertical_sheet_by_fields(excel_file_handler):
 
 
 def test_clean_worksheets_by_sheet_name(excel_file_handler):
-    excel_file_handler.write_cell("VerticalSheet", row=2, col=3, cell_value="V")
-    excel_file_handler.write_cell("HorizontalSheet", row=2, col=3, cell_value="H")
+    cell_position = CellPosition(3, 2)
+    excel_file_handler.write_cell("VerticalSheet", position=cell_position, cell_value="V")
+    excel_file_handler.write_cell("HorizontalSheet", position=cell_position, cell_value="H")
     clean_worksheets_attr = "_clean_worksheets"
     worksheets_cache_attr = "_worksheets_cache"
     clean_worksheets = getattr(excel_file_handler, clean_worksheets_attr)
@@ -192,8 +193,9 @@ def test_clean_worksheets_by_sheet_name(excel_file_handler):
 
 
 def test_clean_worksheets_all(excel_file_handler):
-    excel_file_handler.write_cell("VerticalSheet", row=2, col=3, cell_value="V")
-    excel_file_handler.write_cell("HorizontalSheet", row=2, col=3, cell_value="H")
+    cell_position = CellPosition(3, 2)
+    excel_file_handler.write_cell("VerticalSheet", position=cell_position, cell_value="V")
+    excel_file_handler.write_cell("HorizontalSheet", position=cell_position, cell_value="H")
     clean_worksheets_attr = "_clean_worksheets"
     worksheets_cache_attr = "_worksheets_cache"
     clean_worksheets = getattr(excel_file_handler, clean_worksheets_attr)
@@ -229,7 +231,9 @@ def test_write(excel_file_handler):
 
 
 def test_write_cell(excel_file_handler):
-    excel_file_handler.write_cell("Sheet1", row=2, col=3, cell_value="FakeValue")  # act
+    cell_position = CellPosition(3, 2)
+
+    excel_file_handler.write_cell("Sheet1", position=cell_position, cell_value="FakeValue")  # act
 
     cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # noqa: SLF001
     assert cell.value == "FakeValue"
@@ -238,19 +242,24 @@ def test_write_cell(excel_file_handler):
 
 def test_write_cell_with_style(excel_file_handler):
     fake_style = NamedStyle("fake_style")
+    cell_position = CellPosition(3, 2)
 
-    excel_file_handler.write_cell(  # act
-        "Sheet1", row=2, col=3, cell_value="FakeValue", style=fake_style
-    )
+    excel_file_handler.write_cell(
+        "Sheet1", position=cell_position, cell_value="FakeValue", style=fake_style
+    )  # act
 
     assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # noqa: SLF001
 
 
 def test_write_cell_with_data_validation(excel_file_handler):
     fake_data_validation = DataValidation()
+    cell_position = CellPosition(3, 2)
 
-    excel_file_handler.write_cell(  # act
-        "Sheet1", row=2, col=3, cell_value="FakeValue", data_validation=fake_data_validation
-    )
+    excel_file_handler.write_cell(
+        "Sheet1",
+        position=cell_position,
+        cell_value="FakeValue",
+        data_validation=fake_data_validation,
+    )  # act
 
     assert "C2" in fake_data_validation.ranges

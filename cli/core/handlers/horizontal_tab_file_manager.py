@@ -3,6 +3,7 @@ from collections.abc import Generator, Mapping
 from typing import TYPE_CHECKING, Any, ClassVar, override
 
 from cli.core.handlers.constants import ERROR_COLUMN_NAME
+from cli.core.handlers.excel_file_handler import CellPosition
 from cli.core.handlers.excel_styles import get_number_format_style, horizontal_tab_style
 from cli.core.handlers.file_manager import ExcelFileManager
 from openpyxl.styles import NamedStyle
@@ -40,8 +41,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
                 style = self._get_style(record, cell_value)
                 self.file_handler.write_cell(
                     self._sheet_name,
-                    col=col,
-                    row=row,
+                    position=CellPosition(col=col, row=row),
                     cell_value=cell_value,
                     data_validation=self._data_validation_map.get(field, None),
                     style=style,
@@ -57,8 +57,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         for col, field in enumerate(self._fields, 1):
             self.file_handler.write_cell(
                 self._sheet_name,
-                row=1,
-                col=col,
+                position=CellPosition(col=col, row=1),
                 cell_value=field,
                 style=horizontal_tab_style,
             )

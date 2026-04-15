@@ -203,6 +203,26 @@ def mpt_product_data():
 
 
 @pytest.fixture
+def product_related_data(request):
+    return {
+        "item": request.getfixturevalue("item_data_from_dict"),
+        "item_group": request.getfixturevalue("item_group_data_from_dict"),
+        "parameter_group": request.getfixturevalue("parameter_group_data_from_dict"),
+        "parameters": request.getfixturevalue("parameters_data_from_dict"),
+        "template": request.getfixturevalue("template_data_from_dict"),
+        "mpt_item": request.getfixturevalue("mpt_item_data"),
+        "mpt_item_group": request.getfixturevalue("mpt_item_group_data"),
+        "mpt_parameter_group": request.getfixturevalue("mpt_parameter_group_data"),
+        "mpt_agreement_parameter": request.getfixturevalue("mpt_agreement_parameter_data"),
+        "mpt_asset_parameter": request.getfixturevalue("mpt_asset_parameter_data"),
+        "mpt_item_parameter": request.getfixturevalue("mpt_item_parameter_data"),
+        "mpt_request_parameter": request.getfixturevalue("mpt_request_parameter_data"),
+        "mpt_subscription_parameter": request.getfixturevalue("mpt_subscription_parameter_data"),
+        "mpt_template": request.getfixturevalue("mpt_template_data"),
+    }
+
+
+@pytest.fixture
 def item_file_data():
     return {
         product_constants.ITEMS_ID: {"value": "PRI-3969-9403-0001-0035", "coordinate": "A325"},
