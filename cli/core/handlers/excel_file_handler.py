@@ -1,5 +1,6 @@
 import re
 from collections.abc import Generator
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
@@ -20,6 +21,14 @@ from openpyxl.worksheet.worksheet import Worksheet
 type SheetData = dict[str, Any]
 type SheetDataGenerator = Generator[SheetData, None, None]
 type StyleData = dict[str, dict[str, NamedStyle]]
+
+
+@dataclass(frozen=True)
+class CellPosition:
+    """Represents a worksheet cell position."""
+
+    col: int
+    row: int
 
 
 class ExcelFileHandler(FileHandler):
@@ -301,8 +310,7 @@ class ExcelFileHandler(FileHandler):
     def write_cell(
         self,
         sheet_name: str,
-        col: int,
-        row: int,
+        position: CellPosition,
         cell_value: str,
         data_validation: DataValidation | None = None,
         style: NamedStyle | None = None,
@@ -311,8 +319,7 @@ class ExcelFileHandler(FileHandler):
 
         Args:
             sheet_name: The name of the sheet.
-            col: The column number (1-based).
-            row: The row number (1-based).
+            position: The cell position (1-based).
             cell_value: The value to write to the cell.
             data_validation: Optional data validation to apply.
             style: Optional cell style to apply.
@@ -323,7 +330,7 @@ class ExcelFileHandler(FileHandler):
         except KeyError:
             sheet = self.workbook.create_sheet(title=sheet_name)
 
-        coordinate = f"{get_column_letter(col)}{row}"
+        coordinate = f"{get_column_letter(position.col)}{position.row}"
         if style is not None:
             sheet[coordinate].style = style
 

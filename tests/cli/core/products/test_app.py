@@ -203,10 +203,7 @@ def test_create_product(
     mocker,
     product_new_file,
     product_data_from_dict,
-    item_data_from_dict,
-    parameter_group_data_from_dict,
-    parameters_data_from_dict,
-    template_data_from_dict,
+    product_related_data,
     product_container_mock,
 ):
     create_product_mock = mocker.patch.object(
@@ -220,7 +217,9 @@ def test_create_product(
         return_value=ServiceResult(
             success=True,
             model=None,
-            collection=DataCollectionModel(collection={"fake_id": item_data_from_dict}),
+            collection=DataCollectionModel(
+                collection={"fake_id": product_related_data["item_group"]}
+            ),
             stats=mocker.Mock(),
         ),
     )
@@ -230,7 +229,9 @@ def test_create_product(
         return_value=ServiceResult(
             success=True,
             model=None,
-            collection=DataCollectionModel(collection={"fake_id": parameters_data_from_dict}),
+            collection=DataCollectionModel(
+                collection={"fake_id": product_related_data["parameter_group"]}
+            ),
             stats=mocker.Mock(),
         ),
     )
@@ -240,7 +241,9 @@ def test_create_product(
         return_value=ServiceResult(
             success=True,
             model=None,
-            collection=DataCollectionModel(collection={"fake_id": parameters_data_from_dict}),
+            collection=DataCollectionModel(
+                collection={"fake_id": product_related_data["parameters"]}
+            ),
             stats=mocker.Mock(),
         ),
     )
@@ -251,7 +254,7 @@ def test_create_product(
         product_container_mock.template_service(),
         "create",
         return_value=ServiceResult(
-            success=True, model=template_data_from_dict, stats=mocker.Mock()
+            success=True, model=product_related_data["template"], stats=mocker.Mock()
         ),
     )
     set_new_parameter_template_mock = mocker.patch.object(
@@ -260,7 +263,11 @@ def test_create_product(
     create_item_service_mock = mocker.patch.object(
         product_container_mock.item_service(),
         "create",
-        return_value=ServiceResult(success=True, model=item_data_from_dict, stats=mocker.Mock()),
+        return_value=ServiceResult(
+            success=True,
+            model=product_related_data["item"],
+            stats=mocker.Mock(),
+        ),
     )
     set_new_item_groups_mock = mocker.patch.object(
         product_container_mock.item_service(), "set_new_item_groups"
@@ -372,15 +379,7 @@ def test_export_product(
     mocker,
     account_container_mock,
     mpt_product_data,
-    mpt_item_data,
-    mpt_item_group_data,
-    mpt_parameter_group_data,
-    mpt_agreement_parameter_data,
-    mpt_asset_parameter_data,
-    mpt_item_parameter_data,
-    mpt_request_parameter_data,
-    mpt_subscription_parameter_data,
-    mpt_template_data,
+    product_related_data,
 ):
     mock_api_client = account_container_mock.api_mpt_client()
     product_resource = mocker.MagicMock(spec=Model)
@@ -388,27 +387,29 @@ def test_export_product(
     mock_api_client.catalog.products.get.return_value = product_resource
     mock_items = mock_api_client.catalog.items
     mock_items_select = mock_items.filter.return_value.select.return_value
-    mock_items_select.fetch_page.return_value = make_collection(mocker, [mpt_item_data])
+    mock_items_select.fetch_page.return_value = make_collection(
+        mocker, [product_related_data["mpt_item"]]
+    )
     item_groups = mock_api_client.catalog.products.item_groups.return_value
     item_groups.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [mpt_item_group_data]
+        mocker, [product_related_data["mpt_item_group"]]
     )
     parameter_groups = mock_api_client.catalog.products.parameter_groups.return_value
     parameter_groups.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [mpt_parameter_group_data]
+        mocker, [product_related_data["mpt_parameter_group"]]
     )
     params_service = mock_api_client.catalog.products.parameters.return_value
     params_service_select = params_service.filter.return_value.select.return_value
     params_service_select.fetch_page.side_effect = [
-        make_collection(mocker, [mpt_agreement_parameter_data]),
-        make_collection(mocker, [mpt_asset_parameter_data]),
-        make_collection(mocker, [mpt_item_parameter_data]),
-        make_collection(mocker, [mpt_request_parameter_data]),
-        make_collection(mocker, [mpt_subscription_parameter_data]),
+        make_collection(mocker, [product_related_data["mpt_agreement_parameter"]]),
+        make_collection(mocker, [product_related_data["mpt_asset_parameter"]]),
+        make_collection(mocker, [product_related_data["mpt_item_parameter"]]),
+        make_collection(mocker, [product_related_data["mpt_request_parameter"]]),
+        make_collection(mocker, [product_related_data["mpt_subscription_parameter"]]),
     ]
     products_templates = mock_api_client.catalog.products.templates.return_value
     products_templates.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [mpt_template_data]
+        mocker, [product_related_data["mpt_template"]]
     )
     product_id = "PRD-0232-2541"
 
