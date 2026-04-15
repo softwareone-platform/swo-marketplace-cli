@@ -32,11 +32,14 @@ def default_results() -> TabResults:
     }
 
 
+type SectionItems = dict[str, list[str]]
+
+
 class ErrorMessagesCollector:
     """Error messages collector."""
 
     def __init__(self) -> None:
-        self._sections: dict[str, dict[str, list[str]]] = {}
+        self._sections: dict[str, SectionItems] = {}
         self._is_empty: bool = True
 
     def add_msg(self, section_name: str, item_name: str, msg: str) -> None:

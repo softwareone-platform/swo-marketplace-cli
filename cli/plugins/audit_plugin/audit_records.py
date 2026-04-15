@@ -36,14 +36,15 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     index = int(index_str)
 
     for trail in [source_trail, target_trail]:
-        current_node = trail
+        current_node: Any | None = trail
         for part in base_path.split("."):
-            try:
-                current_node = current_node[part]
-            except KeyError:
-                continue
+            if not isinstance(current_node, dict) or part not in current_node:
+                current_node = None
+                break
+            current_node = current_node[part]
 
-        if (external_id := get_external_id(current_node, index)) is not None:
+        external_id = get_external_id(current_node, index)
+        if external_id is not None:
             return f"{path} (externalId: {external_id})"
 
     return path
