@@ -14,7 +14,6 @@ class ItemGroupData(BaseDataModel, ActionMixin):
 
     id: str
     default: bool
-    description: str
     display_order: int
     label: str
     multiple: bool
@@ -23,6 +22,7 @@ class ItemGroupData(BaseDataModel, ActionMixin):
 
     coordinate: str | None = None
     created_date: dt.date | None = None
+    description: str | None = None
     updated_date: dt.date | None = None
 
     @classmethod
@@ -48,7 +48,7 @@ class ItemGroupData(BaseDataModel, ActionMixin):
             id=json_data["id"],
             name=json_data["name"],
             label=json_data["label"],
-            description=json_data["description"],
+            description=json_data.get("description"),
             display_order=json_data["displayOrder"],
             default=json_data["default"],
             multiple=json_data["multiple"],
