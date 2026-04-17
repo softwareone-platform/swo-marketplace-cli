@@ -1,18 +1,6 @@
 import datetime as dt
 
-from cli.core.products.constants import (
-    ITEMS_GROUPS_ACTION,
-    ITEMS_GROUPS_CREATED,
-    ITEMS_GROUPS_DEFAULT,
-    ITEMS_GROUPS_DESCRIPTION,
-    ITEMS_GROUPS_DISPLAY_ORDER,
-    ITEMS_GROUPS_ID,
-    ITEMS_GROUPS_LABEL,
-    ITEMS_GROUPS_MODIFIED,
-    ITEMS_GROUPS_MULTIPLE_CHOICES,
-    ITEMS_GROUPS_NAME,
-    ITEMS_GROUPS_REQUIRED,
-)
+from cli.core.products import constants as product_constants
 from cli.core.products.models import ItemGroupData
 
 
@@ -73,15 +61,15 @@ def test_item_group_to_xlsx(item_group_data_from_json):
     result = item_group_data_from_json.to_xlsx()
 
     assert result == {
-        ITEMS_GROUPS_ID: "IGR-0232-2541-0001",
-        ITEMS_GROUPS_NAME: "Items",
-        ITEMS_GROUPS_ACTION: "-",
-        ITEMS_GROUPS_LABEL: "Items",
-        ITEMS_GROUPS_DISPLAY_ORDER: 100,
-        ITEMS_GROUPS_DESCRIPTION: "Default item group",
-        ITEMS_GROUPS_DEFAULT: "True",
-        ITEMS_GROUPS_MULTIPLE_CHOICES: "True",
-        ITEMS_GROUPS_REQUIRED: "True",
-        ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
-        ITEMS_GROUPS_MODIFIED: None,
+        product_constants.ITEMS_GROUPS_ID: "IGR-0232-2541-0001",
+        product_constants.ITEMS_GROUPS_NAME: "Items",
+        product_constants.ITEMS_GROUPS_ACTION: "-",
+        product_constants.ITEMS_GROUPS_LABEL: "Items",
+        product_constants.ITEMS_GROUPS_DISPLAY_ORDER: 100,
+        product_constants.ITEMS_GROUPS_DESCRIPTION: "Default item group",
+        product_constants.ITEMS_GROUPS_DEFAULT: "True",
+        product_constants.ITEMS_GROUPS_MULTIPLE_CHOICES: "True",
+        product_constants.ITEMS_GROUPS_REQUIRED: "True",
+        product_constants.ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
+        product_constants.ITEMS_GROUPS_MODIFIED: None,
     }
