@@ -9,33 +9,22 @@ from cli.core.products.models.mixins import ItemActionMixin
 from dateutil import parser
 
 
-@dataclass
-class ItemData(BaseDataModel, ItemActionMixin):
-    """Data model representing a product item."""
+class ItemPayloadMixin:
+    """Provide payload helpers for item models."""
 
-    id: str
-    description: str
-    group_id: str
-    name: str
-    quantity_not_applicable: bool
-    terms_model: ItemTermsModelEnum
-    terms_period: str
-    terms_commitment: str | None
-    unit_id: str
+    item_type: str | None
     vendor_id: str
-
-    coordinate: str | None = None
-    group_coordinate: str | None = None
-    group_name: str | None = None
-    item_type: str | None = None
-    operations_id: str | None = None
-    parameter_values: list[dict[str, Any]] = field(default_factory=list)
-    product_id: str | None = None
-    status: str | None = None
-    unit_coordinate: str | None = None
-    unit_name: str | None = None
-    created_date: dt.date | None = None
-    updated_date: dt.date | None = None
+    operations_id: str | None
+    group_id: str
+    product_id: str | None
+    terms_model: ItemTermsModelEnum
+    terms_commitment: str | None
+    terms_period: str
+    unit_id: str
+    name: str
+    description: str
+    quantity_not_applicable: bool
+    parameter_values: list[dict[str, Any]]
 
     @property
     def external_ids(self):
@@ -64,6 +53,52 @@ class ItemData(BaseDataModel, ItemActionMixin):
     @property
     def unit(self) -> dict[str, Any]:
         return {"id": self.unit_id}
+
+    def to_json(self) -> dict[str, Any]:
+        """Serialize the item into the MPT payload format."""
+        payload = {
+            "name": self.name,
+            "description": self.description,
+            "group": self.group,
+            "product": self.product,
+            "quantityNotApplicable": self.quantity_not_applicable,
+            "terms": self.terms,
+            "unit": self.unit,
+            "parameters": self.parameter_values,
+        }
+        if self.item_type:
+            payload["externalIds"] = {self.item_type: self.external_ids}
+
+        return payload
+
+
+@dataclass
+class ItemData(ItemPayloadMixin, BaseDataModel, ItemActionMixin):
+    """Data model representing a product item."""
+
+    id: str
+    description: str
+    group_id: str
+    name: str
+    quantity_not_applicable: bool
+    terms_model: ItemTermsModelEnum
+    terms_period: str
+    terms_commitment: str | None
+    unit_id: str
+    vendor_id: str
+
+    coordinate: str | None = None
+    group_coordinate: str | None = None
+    group_name: str | None = None
+    item_type: str | None = None
+    operations_id: str | None = None
+    parameter_values: list[dict[str, Any]] = field(default_factory=list)
+    product_id: str | None = None
+    status: str | None = None
+    unit_coordinate: str | None = None
+    unit_name: str | None = None
+    created_date: dt.date | None = None
+    updated_date: dt.date | None = None
 
     @classmethod
     @override
@@ -120,20 +155,6 @@ class ItemData(BaseDataModel, ItemActionMixin):
             created_date=parser.parse(json_data["audit"]["created"]["at"]).date(),
             updated_date=(updated and parser.parse(updated).date()) or None,
         )
-
-    @override
-    def to_json(self) -> dict[str, Any]:
-        return {
-            "name": self.name,
-            "description": self.description,
-            "externalIds": {self.item_type: self.external_ids},
-            "group": self.group,
-            "product": self.product,
-            "quantityNotApplicable": self.quantity_not_applicable,
-            "terms": self.terms,
-            "unit": self.unit,
-            "parameters": self.parameter_values,
-        }
 
     @override
     def to_xlsx(self) -> dict[str, Any]:

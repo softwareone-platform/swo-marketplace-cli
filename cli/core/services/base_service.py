@@ -5,7 +5,39 @@ from cli.core.services.service_context import ServiceContext
 from cli.core.services.service_result import ServiceResult
 
 
-class Service(ABC):
+class ExportParamsMixin:
+    """Provide export query handling for services."""
+
+    @property
+    def export_params(self):
+        export_query = {"select": "audit", "limit": 100, "offset": 0}
+        export_query.update(self.set_export_params())
+        return export_query
+
+    def set_export_params(self) -> dict[str, Any]:
+        """Override this method to set the export parameters."""
+        return {}
+
+
+class ServiceStatsMixin:
+    """Provide common file/stats update helpers for services."""
+
+    file_manager: Any
+    stats: Any
+
+    def _set_error(self, error: Exception, resource_id: str | None = None) -> None:
+        self.file_manager.write_error(str(error), resource_id)
+        self.stats.add_error(self.file_manager.tab_name)
+
+    def _set_synced(self, resource_id: str, item_coordinate: str) -> None:
+        self.file_manager.write_ids({item_coordinate: resource_id})
+        self.stats.add_synced(self.file_manager.tab_name)
+
+    def _set_skipped(self) -> None:
+        self.stats.add_skipped(self.file_manager.tab_name)
+
+
+class Service(ExportParamsMixin, ServiceStatsMixin, ABC):
     """Abstract base class for all service operations.
 
     This class provides common functionality for service implementations
@@ -20,12 +52,6 @@ class Service(ABC):
         self.data_model = service_context.data_model
         self.file_manager = service_context.file_manager
         self.stats = service_context.stats
-
-    @property
-    def export_params(self):
-        export_query = {"select": "audit", "limit": 100, "offset": 0}
-        export_query.update(self.set_export_params())
-        return export_query
 
     @abstractmethod
     def create(self) -> ServiceResult:
@@ -65,21 +91,6 @@ class Service(ABC):
             ServiceResult object with operation results
         """
         raise NotImplementedError
-
-    def set_export_params(self) -> dict[str, Any]:
-        """Override this method to set the export parameters."""
-        return {}
-
-    def _set_error(self, error: Exception, resource_id: str | None = None) -> None:
-        self.file_manager.write_error(str(error), resource_id)
-        self.stats.add_error(self.file_manager.tab_name)
-
-    def _set_synced(self, resource_id: str, item_coordinate: str) -> None:
-        self.file_manager.write_ids({item_coordinate: resource_id})
-        self.stats.add_synced(self.file_manager.tab_name)
-
-    def _set_skipped(self):
-        self.stats.add_skipped(self.file_manager.tab_name)
 
 
 class BaseService(Service, ABC):
