@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import TypedDict
 
+from cli.core.stats_mixins import StatsMutationMixin, StatsStateMixin
 from rich import box
 from rich.table import Table
 
@@ -88,75 +89,14 @@ class ErrorMessagesCollector:
         return "\n".join(lines)
 
 
-class StatsCollector(ABC):
+class StatsCollector(StatsStateMixin, StatsMutationMixin, ABC):
     """Abstract base class for collecting and managing operation statistics."""
 
-    errors = ErrorMessagesCollector()
-
     def __init__(self, tabs: dict[str, TabResults]) -> None:
+        self.errors = ErrorMessagesCollector()
         self._stat_id: str | None = None
         self._has_error = False
         self._tab_aliases = tabs
-
-    @property
-    def stat_id(self) -> str | None:
-        """Get the identifier of the stats collector.
-
-        Returns:
-            The identifier as a string, or None if not set.
-
-        """
-        return self._stat_id
-
-    @stat_id.setter
-    def stat_id(self, stat_value: str) -> None:
-        self._stat_id = stat_value
-
-    @property
-    def tabs(self) -> dict[str, TabResults]:
-        """Get the tab aliases with their results.
-
-        Returns:
-            A dictionary mapping tab names to their corresponding results.
-
-        """
-        return self._tab_aliases
-
-    @property
-    def has_errors(self) -> bool:
-        """Check if any errors have been recorded."""
-        return self._has_error
-
-    def add_error(self, tab_name: str) -> None:
-        """Increment error and total counters for a tab and mark errors as present.
-
-        Args:
-            tab_name: The name of the tab to update.
-
-        """
-        self._tab_aliases[tab_name]["error"] += 1
-        self._tab_aliases[tab_name]["total"] += 1
-        self._has_error = True
-
-    def add_synced(self, tab_name: str) -> None:
-        """Increment synced and total counters for a tab.
-
-        Args:
-            tab_name: The name of the tab to update.
-
-        """
-        self._tab_aliases[tab_name]["synced"] += 1
-        self._tab_aliases[tab_name]["total"] += 1
-
-    def add_skipped(self, tab_name: str) -> None:
-        """Increment skipped and total counters for a tab.
-
-        Args:
-            tab_name: The name of the tab to update.
-
-        """
-        self._tab_aliases[tab_name]["skipped"] += 1
-        self._tab_aliases[tab_name]["total"] += 1
 
     def to_table(self) -> Table:
         """Generate a rich Table representation of the collected stats.
