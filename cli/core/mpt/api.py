@@ -9,40 +9,34 @@ if TYPE_CHECKING:
     from pydantic import BaseModel
 
 
-class APIService[APIModel: "BaseModel"](ABC):
-    """Abstract base class for API service operations.
+class APIClientMixin:
+    """Provide shared API client metadata accessors."""
 
-    This class provides common functionality for API services that interact
-    with MPT endpoints, including CRUD operations and error handling.
-
-    Attributes:
-        _base_url: Base URL for the API endpoint.
-        _api_model:  Model for API response validation.
-
-    """
-
+    _client: MPTClient
+    _api_model: type["BaseModel"]
     _base_url: str
-    _api_model: APIModel
-
-    def __init__(self, client: MPTClient):
-        self._client = client
-
-    @property
-    @abstractmethod
-    def api_collection(self):
-        raise NotImplementedError
 
     @property
     def client(self) -> MPTClient:
         return self._client
 
     @property
-    def api_model(self) -> APIModel:
+    def api_model(self) -> type["BaseModel"]:
         return self._api_model
 
     @property
     def url(self) -> str:
         return self._base_url
+
+
+class APIReadMixin:
+    """Provide read operations for API services."""
+
+    api_collection: Any
+
+    @property
+    def url(self) -> str:
+        raise NotImplementedError
 
     @wrap_mpt_api_error
     def exists(self, query_params: dict[str, Any] | None = None) -> bool:
@@ -125,6 +119,16 @@ class APIService[APIModel: "BaseModel"](ABC):
             "data": [resource.to_dict() for resource in collection.resources],
         }
 
+
+class APIWriteMixin:
+    """Provide write operations for API services."""
+
+    api_collection: Any
+
+    @property
+    def url(self) -> str:
+        raise NotImplementedError
+
     @wrap_mpt_api_error
     def post(
         self,
@@ -195,6 +199,34 @@ class APIService[APIModel: "BaseModel"](ABC):
             updated_resource = self.api_collection.update(resource_id, json_payload)
 
         return updated_resource.to_dict()
+
+
+class APIOperationsMixin(APIReadMixin, APIWriteMixin):
+    """Group API operations into a single mixin."""
+
+
+class APIService[APIModel: "BaseModel"](APIClientMixin, APIOperationsMixin, ABC):
+    """Abstract base class for API service operations.
+
+    This class provides common functionality for API services that interact
+    with MPT endpoints, including CRUD operations and error handling.
+
+    Attributes:
+        _base_url: Base URL for the API endpoint.
+        _api_model:  Model for API response validation.
+
+    """
+
+    _base_url: str
+    _api_model: type[APIModel]
+
+    def __init__(self, client: MPTClient):
+        self._client = client
+
+    @property
+    @abstractmethod
+    def api_collection(self):
+        raise NotImplementedError
 
 
 class RelatedAPIService(APIService, ABC):

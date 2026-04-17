@@ -1,4 +1,4 @@
-from cli.core.stats import ErrorMessagesCollector
+from cli.core.stats import ErrorMessagesCollector, PriceListStatsCollector
 
 
 def test_status_is_empty():
@@ -36,3 +36,13 @@ def test_stats_str_with_empty_item():
     result = str(stats)
 
     assert result == "Test: new message\n\t\tTest Item: test message"
+
+
+def test_stats_collectors_do_not_share_errors():
+    first_collector = PriceListStatsCollector()
+    second_collector = PriceListStatsCollector()
+    first_collector.errors.add_msg("General", "Item", "error")
+
+    result = second_collector.errors.is_empty()
+
+    assert result is True
