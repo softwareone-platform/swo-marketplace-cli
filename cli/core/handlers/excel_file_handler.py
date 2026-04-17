@@ -3,7 +3,6 @@ from pathlib import Path
 
 from cli.core.handlers import FileHandler
 from cli.core.handlers.excel_file_handler_mixins import ExcelAccessMixin, ExcelSheetMixin
-from openpyxl.reader.excel import load_workbook  # noqa: F401
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 

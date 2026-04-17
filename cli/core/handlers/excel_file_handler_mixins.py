@@ -1,4 +1,3 @@
-import importlib
 import re
 from collections.abc import Generator
 from pathlib import Path
@@ -10,6 +9,7 @@ from cli.core.handlers.errors import (
     RequiredFieldValuesError,
     RequiredSheetsError,
 )
+from openpyxl.reader.excel import load_workbook
 from openpyxl.styles import NamedStyle
 from openpyxl.utils import get_column_letter
 from openpyxl.workbook import Workbook
@@ -37,8 +37,7 @@ class ExcelWorkbookMixin:
     @property
     def workbook(self) -> Workbook:
         if self._workbook_cache is None:
-            excel_file_handler = importlib.import_module("cli.core.handlers.excel_file_handler")
-            self._workbook_cache = excel_file_handler.load_workbook(self.file_path)
+            self._workbook_cache = load_workbook(self.file_path)
 
         return self._workbook_cache
 

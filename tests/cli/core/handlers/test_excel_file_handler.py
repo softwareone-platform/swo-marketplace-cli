@@ -46,7 +46,7 @@ def excel_file_handler(tmp_path, workbook):
     file_path = tmp_path / "fake_excel_file.xlsx"
     workbook.save(file_path)
 
-    with patch("cli.core.handlers.excel_file_handler.load_workbook", return_value=workbook):
+    with patch("cli.core.handlers.excel_file_handler_mixins.load_workbook", return_value=workbook):
         return ExcelFileHandler(file_path)
 
 
