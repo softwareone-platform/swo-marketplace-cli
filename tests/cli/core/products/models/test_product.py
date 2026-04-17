@@ -1,21 +1,6 @@
 import datetime as dt
 
-from cli.core.products.constants import (
-    GENERAL_ACCOUNT_ID,
-    GENERAL_ACCOUNT_NAME,
-    GENERAL_CATALOG_DESCRIPTION,
-    GENERAL_CREATED,
-    GENERAL_EXPORT_DATE,
-    GENERAL_MODIFIED,
-    GENERAL_PRODUCT_DESCRIPTION,
-    GENERAL_PRODUCT_ID,
-    GENERAL_PRODUCT_NAME,
-    GENERAL_PRODUCT_WEBSITE,
-    GENERAL_STATUS,
-    SETTINGS_ACTION,
-    SETTINGS_SETTING,
-    SETTINGS_VALUE,
-)
+from cli.core.products import constants as product_constants
 from cli.core.products.models import DataActionEnum
 from cli.core.products.models.product import ProductData, SettingsData, SettingsRecords
 from freezegun import freeze_time
@@ -76,32 +61,39 @@ def test_product_to_xlsx(product_data_from_json):
     result = product_data_from_json.to_xlsx()
 
     assert result == {
-        GENERAL_PRODUCT_ID: "PRD-0232-2541",
-        GENERAL_PRODUCT_NAME: "Adobe VIP Marketplace for Commercial",
-        GENERAL_CATALOG_DESCRIPTION: "Adobe's groundbreaking innovations empower everyone, "
-        "everywhere to imagine, create, and bring any digital experience to life.",
-        GENERAL_PRODUCT_DESCRIPTION: "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53M"
-        "y5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"
-        "PSJub25lIj4KICA8cGF0aCBkPSJNMTcuNzYyOCAzSDBWNDUuNDU4MkwxNy43NjI4IDNaIiB"
-        "maWxsPSIjRkEwQzAwIi8+CiAgPHBhdGggZD0iTTMwLjI2MDQgM0g0OFY0NS40NTgyTDMwLj"
-        "I2MDQgM1oiIGZpbGw9IiNGQTBDMDAiLz4KICA8cGF0aCBkPSJNMjQuMDExNiAxOC42NDg2T"
-        "DM1LjMxNzMgNDUuNDU4MkgyNy44OTk3TDI0LjUyMDggMzYuOTIyNkgxNi4yNDY5TDI0LjAx"
-        "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+",
-        GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
-        GENERAL_ACCOUNT_ID: "ACC-9226-9856",
-        GENERAL_ACCOUNT_NAME: "Adobe",
-        GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
-        GENERAL_STATUS: "Unpublished",
-        GENERAL_CREATED: dt.date(2024, 3, 19),
-        GENERAL_MODIFIED: dt.date(2025, 6, 3),
+        product_constants.GENERAL_PRODUCT_ID: "PRD-0232-2541",
+        product_constants.GENERAL_PRODUCT_NAME: "Adobe VIP Marketplace for Commercial",
+        product_constants.GENERAL_CATALOG_DESCRIPTION: (
+            "Adobe's groundbreaking innovations empower everyone, "
+            "everywhere to imagine, create, and bring any digital experience to life."
+        ),
+        product_constants.GENERAL_PRODUCT_DESCRIPTION: (
+            "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53M"
+            "y5vcmcvMjAwMC9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"
+            "PSJub25lIj4KICA8cGF0aCBkPSJNMTcuNzYyOCAzSDBWNDUuNDU4MkwxNy43NjI4IDNaIiB"
+            "maWxsPSIjRkEwQzAwIi8+CiAgPHBhdGggZD0iTTMwLjI2MDQgM0g0OFY0NS40NTgyTDMwLj"
+            "I2MDQgM1oiIGZpbGw9IiNGQTBDMDAiLz4KICA8cGF0aCBkPSJNMjQuMDExNiAxOC42NDg2T"
+            "DM1LjMxNzMgNDUuNDU4MkgyNy44OTk3TDI0LjUyMDggMzYuOTIyNkgxNi4yNDY5TDI0LjAx"
+            "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
+        ),
+        product_constants.GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
+        product_constants.GENERAL_ACCOUNT_ID: "ACC-9226-9856",
+        product_constants.GENERAL_ACCOUNT_NAME: "Adobe",
+        product_constants.GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
+        product_constants.GENERAL_STATUS: "Unpublished",
+        product_constants.GENERAL_CREATED: dt.date(2024, 3, 19),
+        product_constants.GENERAL_MODIFIED: dt.date(2025, 6, 3),
     }
 
 
 def test_settings_data_from_dict(settings_file_data):
     result = SettingsData.from_dict({
-        SETTINGS_SETTING: {"value": "Change order validation (draft)", "coordinate": "A2"},
-        SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
-        SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
+        product_constants.SETTINGS_SETTING: {
+            "value": "Change order validation (draft)",
+            "coordinate": "A2",
+        },
+        product_constants.SETTINGS_ACTION: {"value": DataActionEnum.SKIP, "coordinate": "B2"},
+        product_constants.SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
     })
 
     assert len(result.records) == 1
@@ -134,9 +126,12 @@ def test_settings_data_to_xlsx(product_data_from_dict):
 
 def test_setting_item_from_dict(settings_file_data):
     result = SettingsRecords.from_dict({
-        SETTINGS_SETTING: {"value": "Purchase order validation (query)", "coordinate": "A10"},
-        SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
-        SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
+        product_constants.SETTINGS_SETTING: {
+            "value": "Purchase order validation (query)",
+            "coordinate": "A10",
+        },
+        product_constants.SETTINGS_ACTION: {"value": DataActionEnum.DELETE, "coordinate": "B10"},
+        product_constants.SETTINGS_VALUE: {"value": "Off", "coordinate": "C10"},
     })
 
     assert result.name == "Purchase order validation (query)"
@@ -171,7 +166,7 @@ def test_setting_item_to_xlsx():
     result = SettingsRecords(name="Item selection validation", setting_value="Off").to_xlsx()
 
     assert result == {
-        SETTINGS_SETTING: "Item selection validation",
-        SETTINGS_ACTION: "-",
-        SETTINGS_VALUE: "Off",
+        product_constants.SETTINGS_SETTING: "Item selection validation",
+        product_constants.SETTINGS_ACTION: "-",
+        product_constants.SETTINGS_VALUE: "Off",
     }

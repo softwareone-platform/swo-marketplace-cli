@@ -2,6 +2,8 @@ from functools import partial
 from typing import Any, ClassVar
 
 from cli.core.accounts.containers import AccountContainer
+from cli.core.products import handlers as product_handlers
+from cli.core.products import models as product_models
 from cli.core.products.api import (
     ItemAPIService,
     ItemGroupAPIService,
@@ -10,31 +12,7 @@ from cli.core.products.api import (
     ProductAPIService,
     TemplateAPIService,
 )
-from cli.core.products.handlers import (
-    AgreementParametersExcelFileManager,
-    ItemExcelFileManager,
-    ItemGroupExcelFileManager,
-    ItemParametersExcelFileManager,
-    ParameterGroupExcelFileManager,
-    ProductExcelFileManager,
-    RequestParametersExcelFileManager,
-    SettingsExcelFileManager,
-    SubscriptionParametersExcelFileManager,
-    TemplateExcelFileManager,
-)
 from cli.core.products.handlers.parameters_excel_file_manager import AssetParametersExcelFileManager
-from cli.core.products.models import (
-    AgreementParametersData,
-    AssetParametersData,
-    ItemData,
-    ItemGroupData,
-    ItemParametersData,
-    ParameterGroupData,
-    ProductData,
-    RequestParametersData,
-    SubscriptionParametersData,
-    TemplateData,
-)
 from cli.core.products.services import (
     ItemGroupService,
     ItemService,
@@ -80,70 +58,78 @@ class ProductContainer(containers.DeclarativeContainer):
     )
 
     _file_managers = providers.Dict(
-        product=providers.Factory(ProductExcelFileManager, file_path),
-        items=providers.Factory(ItemExcelFileManager, file_path),
-        item_group=providers.Factory(ItemGroupExcelFileManager, file_path),
-        parameter_group=providers.Factory(ParameterGroupExcelFileManager, file_path),
-        agreement_parameters=providers.Factory(AgreementParametersExcelFileManager, file_path),
-        asset_parameters=providers.Factory(AssetParametersExcelFileManager, file_path),
-        item_parameters=providers.Factory(ItemParametersExcelFileManager, file_path),
-        request_parameters=providers.Factory(RequestParametersExcelFileManager, file_path),
-        subscription_parameters=providers.Factory(
-            SubscriptionParametersExcelFileManager, file_path
+        product=providers.Factory(product_handlers.ProductExcelFileManager, file_path),
+        items=providers.Factory(product_handlers.ItemExcelFileManager, file_path),
+        item_group=providers.Factory(product_handlers.ItemGroupExcelFileManager, file_path),
+        parameter_group=providers.Factory(
+            product_handlers.ParameterGroupExcelFileManager, file_path
         ),
-        template=providers.Factory(TemplateExcelFileManager, file_path),
-        settings=providers.Factory(SettingsExcelFileManager, file_path),
+        agreement_parameters=providers.Factory(
+            product_handlers.AgreementParametersExcelFileManager, file_path
+        ),
+        asset_parameters=providers.Factory(AssetParametersExcelFileManager, file_path),
+        item_parameters=providers.Factory(
+            product_handlers.ItemParametersExcelFileManager, file_path
+        ),
+        request_parameters=providers.Factory(
+            product_handlers.RequestParametersExcelFileManager, file_path
+        ),
+        subscription_parameters=providers.Factory(
+            product_handlers.SubscriptionParametersExcelFileManager, file_path
+        ),
+        template=providers.Factory(product_handlers.TemplateExcelFileManager, file_path),
+        settings=providers.Factory(product_handlers.SettingsExcelFileManager, file_path),
     )
 
     _services: ClassVar[dict[str, Any]] = {
         "product": {
             "api": _apis.provided["product"],
-            "data_model": ProductData,
+            "data_model": product_models.ProductData,
             "file_manager": _file_managers.provided["product"],
         },
         "items": {
             "api": _apis.provided["items"],
-            "data_model": ItemData,
+            "data_model": product_models.ItemData,
             "file_manager": _file_managers.provided["items"],
         },
         "item_group": {
             "api": _apis.provided["item_group"],
-            "data_model": ItemGroupData,
+            "data_model": product_models.ItemGroupData,
             "file_manager": _file_managers.provided["item_group"],
         },
         "parameter_group": {
             "api": _apis.provided["parameter_group"],
-            "data_model": ParameterGroupData,
+            "data_model": product_models.ParameterGroupData,
             "file_manager": _file_managers.provided["parameter_group"],
         },
         "agreement_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": AgreementParametersData,
+            "data_model": product_models.AgreementParametersData,
             "file_manager": _file_managers.provided["agreement_parameters"],
         },
         "asset_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": AssetParametersData,
+            "data_model": product_models.AssetParametersData,
             "file_manager": _file_managers.provided["asset_parameters"],
         },
         "item_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": ItemParametersData,
+            "data_model": product_models.ItemParametersData,
             "file_manager": _file_managers.provided["item_parameters"],
         },
         "request_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": RequestParametersData,
+            "data_model": product_models.RequestParametersData,
             "file_manager": _file_managers.provided["request_parameters"],
         },
         "subscription_parameters": {
             "api": _apis.provided["parameters"],
-            "data_model": SubscriptionParametersData,
+            "data_model": product_models.SubscriptionParametersData,
             "file_manager": _file_managers.provided["subscription_parameters"],
         },
         "template": {
             "api": _apis.provided["template"],
-            "data_model": TemplateData,
+            "data_model": product_models.TemplateData,
             "file_manager": _file_managers.provided["template"],
         },
     }
