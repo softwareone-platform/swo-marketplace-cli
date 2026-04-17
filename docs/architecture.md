@@ -45,7 +45,7 @@ The price lists domain owns price list definition import and export.
 
 - API adapters live under [`cli/core/price_lists/api/`](../cli/core/price_lists/api)
 - Excel parsing and writing lives under [`cli/core/price_lists/handlers/`](../cli/core/price_lists/handlers)
-- command orchestration lives in [`cli/core/price_lists/app.py`](../cli/core/price_lists/app.py)
+- command orchestration lives in [`cli/core/price_lists/app/`](../cli/core/price_lists/app)
 
 ### Plugins
 

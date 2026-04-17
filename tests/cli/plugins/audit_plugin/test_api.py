@@ -51,7 +51,9 @@ def test_get_audit_trail_no_record_found(mock_client):
 
 
 def test_get_audit_trail_api_error(mock_client):
-    mock_client.audit.records.options.side_effect = Exception("API Error")
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    filtered.select.return_value.fetch_page.side_effect = Exception("API Error")
 
     with pytest.raises(Exit):
         get_audit_trail(mock_client, "audit123")
@@ -89,7 +91,10 @@ def test_get_audit_records_by_object_empty(mock_client):
 
 
 def test_get_audit_records_by_object_api_error(mock_client):
-    mock_client.audit.records.options.side_effect = Exception("API Error")
+    records_options = mock_client.audit.records.options
+    filtered = records_options.return_value.filter.return_value
+    chain = filtered.order_by.return_value.select.return_value
+    chain.fetch_page.side_effect = Exception("API Error")
 
     with pytest.raises(Exit):
         get_audit_records_by_object(mock_client, "obj123")

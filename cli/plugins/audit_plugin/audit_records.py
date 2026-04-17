@@ -94,10 +94,7 @@ def display_audit_records(records: list) -> None:
     for idx, record in enumerate(records, 1):
         timestamp = record.get("timestamp", "N/A")
         audit_id = record.get("id", "N/A")
-        actor = record.get("actor", {}).get("name", "N/A")
-        actor_account = record.get("actor", {}).get("account", {}).get("name", "")
-        if actor_account:
-            actor = f"{actor} ({actor_account})"
+        actor = _get_actor(record)
         event = record.get("event", "N/A")
         details = record.get("details", "N/A")
 
@@ -111,3 +108,13 @@ def display_audit_records(records: list) -> None:
         )
 
     console.print(table)
+
+
+def _get_actor(record: dict[str, Any]) -> str:
+    actor = record.get("actor") or {}
+    actor_name = actor.get("name", "N/A")
+    actor_account = actor.get("account", {}).get("name", "")
+    if actor_account:
+        actor_name = f"{actor_name} ({actor_account})"
+
+    return actor_name

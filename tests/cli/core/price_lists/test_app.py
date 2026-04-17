@@ -24,12 +24,12 @@ def test_sync_price_lists_multiple_files(
     mocker, price_list_data_from_json, price_list_new_file, active_vendor_account
 ):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.sync.get_active_account",
         return_value=active_vendor_account,
         autospec=True,
     )
     mocker.patch(
-        "cli.core.price_lists.app.get_files_path",
+        "cli.core.price_lists.app.sync.get_files_path",
         return_value=[price_list_new_file, price_list_new_file],
         autospec=True,
     )
@@ -69,7 +69,7 @@ def test_sync_price_lists_create(
     active_vendor_account,
 ):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.sync.get_active_account",
         return_value=active_vendor_account,
         autospec=True,
     )
@@ -105,7 +105,7 @@ def test_sync_price_lists_update(
 ):
     stats = PriceListStatsCollector()
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.sync.get_active_account",
         return_value=active_vendor_account,
         autospec=True,
     )
@@ -139,7 +139,7 @@ def test_sync_price_lists_create_error(
     mocker, active_operations_account, price_list_data_from_json, price_list_file_path
 ):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.sync.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
@@ -166,7 +166,7 @@ def test_sync_price_lists_create_error(
 
 def test_export_price_list(mocker, active_operations_account, price_list_data_from_json):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.export.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
@@ -189,7 +189,7 @@ def test_export_price_list(mocker, active_operations_account, price_list_data_fr
 
 def test_export_file_exists(mocker, active_operations_account):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.export.get_active_account",
         return_value=active_operations_account,
     )
     mocker.patch("pathlib.Path.exists", return_value=True)
@@ -208,7 +208,7 @@ def test_export_price_list_no_operations_account(
     mocker, active_vendor_account, price_list_data_from_json
 ):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.export.get_active_account",
         return_value=active_vendor_account,
         autospec=True,
     )
@@ -225,7 +225,7 @@ def test_export_price_list_no_operations_account(
 
 def test_export_price_list_no_success(mocker, active_operations_account):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.export.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
@@ -247,7 +247,7 @@ def test_export_price_list_item_no_success(
     mocker, active_operations_account, price_list_data_from_json
 ):
     mocker.patch(
-        "cli.core.price_lists.app.get_active_account",
+        "cli.core.price_lists.app.export.get_active_account",
         return_value=active_operations_account,
     )
     stats = PriceListStatsCollector()
