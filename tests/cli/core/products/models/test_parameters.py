@@ -111,7 +111,7 @@ def test_parameters_data_to_json(parameters_data_from_dict):
                         "addition to an account you may already have. You will need to provide "
                         "details such as your company address and contacts, and you will be "
                         "required to accept both the Adobe Terms and Conditions as well as "
-                        "SoftwareOne\\u0027s terms and conditions."
+                        "SoftwareOne's terms and conditions."
                     ),
                 },
                 {
@@ -123,7 +123,7 @@ def test_parameters_data_to_json(parameters_data_from_dict):
                         "the ability to self-service manage your subscriptions within the "
                         "SoftwareOne Marketplace. You will need to provide details such as your "
                         "company address and contacts, and you will be required to accept both the "
-                        "Adobe Terms and Conditions as well as SoftwareOne\\u0027s terms and "
+                        "Adobe Terms and Conditions as well as SoftwareOne's terms and "
                         "conditions.\n\n Note: If you are purchasing Adobe products under a "
                         "different licensing program such as CLP or TLP, you cannot use this "
                         "option."
@@ -175,7 +175,7 @@ def test_parameters_data_to_xlsx(parameters_data_from_json):
             "to provide details such as your company address and contacts, and "
             "you will be required to accept both the Adobe Terms and "
             "Conditions as well as SoftwareOne's terms and "
-            "conditions.\\n\\nNote: If you are purchasing Adobe products under "
+            r"conditions.\n\nNote: If you are purchasing Adobe products under "
             "a different licensing program such as CLP or TLP, you cannot use "
             'this option."}], "defaultValue": "New", "hintText": "Some hint '
             'text"}'
