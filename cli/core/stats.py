@@ -76,7 +76,8 @@ class ErrorMessagesCollector:
         for section_name, section in self._sections.items():
             section_messages = section.get("", [])
             if section_messages:
-                lines.append(f"{section_name}: {', '.join(section_messages)}")
+                joined_section_messages = ", ".join(section_messages)
+                lines.append(f"{section_name}: {joined_section_messages}")
             else:
                 lines.append(f"{section_name}:")
 
@@ -84,7 +85,8 @@ class ErrorMessagesCollector:
                 if not item_name:
                     continue
 
-                lines.append(f"\t\t{item_name}: {', '.join(item_messages)}")
+                joined_item_messages = ", ".join(item_messages)
+                lines.append(f"\t\t{item_name}: {joined_item_messages}")
 
         return "\n".join(lines)
 

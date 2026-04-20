@@ -35,7 +35,8 @@ def sync_price_lists(  # noqa: C901
         file_paths = get_files_path(pricelists_paths)
 
     if not len(file_paths):
-        console.print(f"No files found for provided paths {', '.join(pricelists_paths)}")
+        provided_paths = ", ".join(pricelists_paths)
+        console.print(f"No files found for provided paths {provided_paths}")
         raise typer.Exit(code=3)
 
     typer.confirm(
