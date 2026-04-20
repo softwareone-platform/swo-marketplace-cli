@@ -27,7 +27,7 @@ dependencies = [
     "dependency-injector==4.49.*",
     "mpt-api-client==5.4.*",
     "openpyxl==3.1.*",
-    "pydantic==2.12.*",
+    "pydantic>=2.12,<2.14",
     "pyfiglet==1.0.*",
     "python-dateutil==2.9.*",
     "requests==2.33.*",
