@@ -68,20 +68,32 @@ class ItemService(RelatedBaseService):
                 self._set_skipped()
                 continue
 
+            query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
             try:
-                query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
-                item_data = self.api.list(query_params=query_params)["data"][0]
-            except MPTAPIError as error:
+                response = self.api.list(query_params=query_params)
+            except (MPTAPIError, KeyError) as error:
                 errors.append(str(error))
                 self._set_error(error, record.id)
                 continue
+            response_data = response.get("data", [])
+            if not response_data:
+                missing_item_error = ValueError(
+                    f"Item {record.id}: no matching item found for vendor {record.vendor_id}"
+                )
+                errors.append(str(missing_item_error))
+                self._set_error(missing_item_error, record.id)
+                continue
+            item_data = response_data[0]
 
             # TODO: this logic should be moved to the price list data model creation
             record.type = "operations" if self.account.is_operations() else "vendor"
+            payload = record.to_json()
             try:
-                self.api.update(item_data["id"], record.to_json())
-                self._set_synced(record.id, record.coordinate)
+                self.api.update(item_data["id"], payload)
             except MPTAPIError as error:
                 errors.append(f"Item {record.id}: {error!s}")
                 self._set_error(error, record.id)
+                continue
+
+            self._set_synced(record.id, record.coordinate)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
