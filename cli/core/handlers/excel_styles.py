@@ -26,5 +26,7 @@ def get_number_format_style(currency: str, precision: int) -> NamedStyle:
 
     """
     currency_letter = {"USD": "$", "EUR": "€"}
-    number_format_style.number_format = f"{currency_letter.get(currency, '')}#.{'0' * precision}"
+    precision_format = "0" * precision
+    currency_symbol = currency_letter.get(currency, "")
+    number_format_style.number_format = f"{currency_symbol}#.{precision_format}"
     return number_format_style

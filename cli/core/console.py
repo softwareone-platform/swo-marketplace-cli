@@ -20,7 +20,8 @@ def _gradient(start_hex: str, end_hex: str, num_samples: int = 16) -> list[str]:
             start_rgb[1] + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
         )
         blue = int(start_rgb[2] + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2]))
-        gradient_colors.append(f"#{red:02X}{green:02X}{blue:02X}")
+        rgb_color = bytes((red, green, blue)).hex().upper()
+        gradient_colors.append(f"#{rgb_color}")
 
     return gradient_colors
 
