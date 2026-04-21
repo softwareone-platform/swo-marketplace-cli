@@ -68,6 +68,13 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
         console.print("\n[green]No differences found between the audit trails[/green]")
 
 
+def _parse_positions(positions: str, records_count: int) -> tuple[int, int]:
+    pos1, pos2 = map(int, positions.split(","))
+    if not (1 <= pos1 <= records_count and 1 <= pos2 <= records_count):
+        raise ValueError
+    return pos1, pos2
+
+
 @app.command()
 def diff_by_object_id(
     object_id: Annotated[
@@ -103,9 +110,7 @@ def diff_by_object_id(
 
     if positions:
         try:
-            pos1, pos2 = map(int, positions.split(","))
-            if not (1 <= pos1 <= len(records) and 1 <= pos2 <= len(records)):
-                raise ValueError  # noqa: TRY301
+            pos1, pos2 = _parse_positions(positions, len(records))
         except ValueError:
             msg = (
                 "[red]Invalid positions. Please specify two numbers "

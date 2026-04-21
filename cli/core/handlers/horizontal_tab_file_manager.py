@@ -81,8 +81,9 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             if row[self._id_field]["value"] == resource_id
         )
         try:
-            coordinate = item_row[ERROR_COLUMN_NAME]["coordinate"]
-            column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
+            column_letter, row_number = self._get_row_and_column_from_coordinate(
+                item_row[ERROR_COLUMN_NAME]["coordinate"]
+            )
         except (KeyError, ValueError):
             column_letter = self.file_handler.get_sheet_next_column(self._sheet_name)
             coordinate = next(iter(item_row.values()))["coordinate"]
@@ -95,12 +96,8 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         if not isinstance(cell_value, float):
             return None
 
-        try:
-            currency = record.currency  # type: ignore[attr-defined]
-            precision = record.precision  # type: ignore[attr-defined]
-        except AttributeError:
-            return None
-
+        currency = getattr(record, "currency", None)
+        precision = getattr(record, "precision", None)
         if currency is None or precision is None:
             return None
 

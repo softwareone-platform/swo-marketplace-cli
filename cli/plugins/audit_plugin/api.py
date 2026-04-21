@@ -35,17 +35,16 @@ def get_audit_records_by_object(
     order_by = "-timestamp"
     audit_records_collection = client.audit.records.options(render=True)
     audit_records_filtered = audit_records_collection.filter(object_id_filter)
+    query = audit_records_filtered.order_by(order_by).select(*select_fields)
     try:
-        raw_records = (
-            audit_records_filtered.order_by(order_by).select(*select_fields).fetch_page(limit=limit)
-        )
-        records = [raw_record.to_dict() for raw_record in raw_records]
+        raw_records = query.fetch_page(limit=limit)
     except Exception as error:
         console.print(
             f"[red]Failed to retrieve audit records for object {object_id}: {error!s}[/red]"
         )
         raise typer.Exit(1) from error
 
+    records = [raw_record.to_dict() for raw_record in raw_records]
     if not records:
         console.print(f"[red]No audit records found for object {object_id}[/red]")
         raise typer.Exit(1)

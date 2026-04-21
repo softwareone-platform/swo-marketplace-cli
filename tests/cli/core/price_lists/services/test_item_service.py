@@ -126,6 +126,23 @@ def test_update_item_api_list_error(mocker, service_context):
     stats_add_synced_spy.assert_not_called()
 
 
+def test_update_item_empty_list_response(mocker, service_context):
+    mocker.patch.object(service_context.api, "list", return_value={"data": []})
+    file_handler_mock = mocker.patch.object(service_context.file_manager, "write_error")
+    api_update_spy = mocker.spy(service_context.api, "update")
+    stats_add_synced_spy = mocker.spy(service_context.stats, "add_synced")
+    service = ItemService(service_context)
+
+    result = service.update()
+
+    assert result.success is False
+    assert len(result.errors) > 0
+    assert result.model is None
+    api_update_spy.assert_not_called()
+    file_handler_mock.assert_called()
+    stats_add_synced_spy.assert_not_called()
+
+
 def test_update_item_api_update_error(mocker, service_context, mpt_item_data, item_data_from_dict):
     mocker.patch.object(item_data_from_dict, "to_update", return_value=True)
     mocker.patch.object(

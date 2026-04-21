@@ -85,9 +85,10 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
     def write_error(self, error: str, resource_id: str | None = None) -> None:
         row_data = self._read_data((self._id_field, ERROR_COLUMN_NAME))
         try:
-            coordinate = row_data[ERROR_COLUMN_NAME]["coordinate"]
-            column_letter, row_number = self._get_row_and_column_from_coordinate(coordinate)
-        except KeyError:
+            column_letter, row_number = self._get_row_and_column_from_coordinate(
+                row_data[ERROR_COLUMN_NAME]["coordinate"]
+            )
+        except (KeyError, ValueError):
             column_letter = self.file_handler.get_sheet_next_column(self._sheet_name)
             coordinate = next(iter(row_data.values()))["coordinate"]
             _, row_number = self._get_row_and_column_from_coordinate(coordinate)
