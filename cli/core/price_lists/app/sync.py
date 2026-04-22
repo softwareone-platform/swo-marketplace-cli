@@ -3,6 +3,7 @@ from typing import Annotated
 import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.console import console
+from cli.core.console.renderers.stats import StatsTableRenderer
 from cli.core.file_discovery import get_files_path
 from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.price_lists.api import PriceListAPIService, PriceListItemAPIService
@@ -13,6 +14,7 @@ from cli.core.services.service_context import ServiceContext
 from cli.core.stats import PriceListStatsCollector
 
 app = typer.Typer()
+stats_table_renderer = StatsTableRenderer()
 
 
 @app.command(name="sync")
@@ -104,7 +106,7 @@ def sync_price_lists(  # noqa: C901
                 has_error = True
 
         stats.stat_id = price_list.id
-        console.print(stats.to_table())
+        console.print(stats_table_renderer.render(stats))
 
     if has_error:
         console.print("Price list sync [red bold]FAILED")

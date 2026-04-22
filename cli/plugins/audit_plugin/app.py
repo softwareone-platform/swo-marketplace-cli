@@ -3,6 +3,7 @@ from typing import Annotated, Any
 import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.console import console
+from cli.core.console.renderers.audit import AuditDiffRenderer
 from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.plugins.audit_plugin.api import get_audit_records_by_object, get_audit_trail
 from cli.plugins.audit_plugin.audit_records import (
@@ -10,10 +11,9 @@ from cli.plugins.audit_plugin.audit_records import (
     flatten_dict,
     format_json_path,
 )
-from rich.panel import Panel
-from rich.table import Table
 
 app = typer.Typer(name="audit", help="Audit commands.")
+audit_diff_renderer = AuditDiffRenderer()
 
 
 def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
@@ -31,39 +31,33 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
         console.print("[red]Cannot compare different objects[/red]")
         raise typer.Exit(1)
 
-    panel = Panel(
-        f"Comparing audit trails...\n"
-        f"Object ID: {source_object_id}\n"
-        f"Source Timestamp: {source_trail.get('timestamp')}\n"
-        f"Target Timestamp: {target_trail.get('timestamp')}"
+    console.print(
+        audit_diff_renderer.render_summary(
+            source_object_id,
+            source_trail.get("timestamp"),
+            target_trail.get("timestamp"),
+        )
     )
-    console.print(panel)
 
     source_flat = flatten_dict(source_trail)
     target_flat = flatten_dict(target_trail)
     all_keys = set(source_flat.keys()) | set(target_flat.keys())
 
-    table = Table(title="Audit Trail Differences")
-    table.add_column("Path", style="cyan")
-    table.add_column("Source Value", style="green")
-    table.add_column("Target Value", style="yellow")
-
-    differences_found = False
+    differences: list[tuple[str, str, str]] = []
 
     for key in sorted(all_keys):
         source_value = source_flat.get(key)
         target_value = target_flat.get(key)
         if source_value != target_value:
-            differences_found = True
             formatted_path = format_json_path(key, source_trail, target_trail)
-            table.add_row(
+            differences.append((
                 formatted_path,
                 "[red]<missing>[/red]" if source_value is None else str(source_value),
                 "[red]<missing>[/red]" if target_value is None else str(target_value),
-            )
+            ))
 
-    if differences_found:
-        console.print(table)
+    if differences:
+        console.print(audit_diff_renderer.render_differences(differences))
     else:
         console.print("\n[green]No differences found between the audit trails[/green]")
 

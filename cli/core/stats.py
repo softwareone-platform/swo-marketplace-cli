@@ -2,8 +2,6 @@ from abc import ABC, abstractmethod
 from typing import TypedDict
 
 from cli.core.stats_mixins import StatsMutationMixin, StatsStateMixin
-from rich import box
-from rich.table import Table
 
 
 class TabResults(TypedDict):
@@ -100,27 +98,9 @@ class StatsCollector(StatsStateMixin, StatsMutationMixin, ABC):
         self._has_error = False
         self._tab_aliases = tabs
 
-    def to_table(self) -> Table:
-        """Generate a rich Table representation of the collected stats.
-
-        Returns:
-            A Table object displaying the statistics for each tab.
-
-        """
-        table = Table(self._get_table_title(), box=box.ROUNDED)
-        columns = ["Total", "Synced", "Errors", "Skipped"]
-        for column in columns:
-            table.add_column(column)
-
-        for tab_name, tab_stats in self.tabs.items():
-            table.add_row(
-                tab_name,
-                f"[blue]{tab_stats['total']}",
-                f"[green]{tab_stats['synced']}",
-                f"[red bold]{tab_stats['error']}",
-                f"[white]{tab_stats['skipped']}",
-            )
-        return table
+    def table_title(self) -> str:
+        """Return the semantic title for console renderers."""
+        return self._get_table_title()
 
     @abstractmethod
     def _get_table_title(self) -> str:
