@@ -111,28 +111,17 @@ class ProductStatsCollector(StatsCollector):
     """Statistics collector specifically for product synchronization operations."""
 
     def __init__(self) -> None:
-        general: TabResults = default_results()
-        parameters_groups: TabResults = default_results()
-        items_groups: TabResults = default_results()
-        agreements_parameters: TabResults = default_results()
-        asset_parameters: TabResults = default_results()
-        item_parameters: TabResults = default_results()
-        request_parameters: TabResults = default_results()
-        subscription_parameters: TabResults = default_results()
-        item_rows: TabResults = default_results()
-        templates: TabResults = default_results()
-
         tabs = {
-            "General": general,
-            "Parameters Groups": parameters_groups,
-            "Items Groups": items_groups,
-            "Agreements Parameters": agreements_parameters,
-            "Assets Parameters": asset_parameters,
-            "Item Parameters": item_parameters,
-            "Request Parameters": request_parameters,
-            "Subscription Parameters": subscription_parameters,
-            "Items": item_rows,
-            "Templates": templates,
+            "General": default_results(),
+            "Parameters Groups": default_results(),
+            "Items Groups": default_results(),
+            "Agreements Parameters": default_results(),
+            "Assets Parameters": default_results(),
+            "Item Parameters": default_results(),
+            "Request Parameters": default_results(),
+            "Subscription Parameters": default_results(),
+            "Items": default_results(),
+            "Templates": default_results(),
         }
 
         super().__init__(tabs)
