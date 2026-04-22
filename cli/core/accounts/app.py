@@ -13,19 +13,18 @@ from cli.core.accounts.flows import (
     write_accounts,
 )
 from cli.core.accounts.models import Account
-from cli.core.accounts.table_formatters import wrap_account_type, wrap_active, wrap_token
 from cli.core.accounts.url_parser import protocol_and_host
 from cli.core.console import console
+from cli.core.console.renderers.accounts import AccountsTableRenderer
 from cli.core.errors import (
     AccountNotFoundError,
     MPTAPIError,
     NoActiveAccountFoundError,
 )
 from mpt_api_client import MPTClient
-from rich import box
-from rich.table import Table
 
 app = typer.Typer()
+accounts_table_renderer = AccountsTableRenderer()
 
 
 @app.command(name="add")
@@ -70,9 +69,7 @@ def add_account(
 
         write_accounts(accounts)
 
-    table = _account_table("Account has been added")
-    table = _list_accounts(table, [account])
-    console.print(table)
+    console.print(accounts_table_renderer.render("Account has been added", [account]))
 
 
 @app.command(name="activate")
@@ -96,9 +93,7 @@ def activate_account(
         accounts = disable_accounts_except(accounts, account)
         write_accounts(accounts)
 
-    table = _account_table("Account has been activated")
-    table = _list_accounts(table, [account])
-    console.print(table)
+    console.print(accounts_table_renderer.render("Account has been activated", [account]))
 
 
 @app.command(name="remove")
@@ -127,9 +122,7 @@ def extract_account(
         accounts = remove_account(accounts, account)
         write_accounts(accounts)
 
-    table = _account_table("Account has been deleted")
-    table = _list_accounts(table, [account])
-    console.print(table)
+    console.print(accounts_table_renderer.render("Account has been deleted", [account]))
 
 
 @app.command(name="list")
@@ -149,9 +142,7 @@ def list_accounts(
         console.print("No account found")
         raise typer.Exit(code=0)
 
-    table = _account_table("Available accounts")
-    table = _list_accounts(table, accounts, wrap_secret=False)
-    console.print(table)
+    console.print(accounts_table_renderer.render("Available accounts", accounts, wrap_secret=False))
 
 
 def get_active_account() -> Account:
@@ -167,33 +158,6 @@ def get_active_account() -> Account:
 
     console.print(f"Current active account: {account.id} ({account.name})")
     return account
-
-
-def _account_table(title: str) -> Table:
-    table = Table(title=title, box=box.ROUNDED)
-
-    table.add_column("ID", no_wrap=True)
-    table.add_column("Name")
-    table.add_column("Type")
-    table.add_column("Token", no_wrap=True)
-    table.add_column("Environment", no_wrap=True)
-    table.add_column("Active", justify="center")
-
-    return table
-
-
-def _list_accounts(table: Table, accounts: list[Account], *, wrap_secret: bool = True) -> Table:
-    for account in accounts:
-        table.add_row(
-            account.id,
-            account.name,
-            wrap_account_type(account.type),
-            wrap_token(account, to_wrap_secret=wrap_secret),
-            account.environment,
-            wrap_active(is_active=account.is_active),
-        )
-
-    return table
 
 
 if __name__ == "__main__":

@@ -1,7 +1,9 @@
 from typing import Any
 
 from cli.core.console import console
-from rich.table import Table
+from cli.core.console.renderers.audit import AuditRecordsRenderer
+
+audit_records_renderer = AuditRecordsRenderer()
 
 
 def flatten_dict(
@@ -83,38 +85,4 @@ def get_external_id(current_node: Any, index: int) -> str | None:
 
 def display_audit_records(records: list) -> None:
     """Display available audit records in a table format."""
-    table = Table(title="Available Audit Records")
-    table.add_column("Position", style="cyan", no_wrap=True)
-    table.add_column("Timestamp", style="green", no_wrap=True)
-    table.add_column("Audit ID", style="bright_blue")
-    table.add_column("Actor", style="yellow")
-    table.add_column("Event", style="magenta")
-    table.add_column("Details", style="white")
-
-    for idx, record in enumerate(records, 1):
-        timestamp = record.get("timestamp", "N/A")
-        audit_id = record.get("id", "N/A")
-        actor = _get_actor(record)
-        event = record.get("event", "N/A")
-        details = record.get("details", "N/A")
-
-        table.add_row(
-            str(idx),
-            timestamp,
-            audit_id,
-            actor,
-            event.replace("platform.commerce.", ""),
-            details,
-        )
-
-    console.print(table)
-
-
-def _get_actor(record: dict[str, Any]) -> str:
-    actor = record.get("actor") or {}
-    actor_name = actor.get("name", "N/A")
-    actor_account = actor.get("account", {}).get("name", "")
-    if actor_account:
-        actor_name = f"{actor_name} ({actor_account})"
-
-    return actor_name
+    console.print(audit_records_renderer.render(records))

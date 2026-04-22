@@ -143,7 +143,7 @@ def test_sync_product_force_create(
     mocker, product_container_mock, product_new_file, product_data_from_dict
 ):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
-    to_table_mock = mocker.patch.object(ProductStatsCollector, "to_table", return_value="")
+    render_mock = mocker.patch("cli.core.products.app.stats_table_renderer.render", return_value="")
     validate_definition_mock = mocker.patch.object(
         product_container_mock.product_service(),
         "validate_definition",
@@ -167,12 +167,12 @@ def test_sync_product_force_create(
     validate_definition_mock.assert_called_once()
     retrieve_mock.assert_called_once()
     create_product_mock.assert_called_once()
-    to_table_mock.assert_called_once()
+    render_mock.assert_called_once()
 
 
 def test_sync_product_no_product(mocker, product_new_file, product_container_mock):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
-    to_table_mock = mocker.patch.object(ProductStatsCollector, "to_table", return_value="")
+    render_mock = mocker.patch("cli.core.products.app.stats_table_renderer.render", return_value="")
     validate_definition_mock = mocker.patch.object(
         product_container_mock.product_service(),
         "validate_definition",
@@ -196,7 +196,7 @@ def test_sync_product_no_product(mocker, product_new_file, product_container_moc
     validate_definition_mock.assert_called_once()
     retrieve_mock.assert_called_once()
     create_mock.assert_called_once()
-    to_table_mock.assert_called_once()
+    render_mock.assert_called_once()
 
 
 def test_create_product(

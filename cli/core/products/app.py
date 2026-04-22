@@ -5,16 +5,16 @@ import typer
 from cli.core.accounts.app import get_active_account
 from cli.core.accounts.containers import AccountContainer
 from cli.core.console import console
+from cli.core.console.renderers.products import ProductsTableRenderer
+from cli.core.console.renderers.stats import StatsTableRenderer
 from cli.core.mpt.flows import get_products
-from cli.core.mpt.models import Product as MPTProduct
 from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.products.containers import ProductContainer
-from cli.core.products.table_formatters import wrap_product_status, wrap_vendor
-from rich import box
 from rich.status import Status
-from rich.table import Table
 
 app = typer.Typer()
+products_table_renderer = ProductsTableRenderer()
+stats_table_renderer = StatsTableRenderer()
 
 
 @app.command("export")
@@ -126,9 +126,7 @@ def list_products(
             mpt_client = create_api_mpt_client_from_account(active_account)
             meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
 
-        table = _products_table("Products")
-        table = _list_products(table, products)
-        console.print(table)
+        console.print(products_table_renderer.render("Products", products))
 
         if meta.offset + meta.limit < meta.total:
             typer.confirm("Do you want to fetch next page?", abort=True)
@@ -212,7 +210,7 @@ def sync_product(
             container.resource_id.override(product.id)
             update_product(container, status)
 
-    console.print(container.stats().to_table())
+    console.print(stats_table_renderer.render(container.stats()))
     if container.stats().has_errors:
         raise typer.Exit(code=3)
 
@@ -321,31 +319,6 @@ def update_product(container: ProductContainer, status: Status):
 
     status.update(f"Update subscription parameters for product {resource_id}...")
     container.subscription_parameters_service().update()
-
-
-# TODO: move to to_table()
-def _products_table(title: str) -> Table:
-    table = Table(title=title, box=box.ROUNDED)
-
-    table.add_column("ID")
-    table.add_column("Name", no_wrap=True)
-    table.add_column("Status")
-    table.add_column("Vendor", no_wrap=True)
-
-    return table
-
-
-# TODO: move to to_table()
-def _list_products(table: Table, products: list[MPTProduct]) -> Table:
-    for product in products:
-        table.add_row(
-            product.id,
-            product.name,
-            wrap_product_status(product.status),
-            wrap_vendor(product.vendor),
-        )
-
-    return table
 
 
 if __name__ == "__main__":
