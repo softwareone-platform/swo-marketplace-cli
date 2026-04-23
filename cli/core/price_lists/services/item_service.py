@@ -62,38 +62,44 @@ class ItemService(RelatedBaseService):
 
     @override
     def update(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         for record in self.file_manager.read_data():
             if not record.to_update():
                 self._set_skipped()
                 continue
 
-            query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
-            try:
-                response = self.api.list(query_params=query_params)
-            except (MPTAPIError, KeyError) as error:
-                errors.append(str(error))
-                self._set_error(error, record.id)
-                continue
-            response_data = response.get("data", [])
-            if not response_data:
-                missing_item_error = ValueError(
-                    f"Item {record.id}: no matching item found for vendor {record.vendor_id}"
-                )
-                errors.append(str(missing_item_error))
-                self._set_error(missing_item_error, record.id)
-                continue
-            item_data = response_data[0]
+            self._update_record(errors, record)
 
-            # TODO: this logic should be moved to the price list data model creation
-            record.type = "operations" if self.account.is_operations() else "vendor"
-            payload = record.to_json()
-            try:
-                self.api.update(item_data["id"], payload)
-            except MPTAPIError as error:
-                errors.append(f"Item {record.id}: {error!s}")
-                self._set_error(error, record.id)
-                continue
-
-            self._set_synced(record.id, record.coordinate)
         return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+
+    def _update_item(self, item_data: dict, record) -> None:
+        record.type = "operations" if self.account.is_operations() else "vendor"
+        self.api.update(item_data["id"], record.to_json())
+
+    def _update_record(self, errors: list[str], record) -> None:
+        try:
+            response = self.api.list(
+                query_params={"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
+            )
+        except (MPTAPIError, KeyError, ValueError) as error:
+            errors.append(str(error))
+            self._set_error(error, record.id)
+            return
+
+        response_data = response.get("data", [])
+        if not response_data:
+            missing_item_error = ValueError(
+                f"Item {record.id}: no matching item found for vendor {record.vendor_id}"
+            )
+            errors.append(str(missing_item_error))
+            self._set_error(missing_item_error, record.id)
+            return
+
+        try:
+            self._update_item(response_data[0], record)
+        except MPTAPIError as error:
+            errors.append(f"Item {record.id}: {error!s}")
+            self._set_error(error, record.id)
+            return
+
+        self._set_synced(record.id, record.coordinate)

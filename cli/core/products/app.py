@@ -13,12 +13,11 @@ from cli.core.products.containers import ProductContainer
 from rich.status import Status
 
 app = typer.Typer()
-products_table_renderer = ProductsTableRenderer()
 stats_table_renderer = StatsTableRenderer()
 
 
 @app.command("export")
-def export(  # noqa: C901
+def export(
     product_ids: Annotated[
         list[str],
         typer.Argument(help="List of product IDs to export"),
@@ -54,44 +53,8 @@ def export(  # noqa: C901
     out_path = str(Path.cwd()) if out_path is None else out_path
     has_error = False
     for product_id in product_ids:
-        file_path = Path(out_path) / f"{product_id}.xlsx"
-        product_container = ProductContainer(
-            account_container=account_container, file_path=str(file_path), resource_id=product_id
-        )
-        if file_path.exists():
-            overwrite = typer.confirm(
-                f"File {file_path} already exists. Do you want to overwrite it?",
-                abort=False,
-            )
-            if not overwrite:
-                console.print(f"Skipped export for {product_id}.")
-                continue
-
-            Path(file_path).unlink()
-        else:
-            typer.confirm(
-                f"Do you want to export {product_id} in {out_path}?",
-                abort=True,
-            )
-
-        with console.status(f"Exporting product with id: {product_id}..."):
-            product_container.product_service().export(resource_id=product_id)
-            product_container.item_service().export()
-            product_container.item_group_service().export()
-            product_container.parameter_group_service().export()
-            product_container.agreement_parameters_service().export()
-            product_container.asset_parameters_service().export()
-            product_container.item_parameters_service().export()
-            product_container.request_parameters_service().export()
-            product_container.subscription_parameters_service().export()
-            product_container.template_service().export()
-
-            if product_container.stats().has_errors:
-                console.print(f"Product export with id: {product_id} [red bold]FAILED")
-                has_error = True
-                continue
-
-            console.print(f"Product with id: {product_id} has been exported into {file_path}")
+        if not _export_product_file(account_container, out_path, product_id):
+            has_error = True
 
     if has_error:
         raise typer.Exit(code=3)
@@ -117,22 +80,20 @@ def list_products(
     """
     active_account = get_active_account()
 
-    has_pages = True
     page = 0
-    while has_pages:
+    while True:
         offset = page * page_size
-
         with console.status(f"Fetching #{page} page  of products"):
             mpt_client = create_api_mpt_client_from_account(active_account)
             meta, products = get_products(mpt_client, page_size, offset, query=rql_query)
 
-        console.print(products_table_renderer.render("Products", products))
+        console.print(ProductsTableRenderer().render("Products", products))
 
-        if meta.offset + meta.limit < meta.total:
-            typer.confirm("Do you want to fetch next page?", abort=True)
-            page += 1
-        else:
-            has_pages = False
+        if meta.offset + meta.limit >= meta.total:
+            break
+
+        typer.confirm("Do you want to fetch next page?", abort=True)
+        page += 1
 
 
 @app.command(name="sync")
@@ -184,17 +145,17 @@ def sync_product(
     active_account = container.account_container().account()
     if product is None or force_create:
         if product is None:
-            msg = (
+            typer.confirm(
                 f"Do you want to create new product for account {active_account.id} "
-                f"({active_account.name})"
+                f"({active_account.name})",
+                abort=True,
             )
         else:
-            msg = (
+            typer.confirm(
                 f"Do you want to create new product for account {active_account.id} "
-                f"({active_account.name}) because the product ID exists in the SWO Platform?"
+                f"({active_account.name}) because the product ID exists in the SWO Platform?",
+                abort=True,
             )
-
-        typer.confirm(msg, abort=True)
 
         with console.status("Create product...") as status:
             create_product(container, status)
@@ -319,6 +280,48 @@ def update_product(container: ProductContainer, status: Status):
 
     status.update(f"Update subscription parameters for product {resource_id}...")
     container.subscription_parameters_service().update()
+
+
+def _export_product_file(
+    account_container: AccountContainer, out_path: str, product_id: str
+) -> bool:
+    file_path = Path(out_path) / f"{product_id}.xlsx"
+    product_container = ProductContainer(
+        account_container=account_container, file_path=str(file_path), resource_id=product_id
+    )
+    if file_path.exists():
+        overwrite = typer.confirm(
+            f"File {file_path} already exists. Do you want to overwrite it?",
+            abort=False,
+        )
+        if not overwrite:
+            console.print(f"Skipped export for {product_id}.")
+            return True
+        file_path.unlink()
+    else:
+        typer.confirm(
+            f"Do you want to export {product_id} in {out_path}?",
+            abort=True,
+        )
+
+    with console.status(f"Exporting product with id: {product_id}..."):
+        product_container.product_service().export(resource_id=product_id)
+        product_container.item_service().export()
+        product_container.item_group_service().export()
+        product_container.parameter_group_service().export()
+        product_container.agreement_parameters_service().export()
+        product_container.asset_parameters_service().export()
+        product_container.item_parameters_service().export()
+        product_container.request_parameters_service().export()
+        product_container.subscription_parameters_service().export()
+        product_container.template_service().export()
+
+    if product_container.stats().has_errors:
+        console.print(f"Product export with id: {product_id} [red bold]FAILED")
+        return False
+
+    console.print(f"Product with id: {product_id} has been exported into {file_path}")
+    return True
 
 
 if __name__ == "__main__":

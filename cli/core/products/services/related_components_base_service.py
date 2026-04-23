@@ -89,22 +89,19 @@ class RelatedComponentsBaseService(RelatedComponentsActionMixin, RelatedBaseServ
 
     @override
     def create(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         collection = {}
         for raw_model_data in self.file_manager.read_data():
             data_model = self.prepare_data_model_to_create(raw_model_data)
-
             try:
-                new_item = self.api.post(json=data_model.to_json())
+                old_id, new_id, data_model = _create_one(self.api, data_model)
             except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(error, data_model.id)
+                _collect_error(errors, error)
+                self._set_error(error, raw_model_data.id)
                 continue
 
-            old_id = data_model.id
-            data_model.id = new_item["id"]
             collection[old_id] = data_model
-            self._set_synced(new_item["id"], data_model.coordinate)
+            self._set_synced(new_id, data_model.coordinate)
 
         return ServiceResult(
             success=len(errors) == 0,
@@ -156,25 +153,14 @@ class RelatedComponentsBaseService(RelatedComponentsActionMixin, RelatedBaseServ
 
     @override
     def update(self) -> ServiceResult:
-        errors = []
+        errors: list[str] = []
         for data_model in self.file_manager.read_data():
-            data_model.product_id = self.resource_id
-            if data_model.to_skip:
+            was_synced = self._update_data_model(data_model, errors)
+            if was_synced is None:
+                continue
+
+            if not was_synced:
                 self._set_skipped()
-                continue
-
-            try:
-                action_handler = self._get_update_action_handler(data_model.action)
-            except ValueError as error:
-                errors.append(str(error))
-                self._set_error(error, data_model.id)
-                continue
-
-            try:
-                action_handler(data_model)
-            except MPTAPIError as error:
-                errors.append(str(error))
-                self._set_error(error, data_model.id)
                 continue
 
             self._set_synced(data_model.id, data_model.coordinate)
@@ -194,3 +180,39 @@ class RelatedComponentsBaseService(RelatedComponentsActionMixin, RelatedBaseServ
              DataModel: The data model to create
         """
         return data_model
+
+    def _update_data_model(self, data_model: Any, errors: list[str]) -> bool | None:
+        data_model.product_id = self.resource_id
+        if data_model.to_skip:
+            return False
+
+        try:
+            action_handler = self._get_update_action_handler(data_model.action)
+        except ValueError as error:
+            _collect_error(errors, error)
+            self._set_error(error, data_model.id)
+            return None
+
+        try:
+            return _update_one(action_handler, self.resource_id, data_model)
+        except MPTAPIError as error:
+            _collect_error(errors, error)
+            self._set_error(error, data_model.id)
+            return None
+
+
+def _collect_error(errors: list[str], error: Exception) -> None:
+    errors.append(str(error))
+
+
+def _create_one(api, data_model: Any) -> tuple[str, str, Any]:
+    new_item = api.post(json=data_model.to_json())
+    old_id = data_model.id
+    data_model.id = new_item["id"]
+    return old_id, new_item["id"], data_model
+
+
+def _update_one(action_handler, resource_id: str, data_model: Any) -> bool:
+    data_model.product_id = resource_id
+    action_handler(data_model)
+    return True

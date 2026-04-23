@@ -15,22 +15,19 @@ def flatten_dict(
         new_key = f"{parent_key}{sep}{key}" if parent_key else key
         if isinstance(node_value, dict):
             flattened_items.extend(flatten_dict(node_value, new_key, sep=sep).items())
-        elif isinstance(node_value, list):
-            for index, list_entry in enumerate(node_value):
-                if isinstance(list_entry, dict):
-                    flattened_items.extend(
-                        flatten_dict(list_entry, f"{new_key}[{index}]", sep=sep).items()
-                    )
-                else:
-                    flattened_items.append((f"{new_key}[{index}]", list_entry))
-        else:
-            flattened_items.append((new_key, node_value))
+            continue
+
+        if isinstance(node_value, list):
+            flattened_items.extend(_flatten_list_items(new_key, node_value, sep))
+            continue
+
+        flattened_items.append((new_key, node_value))
     return dict(flattened_items)
 
 
 def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
     """Format JSON path with additional context from external IDs if available."""
-    if not is_valid_path(path):
+    if "[" not in path or "]" not in path:
         return path
 
     array_path, _rest = path.split("]", 1)
@@ -38,30 +35,11 @@ def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict
     index = int(index_str)
 
     for trail in (source_trail, target_trail):
-        current_node: Any | None = trail
-        for part in base_path.split("."):
-            if not isinstance(current_node, dict) or part not in current_node:
-                current_node = None
-                break
-            current_node = current_node[part]
-
-        external_id = get_external_id(current_node, index)
+        external_id = get_external_id(_walk_path(trail, base_path), index)
         if external_id is not None:
             return f"{path} (externalId: {external_id})"
 
     return path
-
-
-def is_valid_path(path: str) -> bool:
-    """Check if a path is valid.
-
-    Args:
-        path: The path to check.
-
-    Returns: True if the path is valid, False otherwise.
-
-    """
-    return "[" in path and "]" in path
 
 
 def get_external_id(current_node: Any, index: int) -> str | None:
@@ -83,6 +61,27 @@ def get_external_id(current_node: Any, index: int) -> str | None:
     return None
 
 
-def display_audit_records(records: list) -> None:
+def display_audit_records(records: list[Any]) -> None:
     """Display available audit records in a table format."""
     console.print(audit_records_renderer.render(records))
+
+
+def _flatten_list_items(new_key: str, node_value: list[Any], sep: str) -> list[tuple[str, Any]]:
+    flattened_items: list[tuple[str, Any]] = []
+    for index, list_entry in enumerate(node_value):
+        if isinstance(list_entry, dict):
+            flattened_items.extend(flatten_dict(list_entry, f"{new_key}[{index}]", sep=sep).items())
+            continue
+
+        flattened_items.append((f"{new_key}[{index}]", list_entry))
+
+    return flattened_items
+
+
+def _walk_path(trail: dict[str, Any], base_path: str) -> Any | None:
+    current_node: Any | None = trail
+    for part in base_path.split("."):
+        if not isinstance(current_node, dict) or part not in current_node:
+            return None
+        current_node = current_node[part]
+    return current_node

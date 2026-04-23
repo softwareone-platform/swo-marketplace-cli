@@ -44,29 +44,15 @@ def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, A
     all_keys = set(source_flat.keys()) | set(target_flat.keys())
 
     differences: list[tuple[str, str, str]] = []
-
     for key in sorted(all_keys):
-        source_value = source_flat.get(key)
-        target_value = target_flat.get(key)
-        if source_value != target_value:
-            formatted_path = format_json_path(key, source_trail, target_trail)
-            differences.append((
-                formatted_path,
-                "[red]<missing>[/red]" if source_value is None else str(source_value),
-                "[red]<missing>[/red]" if target_value is None else str(target_value),
-            ))
+        difference = _difference_row(key, source_flat, target_flat, source_trail, target_trail)
+        if difference is not None:
+            differences.append(difference)
 
     if differences:
         console.print(audit_diff_renderer.render_differences(differences))
     else:
         console.print("\n[green]No differences found between the audit trails[/green]")
-
-
-def _parse_positions(positions: str, records_count: int) -> tuple[int, int]:
-    pos1, pos2 = map(int, positions.split(","))
-    if not (1 <= pos1 <= records_count and 1 <= pos2 <= records_count):
-        raise ValueError
-    return pos1, pos2
 
 
 @app.command()
@@ -102,7 +88,13 @@ def diff_by_object_id(
 
     display_audit_records(records)
 
-    if positions:
+    if positions is None:
+        source_trail = records[0]
+        target_trail = records[1]
+        console.print(
+            "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
+        )
+    else:
         try:
             pos1, pos2 = _parse_positions(positions, len(records))
         except ValueError:
@@ -115,12 +107,6 @@ def diff_by_object_id(
 
         source_trail = records[pos1 - 1]
         target_trail = records[pos2 - 1]
-    else:
-        source_trail = records[0]
-        target_trail = records[1]
-        console.print(
-            "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
-        )
 
     compare_audit_trails(source_trail, target_trail)
 
@@ -146,10 +132,31 @@ def diff_by_records_id(
     compare_audit_trails(source_trail, target_trail)
 
 
-def main() -> None:  # pragma: no cover
-    """Entry point for the audit CLI application."""
-    app()
+def _difference_row(
+    key: str,
+    source_flat: dict[str, Any],
+    target_flat: dict[str, Any],
+    source_trail: dict[str, Any],
+    target_trail: dict[str, Any],
+) -> tuple[str, str, str] | None:
+    source_value = source_flat.get(key)
+    target_value = target_flat.get(key)
+    if source_value == target_value:
+        return None
+
+    return (
+        format_json_path(key, source_trail, target_trail),
+        "[red]<missing>[/red]" if source_value is None else str(source_value),
+        "[red]<missing>[/red]" if target_value is None else str(target_value),
+    )
+
+
+def _parse_positions(positions: str, records_count: int) -> tuple[int, int]:
+    pos1, pos2 = map(int, positions.split(","))
+    if not (1 <= pos1 <= records_count and 1 <= pos2 <= records_count):
+        raise ValueError
+    return pos1, pos2
 
 
 if __name__ == "__main__":
-    main()
+    app()
