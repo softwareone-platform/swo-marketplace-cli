@@ -3,6 +3,8 @@ from typing import Any
 from cli.core.console import console
 from cli.core.console.renderers.audit import AuditRecordsRenderer
 
+type AuditTrail = dict[str, Any]
+
 audit_records_renderer = AuditRecordsRenderer()
 
 
@@ -28,7 +30,7 @@ def flatten_dict(
     return dict(flattened_items)
 
 
-def format_json_path(path: str, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> str:
+def format_json_path(path: str, source_trail: AuditTrail, target_trail: AuditTrail) -> str:
     """Format JSON path with additional context from external IDs if available."""
     if not is_valid_path(path):
         return path

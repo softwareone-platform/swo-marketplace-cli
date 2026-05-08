@@ -18,6 +18,7 @@ from openpyxl.worksheet.worksheet import Worksheet
 
 type SheetData = dict[str, Any]
 type SheetDataGenerator = Generator[SheetData, None, None]
+type ColumnPatterns = list[re.Pattern[str]]
 
 if TYPE_CHECKING:
     from cli.core.handlers.excel_file_handler import CellPosition
@@ -144,12 +145,19 @@ class ExcelReadMixin:
         """Extracts data from a vertical sheet where the first column contains field names."""
         sheet = self._get_worksheet(sheet_name)
         sheet_iter = sheet.iter_rows(min_row=2)
-        return {
-            str(row[0].value): {"value": row[1].value, "coordinate": row[1].coordinate}
-            for row in sheet_iter
-            if self._is_non_empty_field_value(row[0].value)
-            and (fields is None or row[0].value in fields)
-        }
+        result: SheetData = {}
+        for row in sheet_iter:
+            field_cell = row[0]
+            if not self._is_non_empty_field_value(field_cell.value):
+                continue
+            if fields is not None and field_cell.value not in fields:
+                continue
+            _, value_cell, *_ = row
+            result[str(field_cell.value)] = {
+                "value": value_cell.value,
+                "coordinate": value_cell.coordinate,
+            }
+        return result
 
     def get_sheet_next_column(self, sheet_name: str) -> str:
         """Get the next available column letter in the specified sheet."""
@@ -160,7 +168,7 @@ class ExcelReadMixin:
         return self._get_worksheet(sheet_name).max_row + 1
 
     def get_values_for_dynamic_sheet(
-        self, sheet_name: str, fields: tuple[str, ...], patterns: list[re.Pattern[str]]
+        self, sheet_name: str, fields: tuple[str, ...], patterns: ColumnPatterns
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure."""
         ws = self._get_worksheet(sheet_name)
