@@ -8,6 +8,8 @@ from mpt_api_client import MPTClient, RQLQuery
 if TYPE_CHECKING:
     from pydantic import BaseModel
 
+type QueryParams = dict[str, Any] | None
+
 
 class APIClientMixin:
     """Provide shared API client metadata accessors."""
@@ -85,7 +87,7 @@ class APIReadMixin:
         return resource_data.to_dict()
 
     @wrap_mpt_api_error
-    def list(self, query_params: dict[str, Any] | None = None) -> dict[str, Any]:
+    def list(self, query_params: QueryParams = None) -> dict[str, Any]:
         """List resources with optional query parameters.
 
         Args:

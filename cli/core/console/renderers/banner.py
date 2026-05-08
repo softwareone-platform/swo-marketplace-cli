@@ -13,7 +13,9 @@ class BannerRenderer:
 
     def render(self, program_name: str) -> list[Text]:
         """Build the banner lines for the current program name."""
-        normalized_program_name = "".join((program_name[:3].upper(), program_name[3:7]))
+        prefix = program_name[:3].upper()
+        suffix = program_name[3:7]
+        normalized_program_name = f"{prefix}{suffix}"
         figlet = Figlet("georgia11")
         banner_text = figlet.renderText(normalized_program_name)
 
@@ -39,23 +41,21 @@ class BannerRenderer:
     def _gradient(
         self, start_hex: str, end_hex: str, num_samples: int = 16
     ) -> list[str]:  # pragma: no cover
-        start_rgb = tuple(
-            int(start_hex[index : index + 2], HEXADECIMAL_BASE) for index in range(1, 6, 2)
-        )
-        end_rgb = tuple(
-            int(end_hex[index : index + 2], HEXADECIMAL_BASE) for index in range(1, 6, 2)
-        )
+        rgb_indices = range(1, 6, 2)
+        start_hex_segments = (start_hex[index : index + 2] for index in rgb_indices)
+        end_hex_segments = (end_hex[index : index + 2] for index in rgb_indices)
+        start_rgb = tuple(int(segment, HEXADECIMAL_BASE) for segment in start_hex_segments)
+        end_rgb = tuple(int(segment, HEXADECIMAL_BASE) for segment in end_hex_segments)
         gradient_colors = [start_hex]
+        last_sample_index = num_samples - 1
+        red_delta = end_rgb[0] - start_rgb[0]
+        green_delta = end_rgb[1] - start_rgb[1]
+        blue_delta = end_rgb[2] - start_rgb[2]
         for sample in range(1, num_samples):
-            red = int(
-                start_rgb[0] + (float(sample) / (num_samples - 1)) * (end_rgb[0] - start_rgb[0])
-            )
-            green = int(
-                start_rgb[1] + (float(sample) / (num_samples - 1)) * (end_rgb[1] - start_rgb[1])
-            )
-            blue = int(
-                start_rgb[2] + (float(sample) / (num_samples - 1)) * (end_rgb[2] - start_rgb[2])
-            )
+            ratio = float(sample) / last_sample_index
+            red = int(start_rgb[0] + ratio * red_delta)
+            green = int(start_rgb[1] + ratio * green_delta)
+            blue = int(start_rgb[2] + ratio * blue_delta)
             rgb_color = bytes((red, green, blue)).hex().upper()
             gradient_colors.append(f"#{rgb_color}")
 

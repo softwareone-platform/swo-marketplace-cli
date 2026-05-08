@@ -27,7 +27,8 @@ class ProductService(BaseService):
             new_product_data = self.api.post(form_payload=multipart_payload, headers=headers)
         except MPTAPIError as error:
             self._set_error(error)
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         product.id = new_product_data["id"]
         try:
@@ -35,7 +36,8 @@ class ProductService(BaseService):
             self.api.update(f"{product.id}/settings", json_payload=product.settings.to_json())
         except MPTAPIError as error:
             self._set_error(error)
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         self._set_synced(product.id, product.coordinate)
         return ServiceResult(success=True, model=product, stats=self.stats)
@@ -72,7 +74,8 @@ class ProductService(BaseService):
             exists = self.api.exists({"id": product.id})
         except MPTAPIError as error:
             self._set_error(error)
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product if exists else None, stats=self.stats)
 
@@ -81,7 +84,8 @@ class ProductService(BaseService):
         try:
             product_data = self.api.get(resource_id)
         except MPTAPIError as error:
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         product = self.data_model.from_json(product_data)
         return ServiceResult(success=True, model=product, stats=self.stats)
@@ -105,7 +109,8 @@ class ProductService(BaseService):
             for section_name in error.details:
                 self.stats.errors.add_msg(section_name, "", "Required tab doesn't exist")
 
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         try:
             self.file_manager.check_required_fields_by_section()
@@ -113,7 +118,8 @@ class ProductService(BaseService):
             for field_name in error.details:
                 self.stats.errors.add_msg(field_name, "", "Required field doesn't exist")
 
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=None, stats=self.stats)
 
@@ -134,6 +140,7 @@ class ProductService(BaseService):
             self.api.update(product.id, SettingsData(records=setting_items).to_json())
         except MPTAPIError as error:
             self._set_error(error)
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         return ServiceResult(success=True, model=product, stats=self.stats)

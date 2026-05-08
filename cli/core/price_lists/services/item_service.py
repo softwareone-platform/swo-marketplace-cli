@@ -55,7 +55,8 @@ class ItemService(RelatedBaseService):
         try:
             response = self.api.get(resource_id)
         except MPTAPIError as error:
-            return ServiceResult(success=False, errors=[str(error)], model=None, stats=self.stats)
+            error_messages = [str(error)]
+            return ServiceResult(success=False, errors=error_messages, model=None, stats=self.stats)
 
         item_model = self.data_model.from_json(response.json())
         return ServiceResult(success=True, model=item_model, stats=self.stats)
@@ -96,4 +97,5 @@ class ItemService(RelatedBaseService):
                 continue
 
             self._set_synced(record.id, record.coordinate)
-        return ServiceResult(success=len(errors) == 0, errors=errors, model=None, stats=self.stats)
+        success = not errors
+        return ServiceResult(success=success, errors=errors, model=None, stats=self.stats)
