@@ -35,8 +35,10 @@ def product_container_mock(mocker, account_container_mock):
     container.request_parameters_service.override(MagicMock(ParametersService))
     container.subscription_parameters_service.override(MagicMock(ParametersService))
     container.template_service.override(MagicMock(TemplateService))
-    mock = mocker.patch("cli.core.products.app.ProductContainer", autospec=True)
-    mock.return_value = container
+    export_mock = mocker.patch("cli.core.products.app.export.ProductContainer", autospec=True)
+    export_mock.return_value = container
+    sync_mock = mocker.patch("cli.core.products.app.sync.ProductContainer", autospec=True)
+    sync_mock.return_value = container
 
     return container
 
