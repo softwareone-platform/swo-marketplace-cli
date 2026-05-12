@@ -7,6 +7,9 @@ from cli.core.price_lists.constants import (
 from cli.core.services import RelatedBaseService
 from cli.core.services.service_result import ServiceResult
 
+EXPORT_PAGE_SIZE = 100
+EXPORT_SELECT = "audit,item.terms,priceList.precision,priceList.currency"
+
 
 class ItemService(RelatedBaseService):
     """Service for managing price list item operations."""
@@ -20,29 +23,28 @@ class ItemService(RelatedBaseService):
     @override
     def export(self) -> ServiceResult:
         self.file_manager.create_tab()
-
         offset = 0
-        limit = 100
-        select = "audit,item.terms,priceList.precision,priceList.currency"
         while True:
             try:
-                response = self.api.list({"select": select, "offset": offset, "limit": limit})
+                response = self.api.list({
+                    "select": EXPORT_SELECT,
+                    "offset": offset,
+                    "limit": EXPORT_PAGE_SIZE,
+                })
             except MPTAPIError as error:
                 self.stats.add_error(TAB_PRICE_ITEMS)
                 return ServiceResult(
                     success=False, model=None, errors=[str(error)], stats=self.stats
                 )
 
-            records = [self.data_model.from_json(record) for record in response["data"]]
-            self.file_manager.add(records)
+            self.file_manager.add([
+                self.data_model.from_json(record) for record in response["data"]
+            ])
 
-            meta_data = response["meta"]
-            if meta_data["offset"] + meta_data["limit"] < meta_data["total"]:
-                offset += limit
-            else:
-                break
-
-        return ServiceResult(success=True, model=None, stats=self.stats)
+            meta = response["meta"]
+            if meta["offset"] + meta["limit"] >= meta["total"]:
+                return ServiceResult(success=True, model=None, stats=self.stats)
+            offset += EXPORT_PAGE_SIZE
 
     @override
     def retrieve(self) -> ServiceResult:  # pragma: no cover
@@ -65,37 +67,39 @@ class ItemService(RelatedBaseService):
     def update(self) -> ServiceResult:
         errors = []
         for record in self.file_manager.read_data():
-            if not record.to_update():
-                self._set_skipped()
-                continue
-
-            query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
-            try:
-                response = self.api.list(query_params=query_params)
-            except (MPTAPIError, KeyError) as error:
-                errors.append(str(error))
-                self._set_error(error, record.id)
-                continue
-            response_data = response.get("data", [])
-            if not response_data:
-                missing_item_error = ValueError(
-                    f"Item {record.id}: no matching item found for vendor {record.vendor_id}"
-                )
-                errors.append(str(missing_item_error))
-                self._set_error(missing_item_error, record.id)
-                continue
-            item_data = response_data[0]
-
-            # TODO: this logic should be moved to the price list data model creation
-            record.type = "operations" if self.account.is_operations() else "vendor"
-            payload = record.to_json()
-            try:
-                self.api.update(item_data["id"], payload)
-            except MPTAPIError as error:
-                errors.append(f"Item {record.id}: {error!s}")
-                self._set_error(error, record.id)
-                continue
-
-            self._set_synced(record.id, record.coordinate)
+            error_message = self._update_one_record(record)
+            if error_message is not None:
+                errors.append(error_message)
         success = not errors
         return ServiceResult(success=success, errors=errors, model=None, stats=self.stats)
+
+    def _update_one_record(self, record) -> str | None:
+        if not record.to_update():
+            self._set_skipped()
+            return None
+
+        query_params = {"item.ExternalIds.vendor": record.vendor_id, "limit": 1}
+        try:
+            response = self.api.list(query_params=query_params)
+        except (MPTAPIError, KeyError) as error:
+            self._set_error(error, record.id)
+            return str(error)
+
+        response_data = response.get("data", [])
+        if not response_data:
+            missing_item_error = ValueError(
+                f"Item {record.id}: no matching item found for vendor {record.vendor_id}"
+            )
+            self._set_error(missing_item_error, record.id)
+            return str(missing_item_error)
+
+        # TODO: this logic should be moved to the price list data model creation
+        record.type = "operations" if self.account.is_operations() else "vendor"
+        try:
+            self.api.update(response_data[0]["id"], record.to_json())
+        except MPTAPIError as error:
+            self._set_error(error, record.id)
+            return f"Item {record.id}: {error!s}"
+
+        self._set_synced(record.id, record.coordinate)
+        return None

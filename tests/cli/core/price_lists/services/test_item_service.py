@@ -38,6 +38,26 @@ def test_export(mocker, service_context, mpt_item_data):
     api_list_mock.assert_called()
 
 
+def test_export_paginates_until_total(mocker, service_context, mpt_item_data):
+    create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
+    add_mock = mocker.patch.object(service_context.file_manager, "add")
+    first_page = {"data": [mpt_item_data], "meta": {"offset": 0, "limit": 1, "total": 2}}
+    second_page = {"data": [mpt_item_data], "meta": {"offset": 1, "limit": 1, "total": 2}}
+    api_list_mock = mocker.patch.object(
+        service_context.api, "list", side_effect=[first_page, second_page]
+    )
+
+    result = ItemService(service_context).export()
+
+    assert result.success is True
+    create_tab_mock.assert_called_once()
+    assert add_mock.call_count == 2
+    assert api_list_mock.call_count == 2
+    first_call, second_call = api_list_mock.call_args_list
+    assert first_call.args[0]["offset"] == 0
+    assert second_call.args[0]["offset"] > first_call.args[0]["offset"]
+
+
 def test_export_mpt_error(mocker, service_context):
     create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     api_list_mock = mocker.patch.object(
