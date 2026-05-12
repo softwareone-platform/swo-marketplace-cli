@@ -1,10 +1,9 @@
 import pytest
+from cli.plugins.audit_plugin.audit_paths import get_external_id, is_valid_path
 from cli.plugins.audit_plugin.audit_records import (
     display_audit_records,
     flatten_dict,
     format_json_path,
-    get_external_id,
-    is_valid_path,
 )
 
 

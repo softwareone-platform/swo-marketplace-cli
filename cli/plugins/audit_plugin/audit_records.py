@@ -2,10 +2,20 @@ from typing import Any
 
 from cli.core.console import console
 from cli.core.console.renderers.audit import AuditRecordsRenderer
-
-type AuditTrail = dict[str, Any]
+from cli.plugins.audit_plugin.audit_paths import (
+    AuditTrail,
+    get_external_id,
+    is_valid_path,
+    parse_array_path,
+    walk_trail,
+)
 
 audit_records_renderer = AuditRecordsRenderer()
+
+
+def display_audit_records(records: list) -> None:
+    """Display available audit records in a table format."""
+    console.print(audit_records_renderer.render(records))
 
 
 def flatten_dict(
@@ -18,13 +28,7 @@ def flatten_dict(
         if isinstance(node_value, dict):
             flattened_items.extend(flatten_dict(node_value, new_key, sep=sep).items())
         elif isinstance(node_value, list):
-            for index, list_entry in enumerate(node_value):
-                if isinstance(list_entry, dict):
-                    flattened_items.extend(
-                        flatten_dict(list_entry, f"{new_key}[{index}]", sep=sep).items()
-                    )
-                else:
-                    flattened_items.append((f"{new_key}[{index}]", list_entry))
+            flattened_items.extend(_flatten_list_entries(node_value, new_key, sep))
         else:
             flattened_items.append((new_key, node_value))
     return dict(flattened_items)
@@ -35,56 +39,22 @@ def format_json_path(path: str, source_trail: AuditTrail, target_trail: AuditTra
     if not is_valid_path(path):
         return path
 
-    array_path, _rest = path.split("]", 1)
-    base_path, index_str = array_path.split("[")
-    index = int(index_str)
-
+    parts, index = parse_array_path(path)
     for trail in (source_trail, target_trail):
-        current_node: Any | None = trail
-        for part in base_path.split("."):
-            if not isinstance(current_node, dict) or part not in current_node:
-                current_node = None
-                break
-            current_node = current_node[part]
-
-        external_id = get_external_id(current_node, index)
+        external_id = get_external_id(walk_trail(trail, parts), index)
         if external_id is not None:
             return f"{path} (externalId: {external_id})"
 
     return path
 
 
-def is_valid_path(path: str) -> bool:
-    """Check if a path is valid.
-
-    Args:
-        path: The path to check.
-
-    Returns: True if the path is valid, False otherwise.
-
-    """
-    return "[" in path and "]" in path
-
-
-def get_external_id(current_node: Any, index: int) -> str | None:
-    """Get the external ID from an object.
-
-    Args:
-        current_node: the object to get the external ID from.
-        index: the index of the object to get the external ID from.
-
-    Returns: the external ID or None.
-
-    """
-    if isinstance(current_node, list) and len(current_node) > index:
-        try:
-            return current_node[index]["externalId"]
-        except (IndexError, KeyError):
-            return None
-
-    return None
-
-
-def display_audit_records(records: list) -> None:
-    """Display available audit records in a table format."""
-    console.print(audit_records_renderer.render(records))
+def _flatten_list_entries(list_value: list, prefix: str, sep: str) -> list:
+    """Flatten the entries of a list, dispatching dict entries back to ``flatten_dict``."""
+    flattened: list = []
+    for index, list_entry in enumerate(list_value):
+        item_key = f"{prefix}[{index}]"
+        if isinstance(list_entry, dict):
+            flattened.extend(flatten_dict(list_entry, item_key, sep=sep).items())
+        else:
+            flattened.append((item_key, list_entry))
+    return flattened
