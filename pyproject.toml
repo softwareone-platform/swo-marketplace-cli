@@ -132,7 +132,6 @@ per-file-ignores = [
   "cli/core/stats.py:WPS210",
   "cli/plugins/audit_plugin/api.py:WPS210",
   "cli/plugins/audit_plugin/app.py:WPS210",
-  "cli/plugins/audit_plugin/audit_records.py:WPS210,WPS231",
   "tests/**:WPS202,WPS204,WPS210,WPS213,WPS218,WPS221,WPS432"
 ]
 
