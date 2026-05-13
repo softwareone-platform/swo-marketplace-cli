@@ -91,7 +91,7 @@ def account_container_mock(mocker, active_operations_account):
     container = AccountContainer()
     container.account.override(mocker.MagicMock(return_value=active_operations_account))
     container.api_mpt_client.override(mocker.MagicMock(spec=MPTClient))
-    mock = mocker.patch("cli.core.products.app.AccountContainer", autospec=True)
+    mock = mocker.patch("cli.core.products.app.export.AccountContainer", autospec=True)
     mock.return_value = container
 
     return container
