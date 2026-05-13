@@ -43,28 +43,23 @@ def test_get_or_create_accounts_create(mocker, tmp_path):
     assert result == []
 
 
-def test_get_or_create_accounts_get(
-    mocker, accounts_path, active_vendor_account, inactive_vendor_account
-):
+def test_get_or_create_accounts_get(mocker, accounts_path, stored_accounts):
     mocker.patch.object(JsonFileHandler, "_default_file_path", accounts_path)
 
     result = get_or_create_accounts()
 
-    expected_accounts = [active_vendor_account, inactive_vendor_account]
-    assert result == expected_accounts
+    assert result == stored_accounts
 
 
-def test_does_account_exist(active_vendor_account, inactive_vendor_account):
-    result = does_account_exist(
-        [active_vendor_account, inactive_vendor_account], active_vendor_account
-    )
+def test_does_account_exist(stored_accounts, active_vendor_account):
+    result = does_account_exist(stored_accounts, active_vendor_account)
 
     assert result is True
 
 
-def test_doesnot_account_exist(active_vendor_account, inactive_vendor_account):
+def test_doesnot_account_exist(stored_accounts):
     result = does_account_exist(
-        [active_vendor_account, inactive_vendor_account],
+        stored_accounts,
         Account(
             id="ACC-4321",
             name="Not exists account",
@@ -79,66 +74,54 @@ def test_doesnot_account_exist(active_vendor_account, inactive_vendor_account):
     assert result is False
 
 
-def test_remove_account(active_vendor_account, inactive_vendor_account):
-    accounts = [active_vendor_account, inactive_vendor_account]
-
-    result = remove_account(accounts, inactive_vendor_account)
+def test_remove_account(stored_accounts, active_vendor_account, inactive_vendor_account):
+    result = remove_account(stored_accounts, inactive_vendor_account)
 
     assert result == [active_vendor_account]
 
 
-def test_write_accounts(mocker, tmp_path, active_vendor_account, inactive_vendor_account):
+def test_write_accounts(mocker, tmp_path, stored_accounts):
     file_path = tmp_path / ".swocli" / "accounts.json"
     mocker.patch.object(JsonFileHandler, "_default_file_path", file_path)
-    accounts = [active_vendor_account, inactive_vendor_account]
-    write_accounts(accounts)
+    write_accounts(stored_accounts)
     with Path(file_path).open(encoding="utf-8") as file_obj:
         written_accounts = json.load(file_obj)
 
     result = sorted(written_accounts, key=itemgetter("id"))
 
-    assert result == [account.model_dump() for account in accounts]
+    assert result == [account.model_dump() for account in stored_accounts]
 
 
-def test_disable_accounts_except(active_vendor_account, inactive_vendor_account):
-    accounts = [active_vendor_account, inactive_vendor_account]
-
-    disable_accounts_except(accounts, inactive_vendor_account)  # act
+def test_disable_accounts_except(stored_accounts, active_vendor_account, inactive_vendor_account):
+    disable_accounts_except(stored_accounts, inactive_vendor_account)  # act
 
     assert not active_vendor_account.is_active
     assert inactive_vendor_account.is_active
 
 
-def test_find_account(active_vendor_account, inactive_vendor_account):
-    result = find_account(
-        [active_vendor_account, inactive_vendor_account], active_vendor_account.id
-    )
+def test_find_account(stored_accounts, active_vendor_account):
+    result = find_account(stored_accounts, active_vendor_account.id)
 
     assert result == active_vendor_account
 
 
-def test_find_account_exception(active_vendor_account, inactive_vendor_account):
-    accounts = [active_vendor_account, inactive_vendor_account]
-
+def test_find_account_exception(stored_accounts):
     with pytest.raises(AccountNotFoundError) as error:
-        find_account(accounts, "another-account-id")
+        find_account(stored_accounts, "another-account-id")
 
     assert "nother-account-id" in str(error.value)
 
 
-def test_find_active_account(active_vendor_account, inactive_vendor_account):
-    accounts = [active_vendor_account, inactive_vendor_account]
-
-    result = find_active_account(accounts)
+def test_find_active_account(stored_accounts, active_vendor_account):
+    result = find_active_account(stored_accounts)
 
     assert result == active_vendor_account
 
 
-def test_find_active_account_exception(active_vendor_account, inactive_vendor_account):
+def test_find_active_account_exception(stored_accounts, active_vendor_account):
     active_vendor_account.is_active = False
-    accounts = [active_vendor_account, inactive_vendor_account]
 
     with pytest.raises(NoActiveAccountFoundError) as error:
-        find_active_account(accounts)
+        find_active_account(stored_accounts)
 
     assert "No active account found. Activate any account first" in str(error.value)
