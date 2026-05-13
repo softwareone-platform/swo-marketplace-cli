@@ -101,25 +101,27 @@ class APIReadMixin:
         limit = query_params.pop("limit", 100)
         offset = query_params.pop("offset", 0)
         select = query_params.pop("select", None)
-        service = self.api_collection
+        collection = self._build_service(query_params, select).fetch_page(
+            limit=limit, offset=offset
+        )
+        if collection.meta is None or collection.meta.pagination is None:
+            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
+        return {
+            "meta": {
+                "limit": collection.meta.pagination.limit,
+                "offset": collection.meta.pagination.offset,
+                "total": collection.meta.pagination.total,
+            },
+            "data": [resource.to_dict() for resource in collection.resources],
+        }
 
+    def _build_service(self, query_params: dict[str, Any], select: Any) -> Any:
+        service = self.api_collection
         if query_params:
             service = service.filter(RQLQuery(**query_params))
         if select:
             service = service.select(select)
-
-        collection = service.fetch_page(limit=limit, offset=offset)
-        if collection.meta is None or collection.meta.pagination is None:
-            raise MPTAPIError("Missing pagination metadata in response.", "Invalid response")
-        pagination = collection.meta.pagination
-        return {
-            "meta": {
-                "limit": pagination.limit,
-                "offset": pagination.offset,
-                "total": pagination.total,
-            },
-            "data": [resource.to_dict() for resource in collection.resources],
-        }
+        return service
 
 
 class APIWriteMixin:

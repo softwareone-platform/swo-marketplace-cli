@@ -113,7 +113,7 @@ class ExcelValidationMixin:
             raise RequiredFieldsError(details=missed_fields)
 
 
-class ExcelReadMixin:
+class ExcelReadMixin:  # noqa: WPS214
     """Provide read helpers for Excel sheets."""
 
     _get_worksheet: Any
@@ -143,16 +143,12 @@ class ExcelReadMixin:
         self, sheet_name: str, fields: tuple[str, ...] | None = None
     ) -> SheetData:
         """Extracts data from a vertical sheet where the first column contains field names."""
-        sheet = self._get_worksheet(sheet_name)
-        sheet_iter = sheet.iter_rows(min_row=2)
         result: SheetData = {}
-        for row in sheet_iter:
-            field_cell = row[0]
+        for field_cell, value_cell, *_ in self._get_worksheet(sheet_name).iter_rows(min_row=2):
             if not self._is_non_empty_field_value(field_cell.value):
                 continue
             if fields is not None and field_cell.value not in fields:
                 continue
-            _, value_cell, *_ = row
             result[str(field_cell.value)] = {
                 "value": value_cell.value,
                 "coordinate": value_cell.coordinate,
@@ -172,14 +168,7 @@ class ExcelReadMixin:
     ) -> SheetDataGenerator:
         """Extracts data from a sheet with a dynamic column structure."""
         ws = self._get_worksheet(sheet_name)
-        column_map = {}
-        for header_index, column in enumerate(ws["1"]):
-            if column.value and (
-                column.value in fields
-                or any(re.match(pattern, column.value) for pattern in patterns)
-            ):
-                column_map[header_index] = column.value
-
+        column_map = self._build_dynamic_column_map(ws, fields, patterns)
         for row in ws.iter_rows(min_row=2, max_row=ws.max_row):
             if all(cell.value is None for cell in row):
                 continue
@@ -192,6 +181,20 @@ class ExcelReadMixin:
                 for column_index, column_name in column_map.items()
             }
 
+    @classmethod
+    def _build_dynamic_column_map(
+        cls, ws: Worksheet, fields: tuple[str, ...], patterns: ColumnPatterns
+    ) -> dict[int, str]:
+        return {
+            header_index: column.value
+            for header_index, column in enumerate(ws["1"])
+            if column.value
+            and (
+                column.value in fields
+                or any(re.match(pattern, column.value) for pattern in patterns)
+            )
+        }
+
     def _is_non_empty_field_value(self, field_value: Any) -> bool:
         if field_value is None:
             return False
@@ -199,7 +202,7 @@ class ExcelReadMixin:
         return not isinstance(field_value, str) or bool(field_value.strip())
 
 
-class ExcelWriteMixin:
+class ExcelWriteMixin:  # noqa: WPS214
     """Provide write helpers for Excel sheets."""
 
     _worksheets_cache: dict[str, Worksheet]
@@ -230,14 +233,7 @@ class ExcelWriteMixin:
         """Writes data to the Excel workbook."""
         for sheet in sheet_rows:
             for sheet_name, cells in sheet.items():
-                try:
-                    worksheet = self._get_worksheet(sheet_name)
-                except KeyError:
-                    worksheet = self.workbook.create_sheet(title=sheet_name)
-
-                for coordinate, cell_value in cells.items():
-                    worksheet[coordinate] = cell_value
-
+                self._write_cells(sheet_name, cells)
         self.save()
 
     def write_cell(
@@ -271,6 +267,14 @@ class ExcelWriteMixin:
             return
 
         self._worksheets_cache.pop(sheet_name, None)
+
+    def _write_cells(self, sheet_name: str, cells: dict) -> None:
+        try:
+            worksheet = self._get_worksheet(sheet_name)
+        except KeyError:
+            worksheet = self.workbook.create_sheet(title=sheet_name)
+        for coordinate, cell_value in cells.items():
+            worksheet[coordinate] = cell_value
 
 
 class ExcelWorksheetMixin:
