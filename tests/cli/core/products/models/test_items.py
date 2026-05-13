@@ -34,17 +34,22 @@ def test_item_data_terms_property(mocker, item_data_from_dict, terms_model, expe
 def test_item_data_from_dict(item_file_data):
     result = ItemData.from_dict(item_file_data)
 
-    assert result.id == "PRI-3969-9403-0001-0035"
-    assert result.terms_commitment == "1y"
-    assert result.description == "Description"
-    assert result.group_id == "IGR-4944-4118-0002"
-    assert result.name == "XD for Teams; existing XD customers only.;"
-    assert result.terms_period == "1m"
-    assert result.terms_model == ItemTermsModelEnum.USAGE
-    assert result.quantity_not_applicable is True
-    assert result.unit_id == "UNT-1916"
-    assert result.vendor_id == "30006419CB"
-    assert result.coordinate == "A325"
+    expected_data = {
+        "id": "PRI-3969-9403-0001-0035",
+        "terms_commitment": "1y",
+        "description": "Description",
+        "group_id": "IGR-4944-4118-0002",
+        "name": "XD for Teams; existing XD customers only.;",
+        "terms_period": "1m",
+        "terms_model": ItemTermsModelEnum.USAGE,
+        "quantity_not_applicable": True,
+        "unit_id": "UNT-1916",
+        "vendor_id": "30006419CB",
+        "coordinate": "A325",
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_item_data_from_json(mpt_item_data):

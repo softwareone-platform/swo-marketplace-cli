@@ -1,6 +1,6 @@
 import datetime as dt
-import math
 
+import pytest
 from cli.core.price_lists.models import PriceListData
 from freezegun import freeze_time
 
@@ -8,20 +8,25 @@ from freezegun import freeze_time
 def test_price_list_data_from_dict(price_list_file_data):
     result = PriceListData.from_dict(price_list_file_data)
 
-    assert result.id == "PL-1"
-    assert result.currency == "USD"
-    assert result.product_id == "fake_product_id"
-    assert result.product_name == "Test Product Name"
-    assert result.vendor_id == "fake_vendor_id"
-    assert result.vendor_name == "Test Vendor Name"
-    assert result.export_date == dt.date(2024, 6, 1)
-    assert result.precision == 2
-    assert result.notes == "Test notes"
-    assert result.coordinate == "B3"
-    assert result.default_markup == 10
-    assert result.external_id == "test_product_com_usd_global"
-    assert result.type == "operations"
-    assert result.product == {"id": "fake_product_id"}
+    expected_data = {
+        "id": "PL-1",
+        "currency": "USD",
+        "product_id": "fake_product_id",
+        "product_name": "Test Product Name",
+        "vendor_id": "fake_vendor_id",
+        "vendor_name": "Test Vendor Name",
+        "export_date": dt.date(2024, 6, 1),
+        "precision": 2,
+        "notes": "Test notes",
+        "coordinate": "B3",
+        "default_markup": 10,
+        "external_id": "test_product_com_usd_global",
+        "type": "operations",
+        "product": {"id": "fake_product_id"},
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
     assert result.is_operations() is True
 
 
@@ -29,27 +34,35 @@ def test_price_list_data_from_json(mpt_price_list_data):
     with freeze_time("2025-04-23"):
         result = PriceListData.from_json(mpt_price_list_data)
 
-    assert result.id == "PRC-0232-2541-0002"
-    assert result.currency == "USD"
-    assert result.product_id == "PRD-0232-2541"
-    assert result.product_name == "Adobe VIP Marketplace for Commercial"
-    assert result.vendor_id == "ACC-9226-9856"
-    assert result.vendor_name == "Adobe"
-    assert result.export_date == dt.date(2025, 4, 23)
-    assert result.precision == 2
-    assert result.notes == "another price list"
-    assert result.coordinate is None
-    assert math.isclose(result.default_markup, 42.0, abs_tol=1e-9)
-    assert result.external_id is None
-    assert result.type is None
+    expected_data = {
+        "id": "PRC-0232-2541-0002",
+        "currency": "USD",
+        "product_id": "PRD-0232-2541",
+        "product_name": "Adobe VIP Marketplace for Commercial",
+        "vendor_id": "ACC-9226-9856",
+        "vendor_name": "Adobe",
+        "export_date": dt.date(2025, 4, 23),
+        "precision": 2,
+        "notes": "another price list",
+        "coordinate": None,
+        "default_markup": pytest.approx(42.0, abs=1e-9),
+        "external_id": None,
+        "type": None,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_price_list_data_to_json(price_list_data_from_dict):
     result = price_list_data_from_dict.to_json()
 
-    assert result["currency"] == "EUR"
-    assert result["precision"] == 2
-    assert result["notes"] == "Note 1"
-    assert result["product"] == {"id": "PRD-0232-2541"}
-    assert math.isclose(result["defaultMarkup"], 10.0, abs_tol=1e-9)
+    expected_data = {
+        "currency": "EUR",
+        "precision": 2,
+        "notes": "Note 1",
+        "product": {"id": "PRD-0232-2541"},
+        "defaultMarkup": pytest.approx(10.0, abs=1e-9),
+    }
+    assert {field_name: result[field_name] for field_name in expected_data} == expected_data
     assert "externalId" not in result

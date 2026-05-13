@@ -16,29 +16,39 @@ from cli.core.products.models import DataActionEnum, TemplateData
 def test_template_data_from_dict(template_file_data):
     result = TemplateData.from_dict(template_file_data)
 
-    assert result.id == "TPL-0232-2541-0005"
-    assert result.coordinate == "A3"
-    assert result.action == "-"
-    assert result.name == "BulkMigrate"
-    assert result.type == "OrderCompleted"
-    assert result.template_content == "Querying template for Adobe VIP Marketplace"
-    assert result.content_coordinate == "F3"
-    assert result.default is False
+    expected_data = {
+        "id": "TPL-0232-2541-0005",
+        "coordinate": "A3",
+        "action": "-",
+        "name": "BulkMigrate",
+        "type": "OrderCompleted",
+        "template_content": "Querying template for Adobe VIP Marketplace",
+        "content_coordinate": "F3",
+        "default": False,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_template_data_from_json(mpt_template_data):
     result = TemplateData.from_json(mpt_template_data)
 
-    assert result.id == "TPL-0232-2541-0005"
-    assert result.name == "Default Processing Template"
-    assert result.type == "OrderProcessing"
-    assert result.template_content == (
-        "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
-        "we are working on your order."
-    )
-    assert result.default is False
-    assert result.created_date == dt.date(2024, 4, 8)
-    assert result.updated_date == dt.date(2024, 5, 3)
+    expected_data = {
+        "id": "TPL-0232-2541-0005",
+        "name": "Default Processing Template",
+        "type": "OrderProcessing",
+        "template_content": (
+            "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
+            "we are working on your order."
+        ),
+        "default": False,
+        "created_date": dt.date(2024, 4, 8),
+        "updated_date": dt.date(2024, 5, 3),
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_template_data_to_json(template_data_from_dict):
