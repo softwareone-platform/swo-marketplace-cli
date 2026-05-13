@@ -121,11 +121,6 @@ select = ["AAA", "E999", "WPS"]
 show-source = true
 statistics = false
 per-file-ignores = [
-  "cli/core/console/renderers/audit.py:WPS210",
-  "cli/core/console/renderers/banner.py:WPS210",
-  "cli/core/stats.py:WPS210",
-  "cli/plugins/audit_plugin/api.py:WPS210",
-  "cli/plugins/audit_plugin/app.py:WPS210",
   "tests/**:WPS202,WPS204,WPS210,WPS213,WPS218,WPS221,WPS432"
 ]
 
