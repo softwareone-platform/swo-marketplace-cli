@@ -46,7 +46,7 @@ def excel_file_handler(tmp_path, workbook):
     file_path = tmp_path / "fake_excel_file.xlsx"
     workbook.save(file_path)
 
-    with patch("cli.core.handlers.excel_file_handler_mixins.load_workbook", return_value=workbook):
+    with patch("cli.core.handlers.excel_mixins.workbook.load_workbook", return_value=workbook):
         return ExcelFileHandler(file_path)
 
 
@@ -214,6 +214,18 @@ def test_get_values_for_dynamic_sheet(excel_file_handler):
     )
 
     assert len(result[0]) == 1
+    assert result[0] == {"Header1": {"value": "Value1", "coordinate": "A2"}}
+
+
+def test_dynamic_sheet_skips_non_string_headers(excel_file_handler):
+    excel_file_handler._get_worksheet("HorizontalSheet")["B1"] = 123  # noqa: SLF001
+    fields = ["Header1"]
+    patterns = [re.compile(r"Missing\d+")]
+
+    result = list(
+        excel_file_handler.get_values_for_dynamic_sheet("HorizontalSheet", fields, patterns)
+    )
+
     assert result[0] == {"Header1": {"value": "Value1", "coordinate": "A2"}}
 
 

@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from cli.core.handlers import FileHandler
-from cli.core.handlers.excel_file_handler_mixins import ExcelAccessMixin, ExcelSheetMixin
+from cli.core.handlers.excel_mixins import ExcelAccessMixin, ExcelSheetMixin
 from openpyxl.workbook import Workbook
 from openpyxl.worksheet.worksheet import Worksheet
 
