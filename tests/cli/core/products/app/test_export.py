@@ -44,7 +44,7 @@ EXPECTED_PRODUCT_ID_ROWS = (
 )
 
 
-class ModelCollectionFactory:
+class FakeModelCollectionFactory:
     def __init__(self, mocker):
         self.mocker = mocker
 
@@ -65,7 +65,7 @@ class ModelCollectionFactory:
 
 @pytest.fixture
 def model_collection_factory(mocker):
-    return ModelCollectionFactory(mocker)
+    return FakeModelCollectionFactory(mocker)
 
 
 @pytest.fixture
