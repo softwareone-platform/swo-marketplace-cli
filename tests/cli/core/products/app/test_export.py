@@ -3,8 +3,8 @@ from pathlib import Path
 import pytest
 from cli.core.products import app as product_app
 from cli.core.stats import ProductStatsCollector
-from mpt_api_client.models import Collection, Model, Pagination
 from mpt_api_client.models import Meta as ClientMeta
+from mpt_api_client.models import Model, ModelCollection, Pagination
 from openpyxl.reader.excel import load_workbook
 from typer.testing import CliRunner
 
@@ -12,7 +12,7 @@ runner = CliRunner()
 
 
 def make_collection(mocker, data_list):
-    collection = mocker.MagicMock(spec=Collection)
+    collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=ClientMeta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100

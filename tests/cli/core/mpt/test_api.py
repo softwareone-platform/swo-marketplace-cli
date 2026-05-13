@@ -2,7 +2,7 @@ import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.mpt.api import APIService, RelatedAPIService
 from mpt_api_client.exceptions import MPTAPIError as ClientAPIError
-from mpt_api_client.models import Collection, Meta, Model, Pagination
+from mpt_api_client.models import Meta, Model, ModelCollection, Pagination
 from mpt_api_client.resources.catalog.products import ProductsService
 from pydantic import BaseModel
 from requests_toolbelt import MultipartEncoder
@@ -81,7 +81,7 @@ def test_list_with_query_params(mocker, api_service, collection_service):
     expected_data = [{"id": "fakeId", "name": "test"}]
     resource_mock = mocker.MagicMock(spec=Model)
     resource_mock.to_dict.return_value = expected_data[0]
-    collection = mocker.MagicMock(spec=Collection)
+    collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
@@ -101,7 +101,7 @@ def test_list_with_no_query_params(mocker, api_service, collection_service):
     expected_data = [{"id": "fakeId", "name": "test"}]
     resource_mock = mocker.MagicMock(spec=Model)
     resource_mock.to_dict.return_value = expected_data[0]
-    collection = mocker.MagicMock(spec=Collection)
+    collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
@@ -116,7 +116,7 @@ def test_list_with_no_query_params(mocker, api_service, collection_service):
 
 
 def test_list_no_data(mocker, api_service, collection_service):
-    collection = mocker.MagicMock(spec=Collection)
+    collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
@@ -212,7 +212,7 @@ def test_get_exception(api_service, collection_service):
 
 
 def test_list_with_select(mocker, api_service, collection_service):
-    collection = mocker.MagicMock(spec=Collection)
+    collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
