@@ -32,6 +32,16 @@ def api_service(collection_service):
     return FakeApiService(collection_service)
 
 
+@pytest.fixture
+def mpt_resource(mocker):
+    return mocker.MagicMock(spec=Model)
+
+
+@pytest.fixture
+def mpt_api_error_type():
+    return MPTAPIError
+
+
 class FakeRelatedApiService(RelatedAPIService):
     _base_url = "fake_url/{resource_id}/action"
     _api_model = FakeModel
@@ -53,10 +63,9 @@ def related_api_service(collection_service):
         ({"select": "field1"}, "field1"),
     ],
 )
-def test_get(query_params, expected_select, api_service, collection_service, mocker):
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = {"id": "fakeId", "name": "test"}
-    collection_service.get.return_value = resource_mock
+def test_get(query_params, expected_select, api_service, collection_service, mpt_resource):
+    mpt_resource.to_dict.return_value = {"id": "fakeId", "name": "test"}
+    collection_service.get.return_value = mpt_resource
 
     result = api_service.get("fakeId", query_params=query_params)
 
@@ -75,19 +84,18 @@ def test_exists(total, expected_response, api_service, collection_service):
     collection_service.fetch_page.assert_called_once_with(limit=0)
 
 
-def test_list_with_query_params(mocker, api_service, collection_service):
+def test_list_with_query_params(mocker, api_service, collection_service, mpt_resource):
     query_params = {"bla": "foo"}
     expected_meta_data = {"offset": 0, "limit": 100, "total": 10}
     expected_data = [{"id": "fakeId", "name": "test"}]
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = expected_data[0]
+    mpt_resource.to_dict.return_value = expected_data[0]
     collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
     collection.meta.pagination.offset = 0
     collection.meta.pagination.total = 10
-    collection.resources = [resource_mock]
+    collection.resources = [mpt_resource]
     collection_service.filter.return_value.fetch_page.return_value = collection
 
     result = api_service.list(query_params=query_params)
@@ -95,19 +103,18 @@ def test_list_with_query_params(mocker, api_service, collection_service):
     assert result == {"meta": expected_meta_data, "data": expected_data}
 
 
-def test_list_with_no_query_params(mocker, api_service, collection_service):
+def test_list_with_no_query_params(mocker, api_service, collection_service, mpt_resource):
     query_params = None
     expected_meta_data = {"offset": 0, "limit": 100, "total": 10}
     expected_data = [{"id": "fakeId", "name": "test"}]
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = expected_data[0]
+    mpt_resource.to_dict.return_value = expected_data[0]
     collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 100
     collection.meta.pagination.offset = 0
     collection.meta.pagination.total = 10
-    collection.resources = [resource_mock]
+    collection.resources = [mpt_resource]
     collection_service.fetch_page.return_value = collection
 
     result = api_service.list(query_params=query_params)
@@ -130,10 +137,9 @@ def test_list_no_data(mocker, api_service, collection_service):
     assert result == {"meta": {"limit": 100, "offset": 0, "total": 0}, "data": []}
 
 
-def test_post(mocker, api_service, collection_service):
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = {"id": "fakeId", "name": "test"}
-    collection_service.create.return_value = resource_mock
+def test_post(api_service, collection_service, mpt_resource):
+    mpt_resource.to_dict.return_value = {"id": "fakeId", "name": "test"}
+    collection_service.create.return_value = mpt_resource
 
     result = api_service.post(json={"name": "test"})
 
@@ -147,17 +153,16 @@ def test_post_action(api_service, collection_service):
     collection_service.publish.assert_called_once_with("fake_resource_id")
 
 
-def test_post_action_unsupported_raises(api_service):
-    with pytest.raises(MPTAPIError) as error:
+def test_post_action_unsupported_raises(api_service, mpt_api_error_type):
+    with pytest.raises(mpt_api_error_type) as error:
         api_service.post_action("fake_resource_id", "unsupported_action")
 
     assert "Unsupported action 'unsupported_action'" in str(error.value)
 
 
-def test_update_success(mocker, api_service, collection_service):
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = {"id": "fakeId", "bla": "foo", "name": "test"}
-    collection_service.update.return_value = resource_mock
+def test_update_success(api_service, collection_service, mpt_resource):
+    mpt_resource.to_dict.return_value = {"id": "fakeId", "bla": "foo", "name": "test"}
+    collection_service.update.return_value = mpt_resource
 
     result = api_service.update("fakeId", {"bla": "foo", "name": "test"})
 
@@ -202,12 +207,12 @@ def test_get_not_found(api_service, collection_service):
         api_service.get("missing_id")
 
 
-def test_get_exception(api_service, collection_service):
+def test_get_exception(api_service, collection_service, mpt_api_error_type):
     collection_service.get.side_effect = ClientAPIError(
         500, "Server Error", {"status": 500, "message": "Server Error"}
     )
 
-    with pytest.raises(MPTAPIError):
+    with pytest.raises(mpt_api_error_type):
         api_service.get("fakeId")
 
 
@@ -227,10 +232,9 @@ def test_list_with_select(mocker, api_service, collection_service):
     collection_service.select.assert_called_once_with("field1")
 
 
-def test_post_with_form_payload(mocker, api_service, collection_service):
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = {"id": "newId", "name": "created"}
-    collection_service.create.return_value = resource_mock
+def test_post_with_form_payload(mocker, api_service, collection_service, mpt_resource):
+    mpt_resource.to_dict.return_value = {"id": "newId", "name": "created"}
+    collection_service.create.return_value = mpt_resource
     form_payload = mocker.MagicMock(spec=MultipartEncoder)
     form_payload.fields = {
         "data": '{"name": "test"}',
@@ -245,13 +249,12 @@ def test_post_with_form_payload(mocker, api_service, collection_service):
     )
 
 
-def test_update_with_sub_resource(mocker, api_service, collection_service):
-    resource_mock = mocker.MagicMock(spec=Model)
-    collection_service.update_settings.return_value = resource_mock
+def test_update_with_sub_resource(api_service, collection_service, mpt_resource):
+    collection_service.update_settings.return_value = mpt_resource
 
     result = api_service.update("fakeId/settings", {"setting": "value"})
 
-    assert result == resource_mock.to_dict()
+    assert result == mpt_resource.to_dict()
     collection_service.update_settings.assert_called_once_with("fakeId", {"setting": "value"})
 
 
@@ -263,11 +266,11 @@ def test_exists_raises_when_meta_is_none(api_service, collection_service):
         api_service.exists()
 
 
-def test_exists_raises_when_pagination_is_none(api_service, collection_service):
+def test_exists_raises_when_pagination_is_none(api_service, collection_service, mpt_api_error_type):
     collection_page = collection_service.fetch_page.return_value
     collection_page.meta.pagination = None
 
-    with pytest.raises(MPTAPIError):
+    with pytest.raises(mpt_api_error_type):
         api_service.exists()
 
 
@@ -279,18 +282,17 @@ def test_list_raises_when_meta_is_none(api_service, collection_service):
         api_service.list()
 
 
-def test_list_raises_when_pagination_is_none(api_service, collection_service):
+def test_list_raises_when_pagination_is_none(api_service, collection_service, mpt_api_error_type):
     collection_page = collection_service.fetch_page.return_value
     collection_page.meta.pagination = None
 
-    with pytest.raises(MPTAPIError):
+    with pytest.raises(mpt_api_error_type):
         api_service.list()
 
 
-def test_post_form_payload_unknown_field(mocker, api_service, collection_service):
-    resource_mock = mocker.MagicMock(spec=Model)
-    resource_mock.to_dict.return_value = {"id": "newId", "name": "created"}
-    collection_service.create.return_value = resource_mock
+def test_post_form_payload_unknown_field(mocker, api_service, collection_service, mpt_resource):
+    mpt_resource.to_dict.return_value = {"id": "newId", "name": "created"}
+    collection_service.create.return_value = mpt_resource
     form_payload = mocker.MagicMock(spec=MultipartEncoder)
     form_payload.fields = {
         "data": '{"name": "test"}',

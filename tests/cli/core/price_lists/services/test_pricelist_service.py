@@ -21,7 +21,14 @@ def service_context(mock_mpt_api_client, price_list_new_file, active_vendor_acco
     )
 
 
-def test_create_price_list(mocker, service_context, mpt_price_list_data, price_list_data_from_dict):
+@pytest.fixture
+def price_list_service(service_context):
+    return PriceListService(service_context)
+
+
+def test_create_price_list(
+    mocker, service_context, price_list_service, mpt_price_list_data, price_list_data_from_dict
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
@@ -32,9 +39,8 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
     )
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = PriceListService(service_context)
 
-    result = service.create()
+    result = price_list_service.create()
 
     assert result.success is True
     read_data_mock.assert_called_once()
@@ -43,7 +49,9 @@ def test_create_price_list(mocker, service_context, mpt_price_list_data, price_l
     api_post_mock.assert_called_once()
 
 
-def test_create_price_list_error(mocker, service_context, price_list_data_from_dict):
+def test_create_price_list_error(
+    mocker, service_context, price_list_service, price_list_data_from_dict
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
@@ -54,9 +62,8 @@ def test_create_price_list_error(mocker, service_context, price_list_data_from_d
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
     stats_spy = mocker.spy(service_context.stats, "add_error")
-    service = PriceListService(service_context)
 
-    result = service.create()
+    result = price_list_service.create()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error creating price list"]
@@ -67,13 +74,12 @@ def test_create_price_list_error(mocker, service_context, price_list_data_from_d
     file_handler_write_mock.assert_called_once()
 
 
-def test_export(mocker, service_context, mpt_price_list_data):
+def test_export(mocker, service_context, price_list_service, mpt_price_list_data):
     get_mock = mocker.patch.object(service_context.api, "get", return_value=mpt_price_list_data)
     create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
     add_mock = mocker.patch.object(service_context.file_manager, "add")
-    service = PriceListService(service_context)
 
-    result = service.export({"price_list_id": "fake_id"})
+    result = price_list_service.export({"price_list_id": "fake_id"})
 
     assert result.success is True
     get_mock.assert_called()
@@ -81,15 +87,14 @@ def test_export(mocker, service_context, mpt_price_list_data):
     add_mock.assert_called_once()
 
 
-def test_export_mpt_error(mocker, service_context):
+def test_export_mpt_error(mocker, service_context, price_list_service):
     get_mock = mocker.patch.object(
         service_context.api, "get", side_effect=MPTAPIError("API Error", "Error retrieving item")
     )
     create_tab_spy = mocker.spy(service_context.file_manager, "create_tab")
     add_spy = mocker.spy(service_context.file_manager, "add")
-    service = PriceListService(service_context)
 
-    result = service.export({"price_list_id": "fake_id"})
+    result = price_list_service.export({"price_list_id": "fake_id"})
 
     assert result.success is False
     get_mock.assert_called_once()
@@ -97,7 +102,9 @@ def test_export_mpt_error(mocker, service_context):
     add_spy.assert_not_called()
 
 
-def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict):
+def test_retrieve_price_list(
+    mocker, service_context, price_list_service, price_list_data_from_dict
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
@@ -106,9 +113,8 @@ def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict)
         "exists",
         return_value=True,
     )
-    service = PriceListService(service_context)
 
-    result = service.retrieve()
+    result = price_list_service.retrieve()
 
     assert result.success is True
     assert result.model == price_list_data_from_dict
@@ -116,44 +122,43 @@ def test_retrieve_price_list(mocker, service_context, price_list_data_from_dict)
     api_exists_mock.assert_called_once()
 
 
-def test_retrieve_price_list_not_found(mocker, service_context):
+def test_retrieve_price_list_not_found(mocker, service_context, price_list_service):
     mocker.patch.object(
         service_context.api, "exists", side_effect=MPTAPIError("Not Found", "Pricelist not found")
     )
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
-    service = PriceListService(service_context)
 
-    result = service.retrieve()
+    result = price_list_service.retrieve()
 
     assert not result.success
     assert len(result.errors) > 0
     file_handler_write_mock.assert_called_once()
 
 
-def test_retrieve_from_mpt(mocker, service_context, mpt_price_list_data, price_list_data_from_json):
+def test_retrieve_from_mpt(
+    mocker, service_context, price_list_service, mpt_price_list_data, price_list_data_from_json
+):
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
         return_value=mpt_price_list_data,
     )
-    service = PriceListService(service_context)
 
-    result = service.retrieve_from_mpt(price_list_data_from_json.id)
+    result = price_list_service.retrieve_from_mpt(price_list_data_from_json.id)
 
     assert result.success is True
     assert result.model == price_list_data_from_json
     api_get_mock.assert_called_once_with(price_list_data_from_json.id)
 
 
-def test_retrieve_from_mpt_error(mocker, service_context):
+def test_retrieve_from_mpt_error(mocker, service_context, price_list_service):
     api_get_mock = mocker.patch.object(
         service_context.api,
         "get",
         side_effect=MPTAPIError("API Error", "Error retrieving item"),
     )
-    service = PriceListService(service_context)
 
-    result = service.retrieve_from_mpt("fake_id")
+    result = price_list_service.retrieve_from_mpt("fake_id")
 
     assert result.success is False
     assert len(result.errors) > 0
@@ -161,14 +166,13 @@ def test_retrieve_from_mpt_error(mocker, service_context):
     api_get_mock.assert_called_once_with("fake_id")
 
 
-def test_update_price_list(mocker, service_context, price_list_data_from_dict):
+def test_update_price_list(mocker, service_context, price_list_service, price_list_data_from_dict):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
     api_update_mock = mocker.patch.object(service_context.api, "update")
-    service = PriceListService(service_context)
 
-    result = service.update()
+    result = price_list_service.update()
 
     assert result.success is True
     assert result.model is not None
@@ -176,7 +180,9 @@ def test_update_price_list(mocker, service_context, price_list_data_from_dict):
     api_update_mock.assert_called_once()
 
 
-def test_update_price_list_error(mocker, service_context, price_list_data_from_dict):
+def test_update_price_list_error(
+    mocker, service_context, price_list_service, price_list_data_from_dict
+):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=price_list_data_from_dict
     )
@@ -187,9 +193,8 @@ def test_update_price_list_error(mocker, service_context, price_list_data_from_d
     )
     stats_spy = mocker.spy(service_context.stats, "add_error")
     file_handler_write_mock = mocker.patch.object(service_context.file_manager, "write_error")
-    service = PriceListService(service_context)
 
-    result = service.update()
+    result = price_list_service.update()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error updating price list"]

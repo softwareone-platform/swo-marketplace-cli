@@ -22,7 +22,14 @@ def service_context(mock_mpt_api_client, product_file_path, active_vendor_accoun
     )
 
 
-def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_item_data):
+@pytest.fixture
+def item_service(service_context):
+    return ItemService(service_context)
+
+
+def test_update_item_create(
+    mocker, service_context, item_service, item_data_from_dict, mpt_item_data
+):
     item_data_from_dict.action = ItemActionEnum.CREATE
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
@@ -35,9 +42,8 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     update_spy = mocker.spy(service_context.api, "update")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = ItemService(service_context)
 
-    result = service.update()
+    result = item_service.update()
 
     assert result.success is True
     assert result.model is None
@@ -49,7 +55,9 @@ def test_update_item_create(mocker, service_context, item_data_from_dict, mpt_it
     stats_spy.assert_called_once_with(TAB_ITEMS)
 
 
-def test_update_item_create_missing_unit_name(mocker, service_context, item_data_from_dict):
+def test_update_item_create_missing_unit_name(
+    mocker, service_context, item_service, item_data_from_dict
+):
     item_data_from_dict.action = ItemActionEnum.CREATE
     item_data_from_dict.unit_name = None
     mocker.patch.object(
@@ -57,9 +65,8 @@ def test_update_item_create_missing_unit_name(mocker, service_context, item_data
     )
     write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     add_error_spy = mocker.spy(service_context.stats, "add_error")
-    service = ItemService(service_context)
 
-    result = service.update()
+    result = item_service.update()
 
     assert result.success is False
     assert service_context.stats.tabs["Items"]["error"] == 1
@@ -67,7 +74,7 @@ def test_update_item_create_missing_unit_name(mocker, service_context, item_data
     add_error_spy.assert_called_once_with(TAB_ITEMS)
 
 
-def test_update_item_create_error(mocker, service_context, item_data_from_dict):
+def test_update_item_create_error(mocker, service_context, item_service, item_data_from_dict):
     item_data_from_dict.action = ItemActionEnum.CREATE
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
@@ -82,9 +89,8 @@ def test_update_item_create_error(mocker, service_context, item_data_from_dict):
     write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
     update_spy = mocker.spy(service_context.api, "update")
     add_error_spy = mocker.spy(service_context.stats, "add_error")
-    service = ItemService(service_context)
 
-    result = service.update()
+    result = item_service.update()
 
     assert result.success is False
     assert service_context.stats.tabs["Items"]["error"] == 1
@@ -95,15 +101,16 @@ def test_update_item_create_error(mocker, service_context, item_data_from_dict):
     add_error_spy.assert_called_once_with(TAB_ITEMS)
 
 
-def test_update_item_skip(mocker, service_context, item_data_from_dict, mpt_item_data):
+def test_update_item_skip(
+    mocker, service_context, item_service, item_data_from_dict, mpt_item_data
+):
     item_data_from_dict.action = ItemActionEnum.SKIP
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
     stats_spy = mocker.spy(service_context.stats, "add_skipped")
-    service = ItemService(service_context)
 
-    result = service.update()
+    result = item_service.update()
 
     assert result.success is True
     assert result.model is None
@@ -111,7 +118,9 @@ def test_update_item_skip(mocker, service_context, item_data_from_dict, mpt_item
     stats_spy.assert_called_once_with(TAB_ITEMS)
 
 
-def test_update_item_publish(mocker, service_context, item_data_from_dict, mpt_item_data):
+def test_update_item_publish(
+    mocker, service_context, item_service, item_data_from_dict, mpt_item_data
+):
     item_data_from_dict.action = ItemActionEnum.PUBLISH
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
@@ -119,9 +128,8 @@ def test_update_item_publish(mocker, service_context, item_data_from_dict, mpt_i
     post_action_mock = mocker.patch.object(service_context.api, "post_action")
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
     stats_spy = mocker.spy(service_context.stats, "add_synced")
-    service = ItemService(service_context)
 
-    result = service.update()
+    result = item_service.update()
 
     assert result.success is True
     assert result.model is None
@@ -132,7 +140,7 @@ def test_update_item_publish(mocker, service_context, item_data_from_dict, mpt_i
 
 
 def test_set_new_item_groups(
-    mocker, service_context, item_data_from_dict, item_group_data_from_dict
+    mocker, service_context, item_service, item_data_from_dict, item_group_data_from_dict
 ):
     read_data_mock = mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
@@ -140,9 +148,8 @@ def test_set_new_item_groups(
     param_group = DataCollectionModel(collection={"old_group_id": item_group_data_from_dict})
     item_data_from_dict.group_id = "old_group_id"
     write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
-    service = ItemService(service_context)
 
-    service.set_new_item_groups(param_group)  # act
+    item_service.set_new_item_groups(param_group)  # act
 
     read_data_mock.assert_called_once()
     write_ids_mock.assert_called_once_with({

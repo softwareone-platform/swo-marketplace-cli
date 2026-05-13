@@ -22,6 +22,16 @@ def new_accounts_path(tmp_path, accounts_path):
 
 
 @pytest.fixture
+def account_file_path(tmp_path):
+    return tmp_path / ".swocli" / "accounts.json"
+
+
+@pytest.fixture
+def stored_accounts(active_vendor_account, inactive_vendor_account):
+    return [active_vendor_account, inactive_vendor_account]
+
+
+@pytest.fixture
 def inactive_vendor_account():
     return CLIAccount(
         id="ACC-12342",
