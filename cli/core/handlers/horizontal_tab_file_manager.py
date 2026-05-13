@@ -35,17 +35,7 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
         for row, record in enumerate(
             records, self.file_handler.get_sheet_next_row(self._sheet_name)
         ):
-            item_xlsx = record.to_xlsx()
-            for col, field in enumerate(self._fields, 1):
-                cell_value = item_xlsx.get(field, "")
-                style = self._get_style(record, cell_value)
-                self.file_handler.write_cell(
-                    self._sheet_name,
-                    position=CellPosition(col=col, row=row),
-                    cell_value=cell_value,
-                    data_validation=self._data_validation_map.get(field, None),
-                    style=style,
-                )
+            self._write_record_row(record, row)
 
         self.file_handler.save()
 
@@ -106,3 +96,15 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
     @abstractmethod
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
         raise NotImplementedError
+
+    def _write_record_row(self, record: DataModel, row: int) -> None:
+        item_xlsx = record.to_xlsx()
+        for col, field in enumerate(self._fields, 1):
+            cell_value = item_xlsx.get(field, "")
+            self.file_handler.write_cell(
+                self._sheet_name,
+                position=CellPosition(col=col, row=row),
+                cell_value=cell_value,
+                data_validation=self._data_validation_map.get(field, None),
+                style=self._get_style(record, cell_value),
+            )

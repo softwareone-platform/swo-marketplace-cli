@@ -43,8 +43,9 @@ def add_account(
     """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
-        mpt_client = MPTClient.from_config(api_token=secret, base_url=environment)
-        account_service = MPTAccountService(mpt_client)
+        account_service = MPTAccountService(
+            MPTClient.from_config(api_token=secret, base_url=environment)
+        )
         try:
             token = account_service.get_authentication(secret)
         except (MPTAPIError, ValueError) as error:
