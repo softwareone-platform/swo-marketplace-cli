@@ -5,13 +5,9 @@ from cli.core.error_wrappers import ApiErrorWrapper, HttpErrorWrapper
 from mpt_api_client.exceptions import MPTHttpError
 
 
-def _build_runtime_error(request_msg, response_body):
-    return RuntimeError(f"{request_msg}|{response_body}")
-
-
 @pytest.fixture
 def error_factory():
-    return _build_runtime_error
+    return lambda request_msg, response_body: RuntimeError(f"{request_msg}|{response_body}")
 
 
 @pytest.fixture

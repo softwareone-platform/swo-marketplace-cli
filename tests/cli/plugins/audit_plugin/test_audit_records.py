@@ -10,8 +10,8 @@ from cli.plugins.audit_plugin.audit_records import (
     ("input_dict", "expected_result"),
     [
         ({"a": 1, "b": 2}, {"a": 1, "b": 2}),  # simple dict
-        ({"a": {"b": 1, "c": {"d": 2}}}, {"a.b": 1, "a.c.d": 2}),  # nested_dict
-        ({"a": [{"b": 1}, {"c": 2}]}, {"a[0].b": 1, "a[1].c": 2}),  # dict with a list
+        ({"a": {"b": 1, "c": {"d": 2}}}, {"a.b": 1, "a.c.d": 2}),  # noqa: WPS221
+        ({"a": [{"b": 1}, {"c": 2}]}, {"a[0].b": 1, "a[1].c": 2}),  # noqa: WPS221
         ({"a": [1, 2, 3]}, {"a[0]": 1, "a[1]": 2, "a[2]": 3}),  # dict with a primitive list
     ],
 )

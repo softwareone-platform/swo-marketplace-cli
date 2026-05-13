@@ -73,9 +73,9 @@ def test_create(mocker, service_context, related_components_service, mpt_agreeme
     data_model_mock = FakeDataModel()
     new_item_mock = {"id": "new_fake_id"}
     mocker.patch.object(service_context.file_manager, "read_data", return_value=[data_model_mock])
-    post_mock = mocker.patch.object(service_context.api, "post", return_value=new_item_mock)
-    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
-    stats_mock = mocker.patch.object(service_context.stats, "add_synced")
+    mocker.patch.object(service_context.api, "post", return_value=new_item_mock)
+    mocker.patch.object(service_context.file_manager, "write_ids")
+    mocker.patch.object(service_context.stats, "add_synced")
     prepare_data_model_to_create_spy = mocker.spy(
         related_components_service, "prepare_data_model_to_create"
     )
@@ -85,9 +85,11 @@ def test_create(mocker, service_context, related_components_service, mpt_agreeme
     assert result.success is True
     assert result.model is None
     assert isinstance(result.collection, DataCollectionModel)
-    write_ids_mock.assert_called_once_with({"fake_coordinate": "new_fake_id"})
-    post_mock.assert_called_once_with(json={"id": "fake_id"})
-    stats_mock.assert_called_once_with("fake_tab_name")
+    service_context.file_manager.write_ids.assert_called_once_with({
+        "fake_coordinate": "new_fake_id"
+    })
+    service_context.api.post.assert_called_once_with(json={"id": "fake_id"})
+    service_context.stats.add_synced.assert_called_once_with("fake_tab_name")
     prepare_data_model_to_create_spy.assert_called_once()
 
 
@@ -130,25 +132,25 @@ def test_export(mocker, service_context, related_components_service, mpt_agreeme
 def test_export_error(
     mocker, service_context, related_components_service, mpt_agreement_parameter_data
 ):
-    create_data_mock = mocker.patch.object(service_context.file_manager, "create_tab")
-    api_list_mock = mocker.patch.object(
+    mocker.patch.object(service_context.file_manager, "create_tab")
+    mocker.patch.object(
         service_context.api,
         "list",
         side_effect=MPTAPIError("API Error", "Error getting parameters"),
     )
-    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
-    add_error_mock = mocker.patch.object(service_context.stats, "add_error")
-    add_spy = mocker.spy(service_context.file_manager, "add")
+    mocker.patch.object(service_context.file_manager, "write_error")
+    mocker.patch.object(service_context.stats, "add_error")
+    mocker.spy(service_context.file_manager, "add")
 
     result = related_components_service.export()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error getting parameters"]
-    create_data_mock.assert_called_once()
-    api_list_mock.assert_called_once()
-    add_error_mock.assert_called_once_with("fake_tab_name")
-    write_error_mock.assert_called_once()
-    add_spy.assert_not_called()
+    service_context.file_manager.create_tab.assert_called_once()
+    service_context.api.list.assert_called_once()
+    service_context.stats.add_error.assert_called_once_with("fake_tab_name")
+    service_context.file_manager.write_error.assert_called_once()
+    service_context.file_manager.add.assert_not_called()
 
 
 def test_update_action_skip(mocker, service_context, related_components_service):

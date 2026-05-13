@@ -7,11 +7,17 @@ from mpt_api_client import MPTClient, RQLQuery
 from mpt_api_client.models.model import Model
 from typer import Exit
 
+AUDIT_SELECT_FIELDS = ("object", "actor", "details", "documents", "request.api.geolocation")
 
-def _mock_record(mocker, record_data: dict):
-    record = mocker.MagicMock(spec=Model)
-    record.to_dict.return_value = record_data
-    return record
+
+class AuditRecordFactory:
+    def __init__(self, mocker):
+        self.mocker = mocker
+
+    def __call__(self, record_data: dict):
+        record = self.mocker.MagicMock(spec=Model)
+        record.to_dict.return_value = record_data
+        return record
 
 
 @pytest.fixture
@@ -19,7 +25,12 @@ def mock_client(mocker):
     return mocker.Mock(spec=MPTClient)
 
 
-def test_get_audit_trail_successful_retrieval(mock_client, mocker):
+@pytest.fixture
+def audit_record_factory(mocker):
+    return AuditRecordFactory(mocker)
+
+
+def test_get_audit_trail_successful_retrieval(mock_client, audit_record_factory):
     expected_record = {
         "id": "audit123",
         "object": {"id": "obj123"},
@@ -28,15 +39,14 @@ def test_get_audit_trail_successful_retrieval(mock_client, mocker):
     records_options = mock_client.audit.records.options
     filtered = records_options.return_value.filter.return_value
     chain = filtered.select.return_value
-    chain.fetch_page.return_value = [_mock_record(mocker, expected_record)]
+    chain.fetch_page.return_value = [audit_record_factory(expected_record)]
 
     result = get_audit_trail(mock_client, "audit123")
 
-    select_fields = ["object", "actor", "details", "documents", "request.api.geolocation"]
     assert result == expected_record
     records_options.assert_called_once_with(render=True)
     records_options.return_value.filter.assert_called_once_with(RQLQuery(id="audit123"))
-    filtered.select.assert_called_once_with(*select_fields)
+    filtered.select.assert_called_once_with(*AUDIT_SELECT_FIELDS)
     chain.fetch_page.assert_called_once_with(limit=1)
 
 
@@ -59,7 +69,7 @@ def test_get_audit_trail_api_error(mock_client):
         get_audit_trail(mock_client, "audit123")
 
 
-def test_get_audit_records_by_object_retrieval(mock_client, mocker):
+def test_get_audit_records_by_object_retrieval(mock_client, audit_record_factory):
     expected_records = [
         {"id": "audit1", "object": {"id": "obj123"}, "timestamp": "2024-01-01T10:00:00Z"},
         {"id": "audit2", "object": {"id": "obj123"}, "timestamp": "2024-01-01T11:00:00Z"},
@@ -67,16 +77,17 @@ def test_get_audit_records_by_object_retrieval(mock_client, mocker):
     records_options = mock_client.audit.records.options
     filtered = records_options.return_value.filter.return_value
     chain = filtered.order_by.return_value.select.return_value
-    chain.fetch_page.return_value = [_mock_record(mocker, rec) for rec in expected_records]
+    chain.fetch_page.return_value = [
+        audit_record_factory(record_data) for record_data in expected_records
+    ]
 
     result = get_audit_records_by_object(mock_client, "obj123", limit=10)
 
-    select_fields = ["object", "actor", "details", "documents", "request.api.geolocation"]
     assert result == expected_records
     records_options.assert_called_once_with(render=True)
     records_options.return_value.filter.assert_called_once_with(RQLQuery(object__id="obj123"))
     filtered.order_by.assert_called_once_with("-timestamp")
-    filtered.order_by.return_value.select.assert_called_once_with(*select_fields)
+    filtered.order_by.return_value.select.assert_called_once_with(*AUDIT_SELECT_FIELDS)
     chain.fetch_page.assert_called_once_with(limit=10)
 
 
@@ -100,11 +111,11 @@ def test_get_audit_records_by_object_api_error(mock_client):
         get_audit_records_by_object(mock_client, "obj123")
 
 
-def test_get_audit_records_by_object_custom_limit(mock_client, mocker):
+def test_get_audit_records_by_object_custom_limit(mock_client, audit_record_factory):
     records_options = mock_client.audit.records.options
     filtered = records_options.return_value.filter.return_value
     chain = filtered.order_by.return_value.select.return_value
-    chain.fetch_page.return_value = [_mock_record(mocker, {"id": "audit1"})]
+    chain.fetch_page.return_value = [audit_record_factory({"id": "audit1"})]
 
     result = get_audit_records_by_object(mock_client, "obj123", limit=5)
 

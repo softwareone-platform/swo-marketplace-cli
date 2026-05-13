@@ -38,9 +38,8 @@ def test_write_creates_directory_if_not_exists(tmp_path):
     expected_records = [{"id": "test_id", "name": "Test Name"}]
     nonexistent_dir = tmp_path / "nonexistent_dir"
     target_file_path = nonexistent_dir / "accounts.json"
-    json_handler = JsonFileHandler(file_path=target_file_path)
 
-    json_handler.write(expected_records)  # act
+    JsonFileHandler(file_path=target_file_path).write(expected_records)  # act
 
     assert nonexistent_dir.exists()
     assert target_file_path.exists()
