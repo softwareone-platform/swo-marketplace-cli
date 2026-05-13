@@ -13,53 +13,91 @@ from cli.plugins.audit_plugin.audit_records import (
 )
 
 app = typer.Typer(name="audit", help="Audit commands.")
-audit_diff_renderer = AuditDiffRenderer()
 
 
-def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
-    """Compare two audit trails and display the differences. Prints the differences to the console.
+class AuditTrailComparator:
+    """Compare and render audit trail differences."""
 
-    Args:
-        source_trail: The source audit trail as a dictionary.
-        target_trail: The target audit trail as a dictionary.
+    def __init__(self) -> None:
+        self._renderer = AuditDiffRenderer()
 
-    """
-    source_object_id = source_trail.get("object", {}).get("id")
-    target_object_id = target_trail.get("object", {}).get("id")
+    def compare(self, source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
+        """Compare two audit trails and display the differences."""
+        self._check_same_object(source_trail, target_trail)
 
-    if source_object_id != target_object_id:
+        console.print(
+            self._renderer.render_summary(
+                self._object_id(source_trail),
+                source_trail.get("timestamp"),
+                target_trail.get("timestamp"),
+            )
+        )
+
+        differences = self._get_differences(source_trail, target_trail)
+        if differences:
+            console.print(self._renderer.render_differences(differences))
+        else:
+            console.print("\n[green]No differences found between the audit trails[/green]")
+
+    def select_trails(
+        self, records: list[dict[str, Any]], positions: str | None
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
+        """Select the two audit trails to compare from the loaded records."""
+        if positions:
+            try:
+                parsed_positions = _parse_positions(positions, len(records))
+            except ValueError:
+                console.print(
+                    "[red]Invalid positions. Please specify two numbers "
+                    f"between 1 and {len(records)}[/red]"
+                )
+                raise typer.Exit(1)
+
+            source_position, target_position = parsed_positions
+            return records[source_position - 1], records[target_position - 1]
+
+        console.print(
+            "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
+        )
+        return records[0], records[1]
+
+    def _check_same_object(
+        self, source_trail: dict[str, Any], target_trail: dict[str, Any]
+    ) -> None:
+        if self._object_id(source_trail) == self._object_id(target_trail):
+            return
+
         console.print("[red]Cannot compare different objects[/red]")
         raise typer.Exit(1)
 
-    console.print(
-        audit_diff_renderer.render_summary(
-            source_object_id,
-            source_trail.get("timestamp"),
-            target_trail.get("timestamp"),
-        )
-    )
+    def _get_differences(
+        self, source_trail: dict[str, Any], target_trail: dict[str, Any]
+    ) -> list[tuple[str, str, str]]:
+        source_flat = flatten_dict(source_trail)
+        target_flat = flatten_dict(target_trail)
+        return [
+            (
+                format_json_path(key, source_trail, target_trail),
+                self._format_value(source_flat.get(key)),
+                self._format_value(target_flat.get(key)),
+            )
+            for key in sorted(set(source_flat.keys()) | set(target_flat.keys()))
+            if source_flat.get(key) != target_flat.get(key)
+        ]
 
-    source_flat = flatten_dict(source_trail)
-    target_flat = flatten_dict(target_trail)
-    all_keys = set(source_flat.keys()) | set(target_flat.keys())
+    def _format_value(self, audit_value: Any) -> str:
+        if audit_value is None:
+            return "[red]<missing>[/red]"
 
-    differences: list[tuple[str, str, str]] = []
+        return str(audit_value)
 
-    for key in sorted(all_keys):
-        source_value = source_flat.get(key)
-        target_value = target_flat.get(key)
-        if source_value != target_value:
-            formatted_path = format_json_path(key, source_trail, target_trail)
-            differences.append((
-                formatted_path,
-                "[red]<missing>[/red]" if source_value is None else str(source_value),
-                "[red]<missing>[/red]" if target_value is None else str(target_value),
-            ))
+    def _object_id(self, audit_trail: dict[str, Any]) -> Any:
+        return audit_trail.get("object", {}).get("id")
 
-    if differences:
-        console.print(audit_diff_renderer.render_differences(differences))
-    else:
-        console.print("\n[green]No differences found between the audit trails[/green]")
+
+def compare_audit_trails(source_trail: dict[str, Any], target_trail: dict[str, Any]) -> None:
+    """Compare two audit trails and display the differences."""
+    AuditTrailComparator().compare(source_trail, target_trail)
 
 
 def _parse_positions(positions: str, records_count: int) -> tuple[int, int]:
@@ -102,26 +140,7 @@ def diff_by_object_id(
 
     display_audit_records(records)
 
-    if positions:
-        try:
-            pos1, pos2 = _parse_positions(positions, len(records))
-        except ValueError:
-            msg = (
-                "[red]Invalid positions. Please specify two numbers "
-                f"between 1 and {len(records)}[/red]"
-            )
-            console.print(msg)
-            raise typer.Exit(1)
-
-        source_trail = records[pos1 - 1]
-        target_trail = records[pos2 - 1]
-    else:
-        source_trail = records[0]
-        target_trail = records[1]
-        console.print(
-            "[yellow]No positions specified, comparing two most recent records (1,2)[/yellow]"
-        )
-
+    source_trail, target_trail = AuditTrailComparator().select_trails(records, positions)
     compare_audit_trails(source_trail, target_trail)
 
 

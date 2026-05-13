@@ -19,19 +19,13 @@ class AuditRecordsRenderer:
         table.add_column("Details", style="white")
 
         for idx, record in enumerate(records, 1):
-            timestamp = record.get("timestamp", "N/A")
-            audit_id = record.get("id", "N/A")
-            actor = self._get_actor(record)
-            event = record.get("event", "N/A")
-            details = record.get("details", "N/A")
-
             table.add_row(
                 str(idx),
-                timestamp,
-                audit_id,
-                actor,
-                event.replace("platform.commerce.", ""),
-                details,
+                record.get("timestamp", "N/A"),
+                record.get("id", "N/A"),
+                self._get_actor(record),
+                record.get("event", "N/A").replace("platform.commerce.", ""),
+                record.get("details", "N/A"),
             )
 
         return table

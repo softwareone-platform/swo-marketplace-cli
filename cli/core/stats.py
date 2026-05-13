@@ -70,23 +70,29 @@ class ErrorMessagesCollector:
         return self._is_empty
 
     def __str__(self) -> str:
-        lines: list[str] = []
-        for section_name, section in self._sections.items():
-            section_messages = section.get("", [])
-            if section_messages:
-                joined_section_messages = ", ".join(section_messages)
-                lines.append(f"{section_name}: {joined_section_messages}")
-            else:
-                lines.append(f"{section_name}:")
+        return "\n".join(self._iter_error_lines())
 
+    def _iter_error_lines(self) -> list[str]:
+        lines = []
+        for section_name, section in self._sections.items():
+            lines.append(self._format_section_line(section_name, section.get("", [])))
             for item_name, item_messages in section.items():
                 if not item_name:
                     continue
+                lines.append(self._format_item_line(item_name, item_messages))
 
-                joined_item_messages = ", ".join(item_messages)
-                lines.append(f"\t\t{item_name}: {joined_item_messages}")
+        return lines
 
-        return "\n".join(lines)
+    def _format_section_line(self, section_name: str, messages: list[str]) -> str:
+        if not messages:
+            return f"{section_name}:"
+
+        joined_messages = ", ".join(messages)
+        return f"{section_name}: {joined_messages}"
+
+    def _format_item_line(self, item_name: str, messages: list[str]) -> str:
+        joined_messages = ", ".join(messages)
+        return f"\t\t{item_name}: {joined_messages}"
 
 
 class StatsCollector(StatsStateMixin, StatsMutationMixin, ABC):
