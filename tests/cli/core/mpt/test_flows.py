@@ -6,7 +6,7 @@ from mpt_api_client.exceptions import MPTAPIError as ClientAPIError
 from mpt_api_client.models import Meta, Model, ModelCollection, Pagination
 
 
-class MPTProductResourceFactory:
+class FakeMPTProductResourceFactory:
     def __init__(self, mocker):
         self.mocker = mocker
 
@@ -18,7 +18,7 @@ class MPTProductResourceFactory:
 
 @pytest.fixture
 def mpt_product_resource_factory(mocker):
-    return MPTProductResourceFactory(mocker)
+    return FakeMPTProductResourceFactory(mocker)
 
 
 @pytest.mark.parametrize(
