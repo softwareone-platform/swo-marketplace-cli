@@ -18,7 +18,7 @@ def price_list_new_file(tmp_path, price_list_file_path):
 
 
 @pytest.fixture
-def price_list_data_from_dict():
+def price_list_data_from_dict(date_factory):
     return PriceListData(
         id="PRI-0232-2541-0003-0010",
         currency="EUR",
@@ -26,11 +26,11 @@ def price_list_data_from_dict():
         product_name="Test Product Name",
         vendor_id="VND-0232-2541",
         vendor_name="Test Vendor Name",
-        export_date="2024-06-01",
+        export_date=date_factory("2024-06-01"),
         precision=2,
         notes="Note 1",
         coordinate="B3",
-        default_markup=10,
+        default_markup=100,
         external_id=None,
         type="operations",
     )
@@ -47,7 +47,7 @@ def mpt_price_list_data():
         "id": "PRC-0232-2541-0002",
         "currency": "USD",
         "precision": 2,
-        "defaultMarkup": 42.0,
+        "defaultMarkup": 1.0,
         "notes": "another price list",
         "externalIds": {},
         "statistics": {
@@ -186,11 +186,11 @@ def item_data_from_dict():
         erp_id=None,
         item_id="Fake-Item-ID",
         item_name="Fake Item Name",
-        markup=0.15,
+        markup=0.1,
         status=ItemStatus.FOR_SALE,
-        unit_lp=10.28,
-        unit_pp=12.1,
-        unit_sp=10.55,
+        unit_lp=1.0,
+        unit_pp=1.0,
+        unit_sp=1.0,
         vendor_id="65304887CA",
         action=ItemAction.UPDATE,
         coordinate="A38272",
@@ -203,17 +203,17 @@ def mpt_item_data():
     return {
         "id": "PRI-0232-2541-0002-0002",
         "status": "ForSale",
-        "unitLP": 123.0,
-        "unitPP": 123.0,
-        "markup": 123.0,
+        "unitLP": 1.0,
+        "unitPP": 1.0,
+        "markup": 1.0,
         "margin": 0,
-        "unitSP": 9328.85,
-        "PPx1": 123.0,
-        "PPxM": 123.0,
-        "PPxY": 123.0,
+        "unitSP": 1.0,
+        "PPx1": 1.0,
+        "PPxM": 1.0,
+        "PPxY": 1.0,
         "SPx1": 0,
-        "SPxM": 777.4,
-        "SPxY": 9328.85,
+        "SPxM": 1.0,
+        "SPxY": 1.0,
         "priceList": {
             "id": "PRC-0232-2541-0002",
             "currency": "USD",

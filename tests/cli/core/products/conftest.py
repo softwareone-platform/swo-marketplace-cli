@@ -1,4 +1,3 @@
-import datetime as dt
 import shutil
 from pathlib import Path
 from unittest.mock import MagicMock, Mock
@@ -69,14 +68,14 @@ def product_new_file(tmp_path, product_file_path):
 
 
 @pytest.fixture
-def product_file_data():
+def product_file_data(datetime_factory):
     return {
         product_constants.GENERAL_PRODUCT_ID: {"value": "PRD-1234-1234-1234", "coordinate": "B3"},
         product_constants.GENERAL_PRODUCT_NAME: {"value": "Test Product Name", "coordinate": "B4"},
         product_constants.GENERAL_ACCOUNT_ID: {"value": "ACC-1234-1234", "coordinate": "B5"},
         product_constants.GENERAL_ACCOUNT_NAME: {"value": "Test Account Name", "coordinate": "B6"},
         product_constants.GENERAL_EXPORT_DATE: {
-            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-01-01T00:00:00+00:00"),
             "coordinate": "B7",
         },
         product_constants.GENERAL_PRODUCT_WEBSITE: {
@@ -93,30 +92,30 @@ def product_file_data():
         },
         product_constants.GENERAL_STATUS: {"value": "Draft", "coordinate": "B11"},
         product_constants.GENERAL_CREATED: {
-            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-01-01T00:00:00+00:00"),
             "coordinate": "B12",
         },
         product_constants.GENERAL_MODIFIED: {
-            "value": dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-01-01T00:00:00+00:00"),
             "coordinate": "B13",
         },
     }
 
 
 @pytest.fixture
-def product_data_from_dict():
+def product_data_from_dict(datetime_factory):
     return product_models.ProductData(
         id="PRD-1234-1234-1234",
         name="Adobe Commerce (CLI Test)",
         account_id="ACC-1234-1234",
         account_name="Adobe",
-        export_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+        export_date=datetime_factory("2024-01-01T00:00:00+00:00"),
         website="https://example.com",
         short_description="Catalog description",
         long_description="Product description",
         status="Draft",
-        created_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
-        updated_date=dt.datetime(2024, 1, 1, 0, 0, tzinfo=dt.UTC),
+        created_date=datetime_factory("2024-01-01T00:00:00+00:00"),
+        updated_date=datetime_factory("2024-01-01T00:00:00+00:00"),
         coordinate="B3",
         settings=product_models.SettingsData(
             records=[
@@ -229,7 +228,7 @@ def product_related_data(request):
 
 
 @pytest.fixture
-def item_file_data():
+def item_file_data(datetime_factory):
     return {
         product_constants.ITEMS_ID: {"value": "PRI-3969-9403-0001-0035", "coordinate": "A325"},
         product_constants.ITEMS_NAME: {
@@ -250,11 +249,11 @@ def item_file_data():
         product_constants.ITEMS_UNIT_NAME: {"value": "User", "coordinate": "N325"},
         product_constants.ITEMS_QUANTITY_APPLICABLE: {"value": "True", "coordinate": "O325"},
         product_constants.ITEMS_CREATED: {
-            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-05-23T00:00:00+00:00"),
             "coordinate": "P325",
         },
         product_constants.ITEMS_MODIFIED: {
-            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-05-23T00:00:00+00:00"),
             "coordinate": "Q325",
         },
     }
@@ -327,7 +326,7 @@ def mpt_item_data():
 
 
 @pytest.fixture
-def item_group_file_data():
+def item_group_file_data(datetime_factory):
     return {
         product_constants.ITEMS_GROUPS_ID: {"value": "IGR-0232-2541-0001", "coordinate": "A10234"},
         product_constants.ITEMS_GROUPS_NAME: {"value": "Items", "coordinate": "B10234"},
@@ -342,11 +341,11 @@ def item_group_file_data():
         product_constants.ITEMS_GROUPS_MULTIPLE_CHOICES: {"value": "True", "coordinate": "H10234"},
         product_constants.ITEMS_GROUPS_REQUIRED: {"value": "True", "coordinate": "I10234"},
         product_constants.ITEMS_GROUPS_CREATED: {
-            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-06-23T00:00:00+00:00"),
             "coordinate": "J10234",
         },
         product_constants.ITEMS_GROUPS_MODIFIED: {
-            "value": dt.datetime(2025, 6, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-06-23T00:00:00+00:00"),
             "coordinate": "K10234",
         },
     }
@@ -413,7 +412,7 @@ def mpt_item_group_data():
 
 
 @pytest.fixture
-def parameters_file_data():
+def parameters_file_data(datetime_factory):
     return {
         product_constants.PARAMETERS_ID: {"value": "PAR-5159-0756-0001", "coordinate": "A325"},
         product_constants.PARAMETERS_NAME: {"value": "Agreement type", "coordinate": "B325"},
@@ -427,7 +426,7 @@ def parameters_file_data():
             "VIP account to Adobe VIP Marketplace.",
             "coordinate": "G325",
         },
-        product_constants.PARAMETERS_DISPLAY_ORDER: {"value": 101, "coordinate": "H325"},
+        product_constants.PARAMETERS_DISPLAY_ORDER: {"value": 100, "coordinate": "H325"},
         product_constants.PARAMETERS_GROUP_ID: {
             "value": "PGR-5159-0756-0002",
             "coordinate": "I325",
@@ -442,11 +441,11 @@ def parameters_file_data():
             "coordinate": "L325",
         },
         product_constants.PARAMETERS_CREATED: {
-            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-05-23T00:00:00+00:00"),
             "coordinate": "M325",
         },
         product_constants.PARAMETERS_MODIFIED: {
-            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-08-14T00:00:00+00:00"),
             "coordinate": "N325",
         },
     }
@@ -469,7 +468,7 @@ def parameters_data_from_dict():
         description="When you are creating a new agreement with SoftwareOne, you have the option "
         "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
         "VIP account to Adobe VIP Marketplace.",
-        display_order=101,
+        display_order=100,
         group_id="PGR-0232-2541-0001",
         options={
             "optionsList": [
@@ -720,7 +719,7 @@ def mpt_subscription_parameter_data():
 
 
 @pytest.fixture
-def parameter_group_file_data():
+def parameter_group_file_data(datetime_factory):
     return {
         product_constants.PARAMETERS_GROUPS_ID: {
             "value": "IGR-3114-5854-0002",
@@ -739,18 +738,18 @@ def parameter_group_file_data():
         },
         product_constants.PARAMETERS_GROUPS_DEFAULT: {"value": "False", "coordinate": "G325"},
         product_constants.PARAMETERS_GROUPS_CREATED: {
-            "value": dt.datetime(2024, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-05-23T00:00:00+00:00"),
             "coordinate": "H325",
         },
         product_constants.PARAMETERS_GROUPS_MODIFIED: {
-            "value": dt.datetime(2024, 8, 14, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-08-14T00:00:00+00:00"),
             "coordinate": "I325",
         },
     }
 
 
 @pytest.fixture
-def parameter_group_data_from_dict():
+def parameter_group_data_from_dict(datetime_factory):
     return product_models.ParameterGroupData(
         id="PGR-0232-2541-0001",
         coordinate="A2",
@@ -761,8 +760,8 @@ def parameter_group_data_from_dict():
         "VIP account to Adobe VIP Marketplace.",
         display_order=10,
         default=True,
-        created_date=dt.datetime(2024, 5, 6, 0, 0, tzinfo=dt.UTC),
-        updated_date=dt.datetime(2024, 5, 18, 0, 0, tzinfo=dt.UTC),
+        created_date=datetime_factory("2024-05-06T00:00:00+00:00"),
+        updated_date=datetime_factory("2024-05-18T00:00:00+00:00"),
     )
 
 
@@ -803,7 +802,7 @@ def mpt_parameter_group_data():
 
 
 @pytest.fixture
-def template_file_data():
+def template_file_data(datetime_factory):
     return {
         product_constants.TEMPLATES_ID: {"value": "TPL-0232-2541-0005", "coordinate": "A3"},
         product_constants.TEMPLATES_NAME: {"value": "BulkMigrate", "coordinate": "B3"},
@@ -815,7 +814,7 @@ def template_file_data():
             "coordinate": "F3",
         },
         product_constants.TEMPLATES_CREATED: {
-            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-05-23T00:00:00+00:00"),
             "coordinate": "G3",
         },
         product_constants.TEMPLATES_MODIFIED: {"value": None, "coordinate": "H3"},

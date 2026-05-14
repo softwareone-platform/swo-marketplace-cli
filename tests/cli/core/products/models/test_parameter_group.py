@@ -1,5 +1,3 @@
-import datetime as dt
-
 from cli.core.products.models import ParameterGroupData
 
 
@@ -20,7 +18,7 @@ def test_parameter_data_from_dict(parameter_group_file_data):
     } == expected_data
 
 
-def test_parameter_data_from_json(mpt_parameter_group_data):
+def test_parameter_data_from_json(date_factory, mpt_parameter_group_data):
     result = ParameterGroupData.from_json(mpt_parameter_group_data)
 
     expected_data = {
@@ -31,11 +29,11 @@ def test_parameter_data_from_json(mpt_parameter_group_data):
             "to establish a new Microsoft account or connect it to an existing account "
             "you already hold with Adobe."
         ),
-        "display_order": 101,
+        "display_order": 100,
         "label": "Create agreement",
         "name": "Create agreement",
-        "created_date": dt.date(2024, 3, 19),
-        "updated_date": dt.date(2025, 6, 10),
+        "created_date": date_factory("2024-03-19"),
+        "updated_date": date_factory("2025-06-10"),
     }
     assert {
         field_name: getattr(result, field_name) for field_name in expected_data

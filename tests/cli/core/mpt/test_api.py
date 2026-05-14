@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from cli.core.errors import MPTAPIError
 from cli.core.mpt.api import APIService, RelatedAPIService
@@ -209,7 +211,9 @@ def test_get_not_found(api_service, collection_service):
 
 def test_get_exception(api_service, collection_service, mpt_api_error_type):
     collection_service.get.side_effect = ClientAPIError(
-        500, "Server Error", {"status": 500, "message": "Server Error"}
+        HTTPStatus.INTERNAL_SERVER_ERROR,
+        "Server Error",
+        {"status": HTTPStatus.INTERNAL_SERVER_ERROR, "message": "Server Error"},
     )
 
     with pytest.raises(mpt_api_error_type):

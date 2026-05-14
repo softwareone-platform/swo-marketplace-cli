@@ -1,6 +1,5 @@
 import math
 
-import pytest
 from cli.core.price_lists.models.item import ItemAction, ItemData, ItemStatus
 
 
@@ -21,10 +20,10 @@ def test_item_data_from_dict(item_file_data):
         "erp_id": "30006419CB",
         "item_id": "ITM-9939-6700-0280",
         "item_name": "XD for Teams; existing XD customers only.;",
-        "markup": pytest.approx(11.1111111111111),
+        "markup": 0.1,
         "status": ItemStatus.DRAFT,
-        "unit_lp": pytest.approx(119.88),
-        "unit_pp": pytest.approx(107.88),
+        "unit_lp": 1.0,
+        "unit_pp": 1.0,
         "unit_sp": None,
         "vendor_id": "AO03.25842.MN",
         "action": ItemAction.UPDATE,
@@ -46,11 +45,11 @@ def test_item_data_from_json(mpt_item_data):
         "erp_id": "1234567",
         "item_id": "ITM-0232-2541-0002",
         "item_name": "Creative Cloud All Apps with Adobe Stock (10 assets per month)",
-        "markup": pytest.approx(123.0),
+        "markup": 1.0,
         "status": ItemStatus.FOR_SALE,
-        "unit_lp": pytest.approx(123.0),
-        "unit_pp": pytest.approx(123.0),
-        "unit_sp": pytest.approx(9328.85),
+        "unit_lp": 1.0,
+        "unit_pp": 1.0,
+        "unit_sp": 1.0,
         "vendor_id": "65322587CA",
         "action": ItemAction.SKIP,
         "modified_date": None,
@@ -64,8 +63,8 @@ def test_item_data_from_json(mpt_item_data):
 def test_item_data_to_json(item_data_from_dict):
     result = item_data_from_dict.to_json()
 
-    assert math.isclose(result["unitLP"], 10.28)
-    assert math.isclose(result["unitPP"], 12.1)
-    assert math.isclose(result["markup"], 0.15)
-    assert math.isclose(result["unitSP"], 10.55)
+    assert math.isclose(result["unitLP"], 1.0)
+    assert math.isclose(result["unitPP"], 1.0)
+    assert math.isclose(result["markup"], 0.1)
+    assert math.isclose(result["unitSP"], 1.0)
     assert result["status"] == ItemStatus.FOR_SALE

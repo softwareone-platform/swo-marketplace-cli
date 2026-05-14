@@ -1,5 +1,3 @@
-import datetime as dt
-
 from cli.core.products import constants as product_constants
 from cli.core.products.models import ItemGroupData
 
@@ -23,7 +21,7 @@ def test_item_group_data_from_dict(item_group_file_data):
     } == expected_data
 
 
-def test_item_group_data_from_json(mpt_item_group_data):
+def test_item_group_data_from_json(date_factory, mpt_item_group_data):
     result = ItemGroupData.from_json(mpt_item_group_data)
 
     expected_data = {
@@ -35,7 +33,7 @@ def test_item_group_data_from_json(mpt_item_group_data):
         "default": True,
         "multiple": True,
         "required": True,
-        "created_date": dt.date(2024, 3, 19),
+        "created_date": date_factory("2024-03-19"),
         "updated_date": None,
     }
     assert {
@@ -67,7 +65,7 @@ def test_item_group_data_to_json(item_group_data_from_dict):
     }
 
 
-def test_item_group_to_xlsx(item_group_data_from_json):
+def test_item_group_to_xlsx(date_factory, item_group_data_from_json):
     result = item_group_data_from_json.to_xlsx()
 
     assert result == {
@@ -80,6 +78,6 @@ def test_item_group_to_xlsx(item_group_data_from_json):
         product_constants.ITEMS_GROUPS_DEFAULT: "True",
         product_constants.ITEMS_GROUPS_MULTIPLE_CHOICES: "True",
         product_constants.ITEMS_GROUPS_REQUIRED: "True",
-        product_constants.ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
+        product_constants.ITEMS_GROUPS_CREATED: date_factory("2024-03-19"),
         product_constants.ITEMS_GROUPS_MODIFIED: None,
     }

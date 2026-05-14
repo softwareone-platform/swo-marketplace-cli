@@ -1,5 +1,3 @@
-import datetime as dt
-
 import pytest
 from cli.core.products import constants as product_constants
 from cli.core.products.models import AgreementParametersData, DataActionEnum
@@ -17,7 +15,7 @@ def test_parameters_data_from_dict(parameters_file_data):
             "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
             "VIP account to Adobe VIP Marketplace."
         ),
-        "display_order": 101,
+        "display_order": 100,
         "external_id": "agreementType",
         "name": "Agreement type",
         "phase": "Order",
@@ -37,7 +35,7 @@ def test_parameters_data_from_dict(parameters_file_data):
     } == expected_data
 
 
-def test_parameters_data_from_json(mpt_agreement_parameter_data):
+def test_parameters_data_from_json(date_factory, mpt_agreement_parameter_data):
     result = AgreementParametersData.from_json(mpt_agreement_parameter_data)
 
     expected_data = {
@@ -47,7 +45,7 @@ def test_parameters_data_from_json(mpt_agreement_parameter_data):
             "to create a new Adobe VIP Marketplace account or migrate your existing Adobe "
             "VIP account to Adobe VIP Marketplace."
         ),
-        "display_order": 101,
+        "display_order": 100,
         "external_id": "agreementType",
         "name": "Agreement type",
         "phase": "Order",
@@ -90,8 +88,8 @@ def test_parameters_data_from_json(mpt_agreement_parameter_data):
         },
         "group_id": "PGR-0232-2541-0002",
         "group_id_coordinate": None,
-        "created_date": dt.date(2024, 3, 19),
-        "updated_date": dt.date(2024, 3, 19),
+        "created_date": date_factory("2024-03-19"),
+        "updated_date": date_factory("2024-03-19"),
     }
     assert {
         field_name: getattr(result, field_name) for field_name in expected_data
@@ -144,13 +142,13 @@ def test_parameters_data_to_json(parameters_data_from_dict):
         },
         "constraints": {"hidden": False, "readonly": False, "optional": True, "required": False},
         "externalId": "agreementType",
-        "displayOrder": 101,
+        "displayOrder": 100,
         "group": {"id": "PGR-0232-2541-0001"},
     }
     assert result["options"].get("label") is None
 
 
-def test_parameters_data_to_xlsx(parameters_data_from_json):
+def test_parameters_data_to_xlsx(date_factory, parameters_data_from_json):
     result = parameters_data_from_json.to_xlsx()
 
     assert result == {
@@ -165,7 +163,7 @@ def test_parameters_data_to_xlsx(parameters_data_from_json):
             "the option to create a new Adobe VIP Marketplace account or "
             "migrate your existing Adobe VIP account to Adobe VIP Marketplace."
         ),
-        product_constants.PARAMETERS_DISPLAY_ORDER: 101,
+        product_constants.PARAMETERS_DISPLAY_ORDER: 100,
         product_constants.PARAMETERS_GROUP_ID: "PGR-0232-2541-0002",
         product_constants.PARAMETERS_GROUP_NAME: "Create agreement",
         product_constants.PARAMETERS_OPTIONS: (
@@ -192,8 +190,8 @@ def test_parameters_data_to_xlsx(parameters_data_from_json):
         product_constants.PARAMETERS_CONSTRAINTS: (
             '{"hidden": false, "readonly": false, "required": true}'
         ),
-        product_constants.PARAMETERS_CREATED: dt.date(2024, 3, 19),
-        product_constants.PARAMETERS_MODIFIED: dt.date(2024, 3, 19),
+        product_constants.PARAMETERS_CREATED: date_factory("2024-03-19"),
+        product_constants.PARAMETERS_MODIFIED: date_factory("2024-03-19"),
     }
 
 

@@ -1,5 +1,3 @@
-import datetime as dt
-
 from cli.core.products.constants import (
     TEMPLATES_ACTION,
     TEMPLATES_CONTENT,
@@ -31,7 +29,7 @@ def test_template_data_from_dict(template_file_data):
     } == expected_data
 
 
-def test_template_data_from_json(mpt_template_data):
+def test_template_data_from_json(date_factory, mpt_template_data):
     result = TemplateData.from_json(mpt_template_data)
 
     expected_data = {
@@ -43,8 +41,8 @@ def test_template_data_from_json(mpt_template_data):
             "we are working on your order."
         ),
         "default": False,
-        "created_date": dt.date(2024, 4, 8),
-        "updated_date": dt.date(2024, 5, 3),
+        "created_date": date_factory("2024-04-08"),
+        "updated_date": date_factory("2024-05-03"),
     }
     assert {
         field_name: getattr(result, field_name) for field_name in expected_data
@@ -84,7 +82,7 @@ def test_template_data_to_json(template_data_from_dict):
     }
 
 
-def test_template_to_xlsx(template_data_from_json):
+def test_template_to_xlsx(date_factory, template_data_from_json):
     result = template_data_from_json.to_xlsx()
 
     assert result == {
@@ -97,6 +95,6 @@ def test_template_to_xlsx(template_data_from_json):
             "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while we "
             "are working on your order."
         ),
-        TEMPLATES_CREATED: dt.date(2024, 4, 8),
-        TEMPLATES_MODIFIED: dt.date(2024, 5, 3),
+        TEMPLATES_CREATED: date_factory("2024-04-08"),
+        TEMPLATES_MODIFIED: date_factory("2024-05-03"),
     }

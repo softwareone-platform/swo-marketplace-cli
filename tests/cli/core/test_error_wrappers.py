@@ -1,3 +1,4 @@
+from http import HTTPStatus
 from types import SimpleNamespace
 
 import pytest
@@ -12,7 +13,7 @@ def error_factory():
 
 @pytest.fixture
 def http_error_callable(mocker):
-    return mocker.Mock(side_effect=MPTHttpError(500, "err", "boom"))
+    return mocker.Mock(side_effect=MPTHttpError(HTTPStatus.INTERNAL_SERVER_ERROR, "err", "boom"))
 
 
 def test_http_wrapper_get_from_class(error_factory):

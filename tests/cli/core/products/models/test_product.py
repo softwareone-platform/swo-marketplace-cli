@@ -1,9 +1,9 @@
-import datetime as dt
-
 from cli.core.products import constants as product_constants
 from cli.core.products.models import DataActionEnum
 from cli.core.products.models.product import ProductData, SettingsData, SettingsRecords
 from freezegun import freeze_time
+
+SETTINGS_RECORDS_COUNT = 11
 
 
 def test_product_data_from_dict(product_file_data):
@@ -22,7 +22,7 @@ def test_product_data_from_dict(product_file_data):
     } == expected_data
 
 
-def test_product_data_from_json(mpt_product_data):
+def test_product_data_from_json(date_factory, mpt_product_data):
     with freeze_time("2025-05-30"):
         result = ProductData.from_json(mpt_product_data)
 
@@ -45,10 +45,10 @@ def test_product_data_from_json(mpt_product_data):
             "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
         ),
         "website": "https://www.adobe.com/",
-        "export_date": dt.date(2025, 5, 30),
+        "export_date": date_factory("2025-05-30"),
         "status": "Unpublished",
-        "created_date": dt.date(2024, 3, 19),
-        "updated_date": dt.date(2025, 6, 3),
+        "created_date": date_factory("2024-03-19"),
+        "updated_date": date_factory("2025-06-03"),
     }
     assert {
         field_name: getattr(result, field_name) for field_name in expected_data
@@ -67,7 +67,7 @@ def test_product_data_to_json(product_data_from_dict):
     }
 
 
-def test_product_to_xlsx(product_data_from_json):
+def test_product_to_xlsx(date_factory, product_data_from_json):
     result = product_data_from_json.to_xlsx()
 
     assert result == {
@@ -89,10 +89,10 @@ def test_product_to_xlsx(product_data_from_json):
         product_constants.GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
         product_constants.GENERAL_ACCOUNT_ID: "ACC-9226-9856",
         product_constants.GENERAL_ACCOUNT_NAME: "Adobe",
-        product_constants.GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
+        product_constants.GENERAL_EXPORT_DATE: date_factory("2025-05-30"),
         product_constants.GENERAL_STATUS: "Unpublished",
-        product_constants.GENERAL_CREATED: dt.date(2024, 3, 19),
-        product_constants.GENERAL_MODIFIED: dt.date(2025, 6, 3),
+        product_constants.GENERAL_CREATED: date_factory("2024-03-19"),
+        product_constants.GENERAL_MODIFIED: date_factory("2025-06-03"),
     }
 
 
@@ -128,7 +128,7 @@ def test_settings_data_from_dict(settings_file_data):
 def test_settings_data_from_json(mpt_product_data):
     result = SettingsData.from_json(mpt_product_data["settings"])
 
-    assert len(result.records) == 11
+    assert len(result.records) == SETTINGS_RECORDS_COUNT
     assert isinstance(result.records[0], SettingsRecords)
     assert result.json_path is None
 
