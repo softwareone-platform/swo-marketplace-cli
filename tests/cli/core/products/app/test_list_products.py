@@ -56,7 +56,7 @@ def test_list_products_with_query_and_paging(active_vendor_account, mocker, mpt_
     mocker.patch(
         "cli.core.products.app.list_products.get_products",
         return_value=(
-            Meta(limit=20, offset=0, total=2),
+            Meta(limit=24, offset=0, total=2),
             [
                 Product.model_validate(product_data)
                 for product_data in mpt_products_response["data"]
@@ -66,7 +66,7 @@ def test_list_products_with_query_and_paging(active_vendor_account, mocker, mpt_
 
     result = runner.invoke(
         product_app,
-        ["list", "--page", "20", "--query", "eq(product.id,'PRD-1234')"],
+        ["list", "--page", "24", "--query", "eq(product.id,'PRD-1234')"],
     )
 
     assert result.exit_code == 0, result.stdout

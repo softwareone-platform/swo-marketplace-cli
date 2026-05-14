@@ -1,3 +1,5 @@
+from http import HTTPStatus
+
 import pytest
 from cli.core.accounts.api.account_api_service import MPTAccountService
 from cli.core.errors import MPTAPIError
@@ -40,7 +42,9 @@ def test_add_account_token_invalid_format(mock_mpt_api_client):
 def test_get_authentication_value_error(mock_mpt_api_client, mock_mpt_api_tokens):
     secret = "idt:TKN-1111-1111:secret"
     mock_mpt_api_tokens.to_dict.side_effect = MPTHttpError(
-        400, "Not Found", "Entity for given id TKN-1111-1111 not found"
+        HTTPStatus.BAD_REQUEST,
+        "Not Found",
+        "Entity for given id TKN-1111-1111 not found",
     )
     service = MPTAccountService(client=mock_mpt_api_client)
 

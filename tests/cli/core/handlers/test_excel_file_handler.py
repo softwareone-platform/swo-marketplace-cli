@@ -163,12 +163,11 @@ def test_get_data_from_horizontal_sheet_by_fields(excel_file_handler):
 def test_get_data_from_vertical_sheet(excel_file_handler):
     result = excel_file_handler.get_data_from_vertical_sheet("VerticalSheet")
 
-    assert result["Field1"]["value"] == "Value1"
-    assert result["Field1"]["coordinate"] == "B2"
-    assert result["Field2"]["value"] == "Value2"
-    assert result["Field2"]["coordinate"] == "B3"
-    assert result["EmptyField"]["value"] is None
-    assert result["EmptyField"]["coordinate"] == "B4"
+    assert result == {
+        "Field1": {"value": "Value1", "coordinate": "B2"},
+        "Field2": {"value": "Value2", "coordinate": "B3"},
+        "EmptyField": {"value": None, "coordinate": "B4"},
+    }
 
 
 def test_get_data_from_vertical_sheet_by_fields(excel_file_handler):

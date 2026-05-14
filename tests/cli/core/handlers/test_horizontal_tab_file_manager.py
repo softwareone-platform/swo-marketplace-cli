@@ -48,7 +48,7 @@ class FakeHorizontalTabFileManager(HorizontalTabFileManager):
 
     @override
     def _read_data(self) -> Generator[dict[str, Any], None, None]:
-        yield {"ID": "fake_id", "styled_field": 22.5, "field2": "fake field value"}
+        yield {"ID": "fake_id", "styled_field": 1.0, "field2": "fake field value"}
 
 
 @pytest.fixture
@@ -71,7 +71,7 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
     item_to_xlsx_mock = mocker.patch.object(
         model_entry,
         "to_xlsx",
-        return_value={"ID": "fake_id", "styled_field": 22.5, "field2": "fake field value"},
+        return_value={"ID": "fake_id", "styled_field": 1.0, "field2": "fake field value"},
     )
     write_cell_mock = mocker.patch.object(
         fake_horizontal_tab_file_manager.file_handler, "write_cell"
@@ -93,7 +93,7 @@ def test_add(mocker, currency, precision, expected_style, fake_horizontal_tab_fi
         mocker.call(
             "FakeSheet",
             position=CellPosition(col=2, row=2),
-            cell_value=22.5,
+            cell_value=1.0,
             data_validation=None,
             style=expected_style,
         ),
@@ -115,7 +115,7 @@ def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
     mocker.patch.object(fake_horizontal_tab_file_manager.file_handler, "save")
     model_entry = mocker.MagicMock(
         spec=BaseDataModel,
-        to_xlsx=mocker.Mock(return_value={"ID": "fake_id", "styled_field": 22.5}),
+        to_xlsx=mocker.Mock(return_value={"ID": "fake_id", "styled_field": 1.0}),
     )
     write_cell_mock = mocker.patch.object(
         fake_horizontal_tab_file_manager.file_handler, "write_cell"
@@ -134,7 +134,7 @@ def test_add_no_style_attributes(mocker, fake_horizontal_tab_file_manager):
         mocker.call(
             "FakeSheet",
             position=CellPosition(col=2, row=2),
-            cell_value=22.5,
+            cell_value=1.0,
             data_validation=None,
             style=None,
         ),
@@ -182,7 +182,7 @@ def test_read_data(mocker, fake_horizontal_tab_file_manager):
     assert result == [FakeDataModel()]
     data_model_spy.assert_called_once_with({
         "ID": "fake_id",
-        "styled_field": 22.5,
+        "styled_field": 1.0,
         "field2": "fake field value",
     })
 

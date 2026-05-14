@@ -60,15 +60,20 @@ def test_display_records(capsys):
 
     captured = capsys.readouterr()
     output = captured.out
-    assert "Available Audit Records" in output
-    assert "2024-01-01T10:00:00Z" in output
-    assert "audit1" in output
-    assert "Test User" in output
-    assert "(Test" in output
-    assert "Account)" in output
-    assert "create" in output
-    assert "Created" in output
-    assert "object" in output
+    assert all(
+        fragment in output
+        for fragment in (
+            "Available Audit Records",
+            "2024-01-01T10:00:00Z",
+            "audit1",
+            "Test User",
+            "(Test",
+            "Account)",
+            "create",
+            "Created",
+            "object",
+        )
+    )
 
 
 def test_display_records_missing_fields(capsys):

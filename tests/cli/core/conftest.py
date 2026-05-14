@@ -1,8 +1,20 @@
+import datetime as dt
+
 import pytest
 import responses
 from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
 from mpt_api_client import MPTClient
+
+
+@pytest.fixture
+def date_factory():
+    return dt.date.fromisoformat
+
+
+@pytest.fixture
+def datetime_factory():
+    return dt.datetime.fromisoformat
 
 
 @pytest.fixture
