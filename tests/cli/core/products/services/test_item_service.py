@@ -34,14 +34,14 @@ def test_update_item_create(
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
-    post_mock = mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
+    mocker.patch.object(service_context.api, "post", return_value=mpt_item_data)
     search_uom_by_name_mock = mocker.patch(
         "cli.core.products.services.item_service.search_uom_by_name",
         return_value=Uom(id="fake_unit_id", name="User"),
     )
-    write_ids_mock = mocker.patch.object(service_context.file_manager, "write_ids")
-    update_spy = mocker.spy(service_context.api, "update")
-    stats_spy = mocker.spy(service_context.stats, "add_synced")
+    mocker.patch.object(service_context.file_manager, "write_ids")
+    mocker.spy(service_context.api, "update")
+    mocker.spy(service_context.stats, "add_synced")
 
     result = item_service.update()
 
@@ -49,10 +49,12 @@ def test_update_item_create(
     assert result.model is None
     assert service_context.stats.tabs["Items"]["synced"] == 1
     search_uom_by_name_mock.assert_called_once()
-    post_mock.assert_called_once()
-    write_ids_mock.assert_called_once_with({item_data_from_dict.coordinate: mpt_item_data["id"]})
-    update_spy.assert_not_called()
-    stats_spy.assert_called_once_with(TAB_ITEMS)
+    service_context.api.post.assert_called_once()
+    service_context.file_manager.write_ids.assert_called_once_with({
+        item_data_from_dict.coordinate: mpt_item_data["id"]
+    })
+    service_context.api.update.assert_not_called()
+    service_context.stats.add_synced.assert_called_once_with(TAB_ITEMS)
 
 
 def test_update_item_create_missing_unit_name(
@@ -79,26 +81,26 @@ def test_update_item_create_error(mocker, service_context, item_service, item_da
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=[item_data_from_dict]
     )
-    post_mock = mocker.patch.object(
+    mocker.patch.object(
         service_context.api, "post", side_effect=MPTAPIError("API Error", "Error updating item")
     )
     search_uom_by_name_mock = mocker.patch(
         "cli.core.products.services.item_service.search_uom_by_name",
         return_value=Uom(id="fake_unit_id", name="User"),
     )
-    write_error_mock = mocker.patch.object(service_context.file_manager, "write_error")
-    update_spy = mocker.spy(service_context.api, "update")
-    add_error_spy = mocker.spy(service_context.stats, "add_error")
+    mocker.patch.object(service_context.file_manager, "write_error")
+    mocker.spy(service_context.api, "update")
+    mocker.spy(service_context.stats, "add_error")
 
     result = item_service.update()
 
     assert result.success is False
     assert service_context.stats.tabs["Items"]["error"] == 1
     search_uom_by_name_mock.assert_called_once()
-    post_mock.assert_called_once()
-    write_error_mock.assert_called_once()
-    update_spy.assert_not_called()
-    add_error_spy.assert_called_once_with(TAB_ITEMS)
+    service_context.api.post.assert_called_once()
+    service_context.file_manager.write_error.assert_called_once()
+    service_context.api.update.assert_not_called()
+    service_context.stats.add_error.assert_called_once_with(TAB_ITEMS)
 
 
 def test_update_item_skip(

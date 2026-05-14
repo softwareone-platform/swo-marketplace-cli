@@ -6,6 +6,21 @@ from mpt_api_client.exceptions import MPTAPIError as ClientAPIError
 from mpt_api_client.models import Meta, Model, ModelCollection, Pagination
 
 
+class FakeMPTProductResourceFactory:
+    def __init__(self, mocker):
+        self.mocker = mocker
+
+    def __call__(self, product_data):
+        resource = self.mocker.MagicMock(spec=Model)
+        resource.to_dict.return_value = product_data
+        return resource
+
+
+@pytest.fixture
+def mpt_product_resource_factory(mocker):
+    return FakeMPTProductResourceFactory(mocker)
+
+
 @pytest.mark.parametrize(
     "query",
     [
@@ -13,19 +28,18 @@ from mpt_api_client.models import Meta, Model, ModelCollection, Pagination
         "eq(product.id,'PRD-1234-1234')",
     ],
 )
-def test_get_products(mocker, mock_mpt_api_client, mpt_products, query):
-    mock_resources = []
-    for product_data in mpt_products:
-        resource = mocker.MagicMock(spec=Model)
-        resource.to_dict.return_value = product_data
-        mock_resources.append(resource)
+def test_get_products(
+    mocker, mock_mpt_api_client, mpt_products, query, mpt_product_resource_factory
+):
     collection = mocker.MagicMock(spec=ModelCollection)
     collection.meta = mocker.MagicMock(spec=Meta)
     collection.meta.pagination = mocker.MagicMock(spec=Pagination)
     collection.meta.pagination.limit = 10
     collection.meta.pagination.offset = 0
     collection.meta.pagination.total = len(mpt_products)
-    collection.resources = mock_resources
+    collection.resources = [
+        mpt_product_resource_factory(product_data) for product_data in mpt_products
+    ]
     mock_mpt_api_client.catalog.products.fetch_page.return_value = collection
     product_filter = mock_mpt_api_client.catalog.products.filter.return_value
     product_filter.fetch_page.return_value = collection

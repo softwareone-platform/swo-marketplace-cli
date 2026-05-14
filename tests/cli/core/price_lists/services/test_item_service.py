@@ -44,21 +44,19 @@ def test_export(mocker, service_context, item_service, mpt_item_data):
 
 
 def test_export_paginates_until_total(mocker, service_context, item_service, mpt_item_data):
-    create_tab_mock = mocker.patch.object(service_context.file_manager, "create_tab")
-    add_mock = mocker.patch.object(service_context.file_manager, "add")
+    mocker.patch.object(service_context.file_manager, "create_tab")
+    mocker.patch.object(service_context.file_manager, "add")
     first_page = {"data": [mpt_item_data], "meta": {"offset": 0, "limit": 1, "total": 2}}
     second_page = {"data": [mpt_item_data], "meta": {"offset": 1, "limit": 1, "total": 2}}
-    api_list_mock = mocker.patch.object(
-        service_context.api, "list", side_effect=[first_page, second_page]
-    )
+    mocker.patch.object(service_context.api, "list", side_effect=[first_page, second_page])
 
     result = item_service.export()
 
     assert result.success is True
-    create_tab_mock.assert_called_once()
-    assert add_mock.call_count == 2
-    assert api_list_mock.call_count == 2
-    first_call, second_call = api_list_mock.call_args_list
+    service_context.file_manager.create_tab.assert_called_once()
+    assert service_context.file_manager.add.call_count == 2
+    assert service_context.api.list.call_count == 2
+    first_call, second_call = service_context.api.list.call_args_list
     assert first_call.args[0]["offset"] == 0
     assert second_call.args[0]["offset"] > first_call.args[0]["offset"]
 

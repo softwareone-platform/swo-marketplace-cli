@@ -121,7 +121,7 @@ select = ["AAA", "E999", "WPS"]
 show-source = true
 statistics = false
 per-file-ignores = [
-  "tests/**:WPS202,WPS210,WPS213,WPS218,WPS221,WPS432"
+  "tests/**:WPS202,WPS213,WPS218,WPS432"
 ]
 
 [tool.ruff]

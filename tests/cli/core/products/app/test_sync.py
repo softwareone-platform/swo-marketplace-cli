@@ -1,3 +1,4 @@
+import pytest
 from cli.core.models import DataCollectionModel
 from cli.core.products import app as product_app
 from cli.core.services.service_result import ServiceResult
@@ -7,8 +8,21 @@ from typer.testing import CliRunner
 runner = CliRunner()
 
 
-def _stub_product_service(mocker, product_container_mock, product_data_from_dict):
-    """Set up the product service mock with validate_definition + retrieve."""
+class ServiceCreateResultFactory:
+    def __init__(self, mocker):
+        self.mocker = mocker
+
+    def __call__(self, collection_data):
+        return ServiceResult(
+            success=True,
+            model=None,
+            collection=DataCollectionModel(collection={"fake_id": collection_data}),
+            stats=self.mocker.Mock(),
+        )
+
+
+@pytest.fixture
+def existing_product_sync(mocker, product_container_mock, product_data_from_dict):
     product_container_mock.product_service().validate_definition.return_value = ServiceResult(
         success=True, model=None, stats=mocker.Mock()
     )
@@ -17,14 +31,14 @@ def _stub_product_service(mocker, product_container_mock, product_data_from_dict
     )
 
 
-def _stub_service_create(mocker, service_mock, collection_data):
-    """Set up a service create() mock with a DataCollectionModel collection."""
-    service_mock.create.return_value = ServiceResult(
-        success=True,
-        model=None,
-        collection=DataCollectionModel(collection={"fake_id": collection_data}),
-        stats=mocker.Mock(),
-    )
+@pytest.fixture
+def service_create_result_factory(mocker):
+    return ServiceCreateResultFactory(mocker)
+
+
+@pytest.fixture
+def existing_product_file(product_new_file, existing_product_sync):
+    return product_new_file
 
 
 def test_sync_not_valid_definition(mocker, product_container_mock):
@@ -51,11 +65,10 @@ def test_sync_with_dry_run(mocker, product_container_mock):
 
 
 def test_sync_product_update_runs_update_flow(
-    mocker, product_container_mock, product_data_from_dict
+    mocker, product_container_mock, existing_product_sync
 ):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     mocker.patch("cli.core.products.app.sync.stats_table_renderer.render", return_value="")
-    _stub_product_service(mocker, product_container_mock, product_data_from_dict)
 
     result = runner.invoke(product_app, ["sync", "fake_file.xlsx"], input="y\n")
 
@@ -73,9 +86,8 @@ def test_sync_product_update_runs_update_flow(
     product_container_mock.subscription_parameters_service().update.assert_called_once()
 
 
-def test_sync_product_update_with_errors(mocker, product_container_mock, product_data_from_dict):
+def test_sync_product_update_with_errors(mocker, product_container_mock, existing_product_sync):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=True)
-    _stub_product_service(mocker, product_container_mock, product_data_from_dict)
 
     result = runner.invoke(product_app, ["sync", "fake_file.xlsx"], input="y\n")
 
@@ -84,23 +96,26 @@ def test_sync_product_update_with_errors(mocker, product_container_mock, product
 
 
 def test_sync_product_force_create_runs(
-    mocker, product_container_mock, product_new_file, product_data_from_dict, product_related_data
+    mocker,
+    product_container_mock,
+    existing_product_file,
+    product_related_data,
+    service_create_result_factory,
 ):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     render_mock = mocker.patch(
         "cli.core.products.app.sync.stats_table_renderer.render", return_value=""
     )
-    _stub_product_service(mocker, product_container_mock, product_data_from_dict)
     product_container_mock.product_service().create.return_value = ServiceResult(
-        success=True, model=product_data_from_dict, stats=mocker.Mock()
+        success=True,
+        model=product_container_mock.product_service().retrieve.return_value.model,
+        stats=mocker.Mock(),
     )
-    _stub_service_create(
-        mocker, product_container_mock.item_group_service(), product_related_data["item_group"]
+    product_container_mock.item_group_service().create.return_value = service_create_result_factory(
+        product_related_data["item_group"]
     )
-    _stub_service_create(
-        mocker,
-        product_container_mock.parameter_group_service(),
-        product_related_data["parameter_group"],
+    product_container_mock.parameter_group_service().create.return_value = (
+        service_create_result_factory(product_related_data["parameter_group"])
     )
     for parameter_service in (
         product_container_mock.agreement_parameters_service(),
@@ -109,11 +124,13 @@ def test_sync_product_force_create_runs(
         product_container_mock.request_parameters_service(),
         product_container_mock.subscription_parameters_service(),
     ):
-        _stub_service_create(mocker, parameter_service, product_related_data["parameters"])
+        parameter_service.create.return_value = service_create_result_factory(
+            product_related_data["parameters"]
+        )
 
     result = runner.invoke(
         product_app,
-        ["sync", "--force-create", str(product_new_file)],
+        ["sync", "--force-create", str(existing_product_file)],
         input="y\n",
     )
 
@@ -126,7 +143,11 @@ def test_sync_product_force_create_runs(
 
 
 def test_sync_product_no_product_runs_create_flow(
-    mocker, product_new_file, product_container_mock, product_related_data
+    mocker,
+    product_new_file,
+    product_container_mock,
+    product_related_data,
+    service_create_result_factory,
 ):
     mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
     render_mock = mocker.patch(
@@ -141,13 +162,11 @@ def test_sync_product_no_product_runs_create_flow(
     product_container_mock.product_service().create.return_value = ServiceResult(
         success=True, model=product_related_data["template"], stats=mocker.Mock()
     )
-    _stub_service_create(
-        mocker, product_container_mock.item_group_service(), product_related_data["item_group"]
+    product_container_mock.item_group_service().create.return_value = service_create_result_factory(
+        product_related_data["item_group"]
     )
-    _stub_service_create(
-        mocker,
-        product_container_mock.parameter_group_service(),
-        product_related_data["parameter_group"],
+    product_container_mock.parameter_group_service().create.return_value = (
+        service_create_result_factory(product_related_data["parameter_group"])
     )
     for parameter_service in (
         product_container_mock.agreement_parameters_service(),
@@ -156,7 +175,9 @@ def test_sync_product_no_product_runs_create_flow(
         product_container_mock.request_parameters_service(),
         product_container_mock.subscription_parameters_service(),
     ):
-        _stub_service_create(mocker, parameter_service, product_related_data["parameters"])
+        parameter_service.create.return_value = service_create_result_factory(
+            product_related_data["parameters"]
+        )
     add_collection_spy = mocker.spy(DataCollectionModel, "add")
 
     result = runner.invoke(product_app, ["sync", str(product_new_file)], input="y\n")

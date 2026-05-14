@@ -9,22 +9,133 @@ from openpyxl.reader.excel import load_workbook
 from typer.testing import CliRunner
 
 runner = CliRunner()
+PRODUCT_ID = "PRD-0232-2541"
+EXPECTED_PRODUCT_SHEETS = (
+    "General",
+    "Settings",
+    "Items",
+    "Items Groups",
+    "Parameters Groups",
+    "Agreements Parameters",
+    "Assets Parameters",
+    "Item Parameters",
+    "Request Parameters",
+    "Subscription Parameters",
+    "Templates",
+)
+EXPECTED_PRODUCT_MAIN_SHEET_VALUES = (
+    ("General", 12, (("A1", "General Information"), ("A2", "Product ID"), ("B2", PRODUCT_ID))),
+    (
+        "Settings",
+        12,
+        (("A1", "Setting"), ("A2", "Change order validation (draft)"), ("C2", "Enabled")),
+    ),
+)
+EXPECTED_PRODUCT_ID_ROWS = (
+    ("Items", "ITM-0232-2541-0001"),
+    ("Items Groups", "IGR-0232-2541-0001"),
+    ("Parameters Groups", "PGR-0232-2541-0002"),
+    ("Agreements Parameters", "PAR-0232-2541-0001"),
+    ("Assets Parameters", "PAR-0232-2541-0027"),
+    ("Item Parameters", "PAR-0232-2541-0022"),
+    ("Request Parameters", "PAR-0232-2541-0012"),
+    ("Subscription Parameters", "PAR-0232-2541-0023"),
+    ("Templates", "TPL-0232-2541-0005"),
+)
 
 
-def make_collection(mocker, data_list):
-    collection = mocker.MagicMock(spec=ModelCollection)
-    collection.meta = mocker.MagicMock(spec=ClientMeta)
-    collection.meta.pagination = mocker.MagicMock(spec=Pagination)
-    collection.meta.pagination.limit = 100
-    collection.meta.pagination.offset = 0
-    collection.meta.pagination.total = len(data_list)
-    resources = []
-    for resource_data in data_list:
-        resource = mocker.MagicMock(spec=Model)
-        resource.to_dict.return_value = resource_data
-        resources.append(resource)
-    collection.resources = resources
-    return collection
+class FakeModelCollectionFactory:
+    def __init__(self, mocker):
+        self.mocker = mocker
+
+    def __call__(self, data_list):
+        collection = self.mocker.MagicMock(spec=ModelCollection)
+        collection.meta = self.mocker.MagicMock(spec=ClientMeta)
+        collection.meta.pagination = self.mocker.MagicMock(spec=Pagination)
+        collection.meta.pagination.limit = 100
+        collection.meta.pagination.offset = 0
+        collection.meta.pagination.total = len(data_list)
+        collection.resources = []
+        for resource_data in data_list:
+            resource = self.mocker.MagicMock(spec=Model)
+            resource.to_dict.return_value = resource_data
+            collection.resources.append(resource)
+        return collection
+
+
+@pytest.fixture
+def model_collection_factory(mocker):
+    return FakeModelCollectionFactory(mocker)
+
+
+@pytest.fixture
+def product_catalog(account_container_mock):
+    return account_container_mock.api_mpt_client().catalog.products
+
+
+@pytest.fixture
+def catalog_items(account_container_mock):
+    return account_container_mock.api_mpt_client().catalog.items
+
+
+@pytest.fixture
+def product_parameters(product_catalog):
+    return product_catalog.parameters.return_value
+
+
+@pytest.fixture
+def export_product_resource(mocker, product_catalog, mpt_product_data):
+    product_resource = mocker.MagicMock(spec=Model)
+    product_resource.to_dict.return_value = mpt_product_data
+    product_catalog.get.return_value = product_resource
+
+
+@pytest.fixture
+def export_product_related_resources(
+    catalog_items,
+    product_catalog,
+    product_parameters,
+    product_related_data,
+    model_collection_factory,
+):
+    items_select = catalog_items.filter.return_value.select
+    item_groups_select = product_catalog.item_groups.return_value.select
+    parameter_groups_select = product_catalog.parameter_groups.return_value.select
+    parameters_select = product_parameters.filter.return_value.select
+    templates_select = product_catalog.templates.return_value.select
+    items_select.return_value.fetch_page.return_value = model_collection_factory([
+        product_related_data["mpt_item"]
+    ])
+    item_groups_select.return_value.fetch_page.return_value = model_collection_factory([
+        product_related_data["mpt_item_group"]
+    ])
+    parameter_groups_select.return_value.fetch_page.return_value = model_collection_factory([
+        product_related_data["mpt_parameter_group"]
+    ])
+    parameters_select.return_value.fetch_page.side_effect = [
+        model_collection_factory([product_related_data["mpt_agreement_parameter"]]),
+        model_collection_factory([product_related_data["mpt_asset_parameter"]]),
+        model_collection_factory([product_related_data["mpt_item_parameter"]]),
+        model_collection_factory([product_related_data["mpt_request_parameter"]]),
+        model_collection_factory([product_related_data["mpt_subscription_parameter"]]),
+    ]
+    templates_select.return_value.fetch_page.return_value = model_collection_factory([
+        product_related_data["mpt_template"]
+    ])
+
+
+@pytest.fixture
+def exported_product_workbook(tmp_path, export_product_resource, export_product_related_resources):
+    result = runner.invoke(
+        product_app, ["export", PRODUCT_ID, "--out", str(tmp_path)], input="y\ny\n"
+    )
+    product_path = tmp_path / f"{PRODUCT_ID}.xlsx"
+
+    assert result.exit_code == 0, result.stdout
+    assert product_path.exists()
+    workbook = load_workbook(product_path)
+    yield workbook
+    workbook.close()
 
 
 def test_export_skipped_when_user_declines(mocker, product_container_mock):
@@ -55,14 +166,10 @@ def test_export_product_error_exporting_product(mocker, product_container_mock):
     assert result.exit_code == 3, result.stdout
 
 
-def test_export_product_overwrites_existing_files(
-    mocker,
-    tmp_path,
-    product_container_mock,
-):
-    exists_mock = mocker.patch.object(Path, "exists", return_value=True)
-    unlink_mock = mocker.patch.object(Path, "unlink", return_value=True)
-    replace_mock = mocker.patch.object(Path, "replace")
+def test_export_product_overwrites_existing_files(mocker, tmp_path, product_container_mock):
+    mocker.patch.object(Path, "exists", return_value=True)
+    mocker.patch.object(Path, "unlink", return_value=True)
+    mocker.patch.object(Path, "replace")
     product_container_mock.stats.override(mocker.Mock(spec=ProductStatsCollector, has_errors=False))
     product_id = "PRD-1234"
     tmp_file = tmp_path / f"{product_id}.xlsx"
@@ -75,119 +182,35 @@ def test_export_product_overwrites_existing_files(
     )
 
     assert result.exit_code == 0, result.stdout
-    exists_mock.assert_called()
+    Path.exists.assert_called()
     assert tmp_file.exists()
-    unlink_mock.assert_called()
-    replace_mock.assert_called_once()
+    Path.unlink.assert_called()
+    Path.replace.assert_called_once()
     product_container_mock.product_service().export.assert_called_once()
 
 
 @pytest.mark.integration
-def test_export_product(
-    tmp_path,
-    mocker,
-    account_container_mock,
-    mpt_product_data,
-    product_related_data,
-):
-    mock_api_client = account_container_mock.api_mpt_client()
-    product_resource = mocker.MagicMock(spec=Model)
-    product_resource.to_dict.return_value = mpt_product_data
-    mock_api_client.catalog.products.get.return_value = product_resource
-    mock_items = mock_api_client.catalog.items
-    mock_items_select = mock_items.filter.return_value.select.return_value
-    mock_items_select.fetch_page.return_value = make_collection(
-        mocker, [product_related_data["mpt_item"]]
-    )
-    item_groups = mock_api_client.catalog.products.item_groups.return_value
-    item_groups.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [product_related_data["mpt_item_group"]]
-    )
-    parameter_groups = mock_api_client.catalog.products.parameter_groups.return_value
-    parameter_groups.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [product_related_data["mpt_parameter_group"]]
-    )
-    params_service = mock_api_client.catalog.products.parameters.return_value
-    params_service_select = params_service.filter.return_value.select.return_value
-    params_service_select.fetch_page.side_effect = [
-        make_collection(mocker, [product_related_data["mpt_agreement_parameter"]]),
-        make_collection(mocker, [product_related_data["mpt_asset_parameter"]]),
-        make_collection(mocker, [product_related_data["mpt_item_parameter"]]),
-        make_collection(mocker, [product_related_data["mpt_request_parameter"]]),
-        make_collection(mocker, [product_related_data["mpt_subscription_parameter"]]),
-    ]
-    products_templates = mock_api_client.catalog.products.templates.return_value
-    products_templates.select.return_value.fetch_page.return_value = make_collection(
-        mocker, [product_related_data["mpt_template"]]
-    )
-    product_id = "PRD-0232-2541"
+def test_export_product(exported_product_workbook):
+    sheet_names = exported_product_workbook.sheetnames  # act
 
-    result = runner.invoke(
-        product_app, ["export", product_id, "--out", str(tmp_path)], input="y\ny\n"
-    )
+    assert sheet_names == list(EXPECTED_PRODUCT_SHEETS)
 
-    assert result.exit_code == 0, result.stdout
-    product_path = tmp_path / f"{product_id}.xlsx"
-    assert product_path.exists()
-    wb = load_workbook(product_path)
-    expected_sheets = [
-        "General",
-        "Settings",
-        "Items",
-        "Items Groups",
-        "Parameters Groups",
-        "Agreements Parameters",
-        "Assets Parameters",
-        "Item Parameters",
-        "Request Parameters",
-        "Subscription Parameters",
-        "Templates",
-    ]
-    assert wb.sheetnames == expected_sheets
-    general_sheet = wb["General"]
-    assert general_sheet.max_row == 12
-    assert general_sheet["A1"].value == "General Information"
-    assert general_sheet["A2"].value == "Product ID"
-    assert general_sheet["B2"].value == product_id
-    settings_sheet = wb["Settings"]
-    assert settings_sheet.max_row == 12
-    assert settings_sheet["A1"].value == "Setting"
-    assert settings_sheet["A2"].value == "Change order validation (draft)"
-    assert settings_sheet["C2"].value == "Enabled"
-    items_sheet = wb["Items"]
-    assert items_sheet.max_row == 2
-    assert items_sheet["A1"].value == "ID"
-    assert items_sheet["A2"].value == "ITM-0232-2541-0001"
-    items_groups_sheet = wb["Items Groups"]
-    assert items_groups_sheet.max_row == 2
-    assert items_groups_sheet["A1"].value == "ID"
-    assert items_groups_sheet["A2"].value == "IGR-0232-2541-0001"
-    parameters_groups_sheet = wb["Parameters Groups"]
-    assert parameters_groups_sheet.max_row == 2
-    assert parameters_groups_sheet["A1"].value == "ID"
-    assert parameters_groups_sheet["A2"].value == "PGR-0232-2541-0002"
-    agreements_params_sheet = wb["Agreements Parameters"]
-    assert agreements_params_sheet.max_row == 2
-    assert agreements_params_sheet["A1"].value == "ID"
-    assert agreements_params_sheet["A2"].value == "PAR-0232-2541-0001"
-    assets_params_sheet = wb["Assets Parameters"]
-    assert assets_params_sheet.max_row == 2
-    assert assets_params_sheet["A1"].value == "ID"
-    assert assets_params_sheet["A2"].value == "PAR-0232-2541-0027"
-    item_params_sheet = wb["Item Parameters"]
-    assert item_params_sheet.max_row == 2
-    assert item_params_sheet["A1"].value == "ID"
-    assert item_params_sheet["A2"].value == "PAR-0232-2541-0022"
-    request_params_sheet = wb["Request Parameters"]
-    assert request_params_sheet.max_row == 2
-    assert request_params_sheet["A1"].value == "ID"
-    assert request_params_sheet["A2"].value == "PAR-0232-2541-0012"
-    subscription_parameter_sheet = wb["Subscription Parameters"]
-    assert subscription_parameter_sheet.max_row == 2
-    assert subscription_parameter_sheet["A1"].value == "ID"
-    assert subscription_parameter_sheet["A2"].value == "PAR-0232-2541-0023"
-    templates_sheet = wb["Templates"]
-    assert templates_sheet.max_row == 2
-    assert templates_sheet["A1"].value == "ID"
-    assert templates_sheet["A2"].value == "TPL-0232-2541-0005"
-    wb.close()
+
+@pytest.mark.integration
+def test_export_product_main_sheet_values(exported_product_workbook):
+    main_sheet_values = EXPECTED_PRODUCT_MAIN_SHEET_VALUES  # act
+
+    for sheet_values in main_sheet_values:
+        assert exported_product_workbook[sheet_values[0]].max_row == sheet_values[1]
+        for cell_name, expected_value in sheet_values[2]:
+            assert exported_product_workbook[sheet_values[0]][cell_name].value == expected_value
+
+
+@pytest.mark.integration
+def test_export_product_related_sheet_values(exported_product_workbook):
+    id_rows = EXPECTED_PRODUCT_ID_ROWS  # act
+
+    for id_row in id_rows:
+        assert exported_product_workbook[id_row[0]].max_row == 2
+        assert exported_product_workbook[id_row[0]]["A1"].value == "ID"
+        assert exported_product_workbook[id_row[0]]["A2"].value == id_row[1]
