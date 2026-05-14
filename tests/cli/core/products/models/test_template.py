@@ -1,5 +1,3 @@
-import datetime as dt
-
 from cli.core.products.constants import (
     TEMPLATES_ACTION,
     TEMPLATES_CONTENT,
@@ -16,29 +14,39 @@ from cli.core.products.models import DataActionEnum, TemplateData
 def test_template_data_from_dict(template_file_data):
     result = TemplateData.from_dict(template_file_data)
 
-    assert result.id == "TPL-0232-2541-0005"
-    assert result.coordinate == "A3"
-    assert result.action == "-"
-    assert result.name == "BulkMigrate"
-    assert result.type == "OrderCompleted"
-    assert result.template_content == "Querying template for Adobe VIP Marketplace"
-    assert result.content_coordinate == "F3"
-    assert result.default is False
+    expected_data = {
+        "id": "TPL-0232-2541-0005",
+        "coordinate": "A3",
+        "action": "-",
+        "name": "BulkMigrate",
+        "type": "OrderCompleted",
+        "template_content": "Querying template for Adobe VIP Marketplace",
+        "content_coordinate": "F3",
+        "default": False,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
-def test_template_data_from_json(mpt_template_data):
+def test_template_data_from_json(date_factory, mpt_template_data):
     result = TemplateData.from_json(mpt_template_data)
 
-    assert result.id == "TPL-0232-2541-0005"
-    assert result.name == "Default Processing Template"
-    assert result.type == "OrderProcessing"
-    assert result.template_content == (
-        "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
-        "we are working on your order."
-    )
-    assert result.default is False
-    assert result.created_date == dt.date(2024, 4, 8)
-    assert result.updated_date == dt.date(2024, 5, 3)
+    expected_data = {
+        "id": "TPL-0232-2541-0005",
+        "name": "Default Processing Template",
+        "type": "OrderProcessing",
+        "template_content": (
+            "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while "
+            "we are working on your order."
+        ),
+        "default": False,
+        "created_date": date_factory("2024-04-08"),
+        "updated_date": date_factory("2024-05-03"),
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_template_data_to_json(template_data_from_dict):
@@ -74,7 +82,7 @@ def test_template_data_to_json(template_data_from_dict):
     }
 
 
-def test_template_to_xlsx(template_data_from_json):
+def test_template_to_xlsx(date_factory, template_data_from_json):
     result = template_data_from_json.to_xlsx()
 
     assert result == {
@@ -87,6 +95,6 @@ def test_template_to_xlsx(template_data_from_json):
             "#Thanks you for your order  Sit back and enjoy {{ PAR-0232-2541-0002 }} while we "
             "are working on your order."
         ),
-        TEMPLATES_CREATED: dt.date(2024, 4, 8),
-        TEMPLATES_MODIFIED: dt.date(2024, 5, 3),
+        TEMPLATES_CREATED: date_factory("2024-04-08"),
+        TEMPLATES_MODIFIED: date_factory("2024-05-03"),
     }

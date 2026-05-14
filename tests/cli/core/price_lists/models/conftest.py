@@ -1,11 +1,9 @@
-import datetime as dt
-
 import pytest
 from cli.core.price_lists import constants as price_list_constants
 
 
 @pytest.fixture
-def price_list_file_data():
+def price_list_file_data(datetime_factory):
     return {
         price_list_constants.GENERAL_PRICELIST_ID: {"value": "PL-1", "coordinate": "B3"},
         price_list_constants.GENERAL_CURRENCY: {"value": "USD", "coordinate": "B4"},
@@ -17,18 +15,18 @@ def price_list_file_data():
         price_list_constants.GENERAL_VENDOR_ID: {"value": "fake_vendor_id", "coordinate": "B7"},
         price_list_constants.GENERAL_VENDOR_NAME: {"value": "Test Vendor Name", "coordinate": "B8"},
         price_list_constants.GENERAL_EXPORT_DATE: {
-            "value": dt.datetime(2024, 6, 1, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-06-01T00:00:00+00:00"),
             "coordinate": "B9",
         },
         price_list_constants.GENERAL_PRECISION: {"value": 2, "coordinate": "B10"},
         price_list_constants.GENERAL_DEFAULT_MARKUP: {"value": 10, "coordinate": "B11"},
         price_list_constants.GENERAL_NOTES: {"value": "Test notes", "coordinate": "B12"},
         price_list_constants.GENERAL_CREATED: {
-            "value": dt.datetime(2024, 6, 1, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2024-06-01T00:00:00+00:00"),
             "coordinate": "B13",
         },
         price_list_constants.GENERAL_MODIFIED: {
-            "value": dt.datetime(2025, 2, 10, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-02-10T00:00:00+00:00"),
             "coordinate": "B14",
         },
         "type": "operations",
@@ -40,7 +38,7 @@ def price_list_file_data():
 
 
 @pytest.fixture
-def item_file_data():
+def item_file_data(datetime_factory):
     return {
         price_list_constants.PRICELIST_ITEMS_ID: {
             "value": "PRI-3969-9403-0001-0035",
@@ -68,15 +66,15 @@ def item_file_data():
         },
         price_list_constants.PRICELIST_ITEMS_COMMITMENT: {"value": "1y", "coordinate": "G325"},
         price_list_constants.PRICELIST_ITEMS_ACTION: {"value": "update", "coordinate": "H325"},
-        price_list_constants.PRICELIST_ITEMS_UNIT_LP: {"value": 119.88, "coordinate": "I325"},
-        price_list_constants.PRICELIST_ITEMS_UNIT_PP: {"value": 107.88, "coordinate": "J325"},
+        price_list_constants.PRICELIST_ITEMS_UNIT_LP: {"value": 1.0, "coordinate": "I325"},
+        price_list_constants.PRICELIST_ITEMS_UNIT_PP: {"value": 1.0, "coordinate": "J325"},
         price_list_constants.PRICELIST_ITEMS_MARKUP: {
-            "value": 11.1111111111111,
+            "value": 0.1,
             "coordinate": "K325",
         },
         price_list_constants.PRICELIST_ITEMS_STATUS: {"value": "Draft", "coordinate": "L325"},
         price_list_constants.PRICELIST_ITEMS_MODIFIED: {
-            "value": dt.datetime(2025, 5, 23, 0, 0, tzinfo=dt.UTC),
+            "value": datetime_factory("2025-05-23T00:00:00+00:00"),
             "coordinate": "M325",
         },
     }

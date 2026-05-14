@@ -1,48 +1,58 @@
-import datetime as dt
-
 from cli.core.products import constants as product_constants
 from cli.core.products.models import DataActionEnum
 from cli.core.products.models.product import ProductData, SettingsData, SettingsRecords
 from freezegun import freeze_time
 
+SETTINGS_RECORDS_COUNT = 11
+
 
 def test_product_data_from_dict(product_file_data):
     result = ProductData.from_dict(product_file_data)
 
-    assert result.id == "PRD-1234-1234-1234"
-    assert result.coordinate == "B3"
-    assert result.name == "Test Product Name"
-    assert result.short_description == "Catalog description"
-    assert result.long_description == "Product description"
-    assert result.website == "https://example.com"
+    expected_data = {
+        "id": "PRD-1234-1234-1234",
+        "coordinate": "B3",
+        "name": "Test Product Name",
+        "short_description": "Catalog description",
+        "long_description": "Product description",
+        "website": "https://example.com",
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
-def test_product_data_from_json(mpt_product_data):
+def test_product_data_from_json(date_factory, mpt_product_data):
     with freeze_time("2025-05-30"):
         result = ProductData.from_json(mpt_product_data)
 
-    assert result.id == "PRD-0232-2541"
-    assert result.name == "Adobe VIP Marketplace for Commercial"
-    assert result.account_id == "ACC-9226-9856"
-    assert result.account_name == "Adobe"
-    assert result.short_description == (
-        "Adobe's groundbreaking innovations empower everyone, everywhere to imagine, "
-        "create, and bring any digital experience to life."
-    )
-    assert result.long_description == (
-        "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwM"
-        "C9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"
-        "PSJub25lIj4KICA8cGF0aCBkPSJNMTcuNzYyOCAzSDBWNDUuNDU4MkwxNy43NjI4IDNaIiB"
-        "maWxsPSIjRkEwQzAwIi8+CiAgPHBhdGggZD0iTTMwLjI2MDQgM0g0OFY0NS40NTgyTDMwLj"
-        "I2MDQgM1oiIGZpbGw9IiNGQTBDMDAiLz4KICA8cGF0aCBkPSJNMjQuMDExNiAxOC42NDg2T"
-        "DM1LjMxNzMgNDUuNDU4MkgyNy44OTk3TDI0LjUyMDggMzYuOTIyNkgxNi4yNDY5TDI0LjAx"
-        "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
-    )
-    assert result.website == "https://www.adobe.com/"
-    assert result.export_date == dt.date(2025, 5, 30)
-    assert result.status == "Unpublished"
-    assert result.created_date == dt.date(2024, 3, 19)
-    assert result.updated_date == dt.date(2025, 6, 3)
+    expected_data = {
+        "id": "PRD-0232-2541",
+        "name": "Adobe VIP Marketplace for Commercial",
+        "account_id": "ACC-9226-9856",
+        "account_name": "Adobe",
+        "short_description": (
+            "Adobe's groundbreaking innovations empower everyone, everywhere to imagine, "
+            "create, and bring any digital experience to life."
+        ),
+        "long_description": (
+            "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwM"
+            "C9zdmciIHdpZHRoPSI0OCIgaGVpZ2h0PSI0OCIgdmlld0JveD0iMCAwIDQ4IDQ4IiBmaWxs"
+            "PSJub25lIj4KICA8cGF0aCBkPSJNMTcuNzYyOCAzSDBWNDUuNDU4MkwxNy43NjI4IDNaIiB"
+            "maWxsPSIjRkEwQzAwIi8+CiAgPHBhdGggZD0iTTMwLjI2MDQgM0g0OFY0NS40NTgyTDMwLj"
+            "I2MDQgM1oiIGZpbGw9IiNGQTBDMDAiLz4KICA8cGF0aCBkPSJNMjQuMDExNiAxOC42NDg2T"
+            "DM1LjMxNzMgNDUuNDU4MkgyNy44OTk3TDI0LjUyMDggMzYuOTIyNkgxNi4yNDY5TDI0LjAx"
+            "MTYgMTguNjQ4NloiIGZpbGw9IiNGQTBDMDAiLz4KPC9zdmc+"
+        ),
+        "website": "https://www.adobe.com/",
+        "export_date": date_factory("2025-05-30"),
+        "status": "Unpublished",
+        "created_date": date_factory("2024-03-19"),
+        "updated_date": date_factory("2025-06-03"),
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
     assert result.settings is not None
 
 
@@ -57,7 +67,7 @@ def test_product_data_to_json(product_data_from_dict):
     }
 
 
-def test_product_to_xlsx(product_data_from_json):
+def test_product_to_xlsx(date_factory, product_data_from_json):
     result = product_data_from_json.to_xlsx()
 
     assert result == {
@@ -79,10 +89,10 @@ def test_product_to_xlsx(product_data_from_json):
         product_constants.GENERAL_PRODUCT_WEBSITE: "https://www.adobe.com/",
         product_constants.GENERAL_ACCOUNT_ID: "ACC-9226-9856",
         product_constants.GENERAL_ACCOUNT_NAME: "Adobe",
-        product_constants.GENERAL_EXPORT_DATE: dt.date(2025, 5, 30),
+        product_constants.GENERAL_EXPORT_DATE: date_factory("2025-05-30"),
         product_constants.GENERAL_STATUS: "Unpublished",
-        product_constants.GENERAL_CREATED: dt.date(2024, 3, 19),
-        product_constants.GENERAL_MODIFIED: dt.date(2025, 6, 3),
+        product_constants.GENERAL_CREATED: date_factory("2024-03-19"),
+        product_constants.GENERAL_MODIFIED: date_factory("2025-06-03"),
     }
 
 
@@ -96,19 +106,29 @@ def test_settings_data_from_dict(settings_file_data):
         product_constants.SETTINGS_VALUE: {"value": "Enabled", "coordinate": "C2"},
     })
 
-    assert len(result.records) == 1
     setting_item = result.records[0]
-    assert isinstance(setting_item, SettingsRecords)
-    assert setting_item.name == "Change order validation (draft)"
-    assert setting_item.setting_value == "Enabled"
-    assert setting_item.coordinate == "A2"
-    assert result.json_path is None
+    expected_data = {
+        "records_length": len(result.records),
+        "record_type": isinstance(setting_item, SettingsRecords),
+        "name": setting_item.name,
+        "setting_value": setting_item.setting_value,
+        "coordinate": setting_item.coordinate,
+        "json_path": result.json_path,
+    }
+    assert expected_data == {
+        "records_length": 1,
+        "record_type": True,
+        "name": "Change order validation (draft)",
+        "setting_value": "Enabled",
+        "coordinate": "A2",
+        "json_path": None,
+    }
 
 
 def test_settings_data_from_json(mpt_product_data):
     result = SettingsData.from_json(mpt_product_data["settings"])
 
-    assert len(result.records) == 11
+    assert len(result.records) == SETTINGS_RECORDS_COUNT
     assert isinstance(result.records[0], SettingsRecords)
     assert result.json_path is None
 

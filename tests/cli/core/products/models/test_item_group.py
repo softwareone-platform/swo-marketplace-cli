@@ -1,5 +1,3 @@
-import datetime as dt
-
 from cli.core.products import constants as product_constants
 from cli.core.products.models import ItemGroupData
 
@@ -7,30 +5,40 @@ from cli.core.products.models import ItemGroupData
 def test_item_group_data_from_dict(item_group_file_data):
     result = ItemGroupData.from_dict(item_group_file_data)
 
-    assert result.id == "IGR-0232-2541-0001"
-    assert result.name == "Items"
-    assert result.action == "-"
-    assert result.label == "Items"
-    assert result.display_order == 100
-    assert result.description == "Default item group"
-    assert result.default is True
-    assert result.multiple is True
-    assert result.required is True
+    expected_data = {
+        "id": "IGR-0232-2541-0001",
+        "name": "Items",
+        "action": "-",
+        "label": "Items",
+        "display_order": 100,
+        "description": "Default item group",
+        "default": True,
+        "multiple": True,
+        "required": True,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
-def test_item_group_data_from_json(mpt_item_group_data):
+def test_item_group_data_from_json(date_factory, mpt_item_group_data):
     result = ItemGroupData.from_json(mpt_item_group_data)
 
-    assert result.id == "IGR-0232-2541-0001"
-    assert result.name == "Items"
-    assert result.label == "Items"
-    assert result.description == "Default item group"
-    assert result.display_order == 100
-    assert result.default is True
-    assert result.multiple is True
-    assert result.required is True
-    assert result.created_date == dt.date(2024, 3, 19)
-    assert result.updated_date is None
+    expected_data = {
+        "id": "IGR-0232-2541-0001",
+        "name": "Items",
+        "label": "Items",
+        "description": "Default item group",
+        "display_order": 100,
+        "default": True,
+        "multiple": True,
+        "required": True,
+        "created_date": date_factory("2024-03-19"),
+        "updated_date": None,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_item_group_data_to_json(item_group_data_from_dict):
@@ -57,7 +65,7 @@ def test_item_group_data_to_json(item_group_data_from_dict):
     }
 
 
-def test_item_group_to_xlsx(item_group_data_from_json):
+def test_item_group_to_xlsx(date_factory, item_group_data_from_json):
     result = item_group_data_from_json.to_xlsx()
 
     assert result == {
@@ -70,6 +78,6 @@ def test_item_group_to_xlsx(item_group_data_from_json):
         product_constants.ITEMS_GROUPS_DEFAULT: "True",
         product_constants.ITEMS_GROUPS_MULTIPLE_CHOICES: "True",
         product_constants.ITEMS_GROUPS_REQUIRED: "True",
-        product_constants.ITEMS_GROUPS_CREATED: dt.date(2024, 3, 19),
+        product_constants.ITEMS_GROUPS_CREATED: date_factory("2024-03-19"),
         product_constants.ITEMS_GROUPS_MODIFIED: None,
     }

@@ -12,49 +12,59 @@ def test_item_action_from_raw_none():
 def test_item_data_from_dict(item_file_data):
     result = ItemData.from_dict(item_file_data)
 
-    assert result.id == "PRI-3969-9403-0001-0035"
-    assert result.coordinate == "A325"
-    assert result.billing_frequency == "1y"
-    assert result.commitment == "1y"
-    assert result.erp_id == "30006419CB"
-    assert result.item_id == "ITM-9939-6700-0280"
-    assert result.item_name == "XD for Teams; existing XD customers only.;"
-    assert math.isclose(result.markup, 11.1111111111111)
-    assert result.status == ItemStatus.DRAFT
-    assert math.isclose(result.unit_lp, 119.88)
-    assert math.isclose(result.unit_pp, 107.88)
-    assert result.unit_sp is None
-    assert result.vendor_id == "AO03.25842.MN"
-    assert result.action == ItemAction.UPDATE
-    assert result.type is None
+    expected_data = {
+        "id": "PRI-3969-9403-0001-0035",
+        "coordinate": "A325",
+        "billing_frequency": "1y",
+        "commitment": "1y",
+        "erp_id": "30006419CB",
+        "item_id": "ITM-9939-6700-0280",
+        "item_name": "XD for Teams; existing XD customers only.;",
+        "markup": 0.1,
+        "status": ItemStatus.DRAFT,
+        "unit_lp": 1.0,
+        "unit_pp": 1.0,
+        "unit_sp": None,
+        "vendor_id": "AO03.25842.MN",
+        "action": ItemAction.UPDATE,
+        "type": None,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_item_data_from_json(mpt_item_data):
     result = ItemData.from_json(mpt_item_data)
 
-    assert result.id == "PRI-0232-2541-0002-0002"
-    assert result.coordinate is None
-    assert result.billing_frequency == "1y"
-    assert result.commitment == "1y"
-    assert result.erp_id == "1234567"
-    assert result.item_id == "ITM-0232-2541-0002"
-    assert result.item_name == "Creative Cloud All Apps with Adobe Stock (10 assets per month)"
-    assert math.isclose(result.markup, 123.0)
-    assert result.status == ItemStatus.FOR_SALE
-    assert math.isclose(result.unit_lp, 123.0)
-    assert math.isclose(result.unit_pp, 123.0)
-    assert math.isclose(result.unit_sp, 9328.85)
-    assert result.vendor_id == "65322587CA"
-    assert result.action == ItemAction.SKIP
-    assert result.modified_date is None
-    assert result.type is None
+    expected_data = {
+        "id": "PRI-0232-2541-0002-0002",
+        "coordinate": None,
+        "billing_frequency": "1y",
+        "commitment": "1y",
+        "erp_id": "1234567",
+        "item_id": "ITM-0232-2541-0002",
+        "item_name": "Creative Cloud All Apps with Adobe Stock (10 assets per month)",
+        "markup": 1.0,
+        "status": ItemStatus.FOR_SALE,
+        "unit_lp": 1.0,
+        "unit_pp": 1.0,
+        "unit_sp": 1.0,
+        "vendor_id": "65322587CA",
+        "action": ItemAction.SKIP,
+        "modified_date": None,
+        "type": None,
+    }
+    assert {
+        field_name: getattr(result, field_name) for field_name in expected_data
+    } == expected_data
 
 
 def test_item_data_to_json(item_data_from_dict):
     result = item_data_from_dict.to_json()
 
-    assert math.isclose(result["unitLP"], 10.28)
-    assert math.isclose(result["unitPP"], 12.1)
-    assert math.isclose(result["markup"], 0.15)
-    assert math.isclose(result["unitSP"], 10.55)
+    assert math.isclose(result["unitLP"], 1.0)
+    assert math.isclose(result["unitPP"], 1.0)
+    assert math.isclose(result["markup"], 0.1)
+    assert math.isclose(result["unitSP"], 1.0)
     assert result["status"] == ItemStatus.FOR_SALE
