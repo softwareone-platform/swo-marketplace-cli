@@ -41,6 +41,13 @@ def existing_product_file(product_new_file, existing_product_sync):
     return product_new_file
 
 
+@pytest.fixture
+def product_update_container(mocker, product_container_mock, existing_product_sync):
+    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
+    mocker.patch("cli.core.products.app.sync.stats_table_renderer.render", return_value="")
+    return product_container_mock
+
+
 def test_sync_not_valid_definition(mocker, product_container_mock):
     product_container_mock.product_service().validate_definition.return_value = ServiceResult(
         success=False, model=None, stats=mocker.Mock()
@@ -64,26 +71,26 @@ def test_sync_with_dry_run(mocker, product_container_mock):
     product_container_mock.product_service().update.assert_not_called()
 
 
-def test_sync_product_update_runs_update_flow(
-    mocker, product_container_mock, existing_product_sync
-):
-    mocker.patch.object(ProductStatsCollector, "has_errors", new=False)
-    mocker.patch("cli.core.products.app.sync.stats_table_renderer.render", return_value="")
+def test_sync_product_update_runs_update_flow(product_update_container):
+    updated_services = (
+        product_update_container.item_service(),
+        product_update_container.item_group_service(),
+        product_update_container.template_service(),
+        product_update_container.parameter_group_service(),
+        product_update_container.agreement_parameters_service(),
+        product_update_container.asset_parameters_service(),
+        product_update_container.item_parameters_service(),
+        product_update_container.request_parameters_service(),
+        product_update_container.subscription_parameters_service(),
+    )
 
     result = runner.invoke(product_app, ["sync", "fake_file.xlsx"], input="y\n")
 
     assert result.exit_code == 0, result.stdout
     assert "Do you want to update product" in result.stdout
-    product_container_mock.product_service().update.assert_called_once()
-    product_container_mock.item_service().update.assert_called_once()
-    product_container_mock.item_group_service().update.assert_called_once()
-    product_container_mock.template_service().update.assert_called_once()
-    product_container_mock.parameter_group_service().update.assert_called_once()
-    product_container_mock.agreement_parameters_service().update.assert_called_once()
-    product_container_mock.asset_parameters_service().update.assert_called_once()
-    product_container_mock.item_parameters_service().update.assert_called_once()
-    product_container_mock.request_parameters_service().update.assert_called_once()
-    product_container_mock.subscription_parameters_service().update.assert_called_once()
+    product_update_container.product_service().update.assert_called_once()
+    for service in updated_services:
+        service.update.assert_called_once()
 
 
 def test_sync_product_update_with_errors(mocker, product_container_mock, existing_product_sync):

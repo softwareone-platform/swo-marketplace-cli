@@ -69,6 +69,20 @@ def related_components_service(service_context):
     return FakeRelatedComponentsService(service_context)
 
 
+@pytest.fixture
+def related_components_export_error(mocker, service_context):
+    mocker.patch.object(service_context.file_manager, "create_tab")
+    mocker.patch.object(
+        service_context.api,
+        "list",
+        side_effect=MPTAPIError("API Error", "Error getting parameters"),
+    )
+    mocker.patch.object(service_context.file_manager, "write_error")
+    mocker.patch.object(service_context.stats, "add_error")
+    mocker.spy(service_context.file_manager, "add")
+    return service_context
+
+
 def test_create(mocker, service_context, related_components_service, mpt_agreement_parameter_data):
     data_model_mock = FakeDataModel()
     new_item_mock = {"id": "new_fake_id"}
@@ -129,28 +143,17 @@ def test_export(mocker, service_context, related_components_service, mpt_agreeme
     add_mock.assert_called_once()
 
 
-def test_export_error(
-    mocker, service_context, related_components_service, mpt_agreement_parameter_data
-):
-    mocker.patch.object(service_context.file_manager, "create_tab")
-    mocker.patch.object(
-        service_context.api,
-        "list",
-        side_effect=MPTAPIError("API Error", "Error getting parameters"),
-    )
-    mocker.patch.object(service_context.file_manager, "write_error")
-    mocker.patch.object(service_context.stats, "add_error")
-    mocker.spy(service_context.file_manager, "add")
+def test_export_error(related_components_export_error, related_components_service):
 
     result = related_components_service.export()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error getting parameters"]
-    service_context.file_manager.create_tab.assert_called_once()
-    service_context.api.list.assert_called_once()
-    service_context.stats.add_error.assert_called_once_with("fake_tab_name")
-    service_context.file_manager.write_error.assert_called_once()
-    service_context.file_manager.add.assert_not_called()
+    related_components_export_error.file_manager.create_tab.assert_called_once()
+    related_components_export_error.api.list.assert_called_once()
+    related_components_export_error.stats.add_error.assert_called_once_with("fake_tab_name")
+    related_components_export_error.file_manager.write_error.assert_called_once()
+    related_components_export_error.file_manager.add.assert_not_called()
 
 
 def test_update_action_skip(mocker, service_context, related_components_service):

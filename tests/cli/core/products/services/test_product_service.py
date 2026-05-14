@@ -30,7 +30,8 @@ def product_service(service_context):
     return ProductService(service_context)
 
 
-def test_create(mocker, service_context, product_service, mpt_product_data, product_data_from_dict):
+@pytest.fixture
+def product_create_flow(mocker, service_context, mpt_product_data, product_data_from_dict):
     mocker.patch.object(
         service_context.file_manager, "read_data", return_value=product_data_from_dict
     )
@@ -38,17 +39,65 @@ def test_create(mocker, service_context, product_service, mpt_product_data, prod
     mocker.patch.object(service_context.api, "update")
     mocker.patch.object(service_context.file_manager, "write_ids")
     mocker.spy(service_context.stats, "add_synced")
+    return service_context
+
+
+@pytest.fixture
+def product_create_update_error_flow(
+    mocker, service_context, mpt_product_data, product_data_from_dict
+):
+    mocker.patch.object(
+        service_context.file_manager, "read_data", return_value=product_data_from_dict
+    )
+    mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
+    mocker.patch.object(
+        service_context.api,
+        "update",
+        side_effect=MPTAPIError("API Error", "Error creating product"),
+    )
+    mocker.patch.object(service_context.file_manager, "write_error")
+    mocker.spy(service_context.stats, "add_error")
+    return service_context
+
+
+@pytest.fixture
+def product_export_flow(mocker, service_context, mpt_product_data):
+    mocker.patch.object(service_context.api, "get", return_value=mpt_product_data)
+    mocker.patch.object(service_context.file_manager, "create_tab")
+    mocker.patch.object(service_context.file_manager, "add")
+    mocker.patch.object(SettingsExcelFileManager, "create_tab")
+    mocker.patch.object(SettingsExcelFileManager, "add")
+    return service_context
+
+
+@pytest.fixture
+def product_update_error_flow(mocker, service_context, product_data_from_dict):
+    mocker.patch.object(service_context.file_manager, "read_data", return_value=Mock(id=None))
+    mocker.patch.object(
+        SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
+    )
+    mocker.patch.object(
+        service_context.api,
+        "update",
+        side_effect=MPTAPIError("API Error", "Error updating product"),
+    )
+    mocker.spy(service_context.stats, "add_error")
+    mocker.patch.object(service_context.file_manager, "write_error")
+    return service_context
+
+
+def test_create(product_create_flow, product_service, product_data_from_dict):
 
     result = product_service.create()
 
     assert result.success is True
-    service_context.file_manager.read_data.assert_called_once()
-    service_context.stats.add_synced.assert_called_once_with(TAB_GENERAL)
-    service_context.file_manager.write_ids.assert_called_once_with({
+    product_create_flow.file_manager.read_data.assert_called_once()
+    product_create_flow.stats.add_synced.assert_called_once_with(TAB_GENERAL)
+    product_create_flow.file_manager.write_ids.assert_called_once_with({
         "B3": product_data_from_dict.id
     })
-    service_context.api.post.assert_called_once()
-    service_context.api.update.assert_called_once()
+    product_create_flow.api.post.assert_called_once()
+    product_create_flow.api.update.assert_called_once()
 
 
 def test_create_post_error(mocker, service_context, product_service, product_data_from_dict):
@@ -74,46 +123,28 @@ def test_create_post_error(mocker, service_context, product_service, product_dat
     file_handler_write_mock.assert_called_once()
 
 
-def test_create_update_error(
-    mocker, service_context, product_service, mpt_product_data, product_data_from_dict
-):
-    mocker.patch.object(
-        service_context.file_manager, "read_data", return_value=product_data_from_dict
-    )
-    mocker.patch.object(service_context.api, "post", return_value=mpt_product_data)
-    mocker.patch.object(
-        service_context.api,
-        "update",
-        side_effect=MPTAPIError("API Error", "Error creating product"),
-    )
-    mocker.patch.object(service_context.file_manager, "write_error")
-    mocker.spy(service_context.stats, "add_error")
+def test_create_update_error(product_create_update_error_flow, product_service):
 
     result = product_service.create()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error creating product"]
     assert result.model is None
-    service_context.stats.add_error.assert_called_once_with(TAB_GENERAL)
-    service_context.file_manager.read_data.assert_called_once()
-    service_context.api.post.assert_called_once()
-    service_context.api.update.assert_called_once()
-    service_context.file_manager.write_error.assert_called_once()
+    product_create_update_error_flow.stats.add_error.assert_called_once_with(TAB_GENERAL)
+    product_create_update_error_flow.file_manager.read_data.assert_called_once()
+    product_create_update_error_flow.api.post.assert_called_once()
+    product_create_update_error_flow.api.update.assert_called_once()
+    product_create_update_error_flow.file_manager.write_error.assert_called_once()
 
 
-def test_export(mocker, service_context, product_service, mpt_product_data):
-    mocker.patch.object(service_context.api, "get", return_value=mpt_product_data)
-    mocker.patch.object(service_context.file_manager, "create_tab")
-    mocker.patch.object(service_context.file_manager, "add")
-    mocker.patch.object(SettingsExcelFileManager, "create_tab")
-    mocker.patch.object(SettingsExcelFileManager, "add")
+def test_export(product_export_flow, product_service):
 
     result = product_service.export({"product_id": "fake_id"})
 
     assert result.success is True
-    service_context.api.get.assert_called()
-    service_context.file_manager.create_tab.assert_called_once()
-    service_context.file_manager.add.assert_called_once()
+    product_export_flow.api.get.assert_called()
+    product_export_flow.file_manager.create_tab.assert_called_once()
+    product_export_flow.file_manager.add.assert_called_once()
     SettingsExcelFileManager.create_tab.assert_called_once()
     SettingsExcelFileManager.add.assert_called_once()
 
@@ -297,26 +328,15 @@ def test_update(mocker, service_context, product_service, product_data_from_dict
     api_update_mock.assert_called_once_with(product_data_from_dict.id, expected_data)
 
 
-def test_update_error(mocker, service_context, product_service, product_data_from_dict):
-    mocker.patch.object(service_context.file_manager, "read_data", return_value=Mock(id=None))
-    mocker.patch.object(
-        SettingsExcelFileManager, "read_data", return_value=iter([product_data_from_dict.settings])
-    )
-    mocker.patch.object(
-        service_context.api,
-        "update",
-        side_effect=MPTAPIError("API Error", "Error updating product"),
-    )
-    mocker.spy(service_context.stats, "add_error")
-    mocker.patch.object(service_context.file_manager, "write_error")
+def test_update_error(product_update_error_flow, product_service):
 
     result = product_service.update()
 
     assert result.success is False
     assert result.errors == ["API Error with response body Error updating product"]
     assert result.model is None
-    service_context.file_manager.read_data.assert_called_once()
+    product_update_error_flow.file_manager.read_data.assert_called_once()
     SettingsExcelFileManager.read_data.assert_called_once()
-    service_context.stats.add_error.assert_called_once_with(TAB_GENERAL)
-    service_context.file_manager.write_error.assert_called_once()
-    service_context.api.update.assert_called_once()
+    product_update_error_flow.stats.add_error.assert_called_once_with(TAB_GENERAL)
+    product_update_error_flow.file_manager.write_error.assert_called_once()
+    product_update_error_flow.api.update.assert_called_once()
