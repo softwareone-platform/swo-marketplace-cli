@@ -1,4 +1,4 @@
-import click
+from typer._click.core import Command, Context
 from typer.core import TyperGroup
 
 
@@ -10,7 +10,7 @@ class AliasTyperGroup(TyperGroup):
         mpt-cli accounts add
     """
 
-    def get_command(self, ctx: click.Context, cmd_name: str) -> click.Command | None:
+    def get_command(self, ctx: Context, cmd_name: str) -> Command | None:
         """Retrieves a command by name, supporting singular and plural forms.
 
         Args:
@@ -21,7 +21,7 @@ class AliasTyperGroup(TyperGroup):
             The command object if found, otherwise abort the execution of the program.
 
         """
-        rv = click.Group.get_command(self, ctx, cmd_name)
+        rv = super().get_command(ctx, cmd_name)
         if rv is not None:
             return rv
 
@@ -29,15 +29,15 @@ class AliasTyperGroup(TyperGroup):
         if not matches:
             return None
         if len(matches) == 1:
-            return click.Group.get_command(self, ctx, matches[0])
+            return super().get_command(ctx, matches[0])
 
         commands = ", ".join(sorted(matches))
         ctx.fail(f"Too many matches: {commands}")
         return None
 
     def resolve_command(
-        self, ctx: click.Context, args: list[str]
-    ) -> tuple[str, click.Command, list[str]]:
+        self, ctx: Context, args: list[str]
+    ) -> tuple[str | None, Command | None, list[str]]:
         """Resolves the command name, command object, and remaining arguments.
 
         Args:
