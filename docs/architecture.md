@@ -37,7 +37,7 @@ The products domain owns product definition import and export.
 
 - Marketplace-facing models live under [`cli/core/products/models/`](../cli/core/products/models)
 - file import and export logic lives under [`cli/core/products/handlers/`](../cli/core/products/handlers)
-- workflow orchestration lives in [`cli/core/products/app.py`](../cli/core/products/app.py) and the related services
+- workflow orchestration lives under [`cli/core/products/app/`](../cli/core/products/app) (entry point [`app/app.py`](../cli/core/products/app/app.py)) and the related services
 
 ### Price Lists
 
