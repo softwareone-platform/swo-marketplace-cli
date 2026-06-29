@@ -22,6 +22,7 @@ from cli.core.errors import (
     NoActiveAccountFoundError,
 )
 from mpt_api_client import MPTClient
+from mpt_api_client.auth import BearerTokenAuthentication
 
 app = typer.Typer()
 accounts_table_renderer = AccountsTableRenderer()
@@ -44,7 +45,9 @@ def add_account(
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
         account_service = MPTAccountService(
-            MPTClient.from_config(api_token=secret, base_url=environment)
+            MPTClient.from_config(
+                authentication=BearerTokenAuthentication(secret), base_url=environment
+            )
         )
         try:
             token = account_service.get_authentication(secret)
