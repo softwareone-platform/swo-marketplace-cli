@@ -61,7 +61,7 @@ dev = [
     "types-openpyxl==3.1.*",
     "types-python-dateutil==2.9.*",
     "types-requests==2.33.*",
-    "typing-extensions==4.15.*",
+    "typing-extensions==4.16.*",
     "wemake-python-styleguide==1.6.*",
 ]
 
