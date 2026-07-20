@@ -217,7 +217,7 @@ def test_get_values_for_dynamic_sheet(excel_file_handler):
 
 
 def test_dynamic_sheet_skips_non_string_headers(excel_file_handler):
-    excel_file_handler._get_worksheet("HorizontalSheet")["B1"] = 123  # noqa: SLF001
+    excel_file_handler._get_worksheet("HorizontalSheet")["B1"] = 123  # ruff:ignore[private-member-access]
     fields = ["Header1"]
     patterns = [re.compile(r"Missing\d+")]
 
@@ -236,9 +236,9 @@ def test_write(excel_file_handler):
 
     excel_file_handler.write(test_data)  # act
 
-    assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"  # noqa: SLF001
-    assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"  # noqa: SLF001
-    assert excel_file_handler._get_worksheet("FakeSheet")["J23"].value == "ValueJ23"  # noqa: SLF001
+    assert excel_file_handler._get_worksheet("VerticalSheet")["A1"].value == "ValueA1"  # ruff:ignore[private-member-access]
+    assert excel_file_handler._get_worksheet("FakeSheet")["D1"].value == "ValueD1"  # ruff:ignore[private-member-access]
+    assert excel_file_handler._get_worksheet("FakeSheet")["J23"].value == "ValueJ23"  # ruff:ignore[private-member-access]
 
 
 def test_write_cell(excel_file_handler):
@@ -246,7 +246,7 @@ def test_write_cell(excel_file_handler):
 
     excel_file_handler.write_cell("Sheet1", position=cell_position, cell_value="FakeValue")  # act
 
-    cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # noqa: SLF001
+    cell = excel_file_handler._get_worksheet("Sheet1")["C2"]  # ruff:ignore[private-member-access]
     assert cell.value == "FakeValue"
     assert cell.style == "Normal"
 
@@ -259,7 +259,7 @@ def test_write_cell_with_style(excel_file_handler):
         "Sheet1", position=cell_position, cell_value="FakeValue", style=fake_style
     )  # act
 
-    assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # noqa: SLF001
+    assert excel_file_handler._get_worksheet("Sheet1")["C2"].style == "fake_style"  # ruff:ignore[private-member-access]
 
 
 def test_write_cell_with_data_validation(excel_file_handler):

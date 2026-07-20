@@ -11,10 +11,10 @@ from cli.core.price_lists.models import ItemData
 def test_class_properties(mocker, price_list_data_from_dict):
     result = PriceListItemExcelFileManager("fake_file.xlsx")
 
-    assert result._data_model == ItemData  # noqa: SLF001
+    assert result._data_model == ItemData  # ruff:ignore[private-member-access]
     assert result._fields == PRICELIST_ITEMS_FIELDS
-    assert result._sheet_name == TAB_PRICE_ITEMS  # noqa: SLF001
-    assert result._data_validation_map[PRICELIST_ITEMS_ACTION].formula1 == '"-,update"'  # noqa: SLF001
+    assert result._sheet_name == TAB_PRICE_ITEMS  # ruff:ignore[private-member-access]
+    assert result._data_validation_map[PRICELIST_ITEMS_ACTION].formula1 == '"-,update"'  # ruff:ignore[private-member-access]
 
 
 def test_read_data(mocker, item_data_from_dict):
@@ -24,7 +24,7 @@ def test_read_data(mocker, item_data_from_dict):
     )
     excel_manager = PriceListItemExcelFileManager("fake_file.xlsx")
 
-    result = list(excel_manager._read_data())  # noqa: SLF001
+    result = list(excel_manager._read_data())  # ruff:ignore[private-member-access]
 
     assert result == [mock_data]
     get_data_from_horizontal_sheet_mock.assert_called_once_with(

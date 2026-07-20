@@ -12,8 +12,8 @@ class FakeExcelFileManager(ExcelFileManager):
 
 def test_write_ids(mocker):
     file_handler_spy = mocker.patch.object(ExcelFileHandler, "write")
-    file_manager = FakeExcelFileManager("/tmp/fake.xlsx")  # noqa: S108
+    file_manager = FakeExcelFileManager("/tmp/fake.xlsx")  # ruff:ignore[hardcoded-temp-file]
 
     file_manager.write_ids({"A1": "12345"})  # act
 
-    file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])  # noqa: SLF001
+    file_handler_spy.assert_called_once_with([{file_manager._sheet_name: {"A1": "12345"}}])  # ruff:ignore[private-member-access]

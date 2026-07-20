@@ -27,7 +27,7 @@ def test_from_token(active_vendor_account):
             name="Account 1",
             type="Vendor",
         ),
-        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # ruff:ignore[hardcoded-password-func-arg]
     )
 
     result = Account.from_token(token, "https://example.com")
@@ -64,8 +64,8 @@ def test_doesnot_account_exist(stored_accounts):
             id="ACC-4321",
             name="Not exists account",
             type="Vendor",
-            token="secret",  # noqa: S106
-            token_id="TKN-0000-0000-0001",  # noqa: S106
+            token="secret",  # ruff:ignore[hardcoded-password-func-arg]
+            token_id="TKN-0000-0000-0001",  # ruff:ignore[hardcoded-password-func-arg]
             environment="https://example.com",
             is_active=False,
         ),

@@ -32,7 +32,7 @@ def get_version() -> str:
     return __version__
 
 
-def version_callback(show_version: bool) -> None:  # noqa: FBT001
+def version_callback(show_version: bool) -> None:  # ruff:ignore[boolean-type-hint-positional-argument]
     """Callback to display the CLI version and exit if requested.
 
     Args:
@@ -50,7 +50,7 @@ def main(
         bool | None,
         typer.Option("--version", callback=version_callback, is_eager=True),
     ] = None,
-    verbose: Annotated[  # noqa: FBT002
+    verbose: Annotated[  # ruff:ignore[boolean-default-value-positional-argument]
         bool,
         typer.Option(
             "--verbose",

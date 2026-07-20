@@ -173,7 +173,7 @@ def sync_product(
         str,
         typer.Argument(help="Path to Product Definition file", metavar="PRODUCT-PATH"),
     ],
-    is_dry_run: Annotated[  # noqa: FBT002
+    is_dry_run: Annotated[  # ruff:ignore[boolean-default-value-positional-argument]
         bool,
         typer.Option(
             "--dry-run",
@@ -181,7 +181,7 @@ def sync_product(
             help="Do not sync Product Definition. Check the file consistency only.",
         ),
     ] = False,
-    force_create: Annotated[  # noqa: FBT002
+    force_create: Annotated[  # ruff:ignore[boolean-default-value-positional-argument]
         bool,
         typer.Option(
             "--force-create",
