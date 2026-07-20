@@ -48,7 +48,7 @@ dev = [
     "freezegun==1.5.*",
     "ipdb==0.13.*",
     "ipython==9.*",
-    "mypy==2.2.*",
+    "mypy==2.3.*",
     "pre-commit==4.6.*",
     "pytest==9.1.*",
     "pytest-cov==7.1.*",
@@ -195,6 +195,8 @@ ignore = [
   "PLR09",   # we have our own complexity rules
   "PLR2004", # do not report magic numbers
   "PLR6301", # do not require classmethod / staticmethod when self not used
+  "RUF105", # `# noqa` vs `# ruff:ignore` migration (new rule in ruff 0.15.22)
+  "RUF201", # rule codes in selectors (new rule in ruff 0.15.22)
   "TRY003",  # long exception messages from `tryceratops`
 ]
 external = [ "AAA", "WPS" ]
