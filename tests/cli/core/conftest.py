@@ -78,8 +78,8 @@ def active_operations_account():
         id="ACC-12340",
         name="Account 1",
         type="Operations",
-        token="idt:TKN-1111-1111:secret",  # noqa: S106
-        token_id="TKN-1111-1111",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # ruff:ignore[hardcoded-password-func-arg]
+        token_id="TKN-1111-1111",  # ruff:ignore[hardcoded-password-func-arg]
         environment="https://example.com",
         is_active=True,
     )
@@ -91,8 +91,8 @@ def active_vendor_account():
         id="ACC-12341",
         name="Account 1",
         type="Vendor",
-        token="idt:TKN-1111-1111:secret",  # noqa: S106
-        token_id="TKN-1111-1111",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # ruff:ignore[hardcoded-password-func-arg]
+        token_id="TKN-1111-1111",  # ruff:ignore[hardcoded-password-func-arg]
         environment="https://example.com",
         is_active=True,
     )

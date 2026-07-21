@@ -20,7 +20,7 @@ def vendor_token():
             name="New Account",
             type="Vendor",
         ),
-        token="idt:TKN-1111-1111:secret",  # noqa: S106
+        token="idt:TKN-1111-1111:secret",  # ruff:ignore[hardcoded-password-func-arg]
     )
 
 

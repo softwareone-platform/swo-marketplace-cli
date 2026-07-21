@@ -75,7 +75,7 @@ class RelatedComponentsActionMixin:
 
         if model_action == DataActionEnum.DELETE:
             # TODO: uncomment once the delete action is supported
-            # return self._action_delete_item   # noqa: ERA001
+            # return self._action_delete_item   # ruff:ignore[commented-out-code]
             raise ValueError(f"Action type {model_action} is not supported")
 
         if model_action == DataActionEnum.UPDATE:

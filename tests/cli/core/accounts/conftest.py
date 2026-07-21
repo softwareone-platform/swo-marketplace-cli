@@ -37,8 +37,8 @@ def inactive_vendor_account():
         id="ACC-12342",
         name="Account 2",
         type="Vendor",
-        token="idt:TKN-1111-1112:secret2",  # noqa: S106
-        token_id="TKN-1111-1112",  # noqa: S106
+        token="idt:TKN-1111-1112:secret2",  # ruff:ignore[hardcoded-password-func-arg]
+        token_id="TKN-1111-1112",  # ruff:ignore[hardcoded-password-func-arg]
         environment="https://example.com",
         is_active=False,
     )

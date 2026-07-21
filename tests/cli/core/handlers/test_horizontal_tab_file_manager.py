@@ -174,7 +174,7 @@ def test_create_tab(mocker, fake_horizontal_tab_file_manager):
 
 
 def test_read_data(mocker, fake_horizontal_tab_file_manager):
-    data_model_spy = mocker.spy(fake_horizontal_tab_file_manager._data_model, "from_dict")  # noqa: SLF001
+    data_model_spy = mocker.spy(fake_horizontal_tab_file_manager._data_model, "from_dict")  # ruff:ignore[private-member-access]
 
     result = list(fake_horizontal_tab_file_manager.read_data())
 
