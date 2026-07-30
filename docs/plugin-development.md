@@ -31,7 +31,7 @@ version = "0.1.0"
 requires-python = ">=3.12,<4"
 dependencies = [
   "mpt-cli==2.0.*",
-  "mpt-api-client==5.4.*",
+  "mpt-api-client==6.4.*",
   "typer==0.24.*",
 ]
 
