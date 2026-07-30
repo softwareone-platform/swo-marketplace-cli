@@ -21,8 +21,7 @@ from cli.core.errors import (
     MPTAPIError,
     NoActiveAccountFoundError,
 )
-from mpt_api_client import MPTClient
-from mpt_api_client.auth import BearerTokenAuthentication
+from cli.core.mpt.mpt_client import create_api_mpt_client
 
 app = typer.Typer()
 accounts_table_renderer = AccountsTableRenderer()
@@ -44,11 +43,7 @@ def add_account(
     """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
-        account_service = MPTAccountService(
-            MPTClient.from_config(
-                authentication=BearerTokenAuthentication(secret), base_url=environment
-            )
-        )
+        account_service = MPTAccountService(create_api_mpt_client(secret, environment))
         try:
             token = account_service.get_authentication(secret)
         except (MPTAPIError, ValueError) as error:
