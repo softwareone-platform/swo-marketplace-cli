@@ -2,12 +2,12 @@ from typing import Annotated
 
 import typer
 from cli.core.accounts.api.account_api_service import MPTAccountService
+from cli.core.accounts.client import CLIMPTClient
 from cli.core.accounts.constants import FETCHING, READING, REMOVING, STATUS_MSG
 from cli.core.accounts.flows import (
     disable_accounts_except,
     does_account_exist,
     find_account,
-    find_active_account,
     get_or_create_accounts,
     remove_account,
     write_accounts,
@@ -19,9 +19,7 @@ from cli.core.console.renderers.accounts import AccountsTableRenderer
 from cli.core.errors import (
     AccountNotFoundError,
     MPTAPIError,
-    NoActiveAccountFoundError,
 )
-from cli.core.mpt.mpt_client import create_api_mpt_client
 
 app = typer.Typer()
 accounts_table_renderer = AccountsTableRenderer()
@@ -43,7 +41,7 @@ def add_account(
     """Add an account to work with the SoftwareOne Marketplace."""
     with console.status(STATUS_MSG[READING]) as status:
         status.update(f"{STATUS_MSG[FETCHING]} from environment {environment}")
-        account_service = MPTAccountService(create_api_mpt_client(secret, environment))
+        account_service = MPTAccountService(CLIMPTClient(Account.from_secret(secret, environment)))
         try:
             token = account_service.get_authentication(secret)
         except (MPTAPIError, ValueError) as error:
@@ -142,21 +140,6 @@ def list_accounts(
         raise typer.Exit(code=0)
 
     console.print(accounts_table_renderer.render("Available accounts", accounts, wrap_secret=False))
-
-
-def get_active_account() -> Account:
-    """Check for file and create current active account."""
-    with console.status(STATUS_MSG[READING]):
-        accounts = get_or_create_accounts()
-
-    try:
-        account = find_active_account(accounts)
-    except NoActiveAccountFoundError as error:
-        console.print(str(error))
-        raise typer.Exit(code=3)
-
-    console.print(f"Current active account: {account.id} ({account.name})")
-    return account
 
 
 if __name__ == "__main__":

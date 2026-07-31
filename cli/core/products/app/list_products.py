@@ -1,11 +1,10 @@
 from typing import Annotated
 
 import typer
-from cli.core.accounts.app import get_active_account
+from cli.core.accounts import CLIMPTClient
 from cli.core.console import console
 from cli.core.console.renderers.products import ProductsTableRenderer
 from cli.core.mpt.flows import get_products
-from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 
 app = typer.Typer()
 products_table_renderer = ProductsTableRenderer()
@@ -29,8 +28,7 @@ def list_products(
         rql_query: RQL query string to filter products.
 
     """
-    active_account = get_active_account()
-    mpt_client = create_api_mpt_client_from_account(active_account)
+    mpt_client = CLIMPTClient()
     page = 1
     while True:
         with console.status(f"Fetching page {page} of products"):

@@ -1,5 +1,6 @@
-from cli.core.accounts.app import get_active_account
-from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
+from operator import attrgetter
+
+from cli.core.accounts.client import CLIMPTClient
 from dependency_injector import containers, providers
 
 
@@ -8,11 +9,10 @@ class AccountContainer(containers.DeclarativeContainer):
     Container for account-related services and components.
 
     Attributes:
-        account: Provides the active account.
-        mpt_client: Provides the MPT client based on the active account.
-        api_mpt_client: Provides the API MPT client based on the active account.
+        api_mpt_client: Provides the API MPT client bound to the active account.
+        account: Provides the account the API MPT client is bound to.
 
     """
 
-    account = providers.Singleton(get_active_account)
-    api_mpt_client = providers.Singleton(create_api_mpt_client_from_account, account)
+    api_mpt_client = providers.Singleton(CLIMPTClient)
+    account = providers.Callable(attrgetter("mpt_account"), api_mpt_client)

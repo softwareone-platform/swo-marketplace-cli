@@ -33,3 +33,19 @@ class Account(BaseModel):
             environment=environment,
             is_active=True,
         )
+
+    @classmethod
+    def from_secret(cls, secret: str, environment: str) -> Self:
+        """Create a provisional account for authenticating a raw secret during login.
+
+        The account details are unknown until the secret is authenticated against the
+        environment; use ``from_token`` with the fetched token to build the real account.
+        """
+        return cls(
+            id="",
+            name="",
+            type="",
+            token=secret,
+            token_id="",
+            environment=environment,
+        )
