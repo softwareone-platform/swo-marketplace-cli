@@ -1,9 +1,3 @@
-"""Read-only loading of the accounts stored by the marketplace CLI.
-
-Unlike ``get_or_create_accounts``, the accounts file is never created when missing, so
-authentication providers can fail with a clear error instead of an empty file.
-"""
-
 import json
 from pathlib import Path
 
