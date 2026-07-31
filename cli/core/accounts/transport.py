@@ -20,11 +20,6 @@ class CLITransport(TransportSettings):
 
     @override
     def __post_init__(self) -> None:
-        """Resolve ``base_url`` from the account, then validate and normalize.
-
-        Raises:
-            ValueError: If no base URL can be resolved or it is invalid.
-        """
         if self.base_url is None and self.account is not None:
             self.base_url = self.account.environment
         super().__post_init__()

@@ -32,17 +32,6 @@ def load_account(file_path: Path | str | None = None, account_id: str | None = N
 
 
 def _read_raw_accounts(json_file_handler: JsonFileHandler) -> list[dict[str, object]]:
-    """Read the raw account entries stored in the accounts file.
-
-    Args:
-        json_file_handler: Handler for the accounts file to read.
-
-    Returns:
-        The raw account entries.
-
-    Raises:
-        CLIAccountError: If the file is missing, is not valid JSON, or is not a JSON list.
-    """
     path = json_file_handler.file_path
     if not json_file_handler.exists():
         raise CLIAccountError(
@@ -61,18 +50,6 @@ def _read_raw_accounts(json_file_handler: JsonFileHandler) -> list[dict[str, obj
 
 
 def _validate_accounts(raw_accounts: list[dict[str, object]], path: Path) -> list[Account]:
-    """Validate raw account entries into account models.
-
-    Args:
-        raw_accounts: Raw account entries read from the accounts file.
-        path: Accounts file the entries were read from, used in error messages.
-
-    Returns:
-        The validated accounts.
-
-    Raises:
-        CLIAccountError: If an entry is not a valid account.
-    """
     try:
         return [Account.model_validate(raw_account) for raw_account in raw_accounts]
     except ValidationError as validation_error:
