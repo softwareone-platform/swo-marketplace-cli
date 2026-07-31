@@ -10,6 +10,7 @@ from cli.core.accounts.auth import CLIAuthenticator
 from cli.core.accounts.loader import load_account
 from cli.core.accounts.models import Account
 from cli.core.accounts.transport import CLITransport
+from cli.core.console import console
 from mpt_api_client import MPTClient
 from mpt_api_client.http import HTTPClient
 
@@ -44,3 +45,8 @@ class CLIMPTClient(MPTClient):
             )
         )
         self.mpt_account = account
+
+    def print_account(self) -> None:
+        """Print the account this client is bound to."""
+        account = self.mpt_account
+        console.print(f"Current active account: {account.id} ({account.name})")

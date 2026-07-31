@@ -17,7 +17,9 @@ class ProductSyncer:
     def __init__(self, product_container: ProductContainer) -> None:
         self._container = product_container
         self._product_service = self._container.product_service()
-        account = self._container.account_container().account()
+        account_container = self._container.account_container()
+        account_container.api_mpt_client().print_account()
+        account = account_container.account()
         self._account = account
         self._account_label = f"{account.id} ({account.name})"
 

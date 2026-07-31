@@ -130,6 +130,7 @@ def diff_by_object_id(
 
     """
     client = CLIMPTClient()
+    client.print_account()
 
     records = get_audit_records_by_object(client, object_id, limit)
     if len(records) < 2:
@@ -155,6 +156,7 @@ def diff_by_records_id(
 
     """
     client = CLIMPTClient()
+    client.print_account()
 
     source_trail = get_audit_trail(client, source)
     target_trail = get_audit_trail(client, target)

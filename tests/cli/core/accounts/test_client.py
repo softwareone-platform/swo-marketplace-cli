@@ -59,6 +59,15 @@ def test_explicit_account_skips_accounts_file(default_accounts_path, active_vend
     )
 
 
+def test_print_account_prints_bound_account(active_vendor_account, capsys):
+    client = CLIMPTClient(account=active_vendor_account)
+
+    client.print_account()  # act
+
+    expected = f"Current active account: {active_vendor_account.id} ({active_vendor_account.name})"
+    assert expected in capsys.readouterr().out
+
+
 def test_file_missing_raises_error(default_accounts_path):
     with pytest.raises(CLIAccountError, match="not found"):
         CLIMPTClient()

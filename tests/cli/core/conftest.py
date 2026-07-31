@@ -2,6 +2,7 @@ import datetime as dt
 
 import pytest
 import responses
+from cli.core.accounts.client import CLIMPTClient
 from cli.core.accounts.containers import AccountContainer
 from cli.core.accounts.models import Account as CLIAccount
 from mpt_api_client import MPTClient
@@ -102,7 +103,7 @@ def active_vendor_account():
 def account_container_mock(mocker, active_operations_account):
     container = AccountContainer()
     container.account.override(mocker.MagicMock(return_value=active_operations_account))
-    container.api_mpt_client.override(mocker.MagicMock(spec=MPTClient))
+    container.api_mpt_client.override(mocker.MagicMock(spec=CLIMPTClient))
     mock = mocker.patch("cli.core.products.app.export.AccountContainer", autospec=True)
     mock.return_value = container
 

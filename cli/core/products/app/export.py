@@ -14,6 +14,7 @@ class ProductExporter:
 
     def __init__(self, account_container: AccountContainer, out_path: str | None) -> None:
         self._account_container = account_container
+        self._account_container.api_mpt_client().print_account()
         account = self._account_container.account()
         self._account_label = f"{account.id} ({account.name})"
         if not account.is_operations():

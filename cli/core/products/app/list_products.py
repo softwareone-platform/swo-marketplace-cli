@@ -29,6 +29,7 @@ def list_products(
 
     """
     mpt_client = CLIMPTClient()
+    mpt_client.print_account()
     page = 1
     while True:
         with console.status(f"Fetching page {page} of products"):

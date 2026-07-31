@@ -21,6 +21,7 @@ class PriceListSyncer:
 
     def __init__(self) -> None:
         self._mpt_client = CLIMPTClient()
+        self._mpt_client.print_account()
         account = self._mpt_client.mpt_account
         self._account = account
         self._account_label = f"{account.id} ({account.name})"
