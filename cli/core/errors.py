@@ -44,6 +44,10 @@ def wrap_mpt_api_error[**CallableParams, RetType](
     return cast(Callable[CallableParams, RetType], ApiErrorWrapper(func, MPTAPIError))
 
 
+class CLIAccountError(CLIError):
+    """Exception raised when the CLI accounts file is missing or invalid."""
+
+
 class AccountNotFoundError(CLIError):
     """Exception raised when a specified account cannot be found."""
 
