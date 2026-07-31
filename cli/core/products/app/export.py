@@ -16,7 +16,7 @@ class ProductExporter:
         self._account_container = account_container
         self._account_container.api_mpt_client().print_account()
         account = self._account_container.account()
-        self._account_label = f"{account.id} ({account.name})"
+        self._account_label = account.label
         if not account.is_operations():
             console.print(
                 f"Current active account {self._account_label} is not allowed "

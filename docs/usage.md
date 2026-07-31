@@ -104,8 +104,10 @@ client = CLIMPTClient()
 ```
 
 A `CLIAccountError` is raised when the accounts file is missing or invalid. For custom
-setups, `CLIAuthenticator` (stored token) and `CLITransport` (stored environment) can be
-composed into an `HTTPClient` directly; both take an `Account`, e.g. from
+setups, pass `transport` and/or `authentication` to `CLIMPTClient` — whichever is
+omitted is built from the account via `CLITransport` (stored environment) and
+`CLIAuthenticator` (stored token). Both providers can also be composed into an
+`HTTPClient` directly; each takes an `Account`, e.g. from
 `cli.core.accounts.loader.load_account` (active account by default, or a specific one
 via `account_id`).
 

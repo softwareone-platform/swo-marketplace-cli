@@ -21,7 +21,7 @@ class ProductSyncer:
         account_container.api_mpt_client().print_account()
         account = account_container.account()
         self._account = account
-        self._account_label = f"{account.id} ({account.name})"
+        self._account_label = account.label
 
     def sync(self, product_path: str, *, is_dry_run: bool, force_create: bool) -> None:
         """Validate the definition and either create or update the product.

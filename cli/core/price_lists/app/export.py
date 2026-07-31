@@ -20,10 +20,9 @@ class PriceListExporter:
     def __init__(self, out_path: str | None) -> None:
         self._mpt_client = CLIMPTClient()
         self._mpt_client.print_account()
-        account = self._mpt_client.mpt_account
-        self._account = account
-        self._account_label = f"{account.id} ({account.name})"
-        if not account.is_operations():
+        self._account = self._mpt_client.mpt_account
+        self._account_label = self._account.label
+        if not self._account.is_operations():
             console.print(
                 f"Current active account {self._account_label} is not allowed "
                 f"for the export command. Please, activate an operation account."

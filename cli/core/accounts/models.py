@@ -17,6 +17,11 @@ class Account(BaseModel):
     environment: str
     is_active: bool = False
 
+    @property
+    def label(self) -> str:
+        """Human-readable identifier, e.g. ``ACC-1234 (My Account)``."""
+        return f"{self.id} ({self.name})"
+
     def is_operations(self) -> bool:
         """Check if the account type is 'Operations'."""
         return self.type == "Operations"

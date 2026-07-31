@@ -82,29 +82,15 @@ def _validate_accounts(raw_accounts: list[dict[str, object]], path: Path) -> lis
     try:
         return [Account.model_validate(raw_account) for raw_account in raw_accounts]
     except ValidationError as validation_error:
-        error_details = _format_validation_error(validation_error)
+        # The raw error string echoes the offending payload, which may contain account
+        # tokens, so only the field locations and messages are kept.
+        error_details = "; ".join(
+            "{field}: {message}".format(
+                field=".".join(str(location) for location in issue["loc"]),
+                message=issue["msg"],
+            )
+            for issue in validation_error.errors(include_input=False, include_url=False)
+        )
         raise CLIAccountError(
             f"CLI accounts file {path} contains an invalid account: {error_details}."
         ) from validation_error
-
-
-def _format_validation_error(validation_error: ValidationError) -> str:
-    """Summarize a validation error without echoing the invalid input.
-
-    The raw error string includes the offending payload, which may contain account
-    tokens, so only the field locations and messages are kept.
-
-    Args:
-        validation_error: Validation error raised for an account entry.
-
-    Returns:
-        The field locations and messages of the validation issues.
-    """
-    issues = validation_error.errors(include_input=False, include_url=False)
-    return "; ".join(
-        "{field}: {message}".format(
-            field=".".join(str(location) for location in issue["loc"]),
-            message=issue["msg"],
-        )
-        for issue in issues
-    )
