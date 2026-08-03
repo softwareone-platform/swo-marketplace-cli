@@ -14,10 +14,6 @@ def strip_ansi(text):
 
 
 def test_export_file_exists(mocker, active_operations_account):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_operations_account,
-    )
     mocker.patch("pathlib.Path.exists", return_value=True)
     price_list_service_export_spy = mocker.spy(PriceListService, "export")
     item_service_export_spy = mocker.spy(ItemService, "export")
@@ -31,10 +27,6 @@ def test_export_file_exists(mocker, active_operations_account):
 
 
 def test_export_file_exists_overwrite(mocker, active_operations_account, price_list_data_from_json):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_operations_account,
-    )
     mocker.patch("pathlib.Path.exists", return_value=True)
     mocker.patch("pathlib.Path.unlink")
     replace_mock = mocker.patch("pathlib.Path.replace")
@@ -57,10 +49,6 @@ def test_export_file_exists_overwrite(mocker, active_operations_account, price_l
 
 
 def test_export_price_list(mocker, active_operations_account, price_list_data_from_json):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_operations_account,
-    )
     mocker.patch("pathlib.Path.unlink")
     replace_mock = mocker.patch("pathlib.Path.replace")
     stats = PriceListStatsCollector()
@@ -87,10 +75,6 @@ def test_export_price_list(mocker, active_operations_account, price_list_data_fr
 def test_export_price_list_item_no_success(
     mocker, active_operations_account, price_list_data_from_json
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_operations_account,
-    )
     stats = PriceListStatsCollector()
     price_list_service_export_mock = mocker.patch(
         "cli.core.price_lists.services.PriceListService.export",
@@ -110,13 +94,9 @@ def test_export_price_list_item_no_success(
 
 
 def test_export_price_list_no_operations_account(
-    mocker, active_vendor_account, price_list_data_from_json
+    mock_mpt_client, mocker, active_vendor_account, price_list_data_from_json
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+    mock_mpt_client["export"].return_value.mpt_account = active_vendor_account
     price_list_service_export_spy = mocker.spy(PriceListService, "export")
     item_service_export_spy = mocker.spy(ItemService, "export")
 
@@ -129,10 +109,6 @@ def test_export_price_list_no_operations_account(
 
 
 def test_export_price_list_no_success(mocker, active_operations_account):
-    mocker.patch(
-        "cli.core.price_lists.app.export.get_active_account",
-        return_value=active_operations_account,
-    )
     stats = PriceListStatsCollector()
     price_list_service_export_mock = mocker.patch(
         "cli.core.price_lists.services.PriceListService.export",

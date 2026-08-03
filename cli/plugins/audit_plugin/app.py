@@ -1,10 +1,9 @@
 from typing import Annotated, Any
 
 import typer
-from cli.core.accounts.app import get_active_account
+from cli.core.accounts import CLIMPTClient
 from cli.core.console import console
 from cli.core.console.renderers.audit import AuditDiffRenderer
-from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.plugins.audit_plugin.api import get_audit_records_by_object, get_audit_trail
 from cli.plugins.audit_plugin.audit_records import (
     display_audit_records,
@@ -130,8 +129,8 @@ def diff_by_object_id(
         limit: The maximum number of audit records to retrieve.
 
     """
-    account = get_active_account()
-    client = create_api_mpt_client_from_account(account)
+    client = CLIMPTClient()
+    client.print_account()
 
     records = get_audit_records_by_object(client, object_id, limit)
     if len(records) < 2:
@@ -156,8 +155,8 @@ def diff_by_records_id(
         target: The ID of the target audit record.
 
     """
-    account = get_active_account()
-    client = create_api_mpt_client_from_account(account)
+    client = CLIMPTClient()
+    client.print_account()
 
     source_trail = get_audit_trail(client, source)
     target_trail = get_audit_trail(client, target)

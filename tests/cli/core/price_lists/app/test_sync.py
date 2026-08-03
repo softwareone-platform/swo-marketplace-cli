@@ -21,13 +21,9 @@ def test_sync_price_lists_not_files_found(price_list_new_file):
 
 
 def test_sync_price_lists_multiple_files(
-    mocker, price_list_data_from_json, price_list_new_file, active_vendor_account
+    mock_mpt_client, mocker, price_list_data_from_json, price_list_new_file, active_vendor_account
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+    mock_mpt_client["sync"].return_value.mpt_account = active_vendor_account
     mocker.patch(
         "cli.core.price_lists.app.sync.get_files_path",
         return_value=[price_list_new_file, price_list_new_file],
@@ -63,16 +59,13 @@ def test_sync_price_lists_multiple_files(
 
 
 def test_sync_price_lists_create(
+    mock_mpt_client,
     mocker,
     price_list_data_from_json,
     price_list_file_path,
     active_vendor_account,
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+    mock_mpt_client["sync"].return_value.mpt_account = active_vendor_account
     stats = PriceListStatsCollector()
     mocker.patch.object(
         PriceListService,
@@ -103,10 +96,6 @@ def test_sync_price_lists_create(
 def test_sync_price_lists_create_error(
     mocker, active_operations_account, price_list_data_from_json, price_list_file_path
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_operations_account,
-    )
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,
@@ -129,12 +118,10 @@ def test_sync_price_lists_create_error(
     item_service_update_spy.assert_not_called()
 
 
-def test_sync_price_lists_retrieve_error(mocker, active_vendor_account, price_list_file_path):
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+def test_sync_price_lists_retrieve_error(
+    mock_mpt_client, mocker, active_vendor_account, price_list_file_path
+):
+    mock_mpt_client["sync"].return_value.mpt_account = active_vendor_account
     stats = PriceListStatsCollector()
     mocker.patch.object(
         PriceListService,
@@ -156,14 +143,10 @@ def test_sync_price_lists_retrieve_error(mocker, active_vendor_account, price_li
 
 
 def test_sync_price_lists_update(
-    mocker, price_list_data_from_json, price_list_file_path, active_vendor_account
+    mock_mpt_client, mocker, price_list_data_from_json, price_list_file_path, active_vendor_account
 ):
     stats = PriceListStatsCollector()
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+    mock_mpt_client["sync"].return_value.mpt_account = active_vendor_account
     mocker.patch.object(
         PriceListService,
         "retrieve",
@@ -191,13 +174,9 @@ def test_sync_price_lists_update(
 
 
 def test_sync_price_lists_update_error(
-    mocker, active_vendor_account, price_list_data_from_json, price_list_file_path
+    mock_mpt_client, mocker, active_vendor_account, price_list_data_from_json, price_list_file_path
 ):
-    mocker.patch(
-        "cli.core.price_lists.app.sync.get_active_account",
-        return_value=active_vendor_account,
-        autospec=True,
-    )
+    mock_mpt_client["sync"].return_value.mpt_account = active_vendor_account
     stats = PriceListStatsCollector()
     price_list_service_retrieve_mock = mocker.patch.object(
         PriceListService,

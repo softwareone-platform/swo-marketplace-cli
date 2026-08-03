@@ -1,3 +1,4 @@
+import pytest
 from cli.core.mpt.models import Meta, Product
 from cli.core.products import app as product_app
 from typer.testing import CliRunner
@@ -5,11 +6,12 @@ from typer.testing import CliRunner
 runner = CliRunner()
 
 
-def test_list_products(active_vendor_account, mocker, mpt_products_response):
-    mocker.patch(
-        "cli.core.products.app.list_products.get_active_account",
-        return_value=active_vendor_account,
-    )
+@pytest.fixture
+def mock_mpt_client(mocker):
+    return mocker.patch("cli.core.products.app.list_products.CLIMPTClient", autospec=True)
+
+
+def test_list_products(mock_mpt_client, mocker, mpt_products_response):
     mocker.patch(
         "cli.core.products.app.list_products.get_products",
         return_value=(
@@ -27,11 +29,7 @@ def test_list_products(active_vendor_account, mocker, mpt_products_response):
     assert mpt_products_response["data"][0]["id"] in result.stdout
 
 
-def test_list_products_paginates(active_vendor_account, mocker, mpt_products_response):
-    mocker.patch(
-        "cli.core.products.app.list_products.get_active_account",
-        return_value=active_vendor_account,
-    )
+def test_list_products_paginates(mock_mpt_client, mocker, mpt_products_response):
     products = [Product.model_validate(record) for record in mpt_products_response["data"]]
     get_products_mock = mocker.patch(
         "cli.core.products.app.list_products.get_products",
@@ -48,11 +46,7 @@ def test_list_products_paginates(active_vendor_account, mocker, mpt_products_res
     assert mpt_products_response["data"][1]["id"] in result.stdout
 
 
-def test_list_products_with_query_and_paging(active_vendor_account, mocker, mpt_products_response):
-    mocker.patch(
-        "cli.core.products.app.list_products.get_active_account",
-        return_value=active_vendor_account,
-    )
+def test_list_products_with_query_and_paging(mock_mpt_client, mocker, mpt_products_response):
     mocker.patch(
         "cli.core.products.app.list_products.get_products",
         return_value=(

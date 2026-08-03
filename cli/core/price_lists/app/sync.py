@@ -1,11 +1,10 @@
 from typing import Annotated
 
 import typer
-from cli.core.accounts.app import get_active_account
+from cli.core.accounts import CLIMPTClient
 from cli.core.console import console
 from cli.core.console.renderers.stats import StatsTableRenderer
 from cli.core.file_discovery import get_files_path
-from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.price_lists.api import PriceListAPIService, PriceListItemAPIService
 from cli.core.price_lists.handlers import PriceListExcelFileManager, PriceListItemExcelFileManager
 from cli.core.price_lists.models import ItemData, PriceListData
@@ -21,10 +20,10 @@ class PriceListSyncer:
     """Coordinate the CLI-driven sync of one or more price list definition files."""
 
     def __init__(self) -> None:
-        account = get_active_account()
-        self._account = account
-        self._account_label = f"{account.id} ({account.name})"
-        self._mpt_client = create_api_mpt_client_from_account(account)
+        self._mpt_client = CLIMPTClient()
+        self._mpt_client.print_account()
+        self._account = self._mpt_client.mpt_account
+        self._account_label = self._account.label
         self._stats = PriceListStatsCollector()
 
     def sync_all(self, file_paths: list[str]) -> None:

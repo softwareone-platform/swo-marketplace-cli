@@ -1,8 +1,7 @@
 import json
 
 import pytest
-import typer
-from cli.core.accounts.app import app, get_active_account, protocol_and_host
+from cli.core.accounts.app import app, protocol_and_host
 from cli.core.accounts.handlers import JsonFileHandler
 from cli.core.errors import MPTAPIError
 from cli.core.mpt.models import Account, Token
@@ -353,22 +352,6 @@ def test_list_active_account(new_accounts_path_patch):
     assert_account_command_success(result)
     assert "ACC-12341" in result.stdout
     assert "ACC-12342" not in result.stdout
-
-
-def test_get_active_account(new_accounts_path_patch, active_vendor_account):
-    result = get_active_account()
-
-    assert result == active_vendor_account
-
-
-def test_get_active_account_no_active_account(new_accounts_path, new_accounts_path_patch):
-    loaded_accounts = load_stored_accounts(new_accounts_path)
-    loaded_accounts = [{**account_record, "is_active": False} for account_record in loaded_accounts]
-    with new_accounts_path.open("w", encoding="utf-8") as opened_file:
-        json.dump(loaded_accounts, opened_file)
-
-    with pytest.raises(typer.Exit):
-        get_active_account()
 
 
 @pytest.mark.parametrize(

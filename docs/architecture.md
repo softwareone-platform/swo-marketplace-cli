@@ -30,6 +30,7 @@ The accounts domain owns local credential metadata and active-account selection.
 
 - configuration is persisted through JSON handling in [`cli/core/accounts/handlers/`](../cli/core/accounts/handlers)
 - the active account is the source of API configuration for other domains
+- [`cli/core/accounts/client.py`](../cli/core/accounts/client.py) exposes stored accounts as the `CLIMPTClient` Marketplace API client, built on the `CLIAuthenticator` ([`auth.py`](../cli/core/accounts/auth.py)) and `CLITransport` ([`transport.py`](../cli/core/accounts/transport.py)) providers
 
 ### Products
 

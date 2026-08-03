@@ -2,9 +2,8 @@ from pathlib import Path
 from typing import Annotated
 
 import typer
-from cli.core.accounts.app import get_active_account
+from cli.core.accounts import CLIMPTClient
 from cli.core.console import console
-from cli.core.mpt.mpt_client import create_api_mpt_client_from_account
 from cli.core.price_lists.api import PriceListAPIService, PriceListItemAPIService
 from cli.core.price_lists.handlers import PriceListExcelFileManager, PriceListItemExcelFileManager
 from cli.core.price_lists.models import ItemData, PriceListData
@@ -19,17 +18,17 @@ class PriceListExporter:
     """Coordinate the CLI-driven export of one or more price lists."""
 
     def __init__(self, out_path: str | None) -> None:
-        account = get_active_account()
-        self._account = account
-        self._account_label = f"{account.id} ({account.name})"
-        if not account.is_operations():
+        self._mpt_client = CLIMPTClient()
+        self._mpt_client.print_account()
+        self._account = self._mpt_client.mpt_account
+        self._account_label = self._account.label
+        if not self._account.is_operations():
             console.print(
                 f"Current active account {self._account_label} is not allowed "
                 f"for the export command. Please, activate an operation account."
             )
             raise typer.Exit(code=4)
         self._out_dir = str(Path.cwd()) if out_path is None else out_path
-        self._mpt_client = create_api_mpt_client_from_account(account)
         self._stats = PriceListStatsCollector()
 
     def export_all(self, price_list_ids: list[str]) -> None:

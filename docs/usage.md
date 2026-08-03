@@ -90,6 +90,27 @@ mpt-cli accounts activate <account-id>
 mpt-cli accounts remove <account-id>
 ```
 
+### Reuse The CLI Login In Scripts
+
+Python scripts can point the Marketplace API client at the account you are logged into
+the CLI with, without copying tokens or URLs. `CLIMPTClient` reads
+`~/.swocli/accounts.json` and binds the client to the active account, or to a specific
+account when one is passed; the bound account is exposed as `mpt_account`.
+
+```python
+from cli.core.accounts import CLIMPTClient
+
+client = CLIMPTClient()
+```
+
+A `CLIAccountError` is raised when the accounts file is missing or invalid. For custom
+setups, pass `transport` and/or `authentication` to `CLIMPTClient` — whichever is
+omitted is built from the account via `CLITransport` (stored environment) and
+`CLIAuthenticator` (stored token). Both providers can also be composed into an
+`HTTPClient` directly; each takes an `Account`, e.g. from
+`cli.core.accounts.loader.load_account` (active account by default, or a specific one
+via `account_id`).
+
 ## Products
 
 ### List Products
