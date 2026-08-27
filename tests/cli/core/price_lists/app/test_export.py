@@ -1,6 +1,7 @@
 import re
 
 from cli.core.price_lists import app
+from cli.core.price_lists.app import export as app_export
 from cli.core.price_lists.services import ItemService, PriceListService
 from cli.core.services.service_result import ServiceResult
 from cli.core.stats import PriceListStatsCollector
@@ -70,6 +71,30 @@ def test_export_price_list(mocker, active_operations_account, price_list_data_fr
     replace_mock.assert_called_once()
     price_list_service_export_mock.assert_called_once()
     item_service_export_mock.assert_called_once()
+
+
+def test_export_temp_file_keeps_xlsx_extension(
+    mocker, active_operations_account, price_list_data_from_json
+):
+    mocker.patch("pathlib.Path.unlink", autospec=True)
+    replace_mock = mocker.patch("pathlib.Path.replace", autospec=True)
+    stats = PriceListStatsCollector()
+    file_manager_spy = mocker.spy(app_export, "PriceListExcelFileManager")
+    mocker.patch(
+        "cli.core.price_lists.services.PriceListService.export",
+        return_value=ServiceResult(success=True, model=price_list_data_from_json, stats=stats),
+    )
+    mocker.patch(
+        "cli.core.price_lists.services.ItemService.export",
+        return_value=ServiceResult(success=True, model=None, stats=stats),
+    )
+
+    result = runner.invoke(app, ["export", "PRC-1234-1234-1234"], input="y\n")
+
+    assert result.exit_code == 0
+    temp_path = replace_mock.call_args.args[0]
+    assert (temp_path.suffix, temp_path.name) == (".xlsx", "PRC-1234-1234-1234.tmp.xlsx")
+    assert file_manager_spy.call_args.args == (str(temp_path),)
 
 
 def test_export_price_list_item_no_success(
