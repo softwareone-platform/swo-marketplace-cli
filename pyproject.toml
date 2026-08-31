@@ -62,7 +62,7 @@ dev = [
     "types-python-dateutil==2.9.*",
     "types-requests==2.33.*",
     "typing-extensions==4.16.*",
-    "wemake-python-styleguide==1.7.*",
+    "wemake-python-styleguide==1.8.*",
 ]
 
 [tool.hatch.build.targets.sdist]
