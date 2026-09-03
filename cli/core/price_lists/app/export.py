@@ -60,7 +60,7 @@ class PriceListExporter:
                 abort=True,
             )
 
-        temp_path = file_path.with_name(f"{file_path.name}.tmp")
+        temp_path = file_path.with_name(f"{file_path.stem}.tmp.xlsx")
         temp_path.unlink(missing_ok=True)
         if not self._export_workbook(price_list_id, temp_path):
             return False
