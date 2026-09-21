@@ -626,15 +626,15 @@ wheels = [
 
 [[package]]
 name = "mpt-api-client"
-version = "6.4.0"
+version = "7.0.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "httpx" },
     { name = "httpx-retries" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/75/91/51679b504d7e95c84c8207cdcd7556c6d3daa2174758fefc0ced78a787a6/mpt_api_client-6.4.0.tar.gz", hash = "sha256:d51142471862c0b9faa4339c68b193f2bcf94ae63ce523ed00115d371770be83", size = 67099, upload-time = "2026-07-30T16:38:16.622Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/0d/76/e3b55e37156ea9821899daec81cd8fabc60f98f502c510a612999b5416aa/mpt_api_client-7.0.0.tar.gz", hash = "sha256:b60b830b444c790eb91e1a80024f0f338e838cdc86c6788158f20b44fcfc5769", size = 91490, upload-time = "2026-09-16T13:55:37.308Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a2/0c/b91b41941c7d9035b6a3cb5dba2279f274a339b3eb470a0cb77a5113bad9/mpt_api_client-6.4.0-py3-none-any.whl", hash = "sha256:6ac8bd1ce5a48cfa3b98ba9e70b40579cca4467a6fa36c502449b16512f1257c", size = 149517, upload-time = "2026-07-30T16:38:15.542Z" },
+    { url = "https://files.pythonhosted.org/packages/03/03/9359e6a29329aa7155dfe213de9f80f8d61190ff6d3a0804532bea4ad8b2/mpt_api_client-7.0.0-py3-none-any.whl", hash = "sha256:e218dce384773d9887b351655b388606ee3c8bb6065deadc8bb047e6419bb68d", size = 177865, upload-time = "2026-09-16T13:55:36.356Z" },
 ]
 
 [[package]]
@@ -680,7 +680,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "dependency-injector", specifier = "==4.49.*" },
-    { name = "mpt-api-client", specifier = "==6.4.*" },
+    { name = "mpt-api-client", specifier = "==7.0.*" },
     { name = "openpyxl", specifier = "==3.1.*" },
     { name = "pydantic", specifier = "==2.13.*" },
     { name = "pyfiglet", specifier = "==1.0.*" },
