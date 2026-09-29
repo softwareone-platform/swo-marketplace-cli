@@ -177,3 +177,7 @@ cython_debug/
 
 # Makefile
 make/local.mk
+
+# Claude
+.claude/*
+!.claude/settings.json
