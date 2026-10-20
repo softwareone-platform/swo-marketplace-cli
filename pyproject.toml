@@ -49,7 +49,7 @@ dev = [
     "ipdb==0.13.*",
     "ipython==9.*",
     "mypy==2.4.*",
-    "pre-commit==4.6.*",
+    "pre-commit==4.7.*",
     "pytest==9.1.*",
     "pytest-cov==7.1.*",
     "pytest-deadfixtures==3.1.*",
