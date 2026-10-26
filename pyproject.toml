@@ -53,7 +53,7 @@ dev = [
     "pytest==9.1.*",
     "pytest-cov==7.1.*",
     "pytest-deadfixtures==3.1.*",
-    "pytest-mock==3.16.*",
+    "pytest-mock==3.17.*",
     "pytest-randomly==5.0.*",
     "pytest-xdist==3.8.*",
     "responses==0.26.*",
