@@ -22,7 +22,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Notify Microsoft Teams
-        uses: softwareone-platform/notify-pr-teams-action@v4
+        uses: softwareone-platform/notify-pr-teams-action@v5
         with:
           webhook_url: ${{ secrets.TEAMS_WEBHOOK_URL }}
           bot_image_url: https://raw.githubusercontent.com/softwareone-platform/swo-marketplace-cli/main/.github/workflows/assets/turing_team_pr_bot.png
