@@ -41,10 +41,10 @@ repos:
         pass_filenames: false
         additional_dependencies:
           - mpt-api-client==6.4.*
-          - pydantic==2.11.*
+          - pydantic==2.14.*
           - rich==14.3.*
           - types-openpyxl==3.1.*
           - types-python-dateutil==2.9.*
           - types-requests==2.33.*
           - typer==0.27.*
-          - typing-extensions==4.13.*
+          - typing-extensions==4.16.*
