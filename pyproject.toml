@@ -54,7 +54,7 @@ dev = [
     "pytest-cov==7.1.*",
     "pytest-deadfixtures==4.0.*",
     "pytest-mock==3.17.*",
-    "pytest-randomly==5.0.*",
+    "pytest-randomly==5.1.*",
     "pytest-xdist==3.8.*",
     "responses==0.26.*",
     "ruff==0.17.*", # force ruff version to have same formatting everywhere
