@@ -115,7 +115,8 @@ def extract_account(
         abort=True,
     )
 
-    with console.status(f"{STATUS_MSG[REMOVING]} {account.id} ({account.name})"):
+    status_msg = f"{STATUS_MSG[REMOVING]} {account.id} ({account.name})"
+    with console.status(status_msg):
         accounts = remove_account(accounts, account)
         write_accounts(accounts)
 
