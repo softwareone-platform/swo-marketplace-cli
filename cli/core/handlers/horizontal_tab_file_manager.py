@@ -80,7 +80,8 @@ class HorizontalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             _, row_number = self._get_row_and_column_from_coordinate(coordinate)
             self.file_handler.write([{self._sheet_name: {f"{column_letter}1": ERROR_COLUMN_NAME}}])
 
-        self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
+        error_cell = f"{column_letter}{row_number}"
+        self.file_handler.write([{self._sheet_name: {error_cell: error}}])
 
     def _get_style(self, record: DataModel, cell_value: Any) -> NamedStyle | None:
         if not isinstance(cell_value, float):

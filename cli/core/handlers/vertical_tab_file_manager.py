@@ -94,7 +94,8 @@ class VerticalTabFileManager[DataModel: "BaseDataModel"](ExcelFileManager):
             _, row_number = self._get_row_and_column_from_coordinate(coordinate)
             self.file_handler.write([{self._sheet_name: {f"{column_letter}1": ERROR_COLUMN_NAME}}])
 
-        self.file_handler.write([{self._sheet_name: {f"{column_letter}{row_number}": error}}])
+        error_cell = f"{column_letter}{row_number}"
+        self.file_handler.write([{self._sheet_name: {error_cell: error}}])
 
     def _read_data(self, fields: tuple[str, ...]) -> dict[str, Any]:
         return self.file_handler.get_data_from_vertical_sheet(self._sheet_name, fields)
